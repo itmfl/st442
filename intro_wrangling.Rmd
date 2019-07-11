@@ -296,7 +296,7 @@ flights %>% group_by(dest) %>%
   select(year:day, dest, arr_delay, prop_delay)
 ```
 ---
-Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see also the $$R$$ command $\mathrm{vignette("window-functions")}$. 
+Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see also the **R** command $\mathrm{vignette("window-functions")}$. 
 
 The following example is from the link [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
 ```{r}
