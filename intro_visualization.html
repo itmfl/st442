@@ -352,9 +352,30 @@ p + geom_text_repel(aes(label = abb))
 
 &lt;img src="intro_visualization_files/figure-html/unnamed-chunk-22-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
-A few more polishing touches yield
+class: clear
+A few more polishing touches yield the following output
 
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-23-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/plot-label-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+The code generating the previous plot is
+
+
+```r
+library(ggthemes)
+p &lt;- ggplot(murders, aes(x = population/10^6, y = total)) +
+  geom_point(aes(col = region), size = 3) + 
+  geom_text_repel(aes(label = abb)) +
+  scale_x_log10() + scale_y_log10() +
+  xlab("Population in millions (log scale)") + 
+  ylab("Murders (log scale)") + 
+  ggtitle("US Gun Murders in 2010") + 
+  scale_color_discrete(name = "Region") + 
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_economist()
+p
+```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

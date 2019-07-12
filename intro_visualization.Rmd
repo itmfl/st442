@@ -260,9 +260,18 @@ library(ggrepel)
 p + geom_text_repel(aes(label = abb))
 ```
 ---
-A few more polishing touches yield
+class: clear
+A few more polishing touches yield the following output
 
-```{r echo = FALSE, out.width = "80%"}
+```{r out.width = "80%", echo = FALSE}
+knitr::include_graphics(knitr::fig_chunk("plot-label","png"))
+```
+
+---
+class: clear
+The code generating the previous plot is
+
+```{r plot-label, fig.show = "hide", out.width = "60%"}
 library(ggthemes)
 p <- ggplot(murders, aes(x = population/10^6, y = total)) +
   geom_point(aes(col = region), size = 3) + 
@@ -273,6 +282,8 @@ p <- ggplot(murders, aes(x = population/10^6, y = total)) +
   ggtitle("US Gun Murders in 2010") + 
   scale_color_discrete(name = "Region") + 
   geom_smooth(method = "lm", se = FALSE) +
-  theme_fivethirtyeight()
+  theme_economist()
 p
 ```
+---
+# Example 2: Historical baby names
