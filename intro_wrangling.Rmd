@@ -5,26 +5,24 @@ author: "CSC/ST 442"
 date: "Fall 2019"
 output:
   xaringan::moon_reader:
-    css: [mystyle.css, default, xaringan-themer.css]
     lib_dir: libs
+    css: [default, metropolis, metropolis-fonts]
     nature:
-      highlightStyle: solarized-light
+      highlightStyle: zenburn
       highlightLines: true
       countIncrementalSlides: false
     df_print: tibble
 
 --- 
-layout: true
-class: middle
 
----
 #dplyr
 ```{r setup, include=FALSE}
-options(htmltools.dir.version = FALSE,digits=3,tibble.print_min=6)
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
 ```
 
 ```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
+#library(xaringanthemer)
 # duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
 #   title_slide_background_color = "#FFFFFF",
 #   title_slide_text_color = "#006747",
@@ -36,11 +34,11 @@ library(xaringanthemer)
 #   code_font_family = "Fira Code",
 #   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
 # )
-duo(primary_color = "#1F4257", secondary_color = "#F97B64",
-  text_font_google   = google_font("Montserrat", "300", "300i"),
-  code_font_family = "Fira Code",
-  code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-)
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
 ```
 
 We introduce the **dplyr** package written by Hadley Wickham, Roman Fran&ccedil;ois, Lionel Henry, and Kirill M&uuml;ller. This package is a core member of the **tidyverse** approach to data manipulation; the tidyverse provides a coherent framework for reading, pre-processing/wrangling, visualizing, and modeling data.
@@ -52,7 +50,8 @@ There are five main important *verbs* associated with dplyr, namely
 + *mutate* and *transmute*
 + *group_by* and *summarize*
 ---
-We shall follow an an abbreviated presentation from Chapter 5 and 7 of [R for data science](https://r4ds.had.co.nz/). We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
+class: clear
+We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
 
 ```{r warning=FALSE, message = FALSE}
 library(tidyverse)
@@ -61,13 +60,14 @@ data(flights)
 flights
 ```
 ---
-##filter()
+#filter()
 Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and return a new data frame.
 ```{r}
 filter(flights, month == 8, day == 21)
 ## Equivalently: filter(flights, month == 8 & day == 21)
 ```
 ---
+class: clear
 Next, let us try to filter flights from August 21, 2013 that departs from either JFK or LGA.
 ```{r}
 august21 <- filter(flights, month == 8 & day == 21)
@@ -75,25 +75,26 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ## Equivalently: filter(august21, origin %in% c("JFK","LGA"))
 ```
 ---
+class: clear
 Let us now check, among all the flights on August 21 from either JFK or LGA, which of them has a departure or arrival delay of 10 minutes or more.
 ```{r}
 august21_jfk_lga <- filter(august21, origin %in% c("JFK","LGA"))
 filter(august21_jfk_lga, arr_delay > 10 | dep_delay > 10)
 ```
 ---
+class: clear
 We can do all of the above filtering using a single chain sequence as follows
 ```{r}
 flights %>% filter(month == 8 & day == 21) %>% 
             filter(origin %in% c("JFK","LGA")) %>%
             filter(arr_delay > 10 | dep_delay > 10)
 ```
----
-The previous slide introduce the use of the $\%>\%$ pipe operator. 
-The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
 
-The pipe operator maps the command $x \%>\% f(y)$ to $f(x,y)$; similarly, $x \%>\% f(y) \%>\% g(z)$ is mapped to $g(f(x,y),z)$. 
+The previous example introduce the use of the $\%>\%$ pipe operator. 
+The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
+The pipe operator maps $x \%>\% f(y)$ to $f(x,y)$. 
 ---
-##Missing values
+#Missing values
 Missing values are represented in **R** as $\mathrm{NA}$; missing values are "contagious" hence any almost all operations involving one or more $\mathrm{NA}$ will also return a $\mathrm{NA}$. For example
 ```{r}
 NA > 5
@@ -102,7 +103,8 @@ NA + 10
 2*NA
 ```
 ---
-Some further examples include
+class: clear
+Further examples include
 ```{r}
 NA == NA
 0*NA
@@ -111,6 +113,7 @@ NA | TRUE
 FALSE & NA
 ```
 ---
+class: clear
 **filter** only includes rows where the condition is $\mathrm{TRUE}$, i.e., it excludes rows with both $\mathrm{FALSE}$ and $\mathrm{NA}$ values. To preserve missing values, we have to ask for them explicitly, e.g.,
 ```{r}
 df <- tibble(x = c(1, NA, 3))
@@ -118,19 +121,20 @@ filter(df, x > 1)
 filter(df, is.na(x) | x > 1)
 ```
 ---
-##arrange()
+#arrange()
 The *arrange* verb is similar to the *filter* verb, but instead of selecting rows, it reorder them according to some set of column names (or more complicated expressions). As an example, let us order the flights first by the three letter code for the airport destination, then by the date of flight.
 ```{r}
 flights_dest <- select(flights, dest, everything()) 
 arrange(flights_dest, dest, month, day)
 ```
 ---
+class: clear
 We can use **desc** to order a column in descending order, e.g.,
 ```{r}
 arrange(flights_dest, desc(dest), month, day)
 ```
 ---
-##select()
+#select()
 This verb is used to select a subset of columns (of variables). As an example, let us keep only the departure and arrival time of the flights.
 ```{r}
 flights_sml <- select(flights, year, month, day, 
@@ -139,6 +143,7 @@ flights_sml <- select(flights, year, month, day,
 flights_sml
 ```
 ---
+class: clear
 There are a few equivalent way to do the above selection, e.g.,
 ```{r}
 names(flights)
@@ -150,18 +155,20 @@ names(flights)
 ##                      -c(air_time,time_hour))
 ```
 ---
+class: clear
 We can also rename variables using *select*; however this will lead to the dropping of variables that are not explicitly mentioned. A better alternative is to use *rename*, e.g.,
 ```{r}
 rename(flights_sml,
        departure_time = dep_time, arrival_time = arr_time)
 ```
 ---
+class: clear
 A useful helper function for use with select is the **everything()** function, which matches all variables. For example, to move a specific variable to the first column of data frame, we can do
 ```{r}
 select(flights_sml, dep_time, everything())
 ```
 ---
-## mutate()
+# mutate()
 The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. For example
 ```{r}
 flights_sml <- select(flights, year:day,ends_with("delay"),
@@ -172,6 +179,7 @@ mutate(flights_sml, gain = arr_delay - dep_delay,
                     gain_per_hour = gain/hours) %>% select(-hours)
 ```
 ---
+class: clear
 A variant of *mutate* is *transmute*, which drops all variables except the newly created variables, e.g.,
 ```{r}
 transmute(flights, gain = arr_delay - dep_delay, 
@@ -179,19 +187,21 @@ transmute(flights, gain = arr_delay - dep_delay,
                    gain_per_hour = gain/hours)
 ```
 ---
-##summarize()
+#summarize()
 The *summarize* verb collapses a data frame to a single row. For example
 ```{r}
 summarize(flights, delay = mean(dep_delay)) ## oops! missing values
 summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 ```
 ---
+class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 ```{r}
 group_by(flights, year,month,day) %>% 
 summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 ---
+class: clear
 A more involved example is to compute the average distance and delay for flights to all destinations (except Honolulu).
 ```{r}
 delays <- flights %>% group_by(dest) %>% 
@@ -203,47 +213,57 @@ delays <- flights %>% group_by(dest) %>%
 delays
 ```
 ---
+class: clear
 We can then plot how the average delay varies with the distance.
-```{r message = FALSE, fig.align = 'center', out.width='55%'}
+```{r message = FALSE, fig.align = 'center', out.width='80%'}
 library(ggplot2)
 ggplot(delays, aes(x = dist, y  = avg_delay)) + 
   geom_point(aes(size = count)) +
   geom_smooth(se = FALSE) + ylab("average delay") + theme_bw()
 ```
 ---
-There are a large number of useful summary functions. We provide here a few more examples.
+class: clear
+There are a large number of useful summary functions. We provide a few more examples.
 ```{r}
 ## average arrival delay
 not_canceled <- filter(flights, !is.na(dep_delay) & !is.na(arr_delay))
 not_canceled %>% group_by(year, month, day) %>% 
-  summarize(avg_delay = mean(arr_delay),
-            avg_positive_delay = mean(arr_delay[arr_delay > 0]))
+  summarize(avg_delay = mean(arr_delay), avg_positive_delay = mean(arr_delay[arr_delay > 0]))
 ```
 ---
+class: clear
 ```{r}
 not_canceled %>% group_by(dest) %>% 
   summarize(dist_sd = sd(distance)) %>% arrange(desc(dist_sd))
 ```
 ---
+class: clear
 We note that *summarize* drops all variables except possibly those used to group the data and those variables introduced by the summary statistics. Contrasts the following two approaches
 ```{r}
 not_canceled %>% group_by(year,month,day) %>%
   summarize(first_dep = first(dep_time), last_dep = last(dep_time))
 ```
 ---
+class: clear
 ```{r}
 not_canceled %>% group_by(year, month, day) %>%
   mutate(r = min_rank(desc(dep_time))) %>% filter(r %in% range(r))
 ```
 ---
+# More examples
 ```{r}
 not_canceled %>% group_by(year, month, day) %>%
   summarize(n_early = sum(dep_time < 500))
+```
+---
+class: clear
+```{r}
 not_canceled %>% group_by(dest) %>%
   summarize(long_delay_pct = mean(arr_delay > 60)) %>%
   arrange(desc(long_delay_pct))
 ```
 ---
+class: clear
 Finally, when you group by multiple variables, each call to $\mathrm{summary}$ peels off one level of the grouping, e.g.,
 ```{r}
 daily <- group_by(flights, dest, month, day)
@@ -252,6 +272,7 @@ daily %>% summarize(flights = n()) %>%
           summarize(flights = sum(flights)) 
 ```
 ---
+class: clear
 Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$; e.g.,
 ```{r}
 group_by(not_canceled, dest, month) %>% 
@@ -261,6 +282,7 @@ group_by(not_canceled, dest) %>%
   summarize(air_time = mean(air_time)) %>% head(5)
 ```
 ---
+class: clear
 ```{r}
 group_by(not_canceled, dest, month) %>% 
   summarize(air_time = median(air_time)) %>% 
@@ -269,7 +291,7 @@ group_by(not_canceled, dest) %>%
   summarize(air_time = median(air_time)) %>% head(6)
 ```
 ---
-##ungroup()
+#ungroup()
 To remove grouping structure on grouped data, use $\mathrm{ungroup()}$, e.g.,
 ```{r}
 daily <- group_by(flights, year, month, day)
@@ -277,7 +299,7 @@ summarize(daily, flights = n())
 daily %>% ungroup() %>% summarize(flights = n())
 ```
 ---
-##grouped_mutate and grouped_filter
+#grouped_mutate and grouped_filter
 We can also do a number of very useful operations by combining $\mathrm{group\_by}$ with either $\mathrm{filter}$ or $\mathrm{filter}$. For example
 ```{r}
 ## Find the worst flights with longest delay each day
@@ -287,6 +309,7 @@ flights_sml %>% group_by(year, month, day) %>%
   filter(rank(desc(arr_delay)) <= 10)
 ```
 ---
+class: clear
 ```{r}
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
@@ -296,9 +319,10 @@ flights %>% group_by(dest) %>%
   select(year:day, dest, arr_delay, prop_delay)
 ```
 ---
-Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see also the **R** command $\mathrm{vignette("window-functions")}$. 
+class: clear
+Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command $\mathrm{vignette("window-functions")}$. 
 
-The following example is from the link [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
+The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
 ```{r}
 library(Lahman)
 batting <- Lahman::Batting %>% as.tibble() %>% 
@@ -308,22 +332,33 @@ batting <- Lahman::Batting %>% as.tibble() %>%
 players <- batting %>% group_by(playerID)
 ```
 ---
+class: clear
 Using this dataset, let us try a few $\mathrm{group\_mutate}$ and $\mathrm{group\_filter}$ operations. 
 ```{r}
 ## For each player, find the two years with most hits
 filter(players, min_rank(desc(H)) <= 2 & H > 0)
+```
+---
+class: clear
+```{r}
 ## For each player, rank each year by the number of games played
 mutate(players, G_rank = min_rank(G))
 ```
 ---
+class: clear
 ```{r}
 ## For each player, find every year that was 
 ## better than the previous year
 filter(players, AB > 0, lag(AB) > 0, H/AB > lag(H)/lag(AB))
+```
+---
+class: clear
+```{r}
 # For each, player compute a z score based on number of games played
 mutate(players, G_z = (G - mean(G)) / sd(G))
 ```
 ---
+class: clear
 The $\mathrm{ntile(x,m)}$ function divides the (numeric) vector $x$ into $m$ evenly sized buckets. The next operation divides the team players into $4$ coarse groups and calculate the batting average for each group.
 ```{r}
 batting %>% group_by(teamID,playerID) %>%

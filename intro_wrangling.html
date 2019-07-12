@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="author" content="CSC/ST 442" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
-    <link rel="stylesheet" href="mystyle.css" type="text/css" />
-    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
   </head>
   <body>
     <textarea id="source">
@@ -19,10 +19,7 @@ class: center, middle, inverse, title-slide
 
 ---
 
-layout: true
-class: middle
 
----
 #dplyr
 
 
@@ -37,7 +34,8 @@ There are five main important *verbs* associated with dplyr, namely
 + *mutate* and *transmute*
 + *group_by* and *summarize*
 ---
-We shall follow an an abbreviated presentation from Chapter 5 and 7 of [R for data science](https://r4ds.had.co.nz/). We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
+class: clear
+We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
 
 
 ```r
@@ -63,7 +61,7 @@ flights
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
-##filter()
+#filter()
 Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and return a new data frame.
 
 ```r
@@ -90,6 +88,7 @@ filter(flights, month == 8, day == 21)
 ## Equivalently: filter(flights, month == 8 &amp; day == 21)
 ```
 ---
+class: clear
 Next, let us try to filter flights from August 21, 2013 that departs from either JFK or LGA.
 
 ```r
@@ -117,6 +116,7 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ## Equivalently: filter(august21, origin %in% c("JFK","LGA"))
 ```
 ---
+class: clear
 Let us now check, among all the flights on August 21 from either JFK or LGA, which of them has a departure or arrival delay of 10 minutes or more.
 
 ```r
@@ -140,6 +140,7 @@ filter(august21_jfk_lga, arr_delay &gt; 10 | dep_delay &gt; 10)
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
+class: clear
 We can do all of the above filtering using a single chain sequence as follows
 
 ```r
@@ -163,13 +164,12 @@ flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;%
 ## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
----
-The previous slide introduce the use of the `\(\%&gt;\%\)` pipe operator. 
-The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
 
-The pipe operator maps the command `\(x \%&gt;\% f(y)\)` to `\(f(x,y)\)`; similarly, `\(x \%&gt;\% f(y) \%&gt;\% g(z)\)` is mapped to `\(g(f(x,y),z)\)`. 
+The previous example introduce the use of the `\(\%&gt;\%\)` pipe operator. 
+The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
+The pipe operator maps `\(x \%&gt;\% f(y)\)` to `\(f(x,y)\)`. 
 ---
-##Missing values
+#Missing values
 Missing values are represented in **R** as `\(\mathrm{NA}\)`; missing values are "contagious" hence any almost all operations involving one or more `\(\mathrm{NA}\)` will also return a `\(\mathrm{NA}\)`. For example
 
 ```r
@@ -204,7 +204,8 @@ NA + 10
 ## [1] NA
 ```
 ---
-Some further examples include
+class: clear
+Further examples include
 
 ```r
 NA == NA
@@ -246,6 +247,7 @@ FALSE &amp; NA
 ## [1] FALSE
 ```
 ---
+class: clear
 **filter** only includes rows where the condition is `\(\mathrm{TRUE}\)`, i.e., it excludes rows with both `\(\mathrm{FALSE}\)` and `\(\mathrm{NA}\)` values. To preserve missing values, we have to ask for them explicitly, e.g.,
 
 ```r
@@ -272,7 +274,7 @@ filter(df, is.na(x) | x &gt; 1)
 ## 2     3
 ```
 ---
-##arrange()
+#arrange()
 The *arrange* verb is similar to the *filter* verb, but instead of selecting rows, it reorder them according to some set of column names (or more complicated expressions). As an example, let us order the flights first by the three letter code for the airport destination, then by the date of flight.
 
 ```r
@@ -296,6 +298,7 @@ arrange(flights_dest, dest, month, day)
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
+class: clear
 We can use **desc** to order a column in descending order, e.g.,
 
 ```r
@@ -318,7 +321,7 @@ arrange(flights_dest, desc(dest), month, day)
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
-##select()
+#select()
 This verb is used to select a subset of columns (of variables). As an example, let us keep only the departure and arrival time of the flights.
 
 ```r
@@ -341,6 +344,7 @@ flights_sml
 ## # … with 3.368e+05 more rows
 ```
 ---
+class: clear
 There are a few equivalent way to do the above selection, e.g.,
 
 ```r
@@ -364,6 +368,7 @@ names(flights)
 ##                      -c(air_time,time_hour))
 ```
 ---
+class: clear
 We can also rename variables using *select*; however this will lead to the dropping of variables that are not explicitly mentioned. A better alternative is to use *rename*, e.g.,
 
 ```r
@@ -384,6 +389,7 @@ rename(flights_sml,
 ## # … with 3.368e+05 more rows, and 1 more variable: sched_arr_time &lt;int&gt;
 ```
 ---
+class: clear
 A useful helper function for use with select is the **everything()** function, which matches all variables. For example, to move a specific variable to the first column of data frame, we can do
 
 ```r
@@ -403,7 +409,7 @@ select(flights_sml, dep_time, everything())
 ## # … with 3.368e+05 more rows
 ```
 ---
-## mutate()
+# mutate()
 The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. For example
 
 ```r
@@ -428,6 +434,7 @@ mutate(flights_sml, gain = arr_delay - dep_delay,
 ## # … with 3.368e+05 more rows, and 1 more variable: gain_per_hour &lt;dbl&gt;
 ```
 ---
+class: clear
 A variant of *mutate* is *transmute*, which drops all variables except the newly created variables, e.g.,
 
 ```r
@@ -449,7 +456,7 @@ transmute(flights, gain = arr_delay - dep_delay,
 ## # … with 3.368e+05 more rows
 ```
 ---
-##summarize()
+#summarize()
 The *summarize* verb collapses a data frame to a single row. For example
 
 ```r
@@ -474,6 +481,7 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 ## 1  12.6
 ```
 ---
+class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 
 ```r
@@ -494,6 +502,7 @@ summarize(delay = mean(dep_delay, na.rm = TRUE))
 ## # … with 359 more rows
 ```
 ---
+class: clear
 A more involved example is to compute the average distance and delay for flights to all destinations (except Honolulu).
 
 ```r
@@ -519,6 +528,7 @@ delays
 ## # … with 90 more rows
 ```
 ---
+class: clear
 We can then plot how the average delay varies with the distance.
 
 ```r
@@ -528,16 +538,16 @@ ggplot(delays, aes(x = dist, y  = avg_delay)) +
   geom_smooth(se = FALSE) + ylab("average delay") + theme_bw()
 ```
 
-&lt;img src="intro_wrangling_files/figure-html/unnamed-chunk-20-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_wrangling_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
-There are a large number of useful summary functions. We provide here a few more examples.
+class: clear
+There are a large number of useful summary functions. We provide a few more examples.
 
 ```r
 ## average arrival delay
 not_canceled &lt;- filter(flights, !is.na(dep_delay) &amp; !is.na(arr_delay))
 not_canceled %&gt;% group_by(year, month, day) %&gt;% 
-  summarize(avg_delay = mean(arr_delay),
-            avg_positive_delay = mean(arr_delay[arr_delay &gt; 0]))
+  summarize(avg_delay = mean(arr_delay), avg_positive_delay = mean(arr_delay[arr_delay &gt; 0]))
 ```
 
 ```
@@ -553,6 +563,7 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## # … with 359 more rows
 ```
 ---
+class: clear
 
 ```r
 not_canceled %&gt;% group_by(dest) %&gt;% 
@@ -572,6 +583,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## # … with 98 more rows
 ```
 ---
+class: clear
 We note that *summarize* drops all variables except possibly those used to group the data and those variables introduced by the summary statistics. Contrasts the following two approaches
 
 ```r
@@ -592,6 +604,7 @@ not_canceled %&gt;% group_by(year,month,day) %&gt;%
 ## # … with 359 more rows
 ```
 ---
+class: clear
 
 ```r
 not_canceled %&gt;% group_by(year, month, day) %&gt;%
@@ -614,6 +627,7 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
 ```
 ---
+# More examples
 
 ```r
 not_canceled %&gt;% group_by(year, month, day) %&gt;%
@@ -632,6 +646,8 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 6  2013     1     6       2
 ## # … with 359 more rows
 ```
+---
+class: clear
 
 ```r
 not_canceled %&gt;% group_by(dest) %&gt;%
@@ -652,6 +668,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## # … with 98 more rows
 ```
 ---
+class: clear
 Finally, when you group by multiple variables, each call to `\(\mathrm{summary}\)` peels off one level of the grouping, e.g.,
 
 ```r
@@ -674,6 +691,7 @@ daily %&gt;% summarize(flights = n()) %&gt;%
 ## # … with 99 more rows
 ```
 ---
+class: clear
 Be careful when peeling off nested groupings using a sequence of `\(\mathrm{summarize}\)`; e.g.,
 
 ```r
@@ -709,6 +727,7 @@ group_by(not_canceled, dest) %&gt;%
 ## 5 ATL      113.
 ```
 ---
+class: clear
 
 ```r
 group_by(not_canceled, dest, month) %&gt;% 
@@ -745,7 +764,7 @@ group_by(not_canceled, dest) %&gt;%
 ## 6 AUS       211
 ```
 ---
-##ungroup()
+#ungroup()
 To remove grouping structure on grouped data, use `\(\mathrm{ungroup()}\)`, e.g.,
 
 ```r
@@ -777,7 +796,7 @@ daily %&gt;% ungroup() %&gt;% summarize(flights = n())
 ## 1  336776
 ```
 ---
-##grouped_mutate and grouped_filter
+#grouped_mutate and grouped_filter
 We can also do a number of very useful operations by combining `\(\mathrm{group\_by}\)` with either `\(\mathrm{filter}\)` or `\(\mathrm{filter}\)`. For example
 
 ```r
@@ -801,6 +820,7 @@ flights_sml %&gt;% group_by(year, month, day) %&gt;%
 ## # … with 3,603 more rows
 ```
 ---
+class: clear
 
 ```r
 ## Find all popular destinations and compute
@@ -824,9 +844,10 @@ flights %&gt;% group_by(dest) %&gt;%
 ## # … with 1.311e+05 more rows
 ```
 ---
-Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see also the **R** command `\(\mathrm{vignette("window-functions")}\)`. 
+class: clear
+Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command `\(\mathrm{vignette("window-functions")}\)`. 
 
-The following example is from the link [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from `\(1871\)` through `\(2018\)`. We will consider a sample of batting data for players that have won an award.
+The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from `\(1871\)` through `\(2018\)`. We will consider a sample of batting data for players that have won an award.
 
 ```r
 library(Lahman)
@@ -834,17 +855,10 @@ batting &lt;- Lahman::Batting %&gt;% as.tibble() %&gt;%
            select(playerID, yearID, teamID, G, AB, R, H) %&gt;%
            arrange(playerID, yearID, teamID) %&gt;%
            semi_join(Lahman::AwardsPlayers, by = "playerID")
-```
-
-```
-## Warning: `as.tibble()` is deprecated, use `as_tibble()` (but mind the new semantics).
-## This warning is displayed once per session.
-```
-
-```r
 players &lt;- batting %&gt;% group_by(playerID)
 ```
 ---
+class: clear
 Using this dataset, let us try a few `\(\mathrm{group\_mutate}\)` and `\(\mathrm{group\_filter}\)` operations. 
 
 ```r
@@ -864,6 +878,8 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ## 6 abreubo01   1999 PHI      152   546   118   183
 ## # … with 2,771 more rows
 ```
+---
+class: clear
 
 ```r
 ## For each player, rank each year by the number of games played
@@ -883,6 +899,7 @@ mutate(players, G_rank = min_rank(G))
 ## # … with 1.983e+04 more rows
 ```
 ---
+class: clear
 
 ```r
 ## For each player, find every year that was 
@@ -902,6 +919,8 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ## 6 aaronha01   1964 ML1      145   570   103   187
 ## # … with 7,871 more rows
 ```
+---
+class: clear
 
 ```r
 # For each, player compute a z score based on number of games played
@@ -921,6 +940,7 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ## # … with 1.983e+04 more rows
 ```
 ---
+class: clear
 The `\(\mathrm{ntile(x,m)}\)` function divides the (numeric) vector `\(x\)` into `\(m\)` evenly sized buckets. The next operation divides the team players into `\(4\)` coarse groups and calculate the batting average for each group.
 
 ```r
@@ -949,7 +969,7 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "solarized-light",
+"highlightStyle": "zenburn",
 "highlightLines": true,
 "countIncrementalSlides": false
 });
