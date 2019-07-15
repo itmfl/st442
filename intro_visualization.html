@@ -27,11 +27,11 @@ class: center, middle, inverse, title-slide
 We introduce the **ggplot2** package which provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
 Some useful online resources on on **ggplot2** are
-+ A comprehensive description of **ggplot2** is available from [ggplot2: Elegant graphics for data analysis](https://catalog.lib.ncsu.edu/catalog/NCSU3716602)
++ The book [ggplot2: Elegant graphics for data analysis](https://catalog.lib.ncsu.edu/catalog/NCSU3716602)
 
-+ Detailed examples are given in [R Graphics Cookbook](https://r-graphics.org). 
++ The [R Graphics Cookbook](https://r-graphics.org). 
 
-+ A neat cheat sheet is the [R Studio ggplot2 cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
++ The [R Studio ggplot2 cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
 ---
 class: clear
 
@@ -376,6 +376,499 @@ p &lt;- ggplot(murders, aes(x = population/10^6, y = total)) +
   theme_economist()
 p
 ```
+---
+# Example 2: Historical baby names
+This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly `\(1.6\)` million names during the period from `\(1900\)` to `\(2010\)`. A snippet of the data is as follows.
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; sex &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; prop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; alive_prob &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; count_thousands &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_today &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; est_alive_today &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16706 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.053 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.71 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Helen &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6343 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.020 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.34 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Anna &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.019 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Margaret &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5304 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.017 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Ruth &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4765 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.015 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.76 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1900 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; F &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Elizabeth &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4096 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.013 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+class: clear
+We aim to generate plots such as the one below. This plot describe the age distribution of boys born in the USA whose name is Joseph. The name Joseph reaches peak popularity during the `\(1950\)`'s and appears to be declining in popularity since the mid `\(1990\)`'s. 
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-25-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+We first generate the blue bars and the black line in the previous plot.
+
+```r
+name &lt;- "Joseph"
+joseph &lt;- filter(BabyNamesDist, name == "Joseph", sex == "M")
+p &lt;- ggplot(joseph, aes(x = year)) + 
+  geom_bar(stat = "identity", aes(y = count_thousands * alive_prob), 
+                  fill = "#b2d7e8", color = "white") + 
+  geom_line(aes(y = count_thousands), size = 2)
+p &lt;- p + ylab("Number of people (thousands)") + xlab(NULL)
+```
+
+We then compute the median age of people that are currently alive and are named Joseph. 
+
+```r
+median_yob &lt;- joseph %&gt;% 
+  group_by(year) %&gt;% 
+  summarise(count = sum(est_alive_today)) %&gt;% 
+  mutate(prop = cumsum(count)/sum(count)) %&gt;%
+  filter(cumany(prop &gt;= 0.5)) %&gt;% ## a binary earch is more efficient
+  select(year) %&gt;% pull() %&gt;% first()
+median_yob
+```
+---
+class: clear
+We then plot the vertical blue bar depicting the median age of people, currently alive, named Joseph. We annotate the plot by calling `\(\mathrm{geom\_text}\)`.
+
+```r
+p &lt;- p + geom_bar(stat = "identity", 
+                  aes(y = ifelse(year == median_yob, est_alive_today/1000, 0)),
+                  colour = "white", fill = "#008fd5")
+p + ggtitle(paste("Age Distribution of American boys named ", name)) +
+  geom_text(x = 1935, y = 30, label = "Number of Josephs\nborn each year") +
+  geom_text(x = 1915, y = 13, label = "Number of Josephs\nborn each year\nestimated to be alive\non 1/1/2014",color="#b2d7e9") + ylim(0,42) + 
+  geom_text(x = 2003, y = 40, label = "The median\nliving Joseph\nis 37 years old", 
+            color = "darkgray") + 
+  geom_curve(aes(x = 1995, xend = 1974, y =40, yend = 24), 
+             arrow = arrow(length = unit(0.3,"cm")), curvature = 0.5) + ylim(0,42) 
+```
+---
+class: clear
+Our method for creating the plot object `\(p\)` has a nice side effect in that we can easily update the plot data to get a new plot for a different name, e.g.,
+
+```r
+josephine &lt;- filter(BabyNamesDist, name == "Josephine", sex == "F")
+p %+% josephine
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+For even more compelling examples, consider
+
+```r
+p2 &lt;- p + facet_wrap(~ sex)
+p2 %+% filter(BabyNamesDist, name == "Jessie")
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+
+```r
+p3 &lt;- p + facet_grid(name ~ sex)
+p3 %+% filter(BabyNamesDist, name %in% c("Jessie", "Marion", "Jackie"))
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-31-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+We now go back to our original motivation, namely guessing the age of a person given her name. For the `\(25\)` most popular names, we get the following graphic
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-32-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+The code to generate the above graphic is as follows. First we find the `\(25\)` most popular female names for people currently alive.
+
+```r
+com_fem_names &lt;- BabyNamesDist %&gt;% filter(sex == "F") %&gt;%
+  group_by(name) %&gt;%
+  summarise(est_num_alive = sum(est_alive_today)) %&gt;%
+  arrange(desc(est_num_alive)) %&gt;% head(25)
+```
+A selection of the most popular names are
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; N &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; est_num_alive &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2210010 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Jennifer &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 93 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1406082 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Patricia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1238696 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Linda &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1232979 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Elizabeth &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1129616 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Barbara &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1046020 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+class:clear
+We then compute the `\(25\)`th percentile, the median, and the `\(75\)`th percentile for the current age of people with these names. A snippet of the resulting data is given below.
+
+```r
+library(Hmisc)
+com_fem &lt;- BabyNamesDist %&gt;% filter(sex == "F", name %in% com_fem_names$name) %&gt;%
+  group_by(name) %&gt;%
+  summarise(est_num_alive = sum(est_alive_today),
+            q1_age = wtd.quantile(age_today, est_alive_today, probs = 0.25),
+            median_age = wtd.quantile(age_today, est_alive_today, probs = 0.5),
+            q3_age = wtd.quantile(age_today, est_alive_today, probs = 0.75)) %&gt;%
+  arrange(desc(est_num_alive))
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; est_num_alive &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q1_age &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; median_age &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q3_age &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Mary &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2210010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 52 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 62 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Jennifer &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1406082 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Patricia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1238696 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 52 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 61 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 68 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Linda &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1232979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 55 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 62 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 66 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Elizabeth &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1129616 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 38 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 57 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Barbara &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1046020 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 56 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+class: clear
+The code for plotting the graphic is then simply
+
+```r
+p &lt;- ggplot(data = com_fem, aes(x = reorder(name, -median_age)), y = median_age) +
+  xlab(NULL) + ylab("Age (in years)") +
+  ggtitle("Median ages for females with the 25 most common names") +
+  geom_linerange(aes(ymin = q1_age, ymax = q3_age), 
+                 color = "#f3d478", size = 10, alpha = 0.8) +
+  geom_point(aes(y = median_age), fill = "#ed3324", 
+             color = "white", size = 4, shape = 21) +
+  geom_point(aes(x = 24, y = 55), fill = "#ed3324", 
+             color = "white", size = 4, shape = 21) +
+  geom_text(aes(y = 58, x = 24, label = "median")) + 
+  geom_text(aes(y = 26, x = 16, label = "25th percentile")) + 
+  geom_text(aes(y = 51, x = 16, label = "75th percentile")) +
+  geom_point(aes(y = 24, x = 16), shape = 17) +
+  geom_point(aes(y = 56, x = 16), shape = 17) + 
+  coord_flip() ## coord_flip flips the $x$ and $y$ coordinate
+```
+---
+# Example 3: Temperature trend in Dayton, OH.
+We now describe code to generate the graphic we saw earlier about temperature trend in Dayton, OH.
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-38-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+The data for this graphic is available as a white-space separated file. We first read the data and rename the columns
+
+```r
+library(tidyverse)
+DAY &lt;- read_table("http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt", col_names = FALSE)
+names(DAY) &lt;- c("Month", "Day", "Year", "Temp")
+DAY &lt;- select(DAY, "Year", "Month", "Day", "Temp")
+knitr::kable(head(DAY))
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Month &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Day &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Temp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 39.0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19.6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23.0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+class: clear
+We then create a data frame that represents historical data during the period from `\(1995\)` to `\(201\)`.
+
+
+```r
+NEWDAY &lt;- DAY %&gt;% 
+  group_by(Year) %&gt;%
+  mutate(newDay = seq(1, length(Day))) %&gt;% #newDay goes from 1 to 365/366 each year
+  ungroup()
+Past &lt;- NEWDAY %&gt;%
+  filter(Temp != -99 &amp; Year != 2014) %&gt;%  ## -99 corresponds to missing observation.
+  group_by(newDay) %&gt;% 
+  mutate(upper = max(Temp), # identify max value for each day 
+         lower = min(Temp), # identify min value for each day 
+         avg = mean(Temp),  # calculate mean value for each day 
+         se = sd(Temp)/sqrt(length(Temp)), ## standard error
+         avg_upper = avg+(2.101*se), ## upper and lower 99% "confidence" interval
+         avg_lower = avg-(2.101*se)) %&gt;%  
+  ungroup()
+```
+---
+class: clear
+We next extract data for the year `\(2014\)`. We then create data frames representing the lowest and highest temp for each day of the year for the historical data.
+
+```r
+Present &lt;- NEWDAY %&gt;%
+  filter(Temp != -99 &amp; Year == 2014)  
+
+# create dataframe that represents the lowest and highest 
+# temp for each day for the historical data from 1995 to 2013.
+PastRecords &lt;- Past %&gt;%
+  group_by(newDay) %&gt;%
+  summarise(Pastlow = min(Temp),
+            Pasthigh = max(Temp)) 
+
+# create dataframe that identifies the days in 2014 in which the temps were either 
+## lower or higher than all previous 19 years
+PresentRecords &lt;- Present %&gt;%
+  left_join(PastRecords, by = "newDay") %&gt;%  
+  mutate(recordlow = ifelse(Temp&lt;Pastlow, "Y", "N"),
+         recordhigh = ifelse(Temp &gt; Pasthigh, "Y", "N")) %&gt;% 
+  filter(recordlow == "Y" | recordhigh == "Y")  
+```
+---
+class: clear
+We first plot the historical data.
+
+
+```r
+p &lt;- ggplot(Past, aes(newDay, Temp)) + 
+  theme(plot.background = element_blank(), panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(), panel.border = element_blank(),
+        panel.background = element_blank(), axis.ticks = element_blank(),
+        axis.title = element_blank()) +
+  geom_linerange(Past, mapping=aes(x=newDay, ymin=lower, ymax=upper), 
+                 colour = "wheat2", alpha=.1)
+p
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-42-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+We next plot the temperature for `\(2014\)` along with the average temperature based on historical data.
+
+
+```r
+p &lt;- p + geom_linerange(Past, mapping=aes(x=newDay, ymin=avg_lower, ymax=avg_upper), 
+                        colour = "wheat4")
+p &lt;- p +  geom_line(Present, mapping=aes(x=newDay, y=Temp))
+p
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-43-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+We then plot the dates (in `\(2014\)`) for which the temperature break either the lowest or the highest record.
+
+```r
+p &lt;- p + geom_point(data=filter(PresentRecords, recordlow == "Y"), 
+                    aes(x=newDay, y=Temp), colour="blue3") +
+  geom_point(data=filter(PresentRecords, recordhigh == "Y"), 
+             aes(x=newDay, y=Temp), colour="firebrick3")
+p
+```
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-44-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+We then setup the axes and labels.
+
+```r
+p &lt;- p +  geom_vline(xintercept = 0, colour = "wheat4", linetype=1, size=1)
+xseq &lt;- c(31,59,90,120,151,181,212,243,273,304,334,365)
+for(x in xseq){
+  p &lt;- p + geom_vline(xintercept = x, colour = "wheat4", linetype=3, size=.5)
+}
+
+dgr_fmt &lt;- function(x, ...) {
+  parse(text = paste(x, "*degree", sep = ""))
+}
+
+# create y-axis variable
+a &lt;- dgr_fmt(seq(-20,100, by=10))
+
+p &lt;- p + coord_cartesian(ylim = c(-20,100)) +
+  scale_y_continuous(breaks = seq(-20,100, by=10), labels = a) +
+  scale_x_continuous(expand = c(0, 0),
+                     breaks=c(15,45,75,105,135,165,195,228,258,288,320,350),
+                     labels = c("Jan", "Feb", "Mar", "Apr",
+                                "May", "June", "July", "Aug", "Sep",
+                                "Oct", "Nov", "Dec"))
+```
+---
+class: clear
+The previous code chunk yields the following output. The final output is the obtained by adding `\(\mathrm{geom\_text}\)` commands to generate the annotations.
+
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-46-1.png" width="120%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

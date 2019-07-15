@@ -6,9 +6,6 @@ names(DAY) <- c("Month", "Day", "Year", "Temp")
 DAY <- select(DAY, "Year", "Month", "Day", "Temp")
 # create dataframe that represents 1995-2013 historical data
 Past <- DAY %>%
-  group_by(Year, Month) %>%
-  arrange(Day, .by_group = TRUE) %>%
-  ungroup() %>%
   group_by(Year) %>%
   mutate(newDay = seq(1, length(Day))) %>%          
   ungroup() %>%

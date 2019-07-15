@@ -1,0 +1,4 @@
+*.rdx
+*.rdb
+*.RData
+*chunk*
