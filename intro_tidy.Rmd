@@ -20,7 +20,7 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 ```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
+#library(xaringanthemer)
 library(tidyverse)
 # duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
 #   title_slide_background_color = "#FFFFFF",
@@ -121,9 +121,70 @@ knitr::include_graphics("figures/tidyr.png")
 ---
 class: clear
 As another example, consider the following two representations of table $4a$.
-```{r}
-table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
-  arrange(country, year)
-table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+.pull-left[
+```{r echo = FALSE}
+knitr::kable(table4a) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+.pull-right[
+```{r echo = FALSE}
+knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+
+<br>
+To go from the first representation to the second representation, we do
+```{r eval = FALSE}
+table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
+```
+and to go from the second representation to the first, we do
+```{r eval = FALSE}
+table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>%
   spread(year, cases)
+```
+---
+# Missing data, gather, and spread.
+In the previous examples, **gather** and **spread** are inverse transformations. But this is not always the case. For example
+```{r}
+stocks <- tribble(
+  ~year, ~half, ~return,
+  2015, 1, 1.88,
+  2015,2,0.59,
+  2016,1,0.92,
+  2016,2,0.17
+)
+stocks %>% spread(year, return)
+```
+---
+# The joy of join()
+To go from table $4a$ and $4b$ to Table $1$, we need to combine columns. More specifically
+.pull-left[
+```{r eval = FALSE}
+table4a.long <- table4a %>% gather(...)
+```
+```{r echo = FALSE}
+knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+.pull-right[
+```{r eval = FALSE}
+table4b.long <- table4b %>% gather(...)
+```
+```{r echo = FALSE}
+knitr::kable(table4b %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+---
+class: clear
+We then *join* the columns of the *reshaped* table $4b$ to that of the reshaped $4a$
+```{r echo = 3, eval = -3}
+table4a.long <- table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
+table4b.long <- table4b %>% gather(key = "year", value = "population", `1999`, `2000`)
+table4a.long %>% left_join(table4b.long)
+knitr::kable(table4a.long %>% left_join(table4b.long)) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
