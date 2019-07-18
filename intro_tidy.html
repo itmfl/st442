@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Reshaping data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="CSC/ST 442" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <script src="libs/kePrint/kePrint.js"></script>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Reshaping data
+## tidyr and relational data with dplyr
+### CSC/ST 442
+### Fall 2019
+
+---
+
+
+
+
+
+#Tidy Data
+Consider the following four different representations of the same data.
+
+
+.pull-left[
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;Table 1&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; population &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+.pull-right[
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;Table 2&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; type &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.45e+02 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.67e+03 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.77e+04 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.05e+04 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.12e+05 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; cases &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.14e+05 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; population &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+---
+class: clear
+.pull-left[
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;Table 3&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; rate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 745/19987071 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2666/20595360 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 37737/172006362 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 80488/174504898 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 212258/1272915272 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 213766/1280428583 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+.pull-right[
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;Table 4a&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;Table 4b&lt;/caption&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+&lt;br&gt;
+&lt;br&gt; 
+The above tables, while representing the same data, are not equally easy to use. 
+For example, table `\(4a\)` provides the simplest way for finding the difference in the number of cases between `\(1999\)` and `\(2000\)`. Table `\(1\)` is the easiest table to add new variables such as `\(\mathrm{GDP}\)`. Table `\(3\)` is not particularly suitable for data analysis, but is possibly useful for data collection. Table `\(2\)` is appropriate if the columns of Table `\(1\)`, instead of being *cases* and *populations*, are e.g., *diabetes*, *HIV*, *colon cancer*, ... for which there is possibly missing/unobserved data (that is not all diseases are surveyed for every country). 
+---
+#gather() and spread()
+There is often a need to transform data between two different representations exemplified by Table `\(1\)` and Table `\(2\)` in the previous slide. The main tool for doing so are the verbs **gather** and **spread** that are part of the **tidyr** library.  For a thoughtful discussion of the motivations behind **tidyr**, see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+To convert from Table `\(1\)` to Table `\(2\)`, we do
+
+```r
+table2 &lt;- gather(table1, key = "type", value = "value", cases, population)
+```
+
+Conversely, to convert from Table `\(2\)` to Table `\(1\)`, we do
+
+```r
+table1 &lt;- spread(table2, type, value)
+```
+
+---
+class: clear
+The idea behind *gather* and *spread* is best described by the following graphic; in particular, *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
+
+&lt;img src="figures/tidyr.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+As another example, consider the following two representations of table `\(4a\)`.
+
+```r
+table4a %&gt;% gather(key = "year", value = "cases", `1999`, `2000`) %&gt;% 
+  arrange(country, year)
+```
+
+```
+## # A tibble: 6 x 3
+##   country     year   cases
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;dbl&gt;
+## 1 Afghanistan 1999     745
+## 2 Afghanistan 2000    2666
+## 3 Brazil      1999   37737
+## 4 Brazil      2000   80488
+## 5 China       1999  212258
+## 6 China       2000  213766
+```
+
+```r
+table4a %&gt;% gather(key = "year", value = "cases", `1999`, `2000`) %&gt;% 
+  spread(year, cases)
+```
+
+```
+## # A tibble: 3 x 3
+##   country     `1999` `2000`
+##   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

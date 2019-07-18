@@ -1,0 +1,129 @@
+---
+title: "Reshaping data"
+subtitle: "tidyr and relational data with dplyr"
+author: "CSC/ST 442"
+date: "Fall 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, metropolis, metropolis-fonts]
+    nature:
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+    df_print: tibble
+
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+library(tidyverse)
+# duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
+#   title_slide_background_color = "#FFFFFF",
+#   title_slide_text_color = "#006747",
+#   header_font_google = google_font("Josefin Sans"),
+#   title_slide_background_image = "ncstate.png",
+#   title_slide_background_size = "600px",
+#   title_slide_background_position = "bottom",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+```
+
+#Tidy Data
+Consider the following four different representations of the same data.
+
+```{r echo = FALSE}
+table1 <- tribble(
+  ~country, ~year, ~cases, ~population,
+  "Afghanistan", 1999, 745, 19987071,
+  "Afghanistan", 2000, 2666, 20595360,
+  "Brazil", 1999, 37737, 172006362,
+  "Brazil", 2000, 80488, 174504898,
+  "China", 1999, 212258, 1272915272,
+  "China", 2000, 213766, 1280428583
+)
+
+table2 <- gather(table1, key = "type", value = "value", cases, population) %>% arrange(country, year)
+table3 <- table1 %>% unite(rate, cases, population, sep = "/")
+table4a <- table1 %>% select(-population) %>% spread(year, cases)
+table4b <- table1 %>% select(-cases) %>% spread(year, population)
+```
+.pull-left[
+```{r echo = FALSE}
+library(kableExtra)
+knitr::kable(table1, caption = "Table 1") %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+
+```
+]
+.pull-right[
+```{r echo = FALSE}
+library(kableExtra)
+knitr::kable(table2, caption = "Table 2") %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+---
+class: clear
+.pull-left[
+```{r echo = FALSE}
+knitr::kable(table3, caption = "Table 3") %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+
+```
+]
+.pull-right[
+```{r echo = FALSE}
+knitr::kable(table4a, caption = "Table 4a") %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4b, caption = "Table 4b") %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+]
+
+<br>
+<br> 
+The above tables, while representing the same data, are not equally easy to use. 
+For example, table $4a$ provides the simplest way for finding the difference in the number of cases between $1999$ and $2000$. Table $1$ is the easiest table to add new variables such as $\mathrm{GDP}$. Table $3$ is not particularly suitable for data analysis, but is possibly useful for data collection. Table $2$ is appropriate if the columns of Table $1$, instead of being *cases* and *populations*, are e.g., *diabetes*, *HIV*, *colon cancer*, ... for which there is possibly missing/unobserved data (that is not all diseases are surveyed for every country). 
+---
+#gather() and spread()
+There is often a need to transform data between two different representations exemplified by Table $1$ and Table $2$ in the previous slide. The main tool for doing so are the verbs **gather** and **spread** that are part of the **tidyr** library.  For a thoughtful discussion of the motivations behind **tidyr**, see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+To convert from Table $1$ to Table $2$, we do
+```{r eval = FALSE}
+table2 <- gather(table1, key = "type", value = "value", cases, population)
+```
+
+Conversely, to convert from Table $2$ to Table $1$, we do
+```{r eval = FALSE}
+table1 <- spread(table2, type, value)
+```
+
+---
+class: clear
+The idea behind *gather* and *spread* is best described by the following graphic; in particular, *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
+
+```{r echo = FALSE}
+knitr::include_graphics("figures/tidyr.png")
+```
+
+---
+class: clear
+As another example, consider the following two representations of table $4a$.
+```{r}
+table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+  arrange(country, year)
+table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+  spread(year, cases)
+```
