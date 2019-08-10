@@ -22,8 +22,6 @@ class: center, middle, inverse, title-slide
 
 
 
-
-
 #Tidy Data
 Consider the following four different representations of the same data.
 
@@ -272,11 +270,23 @@ class: clear
 
 &lt;br&gt;
 &lt;br&gt; 
+
 The above tables, while representing the same data, are not equally easy to use. 
-For example, table `\(4a\)` provides the simplest way for finding the difference in the number of cases between `\(1999\)` and `\(2000\)`. Table `\(1\)` is the easiest table to add new variables such as `\(\mathrm{GDP}\)`. Table `\(3\)` is not particularly suitable for data analysis, but is possibly useful for data collection. Table `\(2\)` is appropriate if the columns of Table `\(1\)`, instead of being *cases* and *populations*, are e.g., *diabetes*, *HIV*, *colon cancer*, ... for which there is possibly missing/unobserved data (that is not all diseases are surveyed for every country). 
+For example, table `\(4a\)` provides the simplest way for finding the difference in the number of cases between `\(1999\)` and `\(2000\)`. Table `\(1\)` is the easiest table to add new variables such as 
+`\(\mathrm{GDP}\)`. Table `\(3\)` is not particularly suitable for data analysis, 
+but is possibly useful for data collection. Table `\(2\)` is appropriate if the 
+columns of Table `\(1\)`, instead of being *cases* and *populations*, are e.g., 
+*diabetes*, *HIV*, *colon cancer*, ... for which there is possibly 
+missing/unobserved data (that is not all diseases are surveyed for every country). 
+
 ---
 #gather() and spread()
-There is often a need to transform data between two different representations exemplified by Table `\(1\)` and Table `\(2\)` in the previous slide. The main tool for doing so are the verbs **gather** and **spread** that are part of the **tidyr** library.  For a thoughtful discussion of the motivations behind **tidyr**, see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+There is often a need to transform data between two different representations 
+exemplified by Table `\(1\)` and Table `\(2\)` in the previous slide. 
+The main tool for doing so are the verbs **gather** and **spread** that are part of 
+the **tidyr** library.  For the motivations behind **tidyr**, 
+see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
 
 To convert from Table `\(1\)` to Table `\(2\)`, we do
 
@@ -292,7 +302,8 @@ table1 &lt;- spread(table2, type, value)
 
 ---
 class: clear
-The idea behind *gather* and *spread* is best described by the following graphic; in particular, *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
+The idea behind *gather* and *spread* is best described by the following graphic 
+wherein *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
 
 &lt;img src="figures/tidyr.png" width="120%" style="display: block; margin: auto;" /&gt;
 
@@ -384,8 +395,559 @@ table4a %&gt;% gather(key = "year", value = "cases", `1999`, `2000`) %&gt;%
   spread(year, cases)
 ```
 ---
-# The joy of join()
-To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to combine columns. More specifically
+# Missing data, gather, and spread.
+In our previous examples we see that *gather* and *spread* behave like inverse operations of one another. This is not always the case.
+Consider the following contrived dataset.
+
+```r
+stocks
+```
+
+```
+## # A tibble: 7 x 3
+##    year quarter return
+##   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2015       1   1.88
+## 2  2015       2   0.59
+## 3  2015       3   0.35
+## 4  2015       4  NA   
+## 5  2016       2   0.92
+## 6  2016       3   0.17
+## # … with 1 more row
+```
+
+How many observations are missing in the above data ? 
++ The observation for the `\(4\)`th quarter of `\(2015\)` is *explicitly* missing
++ The observation for the `\(1\)`st quarter of `\(2016\)` is *implicitly* missing.
+---
+class: clear
+Spreading the above dataset and then gathering the spreaded data yield
+.pull-left[
+
+```r
+stocks %&gt;% spread(year, return)
+```
+
+```
+## # A tibble: 4 x 3
+##   quarter `2015` `2016`
+##     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1       1   1.88  NA   
+## 2       2   0.59   0.92
+## 3       3   0.35   0.17
+## 4       4  NA      2.66
+```
+
+```r
+stocks %&gt;% spread(year, return) %&gt;% 
+  gather(year, return, `2015`, `2016`, 
+         na.rm = TRUE)
+```
+
+```
+## # A tibble: 6 x 3
+##   quarter year  return
+##     &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+## 1       1 2015    1.88
+## 2       2 2015    0.59
+## 3       3 2015    0.35
+## 4       2 2016    0.92
+## 5       3 2016    0.17
+## 6       4 2016    2.66
+```
+]
+.pull-right[
+
+```r
+stocks %&gt;% spread(year, return) %&gt;% 
+  gather(year, return, `2015`, `2016`)
+```
+
+```
+## # A tibble: 8 x 3
+##   quarter year  return
+##     &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+## 1       1 2015    1.88
+## 2       2 2015    0.59
+## 3       3 2015    0.35
+## 4       4 2015   NA   
+## 5       1 2016   NA   
+## 6       2 2016    0.92
+## # … with 2 more rows
+```
+]
+---
+#Missing values: complete() and fill()
+To make missing values explicit, you can use the function **complete()**. The function takes as input a set of columns; it then finds all unique combinations of their values and then ensures that the original dataset contains all these combinations by filling in explicit **NA**s where necesary.
+
+There are also occasions in which a missing value is not really missing; instead a missing value indicate that the previous value should be carried forward. This is especially true when the data are generated via some manual data entry process. We can then 
+use **fill()** to replace missing values with the most recent non-missing value, e.g.,
+
+.pull-left[
+
+```r
+treatment &lt;- tribble(
+  ~person, ~treatment, ~response,
+  "Luigi", 0, 7,
+  NA, NA, 10,
+  NA, 1, 9,
+  "Mario", 1, 4
+)
+```
+]
+.pull-right[
+
+```r
+treatment %&gt;% fill(person,treatment)
+```
+
+```
+## # A tibble: 4 x 3
+##   person treatment response
+##   &lt;chr&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Luigi          0        7
+## 2 Luigi          0       10
+## 3 Luigi          1        9
+## 4 Mario          1        4
+```
+]
+---
+#separate() and unite()
+We recall the following two tables
+
+.pull-left[
+
+```r
+table1
+```
+
+```
+## # A tibble: 6 x 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583
+```
+]
+.pull-right[
+
+```r
+table3
+```
+
+```
+## # A tibble: 6 x 3
+##   country      year rate             
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
+## 1 Afghanistan  1999 745/19987071     
+## 2 Afghanistan  2000 2666/20595360    
+## 3 Brazil       1999 37737/172006362  
+## 4 Brazil       2000 80488/174504898  
+## 5 China        1999 212258/1272915272
+## 6 China        2000 213766/1280428583
+```
+]
+
+&lt;br&gt;
+We see that Table `\(3\)` is obtained by combining the columns *cases* and *populations* in Table `\(1\)` into the column *rate* and separating the values in that column with "/". Note that the *type* for the *rate* column is `\(&lt;\mathrm{chr}&gt;\)` or character, in contrast to the type  `\(&lt;\mathrm{dbl}&gt;\)` for the columns *cases* and *populations*.
+---
+class: clear
+
+To go from Table `\(3\)` to Table `\(1\)`, we do either
+
+.pull-left[
+
+```r
+table3 %&gt;% 
+  separate(rate, 
+          into=c("cases","population"), 
+          sep = "/")
+```
+
+```
+## # A tibble: 6 x 4
+##   country      year cases  population
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     
+## 1 Afghanistan  1999 745    19987071  
+## 2 Afghanistan  2000 2666   20595360  
+## 3 Brazil       1999 37737  172006362 
+## 4 Brazil       2000 80488  174504898 
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583
+```
+]
+
+.pull-right[
+
+```r
+table3 %&gt;% 
+  separate(rate, 
+           into=c("cases","population"), 
+           sep = "/", convert = TRUE)
+```
+
+```
+## # A tibble: 6 x 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;dbl&gt;  &lt;int&gt;      &lt;int&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583
+```
+]
+---
+class: clear
+The inverse of **separate()** is **unite()**, e.g.,
+&lt;br&gt;
+.pull-left[
+
+```r
+table1 %&gt;% 
+  unite(rate, cases, population)
+```
+
+```
+## # A tibble: 6 x 3
+##   country      year rate             
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
+## 1 Afghanistan  1999 745_19987071     
+## 2 Afghanistan  2000 2666_20595360    
+## 3 Brazil       1999 37737_172006362  
+## 4 Brazil       2000 80488_174504898  
+## 5 China        1999 212258_1272915272
+## 6 China        2000 213766_1280428583
+```
+]
+
+.pull-right[
+
+```r
+table1 %&gt;% 
+  unite(rate, cases, population,
+        sep = "/")
+```
+
+```
+## # A tibble: 6 x 3
+##   country      year rate             
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
+## 1 Afghanistan  1999 745/19987071     
+## 2 Afghanistan  2000 2666/20595360    
+## 3 Brazil       1999 37737/172006362  
+## 4 Brazil       2000 80488/174504898  
+## 5 China        1999 212258/1272915272
+## 6 China        2000 213766/1280428583
+```
+]
+---
+# Example 1: Tidying up tuberculosis data
+
+For this example we use the following dataset from the `\(2014\)` World Health Organization (WHO) Global Tubercolosis Report. This dataset records the number of cases of tubercolosis in countries around the world during the period of `\(1980\)` through `\(2013\)`. 
+
+```r
+who
+```
+
+```
+## # A tibble: 7,240 x 60
+##   country iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
+##   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+## 1 Afghan… AF    AFG    1980          NA           NA           NA
+## 2 Afghan… AF    AFG    1981          NA           NA           NA
+## 3 Afghan… AF    AFG    1982          NA           NA           NA
+## 4 Afghan… AF    AFG    1983          NA           NA           NA
+## 5 Afghan… AF    AFG    1984          NA           NA           NA
+## 6 Afghan… AF    AFG    1985          NA           NA           NA
+## # … with 7,234 more rows, and 53 more variables: new_sp_m3544 &lt;int&gt;,
+## #   new_sp_m4554 &lt;int&gt;, new_sp_m5564 &lt;int&gt;, new_sp_m65 &lt;int&gt;,
+## #   new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;, new_sp_f2534 &lt;int&gt;,
+## #   new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;, new_sp_f5564 &lt;int&gt;,
+## #   new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;, new_sn_m1524 &lt;int&gt;,
+## #   new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;, new_sn_m4554 &lt;int&gt;,
+## #   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;,
+## #   new_sn_f1524 &lt;int&gt;, …
+```
+---
+class: clear
+The dataset contains quite a lot of redundant columns and missing observations. Furthermore, the numerous columns whose names start with `\(\mathrm{new}\)` indicate that these columns' names should be recorded as values as opposed to variable names.
+
+We thus start **gathering** the values for the columns whose names begin with `\(\mathrm{new}\)`
+
+```r
+who1 &lt;- who %&gt;% 
+  select(-iso2,-iso3) %&gt;%
+  gather(key = "key", value = "cases", -country, - year, na.rm = TRUE)
+who1
+```
+
+```
+## # A tibble: 76,046 x 4
+##   country      year key         cases
+##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
+## 1 Afghanistan  1997 new_sp_m014     0
+## 2 Afghanistan  1998 new_sp_m014    30
+## 3 Afghanistan  1999 new_sp_m014     8
+## 4 Afghanistan  2000 new_sp_m014    52
+## 5 Afghanistan  2001 new_sp_m014   129
+## 6 Afghanistan  2002 new_sp_m014    90
+## # … with 7.604e+04 more rows
+```
+---
+class: clear
+
+```r
+who1 %&gt;% count(key) %&gt;% select(key) %&gt;% pull()
+```
+
+```
+##  [1] "new_ep_f014"  "new_ep_f1524" "new_ep_f2534" "new_ep_f3544"
+##  [5] "new_ep_f4554" "new_ep_f5564" "new_ep_f65"   "new_ep_m014" 
+##  [9] "new_ep_m1524" "new_ep_m2534" "new_ep_m3544" "new_ep_m4554"
+## [13] "new_ep_m5564" "new_ep_m65"   "new_sn_f014"  "new_sn_f1524"
+## [17] "new_sn_f2534" "new_sn_f3544" "new_sn_f4554" "new_sn_f5564"
+## [21] "new_sn_f65"   "new_sn_m014"  "new_sn_m1524" "new_sn_m2534"
+## [25] "new_sn_m3544" "new_sn_m4554" "new_sn_m5564" "new_sn_m65"  
+## [29] "new_sp_f014"  "new_sp_f1524" "new_sp_f2534" "new_sp_f3544"
+## [33] "new_sp_f4554" "new_sp_f5564" "new_sp_f65"   "new_sp_m014" 
+## [37] "new_sp_m1524" "new_sp_m2534" "new_sp_m3544" "new_sp_m4554"
+## [41] "new_sp_m5564" "new_sp_m65"   "newrel_f014"  "newrel_f1524"
+## [45] "newrel_f2534" "newrel_f3544" "newrel_f4554" "newrel_f5564"
+## [49] "newrel_f65"   "newrel_m014"  "newrel_m1524" "newrel_m2534"
+## [53] "newrel_m3544" "newrel_m4554" "newrel_m5564" "newrel_m65"
+```
+---
+class: clear
+The columns whose names begin with `\(\mathrm{new}\)` has the following intepreration.
+
++ `\(\mathrm{new}\)` denote that the column contains new cases of TB.
++ The next `\(2\)` or `\(3\)` letters describe the type of TB, namely
+    - `\(\mathrm{rel}\)` for relapse
+    - `\(\mathrm{ep}\)` for extrapulmonary TB
+    - `\(\mathrm{sn}\)` for pulmonary TB that are smear negative.
+    - `\(\mathrm{sp}\)` for pulmonary TB that are smear positive.
++ `\(\mathrm{m}\)` and `\(\mathrm{f}\)` denote gender.
++ The numbers denote the age group/age range.
+
+We note that the relapse cases are coded as `\(\mathrm{newrel}\)` as opposed to `\(\mathrm{new\_rel}\)` like the remaining cases. We thus rename `\(\mathrm{newrel}\)` to `\(\mathrm{new\_rel}\)` and then separate the `\(\mathrm{key}\)` column into four columns according to the above scheme. Note that we call **separate** twice; the second separate splits at a specified location in the string.
+
+```r
+who2 &lt;- who1 %&gt;% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
+  separate(key, into = c("new", "type", "sexage")) %&gt;%
+  select(-new) %&gt;%
+  separate(sexage, into = c("sex", "age"), sep = 1)
+```
+---
+class: clear
+
+```r
+who2
+```
+
+```
+## # A tibble: 76,046 x 6
+##   country      year type  sex   age   cases
+##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
+## 1 Afghanistan  1997 sp    m     014       0
+## 2 Afghanistan  1998 sp    m     014      30
+## 3 Afghanistan  1999 sp    m     014       8
+## 4 Afghanistan  2000 sp    m     014      52
+## 5 Afghanistan  2001 sp    m     014     129
+## 6 Afghanistan  2002 sp    m     014      90
+## # … with 7.604e+04 more rows
+```
+
+The data is now in a tidy format. In summary, we did
+
+```r
+who.tidy &lt;- who %&gt;% 
+  gather(key = "key", value = "cases", new_ep_f014:newrel_m65, na.rm = TRUE) %&gt;%
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
+  separate(key, into = c("new", "type", "sexage")) %&gt;% 
+  select(-new, -iso2, -iso3) %&gt;%
+  separate(sexage, into = c("sex", "age"), sep = 1)
+```
+---
+#Example 2: Gender-neutral names
+As another example of the use of **gather()** and **spread()**, 
+suppose we want to summarize the number of people with a given name based on gender, e.g.,
+
+.pull-left[
+
+```r
+library(babynames)
+babynames %&gt;% 
+  filter(name == "Sue") %&gt;%
+  group_by(name, sex) %&gt;% 
+  summarise(total = sum(n))
+```
+
+```
+## # A tibble: 2 x 3
+##   name  sex    total
+##   &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;
+## 1 Sue   F     144465
+## 2 Sue   M        519
+```
+]
+
+.pull-right[
+
+```r
+library(babynames)
+babynames %&gt;% 
+  filter(name == "Robin") %&gt;%
+  group_by(name, sex) %&gt;% 
+  summarise(total = sum(n))
+```
+
+```
+## # A tibble: 2 x 3
+##   name  sex    total
+##   &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;
+## 1 Robin F     289395
+## 2 Robin M      44616
+```
+]
+
+We see that a person named "Sue" is most likely to be female while a person name "Robin" could have reasonable chances of being either male or female.
+
+---
+class: clear
+
+If we now take a collection of names, and look at the number of people with these names based on gender, we might get either
+
+.pull-left[
+
+```r
+names &lt;- c("Sue", "Robin", "Leslie")
+babynames %&gt;% 
+  filter(name %in% names) %&gt;%
+  group_by(name, sex) %&gt;%
+  summarise(total = sum(n))
+```
+
+```
+## # A tibble: 6 x 3
+##   name   sex    total
+##   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt;
+## 1 Leslie F     266474
+## 2 Leslie M     112689
+## 3 Robin  F     289395
+## 4 Robin  M      44616
+## 5 Sue    F     144465
+## 6 Sue    M        519
+```
+]
+
+.pull-right[
+
+
+```r
+names &lt;- c("Sue", "Robin", "Leslie")
+babynames %&gt;% 
+  filter(name %in% names) %&gt;%
+  group_by(name, sex) %&gt;%
+  summarise(total = sum(n)) %&gt;%
+  spread(key = sex, value = total)
+```
+
+```
+## # A tibble: 3 x 3
+##   name        F      M
+##   &lt;chr&gt;   &lt;int&gt;  &lt;int&gt;
+## 1 Leslie 266474 112689
+## 2 Robin  289395  44616
+## 3 Sue    144465    519
+```
+]
+
+&lt;br&gt;
+We see that the use of **spread** yield a representation of our data in a way that is more conducive to our goal of determining names that are most gender-neutral.
+---
+class: clear
+We can now determine the most gender-neutral names for the whole babynames dataset.
+
+```r
+babynames_wide &lt;- babynames %&gt;%
+  group_by(sex, name) %&gt;%
+  summarise(total = sum(n)) %&gt;%
+  spread(key = sex, value = total, fill = 0) ## set missing values in wide table to 0
+babynames_wide %&gt;% filter(M &gt; 50000, F &gt; 50000) %&gt;%
+  mutate(ratio = pmin(F/M, M/F)) %&gt;% ## vectorized version of min
+  arrange(desc(ratio)) %&gt;%
+  head(3)
+```
+
+```
+## # A tibble: 3 x 4
+##   name        F      M ratio
+##   &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+## 1 Riley  100881  92789 0.920
+## 2 Jackie  90604  78405 0.865
+## 3 Casey   76020 110165 0.690
+```
+---
+# Mutating join()
+We recall the following tables
+
+.pull-left[
+
+```r
+table1
+```
+
+```
+## # A tibble: 6 x 4
+##   country      year  cases population
+##   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Afghanistan  1999    745   19987071
+## 2 Afghanistan  2000   2666   20595360
+## 3 Brazil       1999  37737  172006362
+## 4 Brazil       2000  80488  174504898
+## 5 China        1999 212258 1272915272
+## 6 China        2000 213766 1280428583
+```
+]
+
+.pull-right[
+
+```r
+table4a
+```
+
+```
+## # A tibble: 3 x 3
+##   country     `1999` `2000`
+##   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766
+```
+
+```r
+table4b
+```
+
+```
+## # A tibble: 3 x 3
+##   country         `1999`     `2000`
+##   &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Afghanistan   19987071   20595360
+## 2 Brazil       172006362  174504898
+## 3 China       1272915272 1280428583
+```
+]
+---
+class: clear
+To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to reshape them into "long" tables and then combine columns. More specifically
 .pull-left[
 
 ```r
@@ -436,7 +998,7 @@ table4a.long &lt;- table4a %&gt;% gather(...)
 .pull-right[
 
 ```r
-table4b &lt;- table4b %&gt;% gather(...)
+table4b.long &lt;- table4b %&gt;% gather(...)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
@@ -482,7 +1044,7 @@ table4b &lt;- table4b %&gt;% gather(...)
 ]
 ---
 class: clear
-We then *join* the columns of the *reshaped* table `\(4b\)` to that of the reshaped `\(4a\)`
+We then *join* the columns of the *reshaped* table `\(4b\)` to that of the reshaped `\(4a\)`. The join operation we are doing is termed a **mutating join** as we are mutating, i.e., adding a new column to table `\(4a\)`. 
 
 ```r
 ## table4a.long %&gt;% left_join(table4b.long)
@@ -505,22 +1067,16 @@ We then *join* the columns of the *reshaped* table `\(4b\)` to that of the resha
    &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
@@ -530,12 +1086,1202 @@ We then *join* the columns of the *reshaped* table `\(4b\)` to that of the resha
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+---
+class: clear
+The help page for **mutating join** operations include
++ `\(\mathrm{left\_join}(x,y, \mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(x\)`, and all columns from `\(x\)` and `\(y\)`. Rows in `\(x\)` with no match in `\(y\)` will have `\(\mathrm{NA}\)` values in the new columns. If there are multiple matches between `\(x\)` and `\(y\)` then all combination of the matches are returned.
++ `\(\mathrm{right\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(y\)`, and all columns from `\(x\)` and `\(y\)`. Rows in `\(y\)` with no match in `\(x\)` will have `\(\mathrm{NA}\)` values in the new columns...
++ `\(\mathrm{inner\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(x\)` where there are matching values in `\(y\)`, and all columns from `\(x\)` and `\(y\)`...
++ `\(\mathrm{full\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows and all columns from both x and y. Where there are not matching values, returns `\(\mathrm{NA}\)` for the one missing.
+
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/aeab386461820b029b7e7606ccff1286f623bae1/ef0d4/diagrams/join-venn.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+#Combining multiple tables
+The **join()** operations are particularly important for combining multiple tables. For illustrative purposes, we look at the following tables from the **nycflights13** library.
+
++ **flights**: contains information about flights departing NYC airports during `\(2013\)`.
++ **airlines**: maps abbreviated code to full carrier name.
++ **airports**: gives information about each airport as identified by its FAA code.
++ **planes**: gives information about each plane as identified by its *tailnum*
++ **weather**: provides weather information at each NYC airport for each hour.
+
+
+```r
+flights
+```
+
+```
+## # A tibble: 336,776 x 19
+##    year month   day dep_time sched_dep_time dep_delay arr_time
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
+## 1  2013     1     1      517            515         2      830
+## 2  2013     1     1      533            529         4      850
+## 3  2013     1     1      542            540         2      923
+## # … with 3.368e+05 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
+## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
+## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+```
+---
+class: clear
+
+```r
+airlines
+```
+
+```
+## # A tibble: 16 x 2
+##   carrier name                  
+##   &lt;chr&gt;   &lt;chr&gt;                 
+## 1 9E      Endeavor Air Inc.     
+## 2 AA      American Airlines Inc.
+## 3 AS      Alaska Airlines Inc.  
+## # … with 13 more rows
+```
+
+```r
+airports
+```
+
+```
+## # A tibble: 1,458 x 8
+##   faa   name                      lat   lon   alt    tz dst   tzone        
+##   &lt;chr&gt; &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;        
+## 1 04G   Lansdowne Airport        41.1 -80.6  1044    -5 A     America/New_…
+## 2 06A   Moton Field Municipal …  32.5 -85.7   264    -6 A     America/Chic…
+## 3 06C   Schaumburg Regional      42.0 -88.1   801    -6 A     America/Chic…
+## # … with 1,455 more rows
+```
+---
+class: clear
+
+```r
+planes
+```
+
+```
+## # A tibble: 3,322 x 9
+##   tailnum  year type       manufacturer   model  engines seats speed engine
+##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; 
+## 1 N10156   2004 Fixed win… EMBRAER        EMB-1…       2    55    NA Turbo…
+## 2 N102UW   1998 Fixed win… AIRBUS INDUST… A320-…       2   182    NA Turbo…
+## 3 N103US   1999 Fixed win… AIRBUS INDUST… A320-…       2   182    NA Turbo…
+## # … with 3,319 more rows
+```
+
+```r
+weather
+```
+
+```
+## # A tibble: 26,115 x 15
+##   origin  year month   day  hour  temp  dewp humid wind_dir wind_speed
+##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
+## 1 EWR     2013     1     1     1  39.0  26.1  59.4      270      10.4 
+## 2 EWR     2013     1     1     2  39.0  27.0  61.6      250       8.06
+## 3 EWR     2013     1     1     3  39.0  28.0  64.4      240      11.5 
+## # … with 2.611e+04 more rows, and 5 more variables: wind_gust &lt;dbl&gt;,
+## #   precip &lt;dbl&gt;, pressure &lt;dbl&gt;, visib &lt;dbl&gt;, time_hour &lt;dttm&gt;
+```
+---
+class: clear
+Suppose we now want to get the full airlines name for each flights (as opposed to the carrier code). For ease of presentation, we will only include a subset of the original columns for the **flights** data frame.
+
+```r
+flights.sml &lt;- select(flights, year:day, dep_time, tailnum, carrier, dest)
+flights.sml
+```
+
+```
+## # A tibble: 336,776 x 7
+##    year month   day dep_time tailnum carrier dest 
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;
+## 1  2013     1     1      517 N14228  UA      IAH  
+## 2  2013     1     1      533 N24211  UA      IAH  
+## 3  2013     1     1      542 N619AA  AA      MIA  
+## # … with 3.368e+05 more rows
+```
+
+```r
+flights.sml %&gt;% inner_join(airlines)
+```
+
+```
+## Joining, by = "carrier"
+```
+
+```
+## # A tibble: 336,776 x 8
+##    year month   day dep_time tailnum carrier dest  name                  
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;                 
+## 1  2013     1     1      517 N14228  UA      IAH   United Air Lines Inc. 
+## 2  2013     1     1      533 N24211  UA      IAH   United Air Lines Inc. 
+## 3  2013     1     1      542 N619AA  AA      MIA   American Airlines Inc.
+## # … with 3.368e+05 more rows
+```
+---
+class: clear
+Suppose that we want to get detailed information about the airplanes used in the flights.
+In this case, we want to match the observations in both table using the *tailnum* column.
+
+```r
+flights.sml %&gt;% inner_join(planes)
+```
+
+```
+## Joining, by = c("year", "tailnum")
+```
+
+```
+## # A tibble: 4,630 x 14
+##    year month   day dep_time tailnum carrier dest  type  manufacturer model
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;
+## 1  2013     1    18     1846 N37465  UA      FLL   Fixe… BOEING       737-…
+## 2  2013    10     1      647 N355JB  B6      BOS   Fixe… EMBRAER      ERJ …
+## 3  2013    10     1      652 N37471  UA      LAX   Fixe… BOEING       737-…
+## # … with 4,627 more rows, and 4 more variables: engines &lt;int&gt;,
+## #   seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+```
+
+```r
+flights.sml %&gt;% inner_join(planes, by = "tailnum")
+```
+
+```
+## # A tibble: 284,170 x 15
+##   year.x month   day dep_time tailnum carrier dest  year.y type 
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
+## # … with 2.842e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+```
+---
+class: clear
+Comparing the following two variants of **join()**, we see that there are values in the *tailnum* column of the **flights** table
+that do not appear in the **planes** table. We thus need to be careful when using **inner_join()** as it can silently remove observations.
+
+```r
+flights.sml %&gt;% left_join(planes, by = "tailnum")
+```
+
+```
+## # A tibble: 336,776 x 15
+##   year.x month   day dep_time tailnum carrier dest  year.y type 
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
+## # … with 3.368e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+```
+
+```r
+flights.sml %&gt;% inner_join(planes, by = "tailnum")
+```
+
+```
+## # A tibble: 284,170 x 15
+##   year.x month   day dep_time tailnum carrier dest  year.y type 
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
+## # … with 2.842e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+```
+---
+class: clear
+When the identifying key of one table is different from the other table, we use the `\(\mathrm{by} = \mathrm{c}("\mathrm{a}", "\mathrm{b}")\)` option, e.g.,
+
+```r
+airports
+```
+
+```
+## # A tibble: 1,458 x 8
+##   faa   name                      lat   lon   alt    tz dst   tzone        
+##   &lt;chr&gt; &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;        
+## 1 04G   Lansdowne Airport        41.1 -80.6  1044    -5 A     America/New_…
+## 2 06A   Moton Field Municipal …  32.5 -85.7   264    -6 A     America/Chic…
+## 3 06C   Schaumburg Regional      42.0 -88.1   801    -6 A     America/Chic…
+## # … with 1,455 more rows
+```
+
+```r
+flights.sml %&gt;% left_join(airports, by = c("dest" = "faa"))
+```
+
+```
+## # A tibble: 336,776 x 14
+##    year month   day dep_time tailnum carrier dest  name    lat   lon   alt
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1  2013     1     1      517 N14228  UA      IAH   Geor…  30.0 -95.3    97
+## 2  2013     1     1      533 N24211  UA      IAH   Geor…  30.0 -95.3    97
+## 3  2013     1     1      542 N619AA  AA      MIA   Miam…  25.8 -80.3     8
+## # … with 3.368e+05 more rows, and 3 more variables: tz &lt;dbl&gt;, dst &lt;chr&gt;,
+## #   tzone &lt;chr&gt;
+```
+---
+#Filtering joins
+These operations match observations in the same way as `\(\mathrm{left\_join}(x,y)\)`, but instead of adding new columns to `\(x\)`, they only filter the observations in `\(x\)`. More specifically
+
++ `\(\mathrm{semi\_join}(x,y)\)` keeps all observations in `\(x\)` that have a match in `\(y\)`.
++ `\(\mathrm{anti\_join}(x,y)\)` drops all in `\(x\)` that have a match in `\(y\)`.
+
+For example, suppose we are interested in all flights that go to the top ten most popular destinations. We first find these destinations and then filter flights to these destinations.
+
+
+```r
+top_dest &lt;- flights %&gt;% group_by(dest) %&gt;% summarise(count = n()) %&gt;% 
+  arrange(desc(count)) %&gt;% head(10)
+```
+.pull-left[
+
+```r
+flights %&gt;% 
+  filter(dest %in% top_dest$dest) %&gt;%
+  select(year:day, dest)
+```
+
+```
+## # A tibble: 141,145 x 4
+##    year month   day dest 
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1  2013     1     1 MIA  
+## 2  2013     1     1 ATL  
+## 3  2013     1     1 ORD  
+## # … with 1.411e+05 more rows
+```
+]
+.pull-right[
+
+```r
+flights %&gt;% semi_join(top_dest) %&gt;%
+  select(year:day, dest)
+```
+
+```
+## # A tibble: 141,145 x 4
+##    year month   day dest 
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;
+## 1  2013     1     1 MIA  
+## 2  2013     1     1 ATL  
+## 3  2013     1     1 ORD  
+## # … with 1.411e+05 more rows
+```
+]
+---
+class: clear
+As another example of filtering joins, we noted that not all the tailnum associated with planes used in the **flights** table appeared in the **planes** table. We might want to count how many flights are associated with each of these tailnum.
+
+```r
+flights %&gt;% anti_join(planes, by = "tailnum") %&gt;%
+  group_by(tailnum) %&gt;% summarise(n = n()) %&gt;% arrange(desc(n))
+```
+
+```
+## # A tibble: 722 x 2
+##   tailnum     n
+##   &lt;chr&gt;   &lt;int&gt;
+## 1 &lt;NA&gt;     2512
+## 2 N725MQ    575
+## 3 N722MQ    513
+## # … with 719 more rows
+```
+---
+# Example 3: US Healthcare Spending
+We now present a more involved example of tidying data with **tidyr** and joining tables and wrangling data with **dplyr** verbs. The example uses health care data from the [Kaiser Family Foundation](kff.org) and we follow the analysis of [S. Hicks and R. Peng](https://jhu-advdatasci.github.io/2018/lectures/03-tidyverse-1.html).
+
+The data is included in three *csv* files; one file records state-level health insurance coverage from `\(2013\)` to `\(2016\)`, another file records state-level health care expenditures from `\(1991\)` to `\(2014\)`, and the third file records state-level life expectancy at birth.
+We take a look at the first few lines of the health insurance coverage *csv* file. 
+
+```r
+read_lines(file = "https://bit.ly/2YLGiyx", n_max = 5)
+```
+
+```
+## [1] "\"Title: Health Insurance Coverage of the Total Population | The Henry J. Kaiser Family Foundation\""                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+## [2] "\"Timeframe: 2013 - 2016\""                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+## [3] "\"Location\",\"2013__Employer\",\"2013__Non-Group\",\"2013__Medicaid\",\"2013__Medicare\",\"2013__Other Public\",\"2013__Uninsured\",\"2013__Total\",\"2014__Employer\",\"2014__Non-Group\",\"2014__Medicaid\",\"2014__Medicare\",\"2014__Other Public\",\"2014__Uninsured\",\"2014__Total\",\"2015__Employer\",\"2015__Non-Group\",\"2015__Medicaid\",\"2015__Medicare\",\"2015__Other Public\",\"2015__Uninsured\",\"2015__Total\",\"2016__Employer\",\"2016__Non-Group\",\"2016__Medicaid\",\"2016__Medicare\",\"2016__Other Public\",\"2016__Uninsured\",\"2016__Total\""
+## [4] "\"United States\",\"155696900\",\"13816000\",\"54919100\",\"40876300\",\"6295400\",\"41795100\",\"313401200\",\"154347500\",\"19313000\",\"61650400\",\"41896500\",\"5985000\",\"32967500\",\"316159900\",\"155965800\",\"21816500\",\"62384500\",\"43308400\",\"6422300\",\"28965900\",\"318868500\",\"157381500\",\"21884400\",\"62303400\",\"44550200\",\"6192200\",\"28051900\",\"320372000\""                                                                                                                                                                           
+## [5] "\"Alabama\",\"2126500\",\"174200\",\"869700\",\"783000\",\"85600\",\"724800\",\"4763900\",\"2202800\",\"288900\",\"891900\",\"718400\",\"143900\",\"522200\",\"4768000\",\"2218000\",\"291500\",\"911400\",\"719100\",\"174600\",\"519400\",\"4833900\",\"2263800\",\"262400\",\"997000\",\"761200\",\"128800\",\"420800\",\"4834100\""
+```
+---
+class: clear
+Ignore the first two lines. The third line contains column names. Hence
+
+```r
+coverage &lt;- read_csv(file = "https://bit.ly/2YLGiyx", skip = 2, col_names = TRUE)
+```
+
+```
+## Warning: 26 parsing failures.
+## row col   expected    actual                     file
+##  53  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
+##  54  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
+##  55  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
+##  56  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
+##  57  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
+## ... ... .......... ......... ........................
+## See problems(...) for more details.
+```
+
+```r
+coverage[53:nrow(coverage),]
+```
+
+```
+## # A tibble: 26 x 29
+##   Location `2013__Employer` `2013__Non-Grou… `2013__Medicaid`
+##   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Notes                  NA               NA               NA
+## 2 The maj…               NA               NA               NA
+## 3 &lt;NA&gt;                   NA               NA               NA
+## # … with 23 more rows, and 25 more variables: `2013__Medicare` &lt;dbl&gt;,
+## #   `2013__Other Public` &lt;chr&gt;, `2013__Uninsured` &lt;dbl&gt;,
+## #   `2013__Total` &lt;dbl&gt;, `2014__Employer` &lt;dbl&gt;, `2014__Non-Group` &lt;dbl&gt;,
+## #   `2014__Medicaid` &lt;dbl&gt;, `2014__Medicare` &lt;dbl&gt;, `2014__Other
+## #   Public` &lt;chr&gt;, `2014__Uninsured` &lt;dbl&gt;, `2014__Total` &lt;dbl&gt;,
+## #   `2015__Employer` &lt;dbl&gt;, `2015__Non-Group` &lt;dbl&gt;,
+## #   `2015__Medicaid` &lt;dbl&gt;, `2015__Medicare` &lt;dbl&gt;, `2015__Other
+## #   Public` &lt;chr&gt;, `2015__Uninsured` &lt;dbl&gt;, `2015__Total` &lt;dbl&gt;,
+## #   `2016__Employer` &lt;dbl&gt;, `2016__Non-Group` &lt;dbl&gt;, …
+```
+---
+class: clear
+The first `\(52\)` lines appear fine. The `\(53\)`-rd line onwards appear to be notes/annotations and should be ignore.
+
+```r
+coverage &lt;- coverage[1:(which(coverage$Location == "Notes") - 1),]
+## Equivalently
+## coverage %&gt;% filter(cumall(Location != "Notes"))
+```
+The structure of the remaining two files recording health spending and life expectancy are similar. Hence
+
+```r
+spending &lt;- read_csv(file = "https://bit.ly/33j3fZm", skip = 2, col_names = TRUE)
+spending &lt;- spending %&gt;% filter(cumall(Location != "Notes"))
+life_exp &lt;- read_csv(file = "https://bit.ly/2MK13Es", skip = 2, col_names = TRUE)
+life_exp &lt;- life_exp %&gt;% filter(cumall(Location != "Sources"))
+```
+---
+class: clear
+We now take a *glimpse* at the coverage data. 
+
+```r
+glimpse(coverage)
+```
+
+```
+## Observations: 52
+## Variables: 29
+## $ Location             &lt;chr&gt; "United States", "Alabama", "Alaska", "Ariz…
+## $ `2013__Employer`     &lt;dbl&gt; 1.56e+08, 2.13e+06, 3.65e+05, 2.88e+06, 1.1…
+## $ `2013__Non-Group`    &lt;dbl&gt; 13816000, 174200, 24000, 170800, 155600, 19…
+## $ `2013__Medicaid`     &lt;dbl&gt; 54919100, 869700, 95000, 1346100, 600800, 8…
+## $ `2013__Medicare`     &lt;dbl&gt; 40876300, 783000, 55200, 842000, 515200, 38…
+## $ `2013__Other Public` &lt;chr&gt; "6295400", "85600", "60600", "N/A", "67600"…
+## $ `2013__Uninsured`    &lt;dbl&gt; 41795100, 724800, 102200, 1223000, 436800, …
+## $ `2013__Total`        &lt;dbl&gt; 3.13e+08, 4.76e+06, 7.02e+05, 6.60e+06, 2.9…
+...
+```
+---
+class: clear
+We gather that the data is *untidy* and needs gathering.
+
+```r
+coverage_long &lt;- coverage %&gt;%  gather(key = "year_type",value = "tot_coverage", 
+                                      -Location)
+coverage_long
+```
+
+```
+## # A tibble: 1,456 x 3
+##   Location      year_type      tot_coverage
+##   &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;       
+## 1 United States 2013__Employer 155696900   
+## 2 Alabama       2013__Employer 2126500     
+## 3 Alaska        2013__Employer 364900      
+## # … with 1,453 more rows
+```
+Hmm, *tot_coverage* is a character vector ? Let us try converting characters to numeric.
+
+```r
+coverage_long &lt;- coverage %&gt;% gather(key = "year_type", value = "tot_coverage", 
+                                     -Location, convert = TRUE)
+class(coverage_long$tot_coverage)
+```
+
+```
+## [1] "character"
+```
+No improvement, sadly.
+---
+class: clear
+Turns out *tot_coverage* contains missing entries coded as "N/A". We ignore this issue with
+
+```r
+coverage_long &lt;- coverage_long %&gt;% mutate_at("tot_coverage", as.integer)
+```
+
+```
+## Warning in rlang::eval_tidy(~.Primitive("as.integer")(tot_coverage),
+## &lt;environment&gt;): NAs introduced by coercion
+```
+The spending data is also untidy. More magic the gathering.
+
+```r
+spending_long &lt;- spending %&gt;% gather(key = "year", value = "tot_spending", 
+                                     -Location)
+spending_long
+```
+
+```
+## # A tibble: 1,248 x 3
+##   Location      year                        tot_spending
+##   &lt;chr&gt;         &lt;chr&gt;                              &lt;dbl&gt;
+## 1 United States 1991__Total Health Spending       675896
+## 2 Alabama       1991__Total Health Spending        10393
+## 3 Alaska        1991__Total Health Spending         1458
+## # … with 1,245 more rows
+```
+---
+class: clear
+We now separate the "year" column for the *spending* data and the "year_type" column for the *coverage* data
+
+```r
+(spending_long &lt;- spending_long %&gt;% 
+  separate(year, sep = "__", into = c("year", "name"), convert = TRUE) %&gt;%
+  select(-name))
+```
+
+```
+## # A tibble: 1,248 x 3
+##   Location       year tot_spending
+##   &lt;chr&gt;         &lt;int&gt;        &lt;dbl&gt;
+## 1 United States  1991       675896
+## 2 Alabama        1991        10393
+## 3 Alaska         1991         1458
+## # … with 1,245 more rows
+```
+
+```r
+(coverage_long &lt;- coverage_long %&gt;%
+  separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE))
+```
+
+```
+## # A tibble: 1,456 x 4
+##   Location       year type     tot_coverage
+##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
+## 1 United States  2013 Employer    155696900
+## 2 Alabama        2013 Employer      2126500
+## 3 Alaska         2013 Employer       364900
+## # … with 1,453 more rows
+```
+---
+class: clear
+We also clean up the column names of the *life_exp* data.
+
+```r
+life_exp &lt;- life_exp %&gt;% rename(life_exp_years = `Life Expectancy at Birth (years)`)
+```
+
+We now add more contextual information to the *coverage* dataset, such as the state region and abbreviation. These information are available from the *state* dataset in the **datasets** package. We note that the *coverage* dataset includes records for Washington DC, which is missing from the state dataset. Hence
+
+```r
+library(datasets)
+data(state)
+states.df &lt;- tibble(state.name = c(state.name, "District of Columbia"),
+                    state.abb =  c(state.abb, "DC"),
+                    state.region = as.factor(c(as.character(state.region), "South")))
+coverage_long &lt;- coverage_long %&gt;% 
+  left_join(states.df, by = c("Location" = "state.name"))
+coverage_long
+```
+
+```
+## # A tibble: 1,456 x 6
+##   Location       year type     tot_coverage state.abb state.region
+##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;           &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;       
+## 1 United States  2013 Employer    155696900 &lt;NA&gt;      &lt;NA&gt;        
+## 2 Alabama        2013 Employer      2126500 AL        South       
+## 3 Alaska         2013 Employer       364900 AK        West        
+## # … with 1,453 more rows
+```
+---
+class: clear
+
+We now merge the *coverage*, *spending* and *life_exp* dataset together. The *coverage* dataset records span `\(2013\)` to `\(2016\)` while the *spending* dataset records span `\(1991\)` to `\(2014\)`. In this case we wants to include only the years `\(2013\)` and `\(2014\)` in the merged datasets.
+
+```r
+hc &lt;- coverage_long %&gt;% 
+  inner_join(spending_long) %&gt;%
+  inner_join(life_exp)
+```
+
+```
+## Joining, by = c("Location", "year")
+```
+
+```
+## Joining, by = "Location"
+```
+
+```r
+hc
+```
+
+```
+## # A tibble: 728 x 8
+##   Location  year type  tot_coverage state.abb state.region tot_spending
+##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;               &lt;dbl&gt;
+## 1 United …  2013 Empl…    155696900 &lt;NA&gt;      &lt;NA&gt;              2435624
+## 2 Alabama   2013 Empl…      2126500 AL        South               33788
+## 3 Alaska    2013 Empl…       364900 AK        West                 7684
+## # … with 725 more rows, and 1 more variable: life_exp_years &lt;dbl&gt;
+```
+---
+class: clear
+Our data is now in a reasonable format for visualization and further analysis. One problem remains in that *total* is not a valid type of healthcare coverage. Rather, a row for which the type is *total* is a record of the total number of people in that state. We remedy this issue via
+
+```r
+pop &lt;- hc %&gt;% 
+  filter(type == "Total") %&gt;%
+  select(Location, year, tot_coverage) %&gt;%
+  rename(tot_population = tot_coverage)
+hc &lt;- hc %&gt;%
+  filter(Location != "United States", type != "Total") %&gt;%
+  left_join(pop)
+hc
+```
+
+```
+## # A tibble: 612 x 9
+##   Location  year type  tot_coverage state.abb state.region tot_spending
+##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;               &lt;dbl&gt;
+## 1 Alabama   2013 Empl…      2126500 AL        South               33788
+## 2 Alaska    2013 Empl…       364900 AK        West                 7684
+## 3 Arizona   2013 Empl…      2883800 AZ        West                41481
+## # … with 609 more rows, and 2 more variables: life_exp_years &lt;dbl&gt;,
+## #   tot_population &lt;int&gt;
+```
+---
+class: clear
+Let us now try to answer the following question of "Is there a relationship between healthcare coverage and healthcare spending in the US ?" We take a look at Employer type coverage for `\(2013\)`. A naive visualization indicates a strong relationship, but there is confounding effect due to population size.
+
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-69-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+If we remove the effect of population, the relationship between spending and coverage becomes much weaker. 
+
+```r
+hc &lt;- hc %&gt;%
+  mutate(spending_capita = (tot_spending*10^6)/tot_population,
+         prop_coverage = tot_coverage/tot_population)
+hc %&gt;% filter(type == "Employer", year == "2013") %&gt;%
+  ggplot(aes(x = spending_capita, y = prop_coverage)) +
+  geom_point() + xlab("spending per capita") + 
+  ylab("proportion of Employer coverage") + geom_smooth(method = "lm")
+```
+
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-70-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+# Automation and iteration
+Compare the following code chunks.
+.pull-left[
+
+```r
+df &lt;- tibble(
+  a = rnorm(100),
+  b = rnorm(100),
+  c = rnorm(100),
+  d = rnorm(100)
+)
+output &lt;- numeric(length(df))
+for(i in seq_along(df)){
+  output[i] &lt;- median(df[[i]])
+}
+output
+```
+
+```
+## [1] -0.1639  0.0520  0.0632 -0.0459
+```
+
+```r
+apply(df,2,median)
+```
+
+```
+##       a       b       c       d 
+## -0.1639  0.0520  0.0632 -0.0459
+```
+]
+
+.pull-right[
+
+```r
+lapply(df,median)
+```
+
+```
+## $a
+## [1] -0.164
+## 
+## $b
+## [1] 0.052
+## 
+## $c
+## [1] 0.0632
+## 
+## $d
+## [1] -0.0459
+```
+
+```r
+sapply(df,median)
+```
+
+```
+##       a       b       c       d 
+## -0.1639  0.0520  0.0632 -0.0459
+```
+]
+---
+class: clear
+The **apply** family of operations allow for complex iteration over elements of a data frame, list, or matrix, without the need to write explicit loops construct. As another example, compare
+
+.pull-left[
+
+```r
+probs = c(0.25,0.5,0.75)
+output2 &lt;- matrix(0, length(probs), 
+                     length(df))
+for(i in seq_along(df)){
+  output2[,i] &lt;- quantile(df[[i]], 
+                          probs)
+}
+output2
+```
+
+```
+##        [,1]   [,2]    [,3]    [,4]
+## [1,] -0.829 -0.612 -0.7058 -0.7635
+## [2,] -0.164  0.052  0.0632 -0.0459
+## [3,]  0.395  0.813  0.5201  0.5707
+```
+]
+
+.pull-right[
+
+```r
+apply(df, 2, quantile, probs)
+```
+
+```
+##          a      b       c       d
+## 25% -0.829 -0.612 -0.7058 -0.7635
+## 50% -0.164  0.052  0.0632 -0.0459
+## 75%  0.395  0.813  0.5201  0.5707
+```
+
+```r
+sapply(df, quantile, probs)
+```
+
+```
+##          a      b       c       d
+## 25% -0.829 -0.612 -0.7058 -0.7635
+## 50% -0.164  0.052  0.0632 -0.0459
+## 75%  0.395  0.813  0.5201  0.5707
+```
+]
+---
+class: clear
+
+There are numerous variants of *apply*, including
+
++ `\(\mathrm{apply}(X, \mathrm{margin}, \mathrm{FUN}, ...)\)` which takes a data frame, array or matrix `\(X\)` and returns a vector/array/list of values obtained by applying `\(\mathrm{FUN}\)` to the margins (e.g., rows and columns) of `\(X\)`. 
+
++ `\(\mathrm{lapply}(X, \mathrm{FUN}, ...)\)` which takes a list `\(X\)` and return a list of the same length as `\(X\)`, each element of which is the result of applying `\(\mathrm{FUN}\)` to the corresponding element of `\(X\)`.
+
++ `\(\mathrm{sapply}(X, \mathrm{FUN}, ...)\)` is a user-friendly wrapper of `\(\mathrm{lapply}\)` that try to return a vector, matrix, or array, if possible.
+
++ `\(\mathrm{mapply}(\mathrm{FUN}, ..., \mathrm{MoreArgs})\)` is a multivariate version of `\(\mathrm{sapply}\)`; `\(\mathrm{mapply}\)` applies FUN to the first elements of each `\(...\)` argument, the second elements, the third elements, and so on.
+
++ `\(\mathrm{tapply}(X, \mathrm{INDEX}, \mathrm{FUN} = \mathrm{NULL}, ...)\)` apply `\(\mathrm{FUN}\)` to each (non-empty) group of values of `\(X\)` given by a unique combination of the levels of factors contained in the list `\(\mathrm{INDEX}\)`
+
+---
+class: clear
+The following are some examples of *apply* and its variants.
+
+
+```r
+# ?beaver1 and ?beaver2
+beaver &lt;- list(beaver1 = beaver1, beaver2 = beaver2)
+lapply(beaver, function(x) apply(x,2,mean))
+```
+
+```
+## $beaver1
+##      day     time     temp    activ 
+## 3.46e+02 1.31e+03 3.69e+01 5.26e-02 
+## 
+## $beaver2
+##     day    time    temp   activ 
+##  307.13 1446.20   37.60    0.62
+```
+
+```r
+sapply(beaver, function(x) apply(x,2,mean))
+```
+
+```
+##        beaver1 beaver2
+## day   3.46e+02  307.13
+## time  1.31e+03 1446.20
+## temp  3.69e+01   37.60
+## activ 5.26e-02    0.62
+```
+
+---
+class: clear
+
+```r
+head(mtcars)
+```
+
+```
+## # A tibble: 6 x 11
+##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4
+## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4
+## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1
+## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1
+## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2
+## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1
+```
+
+```r
+tapply(mtcars$mpg, mtcars$cyl, mean) ## Work like group_by and summarise
+```
+
+```
+##    4    6    8 
+## 26.7 19.7 15.1
+```
+
+```r
+tapply(mtcars$mpg, list(mtcars$cyl, mtcars$gear), mean)
+```
+
+```
+##      3    4    5
+## 4 21.5 26.9 28.2
+## 6 19.8 19.8 19.7
+## 8 15.1   NA 15.4
+```
+
+---
+class: clear
+
+Nesting a *tapply* within an *apply* is particularly useful.
+
+```r
+apply(mtcars, 2, function(x) tapply(x, mtcars$cyl, mean))
+```
+
+```
+##    mpg cyl disp    hp drat   wt qsec    vs    am gear carb
+## 4 26.7   4  105  82.6 4.07 2.29 19.1 0.909 0.727 4.09 1.55
+## 6 19.7   6  183 122.3 3.59 3.12 18.0 0.571 0.429 3.86 3.43
+## 8 15.1   8  353 209.2 3.23 4.00 16.8 0.000 0.143 3.29 3.50
+```
+
+We end with some examples of *mapply*
+
+.pull-left[
+
+```r
+mapply(rep, 1:4, 4:1)
+```
+
+```
+## [[1]]
+## [1] 1 1 1 1
+## 
+## [[2]]
+## [1] 2 2 2
+## 
+## [[3]]
+## [1] 3 3
+## 
+## [[4]]
+## [1] 4
+```
+]
+
+.pull-right[
+
+```r
+mapply(rep, 4:1, 1:4)
+```
+
+```
+## [[1]]
+## [1] 4
+## 
+## [[2]]
+## [1] 3 3
+## 
+## [[3]]
+## [1] 2 2 2
+## 
+## [[4]]
+## [1] 1 1 1 1
+```
+]
+---
+class: clear
+.pull-left[
+
+```r
+mapply(rep, 1:4, 4)
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    1    2    3    4
+## [3,]    1    2    3    4
+## [4,]    1    2    3    4
+```
+]
+
+.pull-right[
+
+```r
+X &lt;- cbind(1:5, 6:10)
+mapply(function(x,y) x*y, X[,1], X[,2])
+```
+
+```
+## [1]  6 14 24 36 50
+```
+]
+---
+#Purrr: an alternative to apply()
+The **apply** family of operations are powerful, but its syntax is somewhat inconsistent. The **purrr** library (a part of the **tidyverse** approach) provides analogous operations with a cleaner syntax. These operations are (here `\(.x\)` is a list or atomic vector and `\(.f\)` is a function, **formula**, or vector)
+
++ `\(\mathrm{map}(.x, .f, ...)\)`: makes a list
++ `\(\mathrm{map\_lgl}(.x, .f, ...)\)`: makes a logical vector
++ `\(\mathrm{map\_int}(.x, .f, ...)\)`: makes an integer vector
++ `\(\mathrm{map\_dbl}(.x, .f, ...)\)`: makes a double vector
++ `\(\mathrm{map\_chr}(.x, .f, ...)\)`: makes a character vector
++ `\(\mathrm{map\_dfr}(.x, .f, ...)\)` and `\(\mathrm{map\_dfc}(.x, .f, ...)\)` makes a data-frame by row-binding or column binding.
+
+---
+class: clear
+
+The `\(.f\)` argument to `\(\mathrm{map\_*}\)` can be either a **formula**, a string, or a number. 
+For example (here we use the **dplyr** verb `\(\mathrm{group\_split}\)` to split a data frame into groups based on a factor)
+
+.pull-left[
+
+```r
+models &lt;- mtcars %&gt;% 
+  group_split(cyl) %&gt;% 
+  map(function(df) 
+    lm(mpg ~ wt, data = df))
+
+models %&gt;% map(summary) %&gt;% 
+  map_dbl(function(x) x$r.squared)
+```
+
+```
+## [1] 0.509 0.465 0.423
+```
+]
+
+.pull-right[
+
+```r
+models &lt;- mtcars %&gt;% 
+  group_split(cyl) %&gt;%
+  map(~ lm(mpg ~ wt, data = .))
+
+models %&gt;% map(summary) %&gt;% 
+  map_dbl(~ .$r.squared)
+```
+
+```
+## [1] 0.509 0.465 0.423
+```
+
+```r
+## Equivalently
+models %&gt;% map(summary) %&gt;%
+  map_dbl("r.squared")
+```
+
+```
+## [1] 0.509 0.465 0.423
+```
+]
+---
+class: clear
+
+```r
+x &lt;- list(list(1,2,3), list(4,5,6), list(7,8,9))
+## Extract 2nd element from each list
+x %&gt;% sapply('[[',2) 
+```
+
+```
+## [1] 2 5 8
+```
+
+```r
+x %&gt;% map_dbl(2)
+```
+
+```
+## [1] 2 5 8
+```
+---
+class: clear
+The analogue of `\(\mathrm{mapply}\)` for mapping over multiple arguments is `\(\mathrm{map2}\)` and `\(\mathrm{pmap}\)`. For example
+.pull-left[
+
+```r
+mean = c(0,1,2)
+sd = c(1,2,3)
+mapply(rnorm, mean, sd, 3) ## Oops
+```
+
+```
+## [[1]]
+## numeric(0)
+## 
+## [[2]]
+## [1] 7.4
+## 
+## [[3]]
+## [1]  2.3030 -0.0909
+```
+
+```r
+mapply(rnorm, mean = mean, 
+       sd = sd, n = 3)
+```
+
+```
+##       [,1]  [,2]  [,3]
+## [1,] -1.34 -1.35 -2.19
+## [2,] -0.96  1.46  1.04
+## [3,] -1.06  1.90  3.77
+```
+]
+
+.pull-right[
+
+```r
+pmap_dfc(list(mean = mean,sd = sd), 
+         rnorm, 3)
+```
+
+```
+## # A tibble: 3 x 3
+##       V1    V2    V3
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 -0.223  2.56  6.87
+## 2  0.326 -2.98  5.61
+## 3  0.183  5.55  1.61
+```
+]
+
+---
+class: clear
+For even more "complex" iterations, there is **invoke\_map**, e.g.,
+.pull-left[
+
+```r
+f &lt;- c("runif", "rnorm", "rbinom")
+param &lt;- list(
+  list(min = -1, max = 1),
+  list(sd = 5),
+  list(size = 10, prob = 0.5)
+)
+invoke_map(f, param, n = 1)
+```
+]
+
+.pull-right[
+
+```
+## [[1]]
+## [1] -0.955
+## 
+## [[2]]
+## [1] 0.566
+## 
+## [[3]]
+## [1] 5
+```
+]
+
+---
+#Example 4: Baseball winning percentage 
+In this example we try to model the winning percentage of baseball teams in terms of simpler statistics such as the number of runs scored and runs allowed.
+
+A popular model in sabermetrics is that a rough estimate of a team's expected winning percentage is (here `\(RS\)` and `\(RA\)` denote the total number of runs scored and runs allowed in a season). 
+`$$\widehat{Wpct} = \frac{1}{1 + (RA/RS)^{k}}$$`
+for some choice of `\(k\)`; [Bill James](https://en.wikipedia.org/wiki/Bill_James) posited that `\(k = 2\)`. We now verify this expression using data from the **Lahman** package.
+---
+class: clear
+
+```r
+exp_wpct &lt;- function(x, k = 2) { 
+  return(1/(1 + (1/x)^k))
+}
+library(Lahman)
+TeamRuns &lt;- Teams %&gt;% 
+  rename(RS = R) %&gt;% 
+  mutate(wpct = W / (W + L), run_ratio = RS/RA, hat.wpct = exp_wpct(run_ratio)) %&gt;%
+  select(yearID, teamID, lgID, wpct, hat.wpct, run_ratio) 
+TeamRuns
+```
+
+```
+## # A tibble: 2,895 x 6
+##   yearID teamID lgID   wpct hat.wpct run_ratio
+##    &lt;int&gt; &lt;fct&gt;  &lt;fct&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1   1871 BS1    NA    0.667    0.637     1.32 
+## 2   1871 CH1    NA    0.679    0.611     1.25 
+## 3   1871 CL1    NA    0.345    0.348     0.730
+## # … with 2,892 more rows
+```
+---
+class: clear
+The following figure provides reasonably strong support to Bill Jame's formula.
+
+```r
+ggplot(data = TeamRuns, aes(x = run_ratio, y = wpct)) +
+  geom_vline(xintercept = 1, color = "darkgray", linetype = 2) +
+  geom_hline(yintercept = 0.5, color = "darkgray", linetype = 2) +
+  geom_point(alpha = 0.3) + stat_function(fun = exp_wpct, size = 2, color = "blue") + 
+  xlab("Ratio of Runs Scored to Runs Allowed") + ylab("Winning Percentage")
+```
+
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-88-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+Nevertheless, we might ask whether or not `\(k = 2\)` really the "optimal" choice for this data ? To answer this, we find `\(\hat{k}\)` minimizing the (non-linear) least square criterion
+`$$\min_{k} \sum_{i} \Bigl(Wpct_{i} - \frac{1}{1 + (RA_i/RS_i)^{k}} \Bigr)^2.$$`
+
+Efficient algorithms for finding `\(\hat{k}\)` are reasonably complicated but for our current purpose, the following "exhaustive" search is sufficient. We see that the optimal `\(k\)` for this data is roughly `\(1.87\)`.
+
+```r
+kseq &lt;- seq(from = 0.5, to = 2.5, by = 0.01)
+names(kseq) &lt;- kseq
+mse &lt;- map_dbl(kseq, 
+        .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
+        x = TeamRuns$run_ratio, y = TeamRuns$wpct)
+which.min(mse)
+```
+
+```
+## 1.87 
+##  138
+```
+---
+class: clear
+We might want to see how the "optimal" value of `\(k\)` changes over time. We see that the optimal `\(k\)` over time ranges from `\(1.74\)` to `\(2.02\)`. 
+
+```r
+fit.k &lt;- function(df, kseq = seq(from = 0.5, to = 2.5, by = 0.01), name1, name2){
+  mse &lt;- map_dbl(.x = kseq, 
+          .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
+          x = df[[name1]], y = df[[name2]])
+  idx &lt;- which.min(mse)
+  return(tibble(k = kseq[idx]))
+}
+kseq &lt;- seq(from = 0.5, to = 2.5, by = 0.01)
+kstar &lt;- TeamRuns %&gt;% mutate(decade = yearID %/%10 * 10) %&gt;%
+  group_split(decade) %&gt;% map_df(fit.k, name1 = "run_ratio", name2 = "wpct")
+kstar
+```
+
+```
+## # A tibble: 15 x 1
+##       k
+##   &lt;dbl&gt;
+## 1  1.95
+## 2  1.82
+## 3  2.02
+## 4  1.75
+## 5  1.91
+## 6  1.91
+## # … with 9 more rows
+```
+---
+class: clear
+Continuing in the same vein, let us identify, for each season, the team that led their league in home runs. We first write a helper function that, given records for a subset of teams, return a data frame listing the team with the most home runs. We then split our data in groups based on `\(\mathrm{yearID}\)` and `\(\mathrm{lgID}\)` and apply our helper function to each group.
+
+```r
+hr_leader &lt;- function(x){
+  x %&gt;% select(yearID, lgID, teamID, HR) %&gt;%
+    arrange(desc(HR)) %&gt;% head(n = 1)
+}
+library(Lahman)
+hr_leaders &lt;- Teams %&gt;% group_split(yearID, lgID) %&gt;%
+  map_df(hr_leader)
+hr_leaders
+```
+
+```
+## # A tibble: 280 x 4
+##   yearID lgID  teamID    HR
+##    &lt;int&gt; &lt;fct&gt; &lt;fct&gt;  &lt;int&gt;
+## 1   1871 NA    CH1       10
+## 2   1872 NA    BL1       14
+## 3   1873 NA    BS1       13
+## 4   1874 NA    BS1       17
+## 5   1875 NA    BS1       15
+## 6   1876 NL    BSN        9
+## # … with 274 more rows
+```
+---
+class: clear
+We then visualize how the number of home runs of the top hitting teams change over time.
+
+```r
+hr_leaders %&gt;% 
+  filter(yearID &gt;= 1916) %&gt;%
+  ggplot(aes(x = yearID, y = HR, color = lgID)) + geom_line() + 
+    geom_point() + geom_smooth(se = 0) + geom_vline(xintercept = 1973) + 
+    annotate("text", x = 1974, y = 25, 
+             label = "AL adopts designated hitter rule", hjust = "left")
+```
+
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-92-1.png" width="80%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
