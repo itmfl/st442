@@ -2,7 +2,7 @@
 title: "Data Wrangling"
 subtitle: "An introduction to dplyr (part I)"
 author: "CSC/ST 442"
-date: "Fall 2019"
+date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
     lib_dir: libs

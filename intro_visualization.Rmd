@@ -2,7 +2,7 @@
 title: "Visualizing Data"
 subtitle: "An introduction to ggplot2"
 author: "CSC/ST 442"
-date: "Fall 2019"
+date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
