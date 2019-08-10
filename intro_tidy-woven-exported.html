@@ -1,0 +1,522 @@
+<p>#Tidy Data Consider the following four different representations of the same data.</p>
+.pull-left[
+<table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Table 1
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:right;">
+cases
+</th>
+<th style="text-align:right;">
+population
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:right;">
+745
+</td>
+<td style="text-align:right;">
+2.00e+07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+2666
+</td>
+<td style="text-align:right;">
+2.06e+07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:right;">
+37737
+</td>
+<td style="text-align:right;">
+1.72e+08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+80488
+</td>
+<td style="text-align:right;">
+1.75e+08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:right;">
+212258
+</td>
+<td style="text-align:right;">
+1.27e+09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+213766
+</td>
+<td style="text-align:right;">
+1.28e+09
+</td>
+</tr>
+</tbody>
+</table>
+] .pull-right[
+<table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Table 2
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+type
+</th>
+<th style="text-align:right;">
+value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+7.45e+02
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+2.00e+07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+2.67e+03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+2.06e+07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+3.77e+04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+1.72e+08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+8.05e+04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+1.75e+08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+2.12e+05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+1.27e+09
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+cases
+</td>
+<td style="text-align:right;">
+2.14e+05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+population
+</td>
+<td style="text-align:right;">
+1.28e+09
+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="section">]</h2>
+class: clear .pull-left[
+<table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Table 3
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+rate
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+745/19987071
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+2666/20595360
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+37737/172006362
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+80488/174504898
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+1999
+</td>
+<td style="text-align:left;">
+212258/1272915272
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+213766/1280428583
+</td>
+</tr>
+</tbody>
+</table>
+] .pull-right[
+<table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Table 4a
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:right;">
+1999
+</th>
+<th style="text-align:right;">
+2000
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+745
+</td>
+<td style="text-align:right;">
+2666
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+37737
+</td>
+<td style="text-align:right;">
+80488
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+212258
+</td>
+<td style="text-align:right;">
+213766
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+Table 4b
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:right;">
+1999
+</th>
+<th style="text-align:right;">
+2000
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:right;">
+2.00e+07
+</td>
+<td style="text-align:right;">
+2.06e+07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brazil
+</td>
+<td style="text-align:right;">
+1.72e+08
+</td>
+<td style="text-align:right;">
+1.75e+08
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+China
+</td>
+<td style="text-align:right;">
+1.27e+09
+</td>
+<td style="text-align:right;">
+1.28e+09
+</td>
+</tr>
+</tbody>
+</table>
+<p>]</p>
+<p><br> <br> The above tables, while representing the same data, are not equally easy to use. For example, table <span class="math inline">4<em>a</em></span> provides the simplest way for finding the difference in the number of cases between <span class="math inline">1999</span> and <span class="math inline">2000</span>. Table <span class="math inline">1</span> is the easiest table to add new variables such as <span class="math inline"><em>G</em><em>D</em><em>P</em></span>. Table <span class="math inline">3</span> is not particularly suitable for data analysis, but is possibly useful for data collection. Table <span class="math inline">2</span> is appropriate if the columns of Table <span class="math inline">1</span>, instead of being <em>cases</em> and <em>populations</em>, are e.g., <em>diabetes</em>, <em>HIV</em>, <em>colon cancer</em>, … for which there is possibly missing/unobserved data (that is not all diseases are surveyed for every country). — #gather() and spread() There is often a need to transform data between two different representations exemplified by Table <span class="math inline">1</span> and Table <span class="math inline">2</span> in the previous slide. The main tool for doing so are the verbs <strong>gather</strong> and <strong>spread</strong> that are part of the <strong>tidyr</strong> library. For a thoughtful discussion of the motivations behind <strong>tidyr</strong>, see the article <a href="https://www.jstatsoft.org/article/view/v059i10">Tidy Data</a> by Hadley Wickham.</p>
+<p>To convert from Table <span class="math inline">1</span> to Table <span class="math inline">2</span>, we do</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">table2 &lt;-<span class="st"> </span><span class="kw">gather</span>(table1, <span class="dt">key =</span> <span class="st">&quot;type&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;value&quot;</span>, cases, population)</a></code></pre></div>
+<p>Conversely, to convert from Table <span class="math inline">2</span> to Table <span class="math inline">1</span>, we do</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">table1 &lt;-<span class="st"> </span><span class="kw">spread</span>(table2, type, value)</a></code></pre></div>
+<p>class: clear As another example, consider the following two representations of table <span class="math inline">4<em>a</em></span>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">table4a <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;year&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;cases&quot;</span>, <span class="st">`</span><span class="dt">1999</span><span class="st">`</span>, <span class="st">`</span><span class="dt">2000</span><span class="st">`</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="st">  </span><span class="kw">arrange</span>(country, year)</a></code></pre></div>
+<pre><code>## # A tibble: 6 x 3
+##   country     year   cases
+##   &lt;chr&gt;       &lt;chr&gt;  &lt;dbl&gt;
+## 1 Afghanistan 1999     745
+## 2 Afghanistan 2000    2666
+## 3 Brazil      1999   37737
+## 4 Brazil      2000   80488
+## 5 China       1999  212258
+## 6 China       2000  213766</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">table4a <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">gather</span>(<span class="dt">key =</span> <span class="st">&quot;year&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;cases&quot;</span>, <span class="st">`</span><span class="dt">1999</span><span class="st">`</span>, <span class="st">`</span><span class="dt">2000</span><span class="st">`</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">spread</span>(year, cases)</a></code></pre></div>
+<pre><code>## # A tibble: 3 x 3
+##   country     `1999` `2000`
+##   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Afghanistan    745   2666
+## 2 Brazil       37737  80488
+## 3 China       212258 213766</code></pre>
