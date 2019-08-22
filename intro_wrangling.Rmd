@@ -256,7 +256,8 @@ There are a large number of useful summary functions. We provide a few more exam
 ## average arrival delay
 not_canceled <- filter(flights, !is.na(dep_delay) & !is.na(arr_delay))
 not_canceled %>% group_by(year, month, day) %>% 
-  summarize(avg_delay = mean(arr_delay), avg_positive_delay = mean(arr_delay[arr_delay > 0]))
+  summarize(avg_delay = mean(arr_delay), 
+            avg_positive_delay = mean(arr_delay[arr_delay > 0]))
 ```
 ---
 class: clear
@@ -302,21 +303,22 @@ daily %>% summarize(flights = n()) %>%
 ---
 class: clear
 Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$; e.g.,
-```{r}
+```{r echo = -1}
+options(tibble.print_max = 4, tibble.print_min = 4)
 group_by(not_canceled, dest, month) %>% 
   summarize(air_time = mean(air_time)) %>% 
-  summarize(air_time = mean(air_time)) %>% head(5)
+  summarize(air_time = mean(air_time))
 group_by(not_canceled, dest) %>% 
-  summarize(air_time = mean(air_time)) %>% head(5)
+  summarize(air_time = mean(air_time))
 ```
 ---
 class: clear
 ```{r}
 group_by(not_canceled, dest, month) %>% 
   summarize(air_time = median(air_time)) %>% 
-  summarize(air_time = median(air_time)) %>% head(6)
+  summarize(air_time = median(air_time))
 group_by(not_canceled, dest) %>% 
-  summarize(air_time = median(air_time)) %>% head(6)
+  summarize(air_time = median(air_time))
 ```
 ---
 #ungroup()
