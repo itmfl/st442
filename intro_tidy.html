@@ -4,7 +4,7 @@
     <title>Reshaping data</title>
     <meta charset="utf-8" />
     <meta name="author" content="CSC/ST 442" />
-    <meta name="date" content="2019-08-10" />
+    <meta name="date" content="2019-08-20" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 # Reshaping data
 ## tidyr and relational data with dplyr
 ### CSC/ST 442
-### 2019-08-10
+### 2019-08-20
 
 ---
 
@@ -1006,7 +1006,7 @@ table4b.long &lt;- table4b %&gt;% gather(...)
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
    &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; population &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -1049,6 +1049,10 @@ We then *join* the columns of the *reshaped* table `\(4b\)` to that of the resha
 
 ```r
 ## table4a.long %&gt;% left_join(table4b.long)
+```
+
+```
+## Joining, by = c("country", "year")
 ```
 
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1722,7 +1726,7 @@ output
 ```
 
 ```
-## [1]  0.0748  0.0423 -0.0255 -0.1015
+## [1]  0.1547 -0.0599  0.1576 -0.1549
 ```
 
 ```r
@@ -1731,7 +1735,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-##  0.0748  0.0423 -0.0255 -0.1015
+##  0.1547 -0.0599  0.1576 -0.1549
 ```
 ]
 
@@ -1743,16 +1747,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.0748
+## [1] 0.155
 ## 
 ## $b
-## [1] 0.0423
+## [1] -0.0599
 ## 
 ## $c
-## [1] -0.0255
+## [1] 0.158
 ## 
 ## $d
-## [1] -0.101
+## [1] -0.155
 ```
 
 ```r
@@ -1761,7 +1765,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-##  0.0748  0.0423 -0.0255 -0.1015
+##  0.1547 -0.0599  0.1576 -0.1549
 ```
 ]
 ---
@@ -1782,10 +1786,10 @@ output2
 ```
 
 ```
-##         [,1]    [,2]    [,3]   [,4]
-## [1,] -0.7018 -0.4752 -0.6753 -0.746
-## [2,]  0.0748  0.0423 -0.0255 -0.101
-## [3,]  0.7395  0.6769  0.4131  0.617
+##        [,1]    [,2]   [,3]   [,4]
+## [1,] -0.416 -0.5240 -0.624 -0.693
+## [2,]  0.155 -0.0599  0.158 -0.155
+## [3,]  0.802  0.5964  0.902  0.703
 ```
 ]
 
@@ -1796,10 +1800,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##           a       b       c      d
-## 25% -0.7018 -0.4752 -0.6753 -0.746
-## 50%  0.0748  0.0423 -0.0255 -0.101
-## 75%  0.7395  0.6769  0.4131  0.617
+##          a       b      c      d
+## 25% -0.416 -0.5240 -0.624 -0.693
+## 50%  0.155 -0.0599  0.158 -0.155
+## 75%  0.802  0.5964  0.902  0.703
 ```
 
 ```r
@@ -1807,10 +1811,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##           a       b       c      d
-## 25% -0.7018 -0.4752 -0.6753 -0.746
-## 50%  0.0748  0.0423 -0.0255 -0.101
-## 75%  0.7395  0.6769  0.4131  0.617
+##          a       b      c      d
+## 25% -0.416 -0.5240 -0.624 -0.693
+## 50%  0.155 -0.0599  0.158 -0.155
+## 75%  0.802  0.5964  0.902  0.703
 ```
 ]
 ---
@@ -2082,10 +2086,10 @@ mapply(rnorm, mean, sd, 3) ## Oops
 ## numeric(0)
 ## 
 ## [[2]]
-## [1] 1.84
+## [1] 0.254
 ## 
 ## [[3]]
-## [1] 2.22 3.04
+## [1] -2.51  2.03
 ```
 
 ```r
@@ -2094,10 +2098,10 @@ mapply(rnorm, mean = mean,
 ```
 
 ```
-##        [,1] [,2]   [,3]
-## [1,] -0.925 3.12 -1.682
-## [2,] -1.157 2.06 10.802
-## [3,]  0.571 1.66 -0.253
+##        [,1]  [,2]  [,3]
+## [1,] -1.780 0.456  1.31
+## [2,] -1.050 3.515  5.30
+## [3,]  0.367 2.053 -1.60
 ```
 ]
 
@@ -2110,11 +2114,11 @@ pmap_dfc(list(mean = mean,sd = sd),
 
 ```
 ## # A tibble: 3 x 3
-##      V1    V2    V3
-##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 1.25   2.07  2.00
-## 2 1.46  -3.26  1.55
-## 3 0.701  2.67 10.3
+##       V1      V2     V3
+##    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1 -0.310 -0.0665 -0.635
+## 2 -0.943  1.80    6.39 
+## 3  0.782  4.27    4.72
 ```
 ]
 
@@ -2138,13 +2142,13 @@ invoke_map(f, param, n = 1)
 
 ```
 ## [[1]]
-## [1] -0.448
+## [1] -0.969
 ## 
 ## [[2]]
-## [1] -4.27
+## [1] -0.772
 ## 
 ## [[3]]
-## [1] 4
+## [1] 3
 ```
 ]
 

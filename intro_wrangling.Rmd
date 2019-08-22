@@ -19,7 +19,35 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+
+require("magrittr")
+
+file_name <- rstudioapi::getSourceEditorContext()[["path"]]
+
+doc <- toc <- readLines(file_name)
+tocc <- character()
+for (i in 1:length(toc)) {
+  if(substr(toc[i][1], 1, 2) == "# ") {
+    toc[i] <- gsub("# ", "", toc[i], fixed = TRUE) %>% 
+                gsub("#", "", ., fixed = TRUE)
+    tocc <- append(tocc, toc[i])
+  }
+}
+
+tocc <- paste("- ", tocc[-1])
+
+row_outline <- which(doc == "# Outline")
+row_body <- which(doc == "---")
+row_body <- row_body[which(row_body > row_outline)][1]
+
+doc <- c(doc[1:row_outline], "\n", tocc, "\n", doc[(row_body):length(doc)])
+
+
+writeLines(doc, file_name)
 ```
+
+# Outline
+---
 
 ```{r xaringan-themer, include = FALSE}
 #library(xaringanthemer)
@@ -214,7 +242,7 @@ delays
 ```
 ---
 class: clear
-We can then plot how the average delay varies with the distance.
+# We can then plot how the average delay varies with the distance.
 ```{r message = FALSE, fig.align = 'center', out.width='80%'}
 library(ggplot2)
 ggplot(delays, aes(x = dist, y  = avg_delay)) + 

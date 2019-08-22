@@ -448,18 +448,19 @@ knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %
 table4b.long <- table4b %>% gather(...)
 ```
 ```{r echo = FALSE}
-knitr::kable(table4b %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+knitr::kable(table4b %>% gather(key = "year", value = "population", `1999`, `2000`) %>% 
   arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
 class: clear
 We then *join* the columns of the *reshaped* table $4b$ to that of the reshaped $4a$. The join operation we are doing is termed a **mutating join** as we are mutating, i.e., adding a new column to table $4a$. 
-```{r echo = 3, eval = -3}
+```{r echo = 3, eval = -3, message = TRUE}
 table4a.long <- table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
 table4b.long <- table4b %>% gather(key = "year", value = "population", `1999`, `2000`)
 table4a.long %>% left_join(table4b.long)
-knitr::kable(table4a.long %>% left_join(table4b.long) %>% arrange(country,year)) %>%
+table.joined <- table4a.long %>% left_join(table4b.long)
+knitr::kable(table.joined %>% arrange(country,year)) %>%
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ---
