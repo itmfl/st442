@@ -20,7 +20,7 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 ```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
+# library(xaringanthemer)
 library(tidyverse)
 # duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
 #   title_slide_background_color = "#FFFFFF",
@@ -47,8 +47,8 @@ library(tidyverse)
     + MS in Comptuer Science @ U. Wisconsin Milwaukee.
     + PhD in Computer Science @ Indiana University.
 + Preferred Salutation: Minh or Dr. Tang.
-+ Current Employment: Department of Statistics.
-+ Office Hour: 10am -- 12pm Wednesday, or by appointment.
++ Current Affiliation: Department of Statistics @ NCSU.
++ Office & Office Hour: SAS Hall 5236; 10am -- 12pm Wednesday, or by appointment.
 + Favourite Quote:
    > Three minutes thought would suffice to find this out but thought is irksome 
    > and three  minutes is a long time.
@@ -104,6 +104,15 @@ knitr::include_graphics("figures/ibm.png")
 ```
 ---
 class: clear
+```{r echo = FALSE, out.width = "50%", fig.cap = "PWC"}
+knitr::include_graphics("https://www.pwc.com/us/en/publications/data-science-and-analytics/253879-2017-dsa-graphic-12-8b-07.png")
+```
+
+--
+Who are these pesky data engineers ?
+
+---
+class: clear
 ```{r echo = FALSE, out.width="70%", fig.cap = "Linkedin economic report"}
 knitr::include_graphics("figures/linkedin_shortage.png")
 ```
@@ -120,9 +129,20 @@ knitr::include_graphics("https://bit.ly/2Mmu7lW")
 
 ---
 # The many Venns of data science
-```{r out.width = "60%", echo = FALSE, fig.cap = "Figure from D. Conway"}
+
+.pull-left[
+<br>
+<br>
+```{r out.width = "90%", echo = FALSE, fig.cap = "Figure from D. Conway"}
 knitr::include_graphics("https://bit.ly/2NbBfBb")
 ```
+]
+
+.pull-right[
+```{r out.width = "50%", echo = FALSE}
+knitr::include_graphics("https://www.cognilytica.com/wp-content/uploads/2018/06/DATA-SCIENCE-VS-DATA-ENGINEER-CGIG001-v2.png")
+```
+]
 ---
 class: clear
 ```{r echo = FALSE, out.width="80%", fig.cap = "Figure from S. Kolassa"}
@@ -160,7 +180,7 @@ knitr::include_graphics("figures/tukey2.png")
 knitr::include_graphics("figures/tukey3.png")
 ```
 ---
-# David Donoho 50 Years of Data Science
+# 50 Years of Data Science
 ```{r out.width="70%", echo = FALSE, fig.cap = "https://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf"}
 knitr::include_graphics("figures/donoho.png")
 ```
@@ -200,7 +220,7 @@ are available through the CRAN family of Internet sites.
 
 + Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/)
 
-+ Chapter $1$ through $4$ of Rafael Irizarry's [Introduction to Data Science](https://bookdown.org/rdpeng/rprogdatascience/)
++ Chapter $1$ through $4$ of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
 
 + [JHU Coursera](https://www.coursera.org/learn/r-programming)
 
