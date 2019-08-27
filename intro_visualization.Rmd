@@ -11,8 +11,7 @@ output:
       highlightStyle: zenburn
       highlightLines: true
       countIncrementalSlides: false
-    df_print: tibble
-
+   
 --- 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
@@ -20,7 +19,6 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 ```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
 library(tidyverse)
 # duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
 #   title_slide_background_color = "#FFFFFF",
@@ -223,7 +221,7 @@ library(dplyr)
 
 climate_sub <- climate %>%
   filter(Source == "Berkeley" & Year >= 1900) %>%
-  mutate(pos = Anomaly10y >= 0)
+  mutate(pos = Anomaly10y >= 0) %>% as.tibble()
 
 climate_sub
 ```
@@ -316,7 +314,7 @@ p
 # Example 2: Historical baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly $1.6$ million names during the period from $1900$ to $2010$. A snippet of the data is as follows.
 
-```{r cache = TRUE, echo = FALSE}
+```{r cache = FALSE, echo = FALSE}
 library(mdsr)
 library(babynames)
 BabyNamesDist <- make_babynames_dist()
@@ -337,7 +335,7 @@ median_yob <- joseph %>%
   group_by(year) %>% 
   summarise(count = sum(est_alive_today)) %>% 
   mutate(prop = cumsum(count)/sum(count)) %>%
-  filter(cumany(prop >= 0.5)) %>% ## a binary earch is more efficient
+  filter(cumany(prop >= 0.5)) %>% ## a binary search is more efficient
   select(year) %>% pull() %>% first()
 p <- p + geom_bar(stat = "identity", 
                   aes(y = ifelse(year == median_yob, est_alive_today/1000, 0)),
@@ -409,7 +407,7 @@ p3 %+% filter(BabyNamesDist, name %in% c("Jessie", "Marion", "Jackie"))
 ---
 class: clear
 We now go back to our original motivation, namely guessing the age of a person given her name. For the $25$ most popular names, we get the following graphic
-```{r echo = FALSE, cache = TRUE, out.width="60%", fig.asp = 1.2}
+```{r echo = FALSE, cache = FALSE, out.width="60%", fig.asp = 1.2}
 com_fem_names <- BabyNamesDist %>% filter(sex == "F") %>%
   group_by(name) %>%
   summarise(N = n(), 
@@ -496,7 +494,7 @@ p <- ggplot(data = com_fem, aes(x = reorder(name, -median_age)), y = median_age)
 # Example 3: Temperature trend in Dayton, OH.
 We now describe code to generate the graphic we saw earlier about temperature trend in Dayton, OH.
 
-```{r cache = TRUE, echo = FALSE, out.width="80%"}
+```{r cache = FALSE, echo = FALSE, out.width="80%"}
 source("daytona.R")
 p <- daytona_plot()
 print(p)
@@ -515,7 +513,7 @@ knitr::kable(head(DAY))
 class: clear
 We then create a data frame that represents historical data during the period from $1995$ to $201$.
 
-```{r cache = TRUE}
+```{r cache = FALSE}
 NEWDAY <- DAY %>% 
   group_by(Year) %>%
   mutate(newDay = seq(1, length(Day))) %>% #newDay goes from 1 to 365/366 each year
@@ -534,7 +532,7 @@ Past <- NEWDAY %>%
 ---
 class: clear
 We next extract data for the year $2014$. We then create data frames representing the lowest and highest temp for each day of the year for the historical data.
-```{r cache = TRUE}
+```{r cache = FALSE}
 Present <- NEWDAY %>%
   filter(Temp != -99 & Year == 2014)  
 
@@ -557,7 +555,7 @@ PresentRecords <- Present %>%
 class: clear
 We first plot the historical data.
 
-```{r cache = TRUE, out.width = "70%"}
+```{r cache = FALSE, out.width = "70%"}
 p <- ggplot(Past, aes(newDay, Temp)) + 
   theme(plot.background = element_blank(), panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(), panel.border = element_blank(),
@@ -571,7 +569,7 @@ p
 class: clear
 We next plot the temperature for $2014$ along with the average temperature based on historical data.
 
-```{r cache = TRUE, out.width = "70%"}
+```{r cache = FALSE, out.width = "70%"}
 p <- p + geom_linerange(Past, mapping=aes(x=newDay, ymin=avg_lower, ymax=avg_upper), 
                         colour = "wheat4")
 p <- p +  geom_line(Present, mapping=aes(x=newDay, y=Temp))
@@ -580,7 +578,7 @@ p
 ---
 class: clear
 We then plot the dates (in $2014$) for which the temperature break either the lowest or the highest record.
-```{r cache = TRUE, out.width = "70%"}
+```{r cache = FALSE, out.width = "70%"}
 p <- p + geom_point(data=filter(PresentRecords, recordlow == "Y"), 
                     aes(x=newDay, y=Temp), colour="blue3") +
   geom_point(data=filter(PresentRecords, recordhigh == "Y"), 
@@ -590,7 +588,7 @@ p
 ---
 class: clear
 We then setup the axes and labels.
-```{r cache= TRUE, out.wdith = "70%"}
+```{r cache= FALSE, out.wdith = "70%"}
 p <- p +  geom_vline(xintercept = 0, colour = "wheat4", linetype=1, size=1)
 xseq <- c(31,59,90,120,151,181,212,243,273,304,334,365)
 for(x in xseq){

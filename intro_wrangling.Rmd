@@ -496,3 +496,54 @@ flights %>% pull(arr_delay) %>% quantile(na.rm = TRUE)
 ```
 
 The difference in the above output is due to the fact that $\mathrm{quantile}$ expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column $\mathrm{arr\_delay}$ ,we need to use $\mathrm{pull}$. 
+---
+#summarise and do
+Continuing the above theme. Suppose we want to find the quantiles for $\mathrm{arr\_delay}$ as grouped by popular destination.
+We first try the following code.
+```{r error = TRUE}
+pop_dest <- flights %>% 
+  group_by(dest) %>% 
+  filter(n() > 365,!is.na(arr_delay))
+pop_dest %>% summarise(delay_quantile = quantile(arr_delay))
+```
+
+The code doesn't work. Let us first simplify the problem and find the quantiles for 
+$\mathrm{arr\_delay}$ for the **ungrouped** data.
+```{r error = TRUE}
+pop_dest %>% ungroup %>% 
+  summarise(delay_quantile = quantile(arr_delay)
+```
+---
+class: clear
+We see the same error message. After some thought (googling?), we realize that the issue is because **dplyr** verbs takes as input a data frame and outputs another data frame. The output of $\mathrm{quantile}$ is not a data frame. Helper functions to the rescue.
+```{r error = TRUE}
+quantile(pop_dest$arr_delay,na.rm = TRUE)
+my_quantile <- function(df){
+  z <- quantile(df$arr_delay,na.rm = TRUE)
+  tibble(min = z[1], percentile25 = z[2], median = z[3], 
+         percentile75 = z[4], max = z[5])
+}
+pop_dest %>% ungroup() %>% summarise(my_quantile) ## Oops!
+pop_dest %>% ungroup() %>% my_quantile ### Yay!
+```
+---
+class: clear
+Let us now un-un-group the (grouped) data.
+```{r}
+pop_dest %>% my_quantile ### Oops!
+```
+Our helper function $\mathrm{my\_quantile}$ does not understand grouped vs ungrouped data.
+Luckily, since we "Think and do", after some thinking (googling?)
+```{r}
+pop_dest %>% 
+  do(my_quantile(.))
+```
+---
+class: clear
+The help page for $\mathrm{dplyr::do}$ reads
+
+```{r out.width = "70%", echo = FALSE}
+knitr::include_graphics("figures/dplyr_do.png")
+```
+
+See also section 5.12 of [Introduction to Data Science](https://rafalab.github.io/dsbook/tidyverse.html#do)

@@ -245,7 +245,7 @@ library(dplyr)
 
 climate_sub &lt;- climate %&gt;%
   filter(Source == "Berkeley" &amp; Year &gt;= 1900) %&gt;%
-  mutate(pos = Anomaly10y &gt;= 0)
+  mutate(pos = Anomaly10y &gt;= 0) %&gt;% as.tibble()
 
 climate_sub
 ```
