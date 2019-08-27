@@ -215,6 +215,33 @@ p2 <- p + geom_bar(aes(y = math), stat = "identity")
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
+#Polished graphics
+Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
+```{r}
+library(gcookbook) # Load gcookbook for the climate data set
+library(dplyr)
+
+climate_sub <- climate %>%
+  filter(Source == "Berkeley" & Year >= 1900) %>%
+  mutate(pos = Anomaly10y >= 0)
+
+climate_sub
+```
+---
+class: clear
+```{r out.width = "70%"}
+p <- ggplot(climate_sub, aes(x = Year, y = Anomaly10y, fill = pos))
+p + geom_col()
+```
+
+This figure looks fine but the color are "reversed" and the legend is redundant and distracting.
+---
+class: clear
+```{r out.width = "70%"}
+p + geom_col(colour = "black", size = 0.25) +
+  scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
+```
+---
 # Example 1: US Gun Murders in 2010
 We now present a few more sophisticated examples of **ggplot2** output. 
 ```{r echo = -5}
