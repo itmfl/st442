@@ -11,43 +11,13 @@ output:
       highlightStyle: zenburn
       highlightLines: true
       countIncrementalSlides: false
-    df_print: tibble
-
 --- 
 
 #dplyr
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
-
-require("magrittr")
-
-file_name <- rstudioapi::getSourceEditorContext()[["path"]]
-
-doc <- toc <- readLines(file_name)
-tocc <- character()
-for (i in 1:length(toc)) {
-  if(substr(toc[i][1], 1, 2) == "# ") {
-    toc[i] <- gsub("# ", "", toc[i], fixed = TRUE) %>% 
-                gsub("#", "", ., fixed = TRUE)
-    tocc <- append(tocc, toc[i])
-  }
-}
-
-tocc <- paste("- ", tocc[-1])
-
-row_outline <- which(doc == "# Outline")
-row_body <- which(doc == "---")
-row_body <- row_body[which(row_body > row_outline)][1]
-
-doc <- c(doc[1:row_outline], "\n", tocc, "\n", doc[(row_body):length(doc)])
-
-
-writeLines(doc, file_name)
 ```
-
-# Outline
----
 
 ```{r xaringan-themer, include = FALSE}
 #library(xaringanthemer)
@@ -225,7 +195,12 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 ```{r}
-group_by(flights, year,month,day) %>% 
+flights %>% group_by(year, month, day)
+```
+---
+class: clear
+```{r}
+flights %>% group_by(year, month, day) %>%
 summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 ---
@@ -247,11 +222,11 @@ class: clear
 library(ggplot2)
 ggplot(delays, aes(x = dist, y  = avg_delay)) + 
   geom_point(aes(size = count)) +
-  geom_smooth(se = FALSE) + ylab("average delay") + theme_bw()
+  geom_smooth(se = FALSE) + ylab("average delay") + theme_classic()
 ```
 ---
 class: clear
-There are a large number of useful summary functions. We provide a few more examples.
+There are a large number of useful summary functions. See Section 5.6.4 of [R4DS](https://r4ds.had.co.nz/transform.html#summarise-funs). We provide a few more examples.
 ```{r}
 ## average arrival delay
 not_canceled <- filter(flights, !is.na(dep_delay) & !is.na(arr_delay))
@@ -296,6 +271,11 @@ class: clear
 Finally, when you group by multiple variables, each call to $\mathrm{summary}$ peels off one level of the grouping, e.g.,
 ```{r}
 daily <- group_by(flights, dest, month, day)
+daily
+```
+---
+class:clear
+```{r}
 daily %>% summarize(flights = n()) %>% 
           summarize(flights = sum(flights)) %>%
           summarize(flights = sum(flights)) 
@@ -303,6 +283,7 @@ daily %>% summarize(flights = n()) %>%
 ---
 class: clear
 Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$; e.g.,
+
 ```{r echo = -1}
 options(tibble.print_max = 4, tibble.print_min = 4)
 group_by(not_canceled, dest, month) %>% 
@@ -331,7 +312,7 @@ daily %>% ungroup() %>% summarize(flights = n())
 ---
 #grouped_mutate and grouped_filter
 We can also do a number of very useful operations by combining $\mathrm{group\_by}$ with either $\mathrm{filter}$ or $\mathrm{filter}$. For example
-```{r}
+```{r message = TRUE}
 ## Find the worst flights with longest delay each day
 flights_sml <- select(flights, year:day, ends_with("delay"),
                       distance, air_time)
@@ -399,3 +380,119 @@ batting %>% group_by(teamID,playerID) %>%
   group_by(teamID,quartile) %>% 
   summarise(batting_avg = sum(total_hits)/sum(total_ab))
 ```
+---
+#Scoped variants of dplyr verbs
+The dplyr verbs we see before also have **scoped** variants with the suffixes $\_\mathrm{if}$, $\_\mathrm{at}$ and $\_\mathrm{all}$. 
+
++ $\_\mathrm{if}$ pick variables based on a *predicate* function, e.g., $\mathrm{is.numeric()}$.
++ $\_\mathrm{at}$ pick variables using the same syntax as $\mathrm{select}$
++ $\_\mathrm{all}$ operates on all variables.
+
+These variants are best illustrated using examples. For more details see the [cheat sheet](https://github.com/dcl-docs/cheat-sheets/blob/master/scoped_verbs.md).
+.pull-left[
+```{r}
+df <- tibble(
+  x = runif(100), 
+  y = runif(100), z = runif(100))
+df
+```
+]
+.pull-right[
+```{r}
+df %>% summarise_all(mean)
+```
+]
+---
+class:clear
+If we want to *name* the returned value, do
+```{r}
+df %>% summarise_all(list(mean = mean))
+```
+To get multiple summaries statistics for each column, we pass the functions as a list.
+```{r}
+df %>% summarise_all(list(mean = mean, sd = sd))
+```
+---
+class: clear
+We can also define a function and pass it as an argument to $\mathrm{summarise\_all}$. 
+```{r error = TRUE}
+df %>% summarise_all(max/min)
+temp.fn <- function(x){
+  max(x)/min(x)
+}
+df %>% summarise_all(temp.fn)
+```
+---
+class: clear
+A slightly more complicated syntax is required for passing **anonymous** functions.
+```{r}
+df %>% summarise_all(~max(.)/min(.)) ## Pass an inline anonymous function.
+df %>% summarise_all(list(ratio = ~max(.)/min(.), 
+                          large_values = ~sum(. > mean(.) + sd(.))))
+```
+
+The previous examples uses the $.$ operator, which serves as a placeholder for the variable/data of interest. See also the documentation for the [magrittr library](https://github.com/tidyverse/magrittr).
+
+---
+class: clear
+Examples of $\mathrm{summarize\_at}$; $\mathrm{summarize\_at}$ can use the helper functions of $\mathrm{select}$. 
+.pull-left[
+```{r}
+df
+df %>% summarise_at(vars(x,y), 
+        list(min = min, max = max))
+```
+]
+.pull-right[
+```{r}
+
+df %>% summarise_at(vars(-z), 
+         list(min = min, max = max))
+df %>% summarise_at(vars(contains("x")), 
+         median)
+```
+]
+---
+class: clear
+Some examples of $\mathrm{summarize\_if}$.
+```{r}
+starwars
+starwars %>% summarize_if(is.numeric, list(mean = mean, sd = sd), na.rm = TRUE)
+```
+---
+class: clear
+Finally, we present examples of $\mathrm{filter\_if}$, $\mathrm{filter\_at}$ and $\mathrm{filter\_all}$. These verbs are often used in conjunction with $\mathrm{any\_vars}$ or $\mathrm{all\_vars}$.
+```{r}
+## Find all observations with at least one missing value.
+flights %>% filter_all(any_vars(is.na(.))) 
+```
+---
+class: clear
+```{r}
+## Find all flights with little delay
+flights %>% filter_at(vars(contains("delay")), all_vars(. < 10))
+```
+---
+#dplyr::pull()
+Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
+.pull-left[
+```{r error = TRUE}
+flights %>% select(arr_delay)
+class(flights %>% select(arr_delay))
+```
+]
+.pull-right[
+```{r error = TRUE}
+flights %>% pull(arr_delay) %>% head
+class(flights %>% pull(arr_delay))
+```
+]
+---
+class: clear
+If we now extract quantiles from the above data frame/vector, we get
+```{r error = TRUE}
+flights %>% select(arr_delay) %>% quantile(na.rm = TRUE)
+flights %>% pull(arr_delay) %>% quantile(na.rm = TRUE)
+```
+
+The difference in the above output is due to the fact that $\mathrm{quantile}$ expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column $\mathrm{arr\_delay}$ ,we need to use $\mathrm{pull}$. 
