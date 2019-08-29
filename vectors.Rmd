@@ -1,0 +1,73 @@
+---
+title: "Introduction to Data Science"
+subtitle: "The vectors of R"
+author: "CSC/ST 442"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, metropolis, metropolis-fonts]
+    nature:
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+--- 
+
+#The many vectors of R
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+```{r xaringan-themer, include = FALSE}
+#library(xaringanthemer)
+# duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
+#   title_slide_background_color = "#FFFFFF",
+#   title_slide_text_color = "#006747",
+#   header_font_google = google_font("Josefin Sans"),
+#   title_slide_background_image = "ncstate.png",
+#   title_slide_background_size = "600px",
+#   title_slide_background_position = "bottom",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+```
+.pull-left[
+```{r out.width="125%", echo = FALSE, fig.cap = "Hierarchy of R's vector type (https://r4ds.had.co.nz/vectors.html)"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/1d1b4e1cf0dc5f6e80f621b0225354b0addb9578/6ee1c/diagrams/data-structures-overview.png")
+```
+]
+.pull-right[
++ Atomic vectors are homogeneous (all elements are the same type)
++ Lists (or recursive vectors) can be heterogeneous (elements can be of different type)
++ $\mathrm{NULL}$ represents vector of length $0$. 
+]
+---
+class: clear
+Every vector in **R** has two key properties.
+
+.pull-left[
++ type: determine via **typeof()**
+```{r}
+typeof(c("A","B","C"))
+typeof(1:10)
+library(nycflights13)
+typeof(flights)
+typeof(NULL)
+```
+]
+.pull-right[ 
++ length: determine via **length()**
+```{r}
+length(letters)
+length(1:10)
+length(flights)
+length(NULL)
+```
+]

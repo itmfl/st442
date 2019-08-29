@@ -1,0 +1,135 @@
+---
+title: "Nathan Hotdogs"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.width = 8, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+We will be reproducing the code in Section 12.4 of Benjamin Baumer, Daniel Kaplan and Nicholas Horton's book [MDSR](https://beanumber.github.io/mdsr2e/ch-vizIII.html#extended-example-hot-dog-eating). The original graphic we are trying to reproduce is from [here](https://flowingdata.com/2008/07/03/nathans-annual-hot-dog-eating-contest-kobayashi-vs-chestnut/hot-dogs/).
+
+```{r fig.retina = 3, out.width = "120%"}
+knitr::include_graphics("https://i0.wp.com/flowingdata.com/wp-content/uploads/2008/07/hot-dogs.jpg?w=897&ssl=1")
+```
+
+It was said that the figure was generated in *R* and then edited in Adobe Illustrator. The following code in Baumer et al. illustrate how far one can goes (without too much effort) in reproducing the figure using *R* itself.
+
+## Loading the data.
+
+First we load in the data; the data is given as a csv file.
+```{r}
+library(magrittr) ## To get the '%>%' operator.
+hd <- readr::read_csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv")
+names(hd) <- gsub(" ", "_", names(hd)) %>% ## Replace " " by "_" in column names
+  tolower() ## Convert column names to lower case
+hd
+```
+The *hd* data frame does not contain any observations before $1980$. We estimate the values for these observations from the original figure.
+```{r warning = FALSE}
+new_data <- data.frame(
+  year = c(1979, 1978, 1974, 1972, 1916), 
+  winner = c(NA, "Walter Paul", NA, NA, "James Mullen"),
+  dogs_eaten = c(19.5, 17, 10, 14, 13),
+  country = rep(NA, 5), new_record = c(1,1,0,0,0)
+)
+hd <- dplyr::bind_rows(hd, new_data)
+```
+
+## First plot
+```{r warning = FALSE, out.width = "60%"}
+library(ggplot2)
+p <- ggplot(data = hd, aes(x = year, y = dogs_eaten)) +
+  geom_col()
+p
+```
+The resulting plot is functional, but not terribly exciting. Time for some dressup.
+First color the observations by whether it is a new world record.
+```{r out.width = "60%"}
+p <- p + geom_col(aes(fill = factor(new_record))) +
+  geom_hline(yintercept = 0, color = "darkgray") + 
+  scale_fill_manual(name = NULL, values = c("0" = "#006f3c", "1" = "#81c450")) 
+p
+```
+
+## Adding the annotations text
+We first create a dataframe containing the locations for the annotation texts.
+```{r warning = FALSE, fig.width = 8}
+text <- dplyr::bind_rows(
+  # Frank Dellarosa
+  data.frame(x = 1941.5, y = 37, 
+    label = paste("Frank Dellarosa eats 21 and a half HDBs over 12\n",
+      "minutes, breaking the previous record of 19 and a half."), adj = 0),
+  # Joey Chestnut
+  data.frame(x = 1966.5, y = 69, 
+    label = paste("For the first time since 1999, an American\n",
+      "reclaims the title when Joey Chestnut\n",
+      "consumes 66 HDBs, a new world record."), adj = 0), 
+  # Kobayashi
+  data.frame(x = 1950.5, y = 55, 
+    label = paste("Through 2001-2005, Takeru Kobayashi wins by no less\n",
+      "than 12 HDBs. In 2006, he only wins by 1.75. After win-\n",
+      "ning 6 years in a row and setting the world record 4 times,\n",
+      "Kobayashi places second in 2007."), adj = 0),
+  # Walter Paul
+  data.frame(x = 1938, y = 26, label = "Walter Paul sets a new
+world record with 17 HDBs.", adj = 0),
+  # James Mullen
+  data.frame(x = 1917, y = 10, label = "James Mullen wins the inaugural
+contest, scarfing 13 HDBs. Length
+of contest unavailable.", adj = 0), 
+  data.frame(x = 1935, y = 72, label = "NEW WORLD RECORD"),
+  data.frame(x = 1914, y = 72, label = "Hot dogs and buns (HDBs)")
+)
+```
+We now add the annotation text, and remove the unnecessary legend/guide on the right.
+```{r out.width = "80%"}
+p <- p + 
+  geom_text(data = text, aes(x = x, y = y, label = label), hjust = "left", size = 3) + 
+  labs(caption = "Source: FlowingData     *Data between 1916 and 1972 were unavailable") +
+  guides(fill = FALSE)
+p
+```
+
+## Adding the connecting segments from text labels to the bars.
+We now create a data frame defining the gray line segments in the original figure.
+```{r out.width = "80%"}
+## Read ?geom_path
+segments <- dplyr::bind_rows(
+  data.frame(x = c(1979, 1991, 1991, NA), y = c(37, 37, 21, NA)),
+  data.frame(x = c(1995, 2007, 2007, NA), y = c(69, 69, 66, NA)), 
+  data.frame(x = c(1990, 2006, 2006, NA), y = c(58, 58, 53.75, NA)),
+  data.frame(x = c(2005, 2005, NA), y = c(58, 49, NA)),
+  data.frame(x = c(2004, 2004, NA), y = c(58, 53.5, NA)),
+  data.frame(x = c(2003, 2003, NA), y = c(58, 44.5, NA)),
+  data.frame(x = c(2002, 2002, NA), y = c(58, 50.5, NA)),
+  data.frame(x = c(2001, 2001, NA), y = c(58, 50, NA)),
+  data.frame(x = c(1955, 1978, 1978), y = c(26, 26, 17)))
+p <- p + geom_path(data = segments, aes(x = x, y = y), col = "darkgray")
+p
+```
+
+## Finishing up
+We are almost done. The only things left to do is to setup the 
+locations of the tickmarks, add the key (depicting when is a new record), 
+and remove the axes labels. Not bad for half a day of work ?
+
+```{r out.width = "120%", warning = FALSE}
+xlabs <- c(1916, 1972, 1980, 1990, 2007)
+ylabs <- seq(from = 0, to = 70, by = 10)
+ticks_y <- data.frame(x = 1912, y = ylabs)
+
+p <- p + 
+  scale_x_continuous(name = NULL, breaks = xlabs, minor_breaks = NULL, 
+                     limits = c(1912, 2011), expand = c(0, 1)) + 
+  scale_y_continuous(name = NULL, breaks = ylabs, labels = NULL, minor_breaks = NULL, 
+                     expand = c(0.01, 1)) + 
+  geom_text(data = ticks_y, aes(x = x, y = y + 2, label = y), size = 3) +
+  ggtitle("Winners from Nathan's hot dog eating contest") + 
+  geom_rect(xmin = 1933, ymin = 70.75, xmax = 1934.3, ymax = 73.25, 
+            fill = "#81c450", color = "white") + ## Key
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid.major.y = element_line(color = "gray", linetype = "dotted"),
+        plot.title = element_text(size = rel(2)),
+        axis.ticks.length = unit(0, "cm"))
+p
+```
