@@ -270,12 +270,20 @@ knitr::include_graphics("https://hugelolcdn.com/i/123968.gif")
 ```{r cache = TRUE, out.width = "140%", fig.asp = 0.5}
 p <- ggplot(data = head(SAT_2010,10), 
         aes(x = reorder(state, math), y = math)) +
-  xlab("") + geom_col() + 
-  theme(axis.text.x = 
-    element_text(angle = 90, hjust = 1))
+  xlab("") + geom_col()
 p + coord_polar()
 ```
 ]
+---
+#Bar plots vs dot plots ?
+Consider the following two plots. The plot on the right is known as a Cleveland dot plot after [William Cleveland](https://en.wikipedia.org/wiki/William_S._Cleveland). The dot plot is quite a bit less "noisy" compared to the bar plot.
+```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
+p <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
+  xlab("")
+p1 <- p + geom_col() + coord_flip() + theme_bw()
+p2 <- p + geom_point(size = 3) + coord_flip() + theme_bw()
+grid.arrange(p1,p2,ncol = 2)
+```
 ---
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
