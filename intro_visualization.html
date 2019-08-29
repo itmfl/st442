@@ -285,10 +285,10 @@ class: clear
 Now compare the following codes
 
 ```r
-p1 &lt;- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
-  xlab("") + geom_col() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p2 &lt;- p1 + coord_flip()
+p &lt;- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
+  xlab("") + geom_col() 
+p1 &lt;- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p2 &lt;- p + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
 
@@ -299,9 +299,8 @@ Now compare the following codes.
 
 ```r
 p &lt;- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
-  xlab("") + geom_col() + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p1 &lt;- p + scale_y_reverse()
+  xlab("") + geom_col() 
+p1 &lt;- p + scale_y_reverse() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 p2 &lt;- p + scale_y_reverse() + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```

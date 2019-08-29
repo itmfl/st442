@@ -238,10 +238,10 @@ class: clear
 
 Now compare the following codes
 ```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
-p1 <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
-  xlab("") + geom_col() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p2 <- p1 + coord_flip()
+p <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
+  xlab("") + geom_col() 
+p1 <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p2 <- p + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
@@ -249,9 +249,8 @@ class: clear
 Now compare the following codes.
 ```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
 p <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
-  xlab("") + geom_col() + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p1 <- p + scale_y_reverse()
+  xlab("") + geom_col() 
+p1 <- p + scale_y_reverse() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 p2 <- p + scale_y_reverse() + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
