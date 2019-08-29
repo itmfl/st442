@@ -11,6 +11,7 @@ output:
       highlightStyle: zenburn
       highlightLines: true
       countIncrementalSlides: false
+    df_print: tibble
    
 --- 
 ```{r setup, include=FALSE}
@@ -185,7 +186,7 @@ ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
 ---
 #Histograms and Bar Plots
 We now present examples of two of the most elementary and widely used plots.
-```{r cache = TRUE, fig.asp = 0.5, out.width="80%"}
+```{r cache = FALSE, fig.asp = 0.5, out.width="80%"}
 library(mdsr) ## from the book Modern Data Science with R
 data(SAT_2010)
 SAT_2010
@@ -278,7 +279,7 @@ p + coord_polar()
 ---
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
-```{r}
+```{r cache = TRUE}
 library(gcookbook) # Load gcookbook for the climate data set
 library(dplyr)
 
@@ -290,7 +291,7 @@ climate_sub
 ```
 ---
 class: clear
-```{r out.width = "70%"}
+```{r cache = TRUE, out.width = "70%"}
 p <- ggplot(climate_sub, aes(x = Year, y = Anomaly10y, fill = pos))
 p + geom_col()
 ```
@@ -298,19 +299,19 @@ p + geom_col()
 This figure looks fine but the color are "reversed" and the legend is redundant and distracting.
 ---
 class: clear
-```{r out.width = "70%"}
+```{r cache = TRUE, out.width = "70%"}
 p + geom_col(colour = "black", size = 0.25) +
   scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
 ```
 ---
 # Example 1: US Gun Murders in 2010
 We now present a few more sophisticated examples of **ggplot2** output. 
-```{r echo = -5}
+```{r echo = TRUE}
 ## The package dslabs accompanies the book 
 ## Introduction to Data Science @ https://rafalab.github.io/dsbook/
 library(dslabs)
 data(murders)
-knitr::kable(head(murders))
+murders
 ```
 ---
 class: clear
@@ -387,7 +388,7 @@ knitr::kable(head(BabyNamesDist))
 class: clear
 We aim to generate plots such as the one below. This plot describe the age distribution of boys born in the USA whose name is Joseph. The name Joseph reaches peak popularity during the $1950$'s and appears to be declining in popularity since the mid $1990$'s. 
 
-```{r fig.retina = 3, out.width = "80%", echo = FALSE}
+```{r cache = TRUE, fig.retina = 3, out.width = "80%", echo = FALSE}
 joseph <- filter(BabyNamesDist, name == "Joseph", sex == "M")
 p <- ggplot(data = joseph, aes(x = year))
 p <- p + geom_bar(stat = "identity", aes(y = count_thousands * alive_prob), 
@@ -412,7 +413,7 @@ p + ggtitle("Age Distribution of American boys named Joseph") +
 ---
 class: clear
 We first generate the blue bars and the black line in the previous plot.
-```{r out.width = "70%", eval = FALSE}
+```{r cache = TRUE, out.width = "70%", eval = FALSE}
 name <- "Joseph"
 joseph <- filter(BabyNamesDist, name == "Joseph", sex == "M")
 p <- ggplot(joseph, aes(x = year)) + 
@@ -423,7 +424,7 @@ p <- p + ylab("Number of people (thousands)") + xlab(NULL)
 ```
 
 We then compute the median age of people that are currently alive and are named Joseph. 
-```{r eval = FALSE}
+```{r cache = TRUE, eval = FALSE}
 median_yob <- joseph %>% 
   group_by(year) %>% 
   summarise(count = sum(est_alive_today)) %>% 
@@ -435,13 +436,17 @@ median_yob
 ---
 class: clear
 We then plot the vertical blue bar depicting the median age of people, currently alive, named Joseph. We annotate the plot by calling $\mathrm{geom\_text}$.
-```{r out.width="80%", eval = FALSE}
+```{r cache = TRUE, out.width="80%", eval = FALSE}
 p <- p + geom_bar(stat = "identity", 
                   aes(y = ifelse(year == median_yob, est_alive_today/1000, 0)),
                   colour = "white", fill = "#008fd5")
 p + ggtitle(paste("Age Distribution of American boys named ", name)) +
   geom_text(x = 1935, y = 30, label = "Number of Josephs\nborn each year") +
-  geom_text(x = 1915, y = 13, label = "Number of Josephs\nborn each year\nestimated to be alive\non 1/1/2014",color="#b2d7e9") + ylim(0,42) + 
+  geom_text(x = 1915, y = 13, 
+            label = paste("Number of Josephs","born each year",
+                          "estimated to be alive", "on 1/1/2014",
+                          sep =  "\n"), color="#b2d7e9") + 
+  ylim(0,42) + 
   geom_text(x = 2003, y = 40, label = "The median\nliving Joseph\nis 37 years old", 
             color = "darkgray") + 
   geom_curve(aes(x = 1995, xend = 1974, y =40, yend = 24), 
@@ -450,27 +455,27 @@ p + ggtitle(paste("Age Distribution of American boys named ", name)) +
 ---
 class: clear
 Our method for creating the plot object $p$ has a nice side effect in that we can easily update the plot data to get a new plot for a different name, e.g.,
-```{r out.width="80%"}
+```{r cache = TRUE, out.width="80%"}
 josephine <- filter(BabyNamesDist, name == "Josephine", sex == "F")
 p %+% josephine
 ```
 ---
 class: clear
 For even more compelling examples, consider
-```{r out.width = "80%"}
+```{r cache = TRUE, out.width = "80%"}
 p2 <- p + facet_wrap(~ sex)
 p2 %+% filter(BabyNamesDist, name == "Jessie")
 ```
 ---
 class: clear
-```{r fig.retina = 4}
+```{r cache = TRUE, fig.retina = 4}
 p3 <- p + facet_grid(name ~ sex)
 p3 %+% filter(BabyNamesDist, name %in% c("Jessie", "Marion", "Jackie"))
 ```
 ---
 class: clear
 We now go back to our original motivation, namely guessing the age of a person given her name. For the $25$ most popular names, we get the following graphic
-```{r echo = FALSE, cache = FALSE, out.width="60%", fig.asp = 1.2}
+```{r echo = FALSE, cache = TRUE, out.width="60%", fig.asp = 1.2}
 com_fem_names <- BabyNamesDist %>% filter(sex == "F") %>%
   group_by(name) %>%
   summarise(N = n(), 
@@ -554,8 +559,8 @@ p <- ggplot(data = com_fem, aes(x = reorder(name, -median_age)), y = median_age)
   coord_flip() ## coord_flip flips the $x$ and $y$ coordinate
 ```
 ---
-# Example 3: Temperature trend in Dayton, OH.
-We now describe code to generate the graphic we saw earlier about temperature trend in Dayton, OH.
+# Example 3: Temperatures in Dayton, OH.
+We now describe code to generate the graphic we saw earlier about temperature trend in Dayton, OH. The original code is from [Brad Boehmke](https://rpubs.com/bradleyboehmke/weather_graphic) and is an attempt to reproduce a well-known visualization from Eward Tufte's classic book [Visual display of quantitative information](https://www.edwardtufte.com/tufte/books_vdqi).
 
 ```{r cache = FALSE, echo = FALSE, out.width="80%"}
 source("daytona.R")
@@ -565,9 +570,9 @@ print(p)
 ---
 class: clear
 The data for this graphic is available as a white-space separated file. We first read the data and rename the columns
-```{r}
+```{r cache = TRUE}
 library(tidyverse)
-DAY <- read_table("http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt", col_names = FALSE)
+DAY <- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
 names(DAY) <- c("Month", "Day", "Year", "Temp")
 DAY <- select(DAY, "Year", "Month", "Day", "Temp")
 knitr::kable(head(DAY))
@@ -576,7 +581,7 @@ knitr::kable(head(DAY))
 class: clear
 We then create a data frame that represents historical data during the period from $1995$ to $2013$.
 
-```{r cache = FALSE}
+```{r cache = TRUE}
 NEWDAY <- DAY %>% 
   group_by(Year) %>%
   mutate(newDay = seq(1, length(Day))) %>% #newDay goes from 1 to 365/366 each year
@@ -595,7 +600,7 @@ Past <- NEWDAY %>%
 ---
 class: clear
 We next extract data for the year $2014$. We then create data frames representing the lowest and highest temp for each day of the year for the historical data.
-```{r cache = FALSE}
+```{r cache = TRUE}
 Present <- NEWDAY %>%
   filter(Temp != -99 & Year == 2014)  
 
@@ -618,7 +623,7 @@ PresentRecords <- Present %>%
 class: clear
 We first plot the historical data.
 
-```{r cache = FALSE, out.width = "70%"}
+```{r cache = TRUE, out.width = "70%"}
 p <- ggplot(Past, aes(newDay, Temp)) + 
   theme(plot.background = element_blank(), panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(), panel.border = element_blank(),
@@ -675,8 +680,47 @@ p <- p + coord_cartesian(ylim = c(-20,100)) +
 ```
 ---
 class: clear
-The previous code chunk yields the following output. The final output is the obtained by adding $\mathrm{geom\_text}$ commands to generate the annotations.
+The previous code chunk yields the following output. 
 
+```{r echo = FALSE}
+p
+```
+---
+class: clear
+The final output is obtained by adding $\mathrm{annotate}$ commands for the annotations, e.g.,
+```{r}
+p <- p +
+  ggtitle("Dayton's Weather in 2014") +
+  theme(plot.title=element_text(face="bold",hjust=.012,vjust=.8,
+                                colour="#3C3C3C",size=20)) +
+  annotate("text", x = 119, y = 98, label = "Temperature", size=4, fontface="bold")
+
+p <- p +
+  annotate("text", x = 126, y = 93,
+           label = "Data represents average daily temperatures. Accessible data dates back to", 
+           size=3, colour="gray30") +
+  annotate("text", x = 122, y = 89,
+           label = "January 1, 1995. Data for 2014 is only available through December 16.", 
+           size=3, colour="gray30") +
+  annotate("text", x = 124, y = 85,
+           label = "Average temperature for the year was 51.9° making 2014 the 9th coldest", 
+           size=3, colour="gray30") +
+  annotate("text", x = 128, y = 81, label = "year since 1995", size=3, colour="gray30")
+
+p <- p +
+  annotate("segment", x = 30, xend = 40, y = -5, yend = -10, colour = "blue3") +
+  annotate("text", x = 65, y = -10, 
+           label = "We had 35 days that were the", size=3, colour="blue3") +
+  annotate("text", x = 56, y = -14, 
+           label = "coldest since 1995", size=3, colour="blue3") +
+  annotate("segment", x = 302, xend = 307, y = 74, yend = 82, colour = "firebrick3") +
+  annotate("text", x = 333, y = 92, 
+           label = "We had 19 days that were the", size=3, colour="firebrick3") +
+  annotate("text", x = 324, y = 88, 
+           label = "hottest since 1995", size=3, colour="firebrick3")
+```
+---
+class: clear
 ```{r echo = FALSE}
 p
 ```

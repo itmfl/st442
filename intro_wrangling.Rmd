@@ -510,8 +510,8 @@ pop_dest %>% summarise(delay_quantile = quantile(arr_delay))
 The code doesn't work. Let us first simplify the problem and find the quantiles for 
 $\mathrm{arr\_delay}$ for the **ungrouped** data.
 ```{r error = TRUE}
-pop_dest %>% ungroup %>% 
-  summarise(delay_quantile = quantile(arr_delay)
+pop_dest %>% ungroup() %>% 
+  summarise(delay_quantile = quantile(arr_delay))
 ```
 ---
 class: clear
