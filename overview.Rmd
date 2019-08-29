@@ -6,7 +6,7 @@ date: "Fall 2019"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts]
+    css: [default, metropolis, metropolis-fonts,animate.css]
     nature:
       highlightStyle: zenburn
       highlightLines: true
@@ -56,7 +56,10 @@ library(tidyverse)
    >                     A. E. Houseman
 
 ---
+class: animated, slideInRight
+
 #What it is, data science ?
+
 
 > In God we trust, all others bring data
 >
@@ -122,7 +125,7 @@ knitr::include_graphics("figures/linkedin_shortage.png")
 knitr::include_graphics("figures/ncsu_dsi.png")
 ```
 ---
-# Word clouds, or crappy visualizations ?
+# Word clouds, or crappy visuals ?
 ```{r out.width = "70%", echo = FALSE, fig.cap = "http://www.kimberlycoffey.com/blog/2016/11/text-analysis"}
 knitr::include_graphics("https://bit.ly/2Mmu7lW")
 ```
