@@ -1,0 +1,457 @@
+---
+title: "Visualizing Data"
+subtitle: "Maps and other tidbits"
+author: "CSC/ST 442"
+date: "Fall 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, metropolis, metropolis-fonts]
+    nature:
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+    df_print: tibble
+   
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.width = 8, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+library(knitr)
+hook_output = knit_hooks$get('message')
+knit_hooks$set(message = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
+```{r xaringan-themer, include = FALSE}
+library(tidyverse)
+# duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
+#   title_slide_background_color = "#FFFFFF",
+#   title_slide_text_color = "#006747",
+#   header_font_google = google_font("Josefin Sans"),
+#   title_slide_background_image = "ncstate.png",
+#   title_slide_background_size = "600px",
+#   title_slide_background_position = "bottom",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+```
+
+#The madness of groupings
+**ggplot2** can subset ata into groups and give each group its own appearance and transformation. There are many cases where **ggplot2** created default groups, and this can lead to unexpected results. In particular, the **ggplot2** [reference](https://ggplot2.tidyverse.org/reference/aes_group_order.html) states
+
+> By default, the group is set to the interaction of all discrete variables in the
+> plot. This often partitions the data correctly, but when it does not, or when
+> no discrete variable is used in the plot, you will need to explicitly define the
+> grouping structure, by mapping group to a variable that has a different value
+> for each group.
+
+This implies  
+(see [the link](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/)).
+
++  When the $x$ and $y$ aesthetics are mapped to categorical variables then the rows with the same level form a group. 
+
++ If aesthetic mapping, such as color, shape, and fill, map to categorical variables, they subset the data into groups. Furthermore, the default grouping also apply to statistic transformation such as boxplot and smooth.
+
+---
+class: clear
+
+Consider the following examples of $x$ or $y$ aesthetics being mapped to categorical variables.
+
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, aes(x = x, y = y)) + 
+  geom_line()
+```
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the $x$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, aes(x = z, y = y)) + 
+  geom_line()
+```
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the $z$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, group = z)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+is formed
+by observations with the same level 
+for the $z$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = z, y = y, group = x)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+is formed
+by observations with the same level 
+for the $x$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, group = 1)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+all observations get set to the same group.
+]
+---
+class: clear
+The implicit grouping due to categorical variables being mapped to $x$ or $y$ can be quite confusing. For example,
+.pull-left[
+```{r echo = -1}
+BOD <- as_tibble(BOD)
+BOD
+```
+]
+
+.pull-right[
+```{r}
+ggplot(data = BOD, 
+       aes(x = Time, y = demand)) + 
+  geom_line()
+```
+]
+---
+class: clear
+.pull-left[
+```{r message = TRUE,out.width="70%"}
+BOD$Time <-  as.factor(BOD$Time)
+BOD
+```
+]
+.pull-right[
+```{r message = TRUE, linewidth = 45, out.width = "90%"}
+ggplot(data = BOD, 
+  aes(x = Time, y = demand)) + 
+  geom_line()
+```
+]
+---
+class: clear
+.pull-left[
+```{r message = TRUE, linewidth=45}
+ggplot(data = BOD, 
+  aes(x = Time, y = demand,group=1)) + 
+  geom_line()
+```
+]
+.pull-right[
+```{r message = TRUE,linewidth=45}
+ggplot(data = BOD, 
+  aes(x = Time, y = demand), group = 1) + 
+  geom_line()
+```
+]
+---
+# More on groupings: interactions
+
+```{r}
+mpg
+```
+
+We recall our previous discussion of grouping
+
+> If aesthetic mapping, such as color, shape, and fill, map to categorical variables, 
+> they subset the data into groups.
+
+> By default, the group is set to the interaction of all discrete variables in the
+> plot.
+
+---
+class: clear
+```{r out.width="60%"}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+g1 <- ggplot(mpg, aes(drv, hwy)) + geom_jitter() + stat_boxplot(fill = NA) +
+    labs(subtitle = "stat_boxplot runs on the default groups set by drv")
+
+g2 <- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(fill = NA) +
+    labs(subtitle = "aes(color) further divides data into more groups")
+
+grid.arrange(g1, g2, nrow = 1)
+```
+---
+class: clear
+To get one box plot for every $\mathrm{drv}$ category, we explicit specify $\mathrm{group} = \mathrm{drv}$. 
+```{r out.width = "80%"}
+g3 <- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(aes(group = drv)) +
+    labs(subtitle = "group explicitly set for boxplot")
+g3
+```
+---
+# More on groupings: collective geoms
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + geom_line()
+```
+Here the geom_point and the geom_line are each 
+divided into four groups due to interaction between the implicit grouping
+due to $x$ and the explicit
+grouping due to $\mathrm{color}$ being set to $z$. 
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = z))
+```
+Here the *geom_point* and the *geom_line*
+are both divided into two groups. 
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+Here the *geom_point* has two groups while the *geom_line* has one group.
+However, the *geom_line* now consists of two segments with different colors.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1,color="black")) 
+```
+Here the *geom_point* has two groups while the *geom_line* has one group and only
+one segment.
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different *geom* objects.
+
+.pull-left[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + geom_line(aes(group = z))
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = z),
+               fill="gray80")
+```
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different *geom* objects.
+.pull-left[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+]
+.pull-right[
+```{r}
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = 1),
+               fill="gray80")
+```
+]
+---
+# Ok. Time to move on
+```{r echo = FALSE}
+library(maps)
+library(mosaic)
+library(socviz)
+data(election)
+us_states <- map_data("state")
+election$region <- tolower(election$state)
+us_states_elec <- left_join(us_states, election)
+p <- ggplot(data = subset(us_states_elec, region %nin% "district of columbia"),
+       aes(x = long, y = lat, group = group, fill = d_points))
+p + geom_polygon(color = "gray90", size = 0.1) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  scale_fill_gradient2(low = "red", mid = scales::muted("purple"), high = "blue") + 
+  labs(title = "Election Results 2016", subtitle = "Winning margins", fill = NULL) + 
+  theme_map()
+```
+
+```
