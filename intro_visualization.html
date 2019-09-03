@@ -489,6 +489,12 @@ p
 # Example 2: Historical baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly `\(1.6\)` million names during the period from `\(1900\)` to `\(2010\)`. A snippet of the data is as follows.
 
+
+```r
+library(mdsr); library(babynames)
+BabyNamesDist &lt;- make_babynames_dist()
+```
+
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
@@ -598,9 +604,13 @@ median_yob &lt;- joseph %&gt;%
   group_by(year) %&gt;% 
   summarise(count = sum(est_alive_today)) %&gt;% 
   mutate(prop = cumsum(count)/sum(count)) %&gt;%
-  filter(cumany(prop &gt;= 0.5)) %&gt;% ## a binary earch is more efficient
-  select(year) %&gt;% pull() %&gt;% first()
+  filter(prop &gt;= 0.5) %&gt;% ## a binary search is more efficient
+  arrange(year) %&gt;% select(year) %&gt;% pull() %&gt;% first()
 median_yob
+```
+
+```
+## [1] 1975
 ```
 ---
 class: clear
@@ -866,7 +876,7 @@ knitr::kable(head(DAY))
 &lt;/table&gt;
 ---
 class: clear
-We then create a data frame that represents historical data during the period from `\(1995\)` to `\(2013\)`.
+We then create a data frame of the historical data from `\(1995\)` to `\(2013\)`.
 
 
 ```r
@@ -882,8 +892,43 @@ Past &lt;- NEWDAY %&gt;%
          avg = mean(Temp),  # calculate mean value for each day 
          se = sd(Temp)/sqrt(length(Temp)), ## standard error
          avg_upper = avg+(2.101*se), ## upper and lower 99% "confidence" interval
-         avg_lower = avg-(2.101*se)) %&gt;%  
-  ungroup()
+         avg_lower = avg-(2.101*se)) %&gt;%  ungroup()
+```
+---
+class: clear
+
+```r
+Past
+```
+
+```
+## # A tibble: 8,608 x 11
+##    Year Month   Day  Temp newDay upper lower   avg    se avg_upper
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+## 1  1995     1     1  39        1  50.8  -0.3  31.2  2.48      36.4
+## 2  1995     1     2  19.6      2  54.1  -3.6  30.3  2.96      36.5
+## 3  1995     1     3  20.6      3  56.8   8.8  31.2  3.24      38.0
+## 4  1995     1     4  11.3      4  59.2   7.1  31.2  2.89      37.3
+## 5  1995     1     5   6.8      5  56.5   0    27.9  2.95      34.1
+## 6  1995     1     6  23        6  56.3   2.4  28.4  2.66      34.0
+## # … with 8,602 more rows, and 1 more variable: avg_lower &lt;dbl&gt;
+```
+
+```r
+filter(Past, newDay == 1)
+```
+
+```
+## # A tibble: 24 x 11
+##    Year Month   Day  Temp newDay upper lower   avg    se avg_upper
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+## 1  1995     1     1  39        1  50.8  -0.3  31.2  2.48      36.4
+## 2  1996     1     1  34.5      1  50.8  -0.3  31.2  2.48      36.4
+## 3  1997     1     1  38.9      1  50.8  -0.3  31.2  2.48      36.4
+## 4  1998     1     1  20.3      1  50.8  -0.3  31.2  2.48      36.4
+## 5  1999     1     1  10        1  50.8  -0.3  31.2  2.48      36.4
+## 6  2000     1     1  39.3      1  50.8  -0.3  31.2  2.48      36.4
+## # … with 18 more rows, and 1 more variable: avg_lower &lt;dbl&gt;
 ```
 ---
 class: clear
@@ -895,7 +940,7 @@ Present &lt;- NEWDAY %&gt;%
 
 # create dataframe that represents the lowest and highest 
 # temp for each day for the historical data from 1995 to 2013.
-PastRecords &lt;- Past %&gt;%
+PastRecords &lt;- Past %&gt;% 
   group_by(newDay) %&gt;%
   summarise(Pastlow = min(Temp),
             Pasthigh = max(Temp)) 
@@ -924,7 +969,7 @@ p &lt;- ggplot(Past, aes(newDay, Temp)) +
 p
 ```
 
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-52-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-53-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We next plot the temperature for `\(2014\)` along with the average temperature based on historical data.
@@ -937,7 +982,7 @@ p &lt;- p +  geom_line(Present, mapping=aes(x=newDay, y=Temp))
 p
 ```
 
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-53-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We then plot the dates (in `\(2014\)`) for which the temperature break either the lowest or the highest record.
@@ -950,7 +995,7 @@ p &lt;- p + geom_point(data=filter(PresentRecords, recordlow == "Y"),
 p
 ```
 
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-55-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We then setup the axes and labels.
@@ -981,7 +1026,7 @@ p &lt;- p + coord_cartesian(ylim = c(-20,100)) +
 class: clear
 The previous code chunk yields the following output. 
 
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-56-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-57-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 The final output is obtained by adding `\(\mathrm{annotate}\)` commands for the annotations, e.g.,
@@ -1019,13 +1064,13 @@ p &lt;- p +
 ```
 ---
 class: clear
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-58-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-59-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 # Hotdogs ?
 &lt;img src="figures/nathan_hotdog.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 # R Hotdogs ?
-&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-60-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_visualization_files/figure-html/unnamed-chunk-61-1.png" width="120%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
