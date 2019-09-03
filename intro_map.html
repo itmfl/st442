@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Visualizing Data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="CSC/ST 442" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Visualizing Data
+## Maps and other tidbits
+### CSC/ST 442
+### Fall 2019
+
+---
+
+
+
+
+
+#The madness of groupings
+**ggplot2** can subset ata into groups and give each group its own appearance and transformation. There are many cases where **ggplot2** created default groups, and this can lead to unexpected results. In particular, the **ggplot2** [reference](https://ggplot2.tidyverse.org/reference/aes_group_order.html) states
+
+&gt; By default, the group is set to the interaction of all discrete variables in the
+&gt; plot. This often partitions the data correctly, but when it does not, or when
+&gt; no discrete variable is used in the plot, you will need to explicitly define the
+&gt; grouping structure, by mapping group to a variable that has a different value
+&gt; for each group.
+
+This implies  
+(see [the link](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/)).
+
++  When the `\(x\)` and `\(y\)` aesthetics are mapped to categorical variables then the rows with the same level form a group. 
+
++ If aesthetic mapping, such as color, shape, and fill, map to categorical variables, they subset the data into groups. Furthermore, the default grouping also apply to statistic transformation such as boxplot and smooth.
+
+---
+class: clear
+
+Consider the following examples of `\(x\)` or `\(y\)` aesthetics being mapped to categorical variables.
+
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, aes(x = x, y = y)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-2-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the `\(x\)` variable of `\(\mathrm{df}\)`.
+]
+---
+class: clear
+
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, aes(x = z, y = y)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-4-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the `\(z\)` variable of `\(\mathrm{df}\)`.
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, group = z)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+The grouping here is **explicit** and 
+is formed
+by observations with the same level 
+for the `\(z\)` variable of `\(\mathrm{df}\)`.
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = z, y = y, group = x)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-8-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+The grouping here is **explicit** and 
+is formed
+by observations with the same level 
+for the `\(x\)` variable of `\(\mathrm{df}\)`.
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, group = 1)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-10-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+The grouping here is **explicit** and 
+all observations get set to the same group.
+]
+---
+class: clear
+The implicit grouping due to categorical variables being mapped to `\(x\)` or `\(y\)` can be quite confusing. For example,
+.pull-left[
+
+```r
+BOD
+```
+
+```
+## # A tibble: 6 x 2
+##    Time demand
+##   &lt;dbl&gt;  &lt;dbl&gt;
+## 1     1    8.3
+## 2     2   10.3
+## 3     3   19  
+## 4     4   16  
+## 5     5   15.6
+## 6     7   19.8
+```
+]
+
+.pull-right[
+
+```r
+ggplot(data = BOD, 
+       aes(x = Time, y = demand)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-12-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: clear
+.pull-left[
+
+```r
+BOD$Time &lt;-  as.factor(BOD$Time)
+BOD
+```
+
+```
+## # A tibble: 6 x 2
+##   Time  demand
+##   &lt;fct&gt;  &lt;dbl&gt;
+## 1 1        8.3
+## 2 2       10.3
+## 3 3       19  
+## 4 4       16  
+## 5 5       15.6
+## 6 7       19.8
+```
+]
+.pull-right[
+
+```r
+ggplot(data = BOD, 
+  aes(x = Time, y = demand)) + 
+  geom_line()
+```
+
+```
+## geom_path: Each group consists of only
+one observation. Do you need to
+## adjust the group aesthetic?
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-14-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: clear
+.pull-left[
+
+```r
+ggplot(data = BOD, 
+  aes(x = Time, y = demand,group=1)) + 
+  geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-15-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+```r
+ggplot(data = BOD, 
+  aes(x = Time, y = demand), group = 1) + 
+  geom_line()
+```
+
+```
+## geom_path: Each group consists of only
+one observation. Do you need to
+## adjust the group aesthetic?
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-16-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+---
+# More on groupings: interactions
+
+
+```r
+mpg
+```
+
+```
+## # A tibble: 234 x 11
+##   manufacturer model displ  year   cyl trans  drv     cty   hwy fl    class
+##   &lt;chr&gt;        &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;  &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 audi         a4      1.8  1999     4 auto(… f        18    29 p     comp…
+## 2 audi         a4      1.8  1999     4 manua… f        21    29 p     comp…
+## 3 audi         a4      2    2008     4 manua… f        20    31 p     comp…
+## 4 audi         a4      2    2008     4 auto(… f        21    30 p     comp…
+## 5 audi         a4      2.8  1999     6 auto(… f        16    26 p     comp…
+## 6 audi         a4      2.8  1999     6 manua… f        18    26 p     comp…
+## # … with 228 more rows
+```
+
+We recall our previous discussion of grouping
+
+&gt; If aesthetic mapping, such as color, shape, and fill, map to categorical variables, 
+&gt; they subset the data into groups.
+
+&gt; By default, the group is set to the interaction of all discrete variables in the
+&gt; plot.
+
+---
+class: clear
+
+```r
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+g1 &lt;- ggplot(mpg, aes(drv, hwy)) + geom_jitter() + stat_boxplot(fill = NA) +
+    labs(subtitle = "stat_boxplot runs on the default groups set by drv")
+
+g2 &lt;- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(fill = NA) +
+    labs(subtitle = "aes(color) further divides data into more groups")
+
+grid.arrange(g1, g2, nrow = 1)
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-18-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+To get one box plot for every `\(\mathrm{drv}\)` category, we explicit specify `\(\mathrm{group} = \mathrm{drv}\)`. 
+
+```r
+g3 &lt;- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(aes(group = drv)) +
+    labs(subtitle = "group explicitly set for boxplot")
+g3
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+---
+# More on groupings: collective geoms
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + geom_line()
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-21-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+Here the geom_point and the geom_line are each 
+divided into four groups due to interaction between the implicit grouping
+due to `\(x\)` and the explicit
+grouping due to `\(\mathrm{color}\)` being set to `\(z\)`. 
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = z))
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-23-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+Here the *geom_point* and the *geom_line*
+are both divided into two groups. 
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-25-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+Here the *geom_point* has two groups while the *geom_line* has one group.
+However, the *geom_line* now consists of two segments with different colors.
+]
+---
+class: clear
+.pull-left[
+
+```r
+df &lt;- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A")
+)
+df
+```
+
+```
+## # A tibble: 8 x 3
+##   x         y z    
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 a         1 A    
+## 2 a         2 A    
+## 3 a         3 B    
+## 4 a         4 B    
+## 5 b         4 B    
+## 6 b         3 B    
+## 7 b         2 A    
+## 8 b         1 A
+```
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1,color="black")) 
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-27-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+Here the *geom_point* has two groups while the *geom_line* has one group and only
+one segment.
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different *geom* objects.
+
+.pull-left[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + geom_line(aes(group = z))
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-28-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = z),
+               fill="gray80")
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-29-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different *geom* objects.
+.pull-left[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-30-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+```r
+library(ggplot2)
+ggplot(data = df, 
+       aes(x = x, y = y, color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = 1),
+               fill="gray80")
+```
+
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-31-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+---
+# Ok. Time to move on
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-32-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
