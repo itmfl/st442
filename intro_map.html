@@ -32,8 +32,7 @@ class: center, middle, inverse, title-slide
 &gt; grouping structure, by mapping group to a variable that has a different value
 &gt; for each group.
 
-This implies  
-(see [the link](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/)).
+This [implies](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/).
 
 +  When the `\(x\)` and `\(y\)` aesthetics are mapped to categorical variables then the rows with the same level form a group. 
 
@@ -342,23 +341,6 @@ ggplot(data = BOD,
 ```
 
 &lt;img src="intro_map_files/figure-html/unnamed-chunk-15-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-.pull-right[
-
-```r
-ggplot(data = BOD, 
-  aes(x = Time, y = demand), group = 1) + 
-  geom_line()
-```
-
-```
-## geom_path: Each group consists of only
-one observation. Do you need to
-## adjust the group aesthetic?
-```
-
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-16-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
 ---
 # More on groupings: interactions
 
@@ -406,7 +388,7 @@ g2 &lt;- ggplot(mpg, aes(drv, hwy, color = factor(year))) +
 grid.arrange(g1, g2, nrow = 1)
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-18-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-17-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 To get one box plot for every `\(\mathrm{drv}\)` category, we explicit specify `\(\mathrm{group} = \mathrm{drv}\)`. 
@@ -418,7 +400,7 @@ g3 &lt;- ggplot(mpg, aes(drv, hwy, color = factor(year))) +
 g3
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 # More on groupings: collective geoms
 .pull-left[
@@ -457,7 +439,7 @@ ggplot(data = df,
   geom_point(size=3) + geom_line()
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-21-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-20-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 Here the geom_point and the geom_line are each 
 divided into four groups due to interaction between the implicit grouping
 due to `\(x\)` and the explicit
@@ -502,7 +484,7 @@ ggplot(data = df,
   geom_line(aes(group = z))
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-23-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-22-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 Here the *geom_point* and the *geom_line*
 are both divided into two groups. 
 ]
@@ -545,7 +527,7 @@ ggplot(data = df,
   geom_line(aes(group = 1))
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-25-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-24-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 Here the *geom_point* has two groups while the *geom_line* has one group.
 However, the *geom_line* now consists of two segments with different colors.
 ]
@@ -588,7 +570,7 @@ ggplot(data = df,
   geom_line(aes(group = 1,color="black")) 
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-27-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-26-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 Here the *geom_point* has two groups while the *geom_line* has one group and only
 one segment.
 ]
@@ -606,7 +588,7 @@ ggplot(data = df,
   geom_point(size=3) + geom_line(aes(group = z))
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-28-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-27-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -619,7 +601,7 @@ ggplot(data = df,
                fill="gray80")
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-29-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-28-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -635,7 +617,7 @@ ggplot(data = df,
   geom_line(aes(group = 1))
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-30-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-29-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -648,12 +630,23 @@ ggplot(data = df,
                fill="gray80")
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-31-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-30-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 # Ok. Time to move on
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-32-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-31-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 
+
+
+flight_correlation &lt;- function(df){
+ df &lt;- df %&gt;% arrange(month,day,dep_time) 
+ k &lt;- cor(df$dep_delay, lag(df$dep_delay), use="complete.obs")
+ return(data.frame(cor = k))
+}
+
+flights %&gt;%group_by(origin)%&gt;% do(flight_correlation(.))
+
+What is causing this and how can I fix this issue? 
 ```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

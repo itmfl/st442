@@ -60,8 +60,7 @@ library(tidyverse)
 > grouping structure, by mapping group to a variable that has a different value
 > for each group.
 
-This implies  
-(see [the link](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/)).
+This [implies](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/).
 
 +  When the $x$ and $y$ aesthetics are mapped to categorical variables then the rows with the same level form a group. 
 
@@ -240,14 +239,6 @@ ggplot(data = BOD,
   aes(x = Time, y = demand,group=1)) + 
   geom_line()
 ```
-]
-.pull-right[
-```{r message = TRUE,linewidth=45}
-ggplot(data = BOD, 
-  aes(x = Time, y = demand), group = 1) + 
-  geom_line()
-```
-]
 ---
 # More on groupings: interactions
 
@@ -454,4 +445,15 @@ p + geom_polygon(color = "gray90", size = 0.1) +
   theme_map()
 ```
 
+
+
+flight_correlation <- function(df){
+ df <- df %>% arrange(month,day,dep_time) 
+ k <- cor(df$dep_delay, lag(df$dep_delay), use="complete.obs")
+ return(data.frame(cor = k))
+}
+
+flights %>%group_by(origin)%>% do(flight_correlation(.))
+
+What is causing this and how can I fix this issue? 
 ```
