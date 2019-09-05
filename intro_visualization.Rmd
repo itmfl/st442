@@ -385,9 +385,8 @@ p
 # Example 2: Historical baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly $1.6$ million names during the period from $1900$ to $2010$. A snippet of the data is as follows.
 
-```{r cache = FALSE, echo = FALSE}
-library(mdsr)
-library(babynames)
+```{r cache = FALSE, echo = -3}
+library(mdsr); library(babynames)
 BabyNamesDist <- make_babynames_dist()
 knitr::kable(head(BabyNamesDist))
 ```
@@ -401,7 +400,7 @@ p <- ggplot(data = joseph, aes(x = year))
 p <- p + geom_bar(stat = "identity", aes(y = count_thousands * alive_prob), 
                   fill = "#b2d7e8", color = "white")
 p <- p + geom_line(aes(y = count_thousands), size = 2)
-p <- p + ylab("Number of people (thousands)") + xlab(NULL) + theme_fivethirtyeight()
+p <- p + ylab("Number of people (thousands)") + xlab(NULL)
 median_yob <- joseph %>% 
   group_by(year) %>% 
   summarise(count = sum(est_alive_today)) %>% 
@@ -431,14 +430,16 @@ p <- p + ylab("Number of people (thousands)") + xlab(NULL)
 ```
 
 We then compute the median age of people that are currently alive and are named Joseph. 
-```{r cache = TRUE, eval = FALSE}
+```{r median_yob, cache = TRUE, eval = FALSE}
 median_yob <- joseph %>% 
   group_by(year) %>% 
   summarise(count = sum(est_alive_today)) %>% 
   mutate(prop = cumsum(count)/sum(count)) %>%
-  filter(cumany(prop >= 0.5)) %>% ## a binary earch is more efficient
-  select(year) %>% pull() %>% first()
+  filter(prop >= 0.5) %>% ## a binary search is more efficient
+  arrange(year) %>% select(year) %>% pull() %>% first()
 median_yob
+```
+```{r echo = FALSE, ref.label='median_yob'}
 ```
 ---
 class: clear
@@ -586,7 +587,7 @@ knitr::kable(head(DAY))
 ```
 ---
 class: clear
-We then create a data frame that represents historical data during the period from $1995$ to $2013$.
+We then create a data frame of the historical data from $1995$ to $2013$.
 
 ```{r cache = TRUE}
 NEWDAY <- DAY %>% 
@@ -601,8 +602,13 @@ Past <- NEWDAY %>%
          avg = mean(Temp),  # calculate mean value for each day 
          se = sd(Temp)/sqrt(length(Temp)), ## standard error
          avg_upper = avg+(2.101*se), ## upper and lower 99% "confidence" interval
-         avg_lower = avg-(2.101*se)) %>%  
-  ungroup()
+         avg_lower = avg-(2.101*se)) %>%  ungroup()
+```
+---
+class: clear
+```{r cache = TRUE}
+Past
+filter(Past, newDay == 1)
 ```
 ---
 class: clear
@@ -613,7 +619,7 @@ Present <- NEWDAY %>%
 
 # create dataframe that represents the lowest and highest 
 # temp for each day for the historical data from 1995 to 2013.
-PastRecords <- Past %>%
+PastRecords <- Past %>% 
   group_by(newDay) %>%
   summarise(Pastlow = min(Temp),
             Pasthigh = max(Temp)) 
