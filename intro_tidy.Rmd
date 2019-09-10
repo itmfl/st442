@@ -167,13 +167,15 @@ table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>%
 # Missing data, gather, and spread.
 In our previous examples we see that *gather* and *spread* behave like inverse operations of one another. This is not always the case.
 Consider the following contrived dataset.
-```{r echo = 2}
+```{r echo = 3}
+options(tibble.print_min=8)
 stocks <- tibble(
     year = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
     quarter = c(1,2,3,4,2,3,4),
     return = c(1.88, 0.59, 0.35, NA, 0.92, 0.17, 2.66)
 )
 stocks
+
 ```
 
 How many observations are missing in the above data ? 
@@ -206,7 +208,8 @@ There are also occasions in which a missing value is not really missing; instead
 use **fill()** to replace missing values with the most recent non-missing value, e.g.,
 
 .pull-left[
-```{r}
+```{r echo=-1}
+options(tibble.print_min=6)
 treatment <- tribble(
   ~person, ~treatment, ~response,
   "Luigi", 0, 7,
@@ -351,6 +354,12 @@ who.tidy <- who %>%
 As another example of the use of **gather()** and **spread()**, 
 suppose we want to summarize the number of people with a given name based on gender, e.g.,
 
+```{r}
+library(babynames)
+babynames
+```
+---
+class: clear
 .pull-left[
 ```{r}
 library(babynames)
@@ -409,7 +418,8 @@ We can now determine the most gender-neutral names for the whole babynames datas
 babynames_wide <- babynames %>%
   group_by(sex, name) %>%
   summarise(total = sum(n)) %>%
-  spread(key = sex, value = total, fill = 0) ## set missing values in wide table to 0
+  ## set missing values in wide table to 0
+  spread(key = sex, value = total, fill = 0)
 babynames_wide %>% filter(M > 50000, F > 50000) %>%
   mutate(ratio = pmin(F/M, M/F)) %>% ## vectorized version of min
   arrange(desc(ratio)) %>%
@@ -436,7 +446,10 @@ class: clear
 To go from table $4a$ and $4b$ to Table $1$, we need to reshape them into "long" tables and then combine columns. More specifically
 .pull-left[
 ```{r eval = FALSE}
-table4a.long <- table4a %>% gather(...)
+table4a.long <- table4a %>% 
+  gather(key = "year", 
+         value = "cases", 
+         `1999`, `2000`)
 ```
 ```{r echo = FALSE}
 knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
@@ -445,7 +458,10 @@ knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %
 ]
 .pull-right[
 ```{r eval = FALSE}
-table4b.long <- table4b %>% gather(...)
+table4b.long <- table4b %>%
+  gather(key = "year", 
+         value = "population", 
+         `1999`, `2000`) 
 ```
 ```{r echo = FALSE}
 knitr::kable(table4b %>% gather(key = "year", value = "population", `1999`, `2000`) %>% 
@@ -455,10 +471,12 @@ knitr::kable(table4b %>% gather(key = "year", value = "population", `1999`, `200
 ---
 class: clear
 We then *join* the columns of the *reshaped* table $4b$ to that of the reshaped $4a$. The join operation we are doing is termed a **mutating join** as we are mutating, i.e., adding a new column to table $4a$. 
-```{r echo = 3, eval = -3, message = TRUE}
+```{r eval=FALSE}
+table4a.long %>% left_join(table4b.long)
+```
+```{r echo = FALSE, message = TRUE}
 table4a.long <- table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
 table4b.long <- table4b %>% gather(key = "year", value = "population", `1999`, `2000`)
-table4a.long %>% left_join(table4b.long)
 table.joined <- table4a.long %>% left_join(table4b.long)
 knitr::kable(table.joined %>% arrange(country,year)) %>%
   kable_styling(bootstrap_options = "striped", font_size = 14)
@@ -473,6 +491,31 @@ The help page for **mutating join** operations include
 
 ```{r echo = FALSE, out.width="80%"}
 knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/aeab386461820b029b7e7606ccff1286f623bae1/ef0d4/diagrams/join-venn.png")
+```
+---
+#Visualizing joins
+.pull-left[
+```{r echo = FALSE, out.width="50%", fig.cap = "Join setup; figure from Section 13.4 of R4DS"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/108c0749d084c03103f8e1e8276c20e06357b124/5f113/diagrams/join-setup.png")
+```
+]
+.pull-right[
+```{r echo = FALSE, fig.cap="Inner join"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/3abea0b730526c3f053a3838953c35a0ccbe8980/7f29b/diagrams/join-inner.png")
+```
+]
+---
+class: clear
+```{r echo = FALSE, out.width="50%", fig.cap = "Outer joins"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/9c12ca9e12ed26a7c5d2aa08e36d2ac4fb593f1e/79980/diagrams/join-outer.png")
+```
+---
+class: clear
+```{r echo = FALSE, out.width="50%", fig.cap = "Duplicate keys (one to many)"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/6faac3e996263827cb57fc5803df6192541a9a4b/c7d74/diagrams/join-one-to-many.png")
+```
+```{r echo = FALSE, out.width="50%", fig.cap = "Duplicate keys (many to many)"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/d37530bbf7749f48c02684013ae72b2996b07e25/37510/diagrams/join-many-to-many.png")
 ```
 
 ---
@@ -548,6 +591,8 @@ For example, suppose we are interested in all flights that go to the top ten mos
 top_dest <- flights %>% group_by(dest) %>% summarise(count = n()) %>% 
   arrange(desc(count)) %>% head(10)
 ```
+---
+class: clear
 .pull-left[
 ```{r}
 flights %>% 

@@ -912,11 +912,10 @@ library(ggforce)
 ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) + 
     coord_map(projection = "albers", lat0 = 35, lat1 = 36) + 
   geom_ellipse(aes(x0 = -76, y0 = 35, a = 2, b = 3, angle = -pi / 3, m1 = 3), 
-               size = 3, col = "red") +
- ggtitle('Dorian is coming!!! OMGWTFBBQ11')
+               size = 3, col = "red") + ...
 ```
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-50-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-49-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 # Let us get back to class.
 
@@ -925,7 +924,7 @@ p &lt;- ggplot(data = us_states, mapping = aes(x = long, y = lat, group = group)
 p + geom_polygon(fill = "white", color = "black")
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-50-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-51-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 Maps are by default plotted using the Mercartor projection which does not look too good if you are 
 drawing only a particular region of the world.
 ---
@@ -941,7 +940,7 @@ p &lt;- p + geom_polygon(color = "gray90", size = 0.1) +
 p
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-51-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-52-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 
@@ -986,7 +985,7 @@ p &lt;- p + scale_fill_manual(values = party_colors) +
 p &lt;- p + theme_map(); p
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-53-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Let us now try some other variants of this plot
@@ -1004,7 +1003,7 @@ coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
 p1
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-55-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-56-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -1015,7 +1014,7 @@ p2 &lt;- p1 +
 p2
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-56-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-57-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -1035,7 +1034,7 @@ p2 &lt;- p1 + scale_fill_gradient2(low = scales::muted("blue"),
 p2
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-57-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-58-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 The winning percentage for Democrats in Washington DC is too high, 
@@ -1045,7 +1044,7 @@ thereby skewing the color scale on the previous map. We thus subset the data.
 p2 %+% subset(us_states_elec, region %nin% "district of columbia")
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-58-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-59-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 # Counties map
 
@@ -1056,7 +1055,7 @@ us_counties_elec &lt;- us_counties %&gt;%
 p2 %+% us_counties_elec
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-59-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-60-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 #Maps vs faceted dot plots ?
 
@@ -1077,7 +1076,7 @@ class: clear
 p3 + facet_wrap(~ census, nrow = 2) + guides(color = FALSE)
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-61-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-62-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 
@@ -1086,7 +1085,7 @@ class: clear
 p3 + facet_wrap(~ census, nrow = 2, scales = "free_y") + guides(color = FALSE)
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-62-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-63-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 # USA choropleth
 The United States administrative areas are quite diverse in terms of geographical size and population size.
@@ -1158,7 +1157,7 @@ p2 &lt;- p1 + labs(fill = "Population per\nsquare mile") +
 p2
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-66-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-67-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -1169,7 +1168,7 @@ p2 + scale_fill_brewer(palette="Blues",
              "1,000-5,000", "&gt;5,000"))
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-67-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-68-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -1205,7 +1204,7 @@ class: clear
 gun_p3
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-69-1.png" width="250%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-70-1.png" width="250%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -1213,7 +1212,7 @@ gun_p3
 pop_p3
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-70-1.png" width="250%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-71-1.png" width="250%" style="display: block; margin: auto;" /&gt;
 ]
 
 + the visual impact of the two plots are similar e.g.,dark bands in the West, and fading toward the center; also the Northeast.
@@ -1261,7 +1260,7 @@ p2 + theme_map() + theme(legend.position = "top", strip.background = element_bla
   labs(fill = "Death rate per 10^5 population") + facet_wrap(~ year, ncol = 2)
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-72-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-73-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Compare the previous figure with
@@ -1288,7 +1287,7 @@ class: clear
 p3
 ```
 
-&lt;img src="intro_map_files/figure-html/unnamed-chunk-74-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_map_files/figure-html/unnamed-chunk-75-1.png" width="120%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
