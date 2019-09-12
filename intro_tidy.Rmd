@@ -430,15 +430,19 @@ babynames_wide %>% filter(M > 50000, F > 50000) %>%
 We recall the following tables
 
 .pull-left[
-```{r}
-table1
+```{r echo = FALSE}
+knitr::kable(table1) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 
 .pull-right[
-```{r}
-table4a
-table4b
+```{r echo = FALSE}
+knitr::kable(table4a) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+```
+<br>
+<br>
+```{r echo = FALSE}
+knitr::kable(table4b) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
@@ -449,11 +453,12 @@ To go from table $4a$ and $4b$ to Table $1$, we need to reshape them into "long"
 table4a.long <- table4a %>% 
   gather(key = "year", 
          value = "cases", 
-         `1999`, `2000`)
+         `1999`, `2000`) %>% 
+  arrange(year)
 ```
 ```{r echo = FALSE}
 knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
-  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+  arrange(year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
@@ -461,11 +466,12 @@ knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %
 table4b.long <- table4b %>%
   gather(key = "year", 
          value = "population", 
-         `1999`, `2000`) 
+         `1999`, `2000`) %>%
+  arrange(country)
 ```
 ```{r echo = FALSE}
 knitr::kable(table4b %>% gather(key = "year", value = "population", `1999`, `2000`) %>% 
-  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+  arrange(country)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
@@ -478,7 +484,7 @@ table4a.long %>% left_join(table4b.long)
 table4a.long <- table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
 table4b.long <- table4b %>% gather(key = "year", value = "population", `1999`, `2000`)
 table.joined <- table4a.long %>% left_join(table4b.long)
-knitr::kable(table.joined %>% arrange(country,year)) %>%
+knitr::kable(table.joined) %>%
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ---

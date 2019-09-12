@@ -4,7 +4,7 @@
     <title>Reshaping data</title>
     <meta charset="utf-8" />
     <meta name="author" content="CSC/ST 442" />
-    <meta name="date" content="2019-09-10" />
+    <meta name="date" content="2019-09-12" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 # Reshaping data
 ## tidyr and relational data with dplyr
 ### CSC/ST 442
-### 2019-09-10
+### 2019-09-12
 
 ---
 
@@ -922,51 +922,111 @@ babynames_wide %&gt;% filter(M &gt; 50000, F &gt; 50000) %&gt;%
 We recall the following tables
 
 .pull-left[
-
-```r
-table1
-```
-
-```
-## # A tibble: 6 x 4
-##   country      year  cases population
-##   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
-## 1 Afghanistan  1999    745   19987071
-## 2 Afghanistan  2000   2666   20595360
-## 3 Brazil       1999  37737  172006362
-## 4 Brazil       2000  80488  174504898
-## 5 China        1999 212258 1272915272
-## 6 China        2000 213766 1280428583
-```
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; population &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 ]
 
 .pull-right[
-
-```r
-table4a
-```
-
-```
-## # A tibble: 3 x 3
-##   country     `1999` `2000`
-##   &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Afghanistan    745   2666
-## 2 Brazil       37737  80488
-## 3 China       212258 213766
-```
-
-```r
-table4b
-```
-
-```
-## # A tibble: 3 x 3
-##   country         `1999`     `2000`
-##   &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;
-## 1 Afghanistan   19987071   20595360
-## 2 Brazil       172006362  174504898
-## 3 China       1272915272 1280428583
-```
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 1999 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2000 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 ]
 ---
 class: clear
@@ -977,7 +1037,8 @@ To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to reshape them
 table4a.long &lt;- table4a %&gt;% 
   gather(key = "year", 
          value = "cases", 
-         `1999`, `2000`)
+         `1999`, `2000`) %&gt;% 
+  arrange(year)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
@@ -994,24 +1055,24 @@ table4a.long &lt;- table4a %&gt;%
    &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
@@ -1027,7 +1088,8 @@ table4a.long &lt;- table4a %&gt;%
 table4b.long &lt;- table4b %&gt;%
   gather(key = "year", 
          value = "population", 
-         `1999`, `2000`) 
+         `1999`, `2000`) %&gt;%
+  arrange(country)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
@@ -1100,6 +1162,18 @@ table4a.long %&gt;% left_join(table4b.long)
    &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
@@ -1107,21 +1181,9 @@ table4a.long %&gt;% left_join(table4b.long)
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
@@ -1749,7 +1811,7 @@ hc
 class: clear
 Let us now try to answer the following question of "Is there a relationship between healthcare coverage and healthcare spending in the US ?" We take a look at Employer type coverage for `\(2013\)`. A naive visualization indicates a strong relationship, but there is confounding effect due to population size.
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-76-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-77-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 If we remove the effect of population, the relationship between spending and coverage becomes much weaker. 
@@ -1764,7 +1826,7 @@ hc %&gt;% filter(type == "Employer", year == "2013") %&gt;%
   ylab("proportion of Employer coverage") + geom_smooth(method = "lm")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-77-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-78-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 # Automation and iteration
 Compare the following code chunks.
@@ -1785,7 +1847,7 @@ output
 ```
 
 ```
-## [1] -0.3037  0.0178 -0.0191 -0.0362
+## [1] -0.2822 -0.0499 -0.2206  0.0379
 ```
 
 ```r
@@ -1794,7 +1856,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-## -0.3037  0.0178 -0.0191 -0.0362
+## -0.2822 -0.0499 -0.2206  0.0379
 ```
 ]
 
@@ -1806,16 +1868,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] -0.304
+## [1] -0.282
 ## 
 ## $b
-## [1] 0.0178
+## [1] -0.0499
 ## 
 ## $c
-## [1] -0.0191
+## [1] -0.221
 ## 
 ## $d
-## [1] -0.0362
+## [1] 0.0379
 ```
 
 ```r
@@ -1824,7 +1886,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-## -0.3037  0.0178 -0.0191 -0.0362
+## -0.2822 -0.0499 -0.2206  0.0379
 ```
 ]
 ---
@@ -1845,10 +1907,10 @@ output2
 ```
 
 ```
-##        [,1]    [,2]    [,3]    [,4]
-## [1,] -0.887 -0.5564 -0.9032 -0.5611
-## [2,] -0.304  0.0178 -0.0191 -0.0362
-## [3,]  0.480  0.6171  0.5852  0.5731
+##        [,1]    [,2]   [,3]    [,4]
+## [1,] -0.703 -0.7598 -0.818 -0.5629
+## [2,] -0.282 -0.0499 -0.221  0.0379
+## [3,]  0.440  0.5276  0.497  0.6645
 ```
 ]
 
@@ -1859,10 +1921,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##          a       b       c       d
-## 25% -0.887 -0.5564 -0.9032 -0.5611
-## 50% -0.304  0.0178 -0.0191 -0.0362
-## 75%  0.480  0.6171  0.5852  0.5731
+##          a       b      c       d
+## 25% -0.703 -0.7598 -0.818 -0.5629
+## 50% -0.282 -0.0499 -0.221  0.0379
+## 75%  0.440  0.5276  0.497  0.6645
 ```
 
 ```r
@@ -1870,10 +1932,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##          a       b       c       d
-## 25% -0.887 -0.5564 -0.9032 -0.5611
-## 50% -0.304  0.0178 -0.0191 -0.0362
-## 75%  0.480  0.6171  0.5852  0.5731
+##          a       b      c       d
+## 25% -0.703 -0.7598 -0.818 -0.5629
+## 50% -0.282 -0.0499 -0.221  0.0379
+## 75%  0.440  0.5276  0.497  0.6645
 ```
 ]
 ---
@@ -2145,10 +2207,10 @@ mapply(rnorm, mean, sd, 3) ## Oops
 ## numeric(0)
 ## 
 ## [[2]]
-## [1] 3.71
+## [1] 2.8
 ## 
 ## [[3]]
-## [1] -0.885  4.781
+## [1] 4.49 2.71
 ```
 
 ```r
@@ -2157,10 +2219,10 @@ mapply(rnorm, mean = mean,
 ```
 
 ```
-##         [,1]   [,2] [,3]
-## [1,] 1.11423  0.921 6.52
-## [2,] 1.76428 -1.054 2.08
-## [3,] 0.00974  2.522 4.18
+##        [,1]  [,2] [,3]
+## [1,]  0.600 -1.57 3.39
+## [2,] -0.239  1.21 6.60
+## [3,] -0.784  2.32 1.61
 ```
 ]
 
@@ -2173,11 +2235,11 @@ pmap_dfc(list(mean = mean,sd = sd),
 
 ```
 ## # A tibble: 3 x 3
-##       V1    V2    V3
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1  1.02  -3.23 -5.27
-## 2 -1.17   2.09  2.20
-## 3 -0.207 -2.83  5.05
+##       V1      V2    V3
+##    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1 -0.482  0.0101  7.63
+## 2 -0.759  1.89    2.58
+## 3  0.213 -0.580   3.75
 ```
 ]
 
@@ -2201,13 +2263,13 @@ invoke_map(f, param, n = 1)
 
 ```
 ## [[1]]
-## [1] -0.202
+## [1] -0.923
 ## 
 ## [[2]]
-## [1] 3.83
+## [1] -5.34
 ## 
 ## [[3]]
-## [1] 5
+## [1] 3
 ```
 ]
 
@@ -2254,7 +2316,7 @@ ggplot(data = TeamRuns, aes(x = run_ratio, y = wpct)) +
   xlab("Ratio of Runs Scored to Runs Allowed") + ylab("Winning Percentage")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-95-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-96-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Nevertheless, we might ask whether or not `\(k = 2\)` really the "optimal" choice for this data ? To answer this, we find `\(\hat{k}\)` minimizing the (non-linear) least square criterion
@@ -2345,7 +2407,7 @@ hr_leaders %&gt;%
              label = "AL adopts designated hitter rule", hjust = "left")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-99-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-100-1.png" width="80%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
