@@ -1,0 +1,95 @@
+---
+title: "HW 2"
+output: 
+  pdf_document:
+    df_print: tibble
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+## Instruction
+This assignment consists of $3$ problems. The assignment is due on 
+**Thursday, September 19** at 11:59pm EDT. Please submit your assignment electronically through the moodle webpage. You are encouraged (but not required) to use RMarkdown to write up your homework solution. To start using Rmarkdown read
+
+* Section 40.2 of  [Introduction to Data Science](https://rafalab.github.io/dsbook/reproducible-projects-with-rstudio-and-r-markdown.html)
+* the [RStudio tutorial](https://rmarkdown.rstudio.com/lesson-1.html) 
+* the [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
+
+## Problem 1 (20pts)
+This problem uses the *mpg* dataset from the **ggplot2** library. A snippet of the data is as follows.
+```{r}
+library(ggplot2)
+data(mpg)
+mpg
+#?mpg
+mpg$year <- as.factor(mpg$year) ## Please do this for the following question.
+```
+Using this data, reproduce the following figures. Hint: for the last figure, the smoothing method is "lm" and the grouping is obtained via the **R** command $\mathtt{interaction}$. 
+
+```{r echo = FALSE, message = FALSE, out.width = "120%"}
+library(gridExtra)
+p <- ggplot(mpg, aes(x = displ, y = hwy)) + geom_point()
+p1 <- p + geom_smooth(se = FALSE)
+p2 <- p + geom_smooth(aes(group = drv),se = FALSE)
+p3 <- p + geom_point(aes(color = year)) + geom_smooth(aes(group = drv),se = FALSE)
+p4 <- p + geom_point(aes(color = year)) + geom_smooth(aes(group = 1),se = FALSE)
+p5 <- p + geom_point(aes(color = year)) + geom_smooth(aes(linetype = drv),se = FALSE)
+p6 <- ggplot(mpg, aes(x = displ, y = hwy, color = year)) + geom_point() + 
+  geom_smooth(aes(group = interaction(drv,year)),method = "lm", se = FALSE)
+grid.arrange(p1,p2,p3,p4,p5, ncol = 2)
+```
+
+```{r echo = FALSE, fig.align='center', out.width="60%"}
+p6
+```
+
+## Problem 2 (30pts)
+This problem uses the *flights* and *weather* dataset from the **nycflights13** library. A snippet of the data is as follows.
+```{r}
+library(nycflights13)
+flights
+weather
+```
+
+Using these two datasets, answer the following question.
+
+1. (5pts) Visualize the departure times of cancelled versus non-cancelled flights. 
+2. (5pts)  Draw a boxplot of the temperatures, grouped by months.
+3. (10pts) Visualize the proportion of cancelled flights each day against the average daily temperature, grouped by the airports of origin (EWR, JFK, LGA). 
+
+Hint: you need to create a new column that maps the month and day to a number corresonding to the number of days since January 1. Try this
+```{r}
+as.numeric(as.Date(paste(2013,2,24,sep="/"),format="%Y/%m/%d") - 
+             as.Date("2013/01/01",format="%Y/%m/%d"))
+```
+A more elegant handling of dates and time is available via the **lubridate** package, but the above is sufficient for our current purpose. 
+
+4. (10pts) Visualize the arrival delay for flights to the top twenty most popular destinations, grouped by destinations. 
+
+
+## Problem 3 (25pts)
+This problem uses the obesity data set from the CDC. The original data is in Excel format and we 
+download and extract the data as follows.
+```{r message = FALSE, warning = FALSE}
+## the readxl package is needed to read excel files using R.
+library(readxl) ## install.packages("readxl")
+URL <- "http://www.cdc.gov/diabetes/atlas/countydata/OBPREV/OB_PREV_ALL_STATES.xlsx"
+fil <- basename(URL) 
+if (!file.exists(fil)) download.file(URL, fil) ## Only download the data the first time.
+
+wrkbk <- read_excel(fil)
+obesity_2012 <- setNames(wrkbk[-1, c(2, 61)], c("fips", "pct"))
+obesity_2012$pct <- as.numeric(obesity_2012$pct) / 100
+obesity_2012
+```
+We next load the socviz library and get access to the boundaries line for the US map.
+```{r}
+library(socviz) ## install.packages("socviz")
+county_map
+county_data
+```
+
+Combining the $\mathtt{obesity\_2012}$ data frame and either the $\mathtt{county\_map}$ or $\mathtt{county\_data}$ data, generate a visualization of the US Obesity Rate by County. Using the $\mathtt{county\_data}$, find the variables that are "correlated" with obesity rates. 
