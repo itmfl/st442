@@ -112,7 +112,7 @@ c(typeof(1), typeof(1L), typeof(1.5L))
 ```
 .pull-left[
 ```{r}
-x <- sqrt(2)^2; x - 2
+x <- sqrt(2)^2; x; x - 2
 ```
 ]
 .pull-right[
