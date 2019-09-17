@@ -204,7 +204,13 @@ pryr::object_size(x)
 ```
 
 ```
-## 256 B
+## Registered S3 method overwritten by 'pryr':
+##   method      from
+##   print.bytes Rcpp
+```
+
+```
+## 288 B
 ```
 
 ```r
@@ -213,7 +219,7 @@ pryr::object_size(y)
 ```
 
 ```
-## 24.2 kB
+## 24.3 kB
 ```
 
 + The types are, from least to most general, 
@@ -748,6 +754,223 @@ class: clear
 &lt;p class="caption"&gt;Section 20.5 of R4DS&lt;/p&gt;
 &lt;/div&gt;
 ---
+#Vectors and attributes
+Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement quite a few fancy data structures using the base **R** vectors. For example
+.pull-left[
+
+```r
+x &lt;- c(1L, 2L, 3L); x
+```
+
+```
+## [1] 1 2 3
+```
+
+```r
+typeof(x); attributes(x)
+```
+
+```
+## [1] "integer"
+```
+
+```
+## NULL
+```
+]
+.pull-right[
+
+```r
+class(x) &lt;- "Date"; x
+```
+
+```
+## [1] "1970-01-02" "1970-01-03" "1970-01-04"
+```
+
+```r
+typeof(x); attributes(x)
+```
+
+```
+## [1] "integer"
+```
+
+```
+## $class
+## [1] "Date"
+```
+
+```r
+attr(x,"Greetings") &lt;- "Welcome to 442"
+attributes(x)
+```
+
+```
+## $class
+## [1] "Date"
+## 
+## $Greetings
+## [1] "Welcome to 442"
+```
+]
+
+---
+class: clear
+
+.pull-left[
+
+```r
+y &lt;- 1:6; y
+```
+
+```
+## [1] 1 2 3 4 5 6
+```
+
+```r
+typeof(y); attributes(y)
+```
+
+```
+## [1] "integer"
+```
+
+```
+## NULL
+```
+
+```r
+names(y) &lt;- c("M","T","W",
+              "Th","F","Sat")
+y
+```
+
+```
+##   M   T   W  Th   F Sat 
+##   1   2   3   4   5   6
+```
+
+```r
+attributes(y)
+```
+
+```
+## $names
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+```
+]
+.pull-right[
+
+```r
+ ## similar to dim(y) &lt;- c(3,2)
+attr(y, "dim") &lt;- c(3,2)
+y
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6
+## attr(,"names")
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+```
+
+```r
+y["M"]
+```
+
+```
+## M 
+## 1
+```
+
+```r
+typeof(y); attributes(y)
+```
+
+```
+## [1] "integer"
+```
+
+```
+## $names
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+## 
+## $dim
+## [1] 3 2
+```
+]
+---
+class: clear
+
+The three most important attributes of a vector are
++ **names** for naming the elements
++ **dimensions** or dims to make a vector behave like a matrix or aray
++ **class** is for implementing the S3 object-oriented system (see Hadley's Wickham [Advanced R](https://adv-r.hadley.nz/oo.html) for the gory details of **R** numerous objected-oriented systems).
+
+Attributed vectors are used to implement *factors*, dates and times and data frames, e.g.,
+
+```r
+x &lt;- factor(c("medium","low","high","low","medium"), 
+            levels = c("low","medium","high"))
+x
+```
+
+```
+## [1] medium low    high   low    medium
+## Levels: low medium high
+```
+
+```r
+typeof(x); attributes(x)
+```
+
+```
+## [1] "integer"
+```
+
+```
+## $levels
+## [1] "low"    "medium" "high"  
+## 
+## $class
+## [1] "factor"
+```
+---
+class: clear
+
+```r
+y &lt;- lubridate::ymd_hm("1999-12-23 23:00")
+y
+```
+
+```
+## [1] "1999-12-23 23:00:00 UTC"
+```
+
+```r
+typeof(y)
+```
+
+```
+## [1] "double"
+```
+
+```r
+attributes(y)
+```
+
+```
+## $class
+## [1] "POSIXct" "POSIXt" 
+## 
+## $tzone
+## [1] "UTC"
+```
+
+---
 #The madness of data frames
 A data frame (in base **R**) is then simply a list whose elements are vectors, each of the same length. Consider the following `\(\mathtt{mtcars}\)` data frame.
 
@@ -764,14 +987,6 @@ head(mtcars)
 ## Hornet 4 Drive    21.4   6  258 110 3.08 3.21 19.4  1  0    3    1
 ## Hornet Sportabout 18.7   8  360 175 3.15 3.44 17.0  0  0    3    2
 ## Valiant           18.1   6  225 105 2.76 3.46 20.2  1  0    3    1
-```
-
-```r
-class(mtcars) 
-```
-
-```
-## [1] "data.frame"
 ```
 
 ```r
@@ -809,6 +1024,34 @@ str(mtcars)
 ##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
 ##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
 ##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+---
+class: clear
+
+```r
+attributes(mtcars)
+```
+
+```
+## $names
+##  [1] "mpg"  "cyl"  "disp" "hp"   "drat" "wt"   "qsec" "vs"   "am"   "gear"
+## [11] "carb"
+## 
+## $row.names
+##  [1] "Mazda RX4"           "Mazda RX4 Wag"       "Datsun 710"         
+##  [4] "Hornet 4 Drive"      "Hornet Sportabout"   "Valiant"            
+##  [7] "Duster 360"          "Merc 240D"           "Merc 230"           
+## [10] "Merc 280"            "Merc 280C"           "Merc 450SE"         
+## [13] "Merc 450SL"          "Merc 450SLC"         "Cadillac Fleetwood" 
+## [16] "Lincoln Continental" "Chrysler Imperial"   "Fiat 128"           
+## [19] "Honda Civic"         "Toyota Corolla"      "Toyota Corona"      
+## [22] "Dodge Challenger"    "AMC Javelin"         "Camaro Z28"         
+## [25] "Pontiac Firebird"    "Fiat X1-9"           "Porsche 914-2"      
+## [28] "Lotus Europa"        "Ford Pantera L"      "Ferrari Dino"       
+## [31] "Maserati Bora"       "Volvo 142E"         
+## 
+## $class
+## [1] "data.frame"
 ```
 ---
 class: clear
@@ -906,7 +1149,7 @@ str(y)
 ]
 ---
 class: clear
-As another example of a column of a data frame being a vector, we note that a matrix is an attributed vector, e.g.,
+As another example of a column of a data frame being a vector, we recall that a matrix is an attributed vector, e.g.,
 
 .pull-left[
 
@@ -1113,10 +1356,10 @@ str(y2)
 ```
 ---
 # Creating list columns
-Using the **dplyr** and **tidyr** approach we can create list columns in a data frame via three widely applicable methods
-+ Nesting via `\(\mathtt{tidyr::nest}\)`
-+ With `\(\mathtt{dplyr::mutate}\)` and vectorised functions that returns a list.
-+ With `\(\mathtt{dplyr::summarise}\)` and summary functions that return multiple results.
+Using the **dplyr** and **tidyr** approach we can create list columns in a data frame via simple but powerful methods.
++ Nesting via `\(\mathtt{tidyr::nest()}\)`
++ With `\(\mathtt{dplyr::mutate()}\)` and vectorised functions that returns a list.
++ With `\(\mathtt{dplyr::summarise()}\)` and summary functions that return multiple results.
 
 We illustrate these techniques using the **gapminder** dataframe.
 
@@ -1165,8 +1408,11 @@ nested
 
 ```r
 ## Equivalently
-## nested &lt;- gapminder %&gt;% nest(-country,-continent)
-## nested &lt;- gapminder %&gt;% nest(year:gdpPercap)
+## nested &lt;- gapminder %&gt;% 
+##     nest(-country,-continent)
+## Also equivalently
+## nested &lt;- gapminder %&gt;% 
+##     nest(year:gdpPercap)
 ```
 ]
 .pull-right[
@@ -1206,6 +1452,26 @@ nested$data[[1]]
 ]
 ---
 class: clear
+To go from a nested data frame/tibble to an unnested one, use `\(\mathtt{tidyr::unnest()}\)`, e.g.,
+
+```r
+nested %&gt;% unnest()
+```
+
+```
+## # A tibble: 1,704 x 6
+##   country     continent  year lifeExp      pop gdpPercap
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan Asia       1952    28.8  8425333      779.
+## 2 Afghanistan Asia       1957    30.3  9240934      821.
+## 3 Afghanistan Asia       1962    32.0 10267083      853.
+## 4 Afghanistan Asia       1967    34.0 11537966      836.
+## 5 Afghanistan Asia       1972    36.1 13079460      740.
+## 6 Afghanistan Asia       1977    38.4 14880372      786.
+## # … with 1,698 more rows
+```
+---
+class: clear
 With these list columns, we can then do 
 
 ```r
@@ -1213,7 +1479,8 @@ library(purrr)
 country_model &lt;- function(df){
   lm(lifeExp ~ year, data = df)
 }
-nested_lm &lt;- nested %&gt;% mutate(model = map(data, country_model))
+## using mutate and iterations to create list columns
+nested_lm &lt;- nested %&gt;% mutate(model = map(data, country_model)) 
 nested_lm
 ```
 
@@ -1335,6 +1602,90 @@ nested_lm %&gt;% unnest(coefficients)
 ## 6 Australia   Oceania   &lt;tibble [12 × 4]&gt; &lt;lm&gt;       -376. 0.228
 ## # … with 136 more rows
 ```
+---
+class: clear
+Since `\(\mathtt{ggplot2}\)` objects can also be elements of a list, we can do
+
+```r
+plot_fun &lt;- function(df, name){
+require(ggplot2)
+p &lt;- ggplot(df, aes(x = year, y = lifeExp)) + geom_line() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  ggtitle(paste("Life Expectancy of ", name))
+}
+nested_lm &lt;- nested_lm %&gt;% mutate(plot = map2(data, country, plot_fun))
+nested_lm %&gt;% unnest(coefficients)
+```
+
+```
+## # A tibble: 142 x 7
+##   country     continent data              model  plot   intercept slope
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;list&gt;            &lt;list&gt; &lt;list&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 Afghanistan Asia      &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;       -508. 0.275
+## 2 Albania     Europe    &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;       -594. 0.335
+## 3 Algeria     Africa    &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;      -1068. 0.569
+## 4 Angola      Africa    &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;       -377. 0.209
+## 5 Argentina   Americas  &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;       -390. 0.232
+## 6 Australia   Oceania   &lt;tibble [12 × 4]&gt; &lt;lm&gt;   &lt;gg&gt;       -376. 0.228
+## # … with 136 more rows
+```
+---
+class: clear
+
+```r
+nested_lm %&gt;% filter(country == "Mali") %&gt;% purrr::pluck("plot") %&gt;% pluck(1)
+```
+
+&lt;img src="vectors_files/figure-html/unnamed-chunk-67-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+class: clear
+Finally we present an example of using **dplyr::summarise** to create and simplify list columns.
+
+```r
+probs &lt;- c(0.01,0.25,0.5,0.75,0.99)
+gapminder.gdp &lt;- gapminder %&gt;% group_by(continent, year) %&gt;%
+  summarise(p = list(probs), q = list(quantile(gdpPercap,probs)))
+```
+.pull-left[
+
+```r
+gapminder.gdp
+```
+
+```
+## # A tibble: 60 x 4
+## # Groups:   continent [5]
+##   continent  year p         q        
+##   &lt;fct&gt;     &lt;int&gt; &lt;list&gt;    &lt;list&gt;   
+## 1 Africa     1952 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## 2 Africa     1957 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## 3 Africa     1962 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## 4 Africa     1967 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## 5 Africa     1972 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## 6 Africa     1977 &lt;dbl [5]&gt; &lt;dbl [5]&gt;
+## # … with 54 more rows
+```
+]
+.pull-right[
+
+```r
+gapminder.gdp %&gt;% unnest()
+```
+
+```
+## # A tibble: 300 x 4
+## # Groups:   continent [5]
+##   continent  year     p     q
+##   &lt;fct&gt;     &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Africa     1952  0.01  299.
+## 2 Africa     1952  0.25  535.
+## 3 Africa     1952  0.5   987.
+## 4 Africa     1952  0.75 1455.
+## 5 Africa     1952  0.99 4505.
+## 6 Africa     1957  0.01  340.
+## # … with 294 more rows
+```
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

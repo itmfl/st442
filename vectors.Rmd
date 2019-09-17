@@ -336,20 +336,89 @@ class: clear
 knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/2f3f752cae25018554d484464f117e600ff365a2/37627/diagrams/lists-subsetting.png")
 ```
 ---
+#Vectors and attributes
+Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement quite a few fancy data structures using the base **R** vectors. For example
+.pull-left[
+```{r}
+x <- c(1L, 2L, 3L); x
+typeof(x); attributes(x)
+```
+]
+.pull-right[
+```{r}
+class(x) <- "Date"; x
+typeof(x); attributes(x)
+attr(x,"Greetings") <- "Welcome to 442"
+attributes(x)
+```
+]
+
+---
+class: clear
+
+.pull-left[
+```{r}
+y <- 1:6; y
+typeof(y); attributes(y)
+names(y) <- c("M","T","W",
+              "Th","F","Sat")
+y
+attributes(y)
+
+```
+]
+.pull-right[
+```{r}
+ ## similar to dim(y) <- c(3,2)
+attr(y, "dim") <- c(3,2)
+y
+y["M"]
+typeof(y); attributes(y)
+
+```
+]
+---
+class: clear
+
+The three most important attributes of a vector are
++ **names** for naming the elements
++ **dimensions** or dims to make a vector behave like a matrix or aray
++ **class** is for implementing the S3 object-oriented system (see Hadley's Wickham [Advanced R](https://adv-r.hadley.nz/oo.html) for the gory details of **R** numerous objected-oriented systems).
+
+Attributed vectors are used to implement *factors*, dates and times and data frames, e.g.,
+```{r}
+x <- factor(c("medium","low","high","low","medium"), 
+            levels = c("low","medium","high"))
+x
+typeof(x); attributes(x)
+```
+---
+class: clear
+```{r}
+y <- lubridate::ymd_hm("1999-12-23 23:00")
+y
+typeof(y)
+attributes(y)
+```
+
+---
 #The madness of data frames
 A data frame (in base **R**) is then simply a list whose elements are vectors, each of the same length. Consider the following $\mathtt{mtcars}$ data frame.
 
 ```{r}
 head(mtcars)
-class(mtcars) 
 typeof(mtcars)
-
 ```
 ---
 class: clear
 ```{r}
 length(mtcars)
 str(mtcars)
+```
+---
+class: clear
+```{r}
+attributes(mtcars)
 ```
 ---
 class: clear
@@ -396,7 +465,7 @@ str(y)
 ]
 ---
 class: clear
-As another example of a column of a data frame being a vector, we note that a matrix is an attributed vector, e.g.,
+As another example of a column of a data frame being a vector, we recall that a matrix is an attributed vector, e.g.,
 
 .pull-left[
 ```{r}
@@ -464,10 +533,10 @@ str(y2)
 ```
 ---
 # Creating list columns
-Using the **dplyr** and **tidyr** approach we can create list columns in a data frame via three widely applicable methods
-+ Nesting via $\mathtt{tidyr::nest}$
-+ With $\mathtt{dplyr::mutate}$ and vectorised functions that returns a list.
-+ With $\mathtt{dplyr::summarise}$ and summary functions that return multiple results.
+Using the **dplyr** and **tidyr** approach we can create list columns in a data frame via simple but powerful methods.
++ Nesting via $\mathtt{tidyr::nest()}$
++ With $\mathtt{dplyr::mutate()}$ and vectorised functions that returns a list.
++ With $\mathtt{dplyr::summarise()}$ and summary functions that return multiple results.
 
 We illustrate these techniques using the **gapminder** dataframe.
 ```{r}
@@ -485,8 +554,11 @@ nested <- gapminder %>%
   nest()
 nested
 ## Equivalently
-## nested <- gapminder %>% nest(-country,-continent)
-## nested <- gapminder %>% nest(year:gdpPercap)
+## nested <- gapminder %>% 
+##     nest(-country,-continent)
+## Also equivalently
+## nested <- gapminder %>% 
+##     nest(year:gdpPercap)
 ```
 ]
 .pull-right[
@@ -497,13 +569,20 @@ nested$data[[1]]
 ]
 ---
 class: clear
+To go from a nested data frame/tibble to an unnested one, use $\mathtt{tidyr::unnest()}$, e.g.,
+```{r}
+nested %>% unnest()
+```
+---
+class: clear
 With these list columns, we can then do 
 ```{r}
 library(purrr)
 country_model <- function(df){
   lm(lifeExp ~ year, data = df)
 }
-nested_lm <- nested %>% mutate(model = map(data, country_model))
+## using mutate and iterations to create list columns
+nested_lm <- nested %>% mutate(model = map(data, country_model)) 
 nested_lm
 ```
 ---
@@ -535,3 +614,39 @@ class: clear
 nested_lm
 nested_lm %>% unnest(coefficients)
 ```
+---
+class: clear
+Since $\mathtt{ggplot2}$ objects can also be elements of a list, we can do
+```{r out.width="70%",message=FALSE}
+plot_fun <- function(df, name){
+require(ggplot2)
+p <- ggplot(df, aes(x = year, y = lifeExp)) + geom_line() + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  ggtitle(paste("Life Expectancy of ", name))
+}
+nested_lm <- nested_lm %>% mutate(plot = map2(data, country, plot_fun))
+nested_lm %>% unnest(coefficients)
+```
+---
+class: clear
+```{r out.width="70%"}
+nested_lm %>% filter(country == "Mali") %>% purrr::pluck("plot") %>% pluck(1)
+```
+---
+class: clear
+Finally we present an example of using **dplyr::summarise** to create and simplify list columns.
+```{r}
+probs <- c(0.01,0.25,0.5,0.75,0.99)
+gapminder.gdp <- gapminder %>% group_by(continent, year) %>%
+  summarise(p = list(probs), q = list(quantile(gdpPercap,probs)))
+```
+.pull-left[
+```{r}
+gapminder.gdp
+```
+]
+.pull-right[
+```{r}
+gapminder.gdp %>% unnest()
+```
+]
