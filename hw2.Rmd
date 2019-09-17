@@ -29,7 +29,7 @@ mpg$year <- as.factor(mpg$year) ## Please do this for the following question.
 ```
 Using this data, reproduce the following figures. Hint: for the last figure, the smoothing method is "lm" and the grouping is obtained via the **R** command $\mathtt{interaction}$. 
 
-```{r echo = FALSE, message = FALSE, out.width = "120%"}
+```{r plot.code, echo = FALSE, message = FALSE, out.width = "120%"}
 library(gridExtra)
 p <- ggplot(mpg, aes(x = displ, y = hwy)) + geom_point()
 p1 <- p + geom_smooth(se = FALSE)
@@ -45,6 +45,13 @@ grid.arrange(p1,p2,p3,p4,p5, ncol = 2)
 ```{r echo = FALSE, fig.align='center', out.width="60%"}
 p6
 ```
+
+\subsection*{Solution:}
+The code to generate the above plots are given below.
+```{r ref.label = "plot.code", eval = FALSE}
+```
+A brief description is as follows. The first plot uses two geom objects, namely $\mathtt{geom\_point}$ and $\mathtt{geom\_smooth}$. The second plot uses the same geom objects, but now the $\mathtt{geom\_smooth}$ data is grouped according to the grouping variable $\mathtt{drv}$ (hence there are three smoothing lines). The third plot the $\mathtt{geom\_point}$ are colored according to year while the smoothing is still grouped by $\mathtt{drv}$. For the fourth plot, all the data are grouped into the same group $\mathrm{group} = 1$ so now there is a single smoothing line. The linetype for the smoothing in the fifth plot is now assigned according to $\mathtt{drv}$. Finally, for the last plot, the grouping is based on the interaction between $\mathtt{drv}$ and $\mathtt{year}$; hence there are six groups for the smoothing and since the original aesthetic mapping has $\mathtt{color = year}$ the smoothing lines are colored according to the year.
+
 
 ## Problem 2 (30pts)
 This problem uses the *flights* and *weather* dataset from the **nycflights13** library. A snippet of the data is as follows.
@@ -69,17 +76,71 @@ A more elegant handling of dates and time is available via the **lubridate** pac
 
 4. (10pts) Visualize the arrival delay for flights to the top twenty most popular destinations, grouped by destinations. 
 
+\subsection*{Solution:}
+For (1), a possible plot is (note that we refrain from plotting all the data as there are quite a large number of data points, e.g., more than $3 \times 10^5$ data points)
+```{r out.width="60%", message = FALSE}
+library(dplyr)
+library(ggplot2)
+flights.new <- flights %>% mutate(canceled = is.na(arr_delay) | is.na(dep_delay))
+ggplot(flights.new, aes(x = canceled, y = sched_dep_time)) + geom_boxplot()
+```
 
+For (2), a possibe plot is as follows. Note that we need to specify that $\mathtt{month}$
+is a factor/discrete variable so that the boxplot will be grouped by month (this is an implicit grouping as opposed to an explicit grouping a la $\mathtt{geom\_boxplot(aes(group = month))}$.
+```{r out.width="60%"}
+ggplot(weather, aes(x = factor(month), y = temp)) + geom_boxplot()
+```
+
+For (3), a possible plot is as follows. The plot is, unfortunately, not very informative 
+as there does not appear to be any clear relationship between the daily temperature and 
+canceled flights.
+```{r}
+library(nycflights13)
+flights_canceled <- flights %>% group_by(origin,year,month,day) %>% 
+  summarise(n = n(), 
+            pct_canceled = sum((is.na(arr_delay) | is.na(dep_delay)))/n)
+temp_daily <- weather %>% group_by(origin,year,month,day) %>%
+  summarise(n = n(), avg_temp = mean(temp,na.rm = TRUE))
+full_data <- left_join(flights_canceled, temp_daily, 
+                       by = c("origin", "year", "month", "day"))
+ggplot(full_data, aes(x = avg_temp, y = pct_canceled)) + 
+  geom_point() + facet_wrap(~ origin, ncol = 2)
+```
+A different plot based on days since January $1$ suggest that the days with the highest percentage of canceled flights in $2013$ are in late January/early Februrary.
+```{r}
+flights_canceled <- flights_canceled %>% mutate(newday = 
+as.numeric(as.Date(paste(year,month,day,sep="/"),format="%Y/%m/%d") - 
+             as.Date("2013/01/01",format="%Y/%m/%d"))+1)
+ggplot(flights_canceled, aes(x = newday, y = pct_canceled)) + 
+  geom_point() + facet_wrap(~ origin, ncol = 2)
+```
+
+For (4), a possible plot is as follows. Here we have define popular destinations based on the number of flights to that destination. This, however, is only a surrogate for the number of people traveling to that destination as we do not incorporate information about the number of seats on each flight (this information is available from the **planes** table).
+```{r}
+pop_destinations <- flights %>% group_by(dest) %>%
+  summarise(n = n()) %>% arrange(desc(n)) %>% head(20)
+flights_filtered <- flights %>% semi_join(pop_destinations)
+flights_filtered <- flights_filtered %>% group_by(dest) %>% mutate(n = n())
+ggplot(flights_filtered, 
+       aes(x = reorder(dest,n), y = arr_delay)) + 
+  xlab("destination") + ylab("arrival delay") + 
+  geom_boxplot() + coord_flip()
+```
+We see that, due to the very skewed long tail for the arrival delay, the plot is quite a bit noisy and it is not clear how the arrival delay varies between destinations. One attempt at fixing this might be to only plot the first quartile, the median, and the third quartile. Another attempt is to trim the arrival delay and ignore the very long delays, e.g., 
+```{r}
+ggplot(flights_filtered, 
+       aes(x = reorder(dest,n), y = arr_delay)) + 
+  xlab("destination") + ylab("arrival delay") + 
+  geom_boxplot(outlier.shape = NA)  + coord_flip(ylim = c(NA,100))
+```
 ## Problem 3 (25pts)
 This problem uses the obesity data set from the CDC. The original data is in Excel format and we 
 download and extract the data as follows.
-```{r message = FALSE, warning = FALSE}
-## the readxl package is needed to read excel files using R.
+```{r message = TRUE, warning = TRUE,error=TRUE}
 library(readxl) ## install.packages("readxl")
 URL <- "http://www.cdc.gov/diabetes/atlas/countydata/OBPREV/OB_PREV_ALL_STATES.xlsx"
 fil <- basename(URL) 
 if (!file.exists(fil)) download.file(URL, fil) ## Only download the data the first time.
-
 wrkbk <- read_excel(fil)
 obesity_2012 <- setNames(wrkbk[-1, c(2, 61)], c("fips", "pct"))
 obesity_2012$pct <- as.numeric(obesity_2012$pct) / 100
@@ -93,3 +154,24 @@ county_data
 ```
 
 Combining the $\mathtt{obesity\_2012}$ data frame and either the $\mathtt{county\_map}$ or $\mathtt{county\_data}$ data, generate a visualization of the US Obesity Rate by County. Using the $\mathtt{county\_data}$, find the variables that are "correlated" with obesity rates. 
+
+\subsection*{Solution:}
+An example output is as follows. Note that to join the $\mathtt{county\_map}$ data and the 
+$\mathtt{obesity\_2012}$ data, we need to specify that the $\mathrm{id}$ column in the $\mathtt{county\_map}$ should be matched to the $\mathtt{fip}$ column in the $\mathtt{obesity\_2012}$ data. Once that is done, the remaining part is just standard code from the lecture slides. 
+```{r message = FALSE}
+library(tidyr)
+library(dplyr)
+library(viridis)
+library(ggthemes)
+library(ggplot2)
+county_full <- county_map %>% left_join(obesity_2012,by=c("id" = "fips"))
+p <- ggplot(county_full, 
+            aes(x = long, y = lat, fill = pct, group = group))
+
+p1 <- p + geom_polygon(color = "gray90", size = 0.05) + coord_equal()
+p2 <- p1 + labs(fill = "Population per\nsquare mile") +
+    theme_map() + theme(legend.position=c(0.9, 0.25))
+p2 + scale_fill_viridis(name = "Obesity", labels = scales::percent)
+```
+
+To check which variable in the county data is correlated with the obesity percentage, we can simply compute the correlation between the variables. We see that there are quite a few variables that are correlated with the obesity rate, but one of the most prominent one is simply median household income.

@@ -17,6 +17,29 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+library(knitr)
+hook_output = knit_hooks$get('message')
+knit_hooks$set(message = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+hook_output = knit_hooks$get('error')
+knit_hooks$set(error = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
 ```
 
 ```{r xaringan-themer, include = FALSE}
@@ -71,3 +94,444 @@ length(flights)
 length(NULL)
 ```
 ]
+
+---
+#Important type of atomic vectors
+
+Vectors are created in **R** using the function $\mathtt{c()}$ for combine.
+
++ Logical: simplest type of vector. Three values ( $\mathtt{TRUE}$, $\mathtt{FALSE}$ and $\mathtt{NA}$).
+```{r}
+c(TRUE, FALSE, FALSE, NA, T, F)
+```
+
++ Numeric: vectors whose elements are integers or doubles. Numbers are doubles by default.
+Note that doubles representation are only approximations.
+```{r}
+c(typeof(1), typeof(1L), typeof(1.5L))
+```
+.pull-left[
+```{r}
+x <- sqrt(2)^2; x - 2
+```
+]
+.pull-right[
+```{r}
+c(x == 2, dplyr::near(x,2))
+```
+]
+
+---
+class: clear
++ Special values (avoid using $==$ to check for special values)
+    + $\mathtt{NA}$: integer and double; check with $\mathtt{is.na}$ 
+    + $\mathtt{Inf}$ and $-\mathtt{Inf}$: double; check with $\mathtt{is.infinite()}$       
+    + $\mathtt{NaN}$: double; check with $\mathtt{is.nan()}$ or $\mathtt{is.na()}$.
+```{r}
+c(-1,0,1)/0
+NA*(c(-1,0,1)/0)
+```
+
++ Characters: each element of a character vector is itself a string. 
+```{r}
+x <- c("A string","A longer string", "Even longer string")
+typeof(x); length(x)
+
+```
+---
+class: clear
++ **R** uses a global string pool: each unique string is only stored in memory once, and every use of the string points to that representation. 
+```{r}
+pryr::object_size(x)
+y <- rep(x, 1000)
+pryr::object_size(y)
+```
+
++ The types are, from least to most general, 
+$$ \mathtt{logical} \rightarrow \underbrace{\mathtt{integer} \rightarrow \mathtt{double}}_{\mathtt{numeric}} \rightarrow  \mathtt{character} $$
++ Explicit coercion is via: $\mathtt{as.logical()}$, $\mathtt{as.numeric()}$, $\mathtt{as.integer()}$, $\mathtt{as.double()}$, $\mathtt{as.character()}$. 
+
+---
+class: clear
++ Implicit coercion: $\mathtt{TRUE}$ and $\mathtt{FALSE}$ are coerced to $1\mathrm{L}$ and $0\mathrm{L}$. On occasions, positive integer is coerced to $\mathtt{TRUE}$ and $0$ is coerced to $\mathtt{FALSE}$
+```{r}
+x <- 3
+if(length(x)){
+  x <- rep(x, 2)
+}
+x
+```
+
++ All atomic vectors need to be of the same type, e.g.,
+```{r}
+typeof(c(TRUE, 1L))
+typeof(c(1L,1))
+typeof(c("1",1))
+```
+---
+#Vector recycling rules
+Basic mathematical operations are vectorized in **R**. In the case where the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
+```{r warning = TRUE}
+1:10 + 1
+1:10 + 1:2
+1:10 + 1:3
+```
+---
+class: clear
+For explicit recycling/repetition, use $\mathtt{rep()}$, e.g.,
+.pull-left[
+```{r}
+rep(1:2, times = 5)
+rep(1:2, each = 5)
+rep(1:2, length.out = 10)
+```
+]
+.pull-right[
+```{r}
+rep(1:3, length.out = 10)
+rep(1:3, each = 3)
+rep(1:3, times = c(2,3,4))
+```
+]
+---
+# Naming elements of a vector
+```{r}
+c(x = 1,y = 2, z = 3)
+w <- c(1,2,3)
+names(w) <- c("x", "y", "z")
+w
+```
+
+---
+#Subsetting elements of a vector
+Vectors are subset in **R** using the `[` function. There are four type of things that can appear within `[`
++ A numeric vector containing only integers. The integers must either be **all** non-negative or **all** non-positive
+
+.pull-left[
+```{r error = TRUE}
+x <- 1:10
+x[c(3,2,5)]
+x[c(3,3,2,5,5)]
+```
+]
+
+.pull-right[
+```{r error = TRUE, linewidth=50}
+x[0]
+x[c(0,-2,-4)]
+```
+]
+
+```{r error = TRUE}
+x[c(1,-2,-4)]
+```
+---
+class: clear
++ Subsetting with a logical vector $v$ keeps **all** values corresponding to a $\mathtt{TRUE}$ value in $v$ (and add missing values if there are missing values in $v$) e.g.,
+```{r}
+x%%2 == 0
+x[x%%2 == 0]
+x[c(TRUE, FALSE, NA, FALSE, TRUE)]
+```
++ We can use $\mathtt{which}$ to determine the indices of a logical vector with $\mathtt{TRUE}$ values, e.g.,
+```{r}
+which(x %% 2 == 0)
+which(c(TRUE, FALSE, NA, FALSE, TRUE))
+```
+---
+class: clear
++ If the vector has names then you can subset it with a character vector, e.g.,
+```{r}
+w <- c(x = 1, y = 2, z = 3)
+w[c("x","z","z","x")]
+```
+
++ Finally, you can extract all the elements with `[]` or a single element with `[[]]`, e.g.,
+```{r error = TRUE}
+x <- 1:10
+x[]
+x[[1]]
+x[[c(1,2)]]
+```
+---
+#Recursive vectors (lists)
+Lists are non-atomic vectors whose elements are themselves possibly other lists. Thus, the elements of a list could have different type, e.g.,
+
+.pull-left[
+```{r error = TRUE}
+u <- list(1,2,3)
+u
+v <- list(c(1,2,3))
+v
+```
+]
+.pull-right[
+```{r error = TRUE}
+x <- list(1,2,"NA")
+x
+y <- list(c(1,2,"NA"))
+y
+```
+]
+---
+class: clear
+```{r}
+w <- list(u,v,x,y)
+length(w)
+str(w)
+```
+---
+#Extracting elements from a list
+```{r}
+a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
+str(a)
+```
+
+There are three ways to subset a list, namely `[`, `[[` and `$`.
++ `[` will always extract a sub-list and hence returns another list.
+.pull-left[
+```{r}
+str(a[1:2])
+```
+]
+.pull-right[
+```{r}
+str(a[4])
+```
+]
+
+---
+class: clear
++ `[[` will always extract a **single element** from a list and 
+hence removes a level of nesting. 
+
+.pull-left[
+```{r error = TRUE}
+str(a[[4]])
+a[[c(4,1)]]
+a[[4]][[1]] ## Equivalent to the above
+a[[4]][1] #Not equivalent to the above
+```
+]
+
+.pull-right[
+```{r error = TRUE}
+a[[1:2]] ## Recursive indexing
+a[[1:3]]
+```
+]
+
+---
+class: clear
++ `$` will always extract a **single named element** from a list.
+```{r}
+str(a$d)
+str(a[["d"]])
+str(a["d"])
+```
+
+---
+class: clear
+```{r echo = FALSE, out.width="70%", fig.cap = "Section 20.5 of R4DS"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/2f3f752cae25018554d484464f117e600ff365a2/37627/diagrams/lists-subsetting.png")
+```
+---
+#The madness of data frames
+A data frame (in base **R**) is then simply a list whose elements are vectors, each of the same length. Consider the following $\mathtt{mtcars}$ data frame.
+
+```{r}
+head(mtcars)
+class(mtcars) 
+typeof(mtcars)
+
+```
+---
+class: clear
+```{r}
+length(mtcars)
+str(mtcars)
+```
+---
+class: clear
+There are a few subtleties about data.frames. In particular, one can have a data frame whose elements are also lists. 
+.pull-left[
+```{r}
+x <- data.frame(id=1:2,
+        name = c("John","Mark"),
+        stringsAsFactors = FALSE)
+x
+```
+]
+.pull-right[
+```{r}
+x$children <- list(
+  c("Mary","Jack"),
+  c("Donna"))
+x
+str(x)
+```
+]
+---
+class: clear
+```{r}
+y <- data.frame(id = 1:2, name = c("John","Mark"),
+                children = list(c("Mary","Jack"),c("Donna")))
+y
+```
+.pull-left[
+```{r}
+y <- data.frame(id = 1:2, 
+        name = c("John","Mark"),
+        children = I(list(
+            c("Mary","Jack"),
+            c("Donna"))),
+        stringsAsFactors = FALSE)
+y
+```
+]
+.pull-right[
+```{r}
+str(y)
+```
+]
+---
+class: clear
+As another example of a column of a data frame being a vector, we note that a matrix is an attributed vector, e.g.,
+
+.pull-left[
+```{r}
+w <- matrix(1:9, nrow = 3)
+w
+attributes(w)
+```
+]
+.pull-right[
+```{r}
+class(w)
+typeof(w)
+is.vector(w) ## base R
+purrr::is_vector(w) 
+```
+]
+---
+class: clear
+.pull-left[
+```{r}
+z1 <- data.frame(x = 1:3, y = w)
+z1
+str(z1)
+z1[2,"y"]
+```
+]
+.pull-right[
+```{r}
+z2 <- data.frame(x = 1:3, y = I(w))
+z2
+str(z2)
+z2[2,"y"]
+```
+]
+---
+# dplyr::tibble
+The previous examples illustrate that we can have data frames whose columns are themselve lists. The **tibble** class (and associated $\mathtt{tibble()}$ function) from the **dplyr** library allows for easier construction of data frames (including those with list columns). 
+
+```{r error = TRUE,linewidth=80}
+y <- data.frame(x = 1:3, z = list(1:2,1:3,1:4))
+```
+
+.pull-left[
+```{r error = TRUE}
+
+y1 <- data.frame(x = 1:3, 
+        z = I(list(1:2,1:3,1:4)))
+y1
+```
+]
+.pull-right[
+```{r message = FALSE}
+library(dplyr)
+y2 <- tibble(
+  x = 1:3,
+  z = list(1:2,1:3,1:4))
+y2
+```
+]
+---
+class: clear
+```{r}
+str(y1)
+str(y2)
+```
+---
+# Creating list columns
+Using the **dplyr** and **tidyr** approach we can create list columns in a data frame via three widely applicable methods
++ Nesting via $\mathtt{tidyr::nest}$
++ With $\mathtt{dplyr::mutate}$ and vectorised functions that returns a list.
++ With $\mathtt{dplyr::summarise}$ and summary functions that return multiple results.
+
+We illustrate these techniques using the **gapminder** dataframe.
+```{r}
+library(gapminder)
+gapminder
+```
+---
+class: clear
+.pull-left[
+```{r}
+library(dplyr)
+library(tidyr)
+nested <- gapminder %>% 
+  group_by(country,continent) %>% 
+  nest()
+nested
+## Equivalently
+## nested <- gapminder %>% nest(-country,-continent)
+## nested <- gapminder %>% nest(year:gdpPercap)
+```
+]
+.pull-right[
+```{r}
+nested[1,"data"]
+nested$data[[1]]
+```
+]
+---
+class: clear
+With these list columns, we can then do 
+```{r}
+library(purrr)
+country_model <- function(df){
+  lm(lifeExp ~ year, data = df)
+}
+nested_lm <- nested %>% mutate(model = map(data, country_model))
+nested_lm
+```
+---
+class:clear
+```{r}
+nested_lm$model[[1]]
+```
+The power of these list columns are that the data and the analysis are all synchronized within the $\mathtt{nested\_lm}$ data frame. For example 
+```{r}
+nested_lm %>% filter(continent == "Europe")
+```
+---
+class: clear
+```{r}
+nested_lm %>% arrange(continent,country)
+```
+As another example, consider
+```{r}
+coef_fun <- function(mod){
+  coefficients <- coef(mod)
+  return(tibble(intercept = coefficients[1], slope = coefficients[2]))
+}
+nested_lm <- nested_lm %>% mutate(coefficients = map(model, coef_fun))
+(nested_lm$coefficients)[[1]]
+```
+---
+class: clear
+```{r}
+nested_lm
+nested_lm %>% unnest(coefficients)
+```
