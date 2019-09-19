@@ -14,10 +14,6 @@ output:
     df_print: tibble
    
 --- 
-\[
-\DeclareMathOperator*{\argmin}{arg\,min}
-\]
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
