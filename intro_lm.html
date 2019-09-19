@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>The hitchhiker’s guide to Linear Models</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="CSC/ST 442" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# The hitchhiker’s guide to Linear Models
+## In 75 minutes
+### CSC/ST 442
+### Fall 2019
+
+---
+
+\[
+\DeclareMathOperator*{\argmin}{arg\,min}
+\]
+
+
+
+# Time is an illusion. lunchtime doubly so
+&lt;img src="https://images-na.ssl-images-amazon.com/images/I/81XSN3hA5gL.jpg" width="40%" style="display: block; margin: auto;" /&gt;
+---
+#Regression is everywhere
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/linear_regression_screenshot.png" alt="120 millions hits on Google" width="80%" /&gt;
+&lt;p class="caption"&gt;120 millions hits on Google&lt;/p&gt;
+&lt;/div&gt;
+
+---
+class: clear
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/pubmed_regression.png" alt="750K articles on PubMed" width="70%" /&gt;
+&lt;p class="caption"&gt;750K articles on PubMed&lt;/p&gt;
+&lt;/div&gt;
+---
+class: clear
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-4-1.png" alt="Even your exam scores exhibit regression to the mean" width="120%" /&gt;
+&lt;p class="caption"&gt;Even your exam scores exhibit regression to the mean&lt;/p&gt;
+&lt;/div&gt;
+
+---
+#Prelude to linear models: curve fitting
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-5-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+Q. How can we use `Foo` to predict `Bar` ?
+
+.pull-left[
+
+```r
+p + geom_hline(
+  yintercept = 0, color="blue")
+```
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+p + geom_vline(
+  xintercept = 0, color = "red")
+```
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-7-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: clear
+Q. How can we use `Foo` to predict `Bar` ?
+
+.pull-left[
+
+```r
+p + geom_hline(
+  yintercept = mean(df$y), 
+  color = "blue")
+```
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-8-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+p + geom_smooth(
+  method = "lm", se = FALSE)
+```
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-9-1.png" alt="Simple linear regression line" width="120%" /&gt;
+&lt;p class="caption"&gt;Simple linear regression line&lt;/p&gt;
+&lt;/div&gt;
+]
+
+---
+class: clear
+.pull-left[
+
+```r
+p + geom_smooth(method = "lm", 
+  formula = y ~ x + I(x^2),
+  se = FALSE, color = "blue")
+```
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-10-1.png" alt="Quadratic regression line" width="120%" /&gt;
+&lt;p class="caption"&gt;Quadratic regression line&lt;/p&gt;
+&lt;/div&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+p + geom_smooth(method = "loess", 
+  se = FALSE, color = "blue")
+```
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-11-1.png" alt="Loess smoothing" width="120%" /&gt;
+&lt;p class="caption"&gt;Loess smoothing&lt;/p&gt;
+&lt;/div&gt;
+]
+
+---
+class: clear
+.pull-left[
+
+```r
+fhat &lt;- approxfun(df$x, df$y)
+df.interpolate &lt;- tibble(
+  x = seq(min(df$x), max(df$x),
+          length.out = 100),
+  y = fhat(x))
+
+p + geom_line(data = df.interpolate, 
+              aes(x = x, y = y),
+              color = "blue")
+```
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-12-1.png" alt="Linear Interpolation" width="120%" /&gt;
+&lt;p class="caption"&gt;Linear Interpolation&lt;/p&gt;
+&lt;/div&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+fhat &lt;- splinefun(df$x, df$y)
+df.interpolate &lt;- tibble(
+  x = seq(min(df$x), max(df$x),
+          length.out = 100),
+  y = fhat(x))
+
+p + geom_line(data = df.interpolate, 
+              aes(x = x, y = y),
+              color = "blue")
+```
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-13-1.png" alt="Cubic splines interpolation" width="120%" /&gt;
+&lt;p class="caption"&gt;Cubic splines interpolation&lt;/p&gt;
+&lt;/div&gt;
+]
+---
+class: clear
+
+##Q: Which of the above curve "fits" the data the best ?
+
+##A: Which data ? The existing data ? the new data ? the non-noisy data ? the noisy but real data ?
+
+---
+class: clear
+
+
+```r
+set.seed(123)
+df.new &lt;- tibble( x = rnorm(50), fx = exp(x) + 2*x^2, y = fx + rnorm(50, sd = 0.5))
+p + geom_smooth(method = "lm", se = FALSE, color = "blue", linetype = "dashed") + 
+  geom_smooth(method = "lm", formula = y ~ x + I(x^2), color = "blue") +
+  geom_line(data = df.interpolate, aes(x = x, y = y), color = "green", linetype = "dashed") +
+  geom_line(data = df.new, aes(x = x, y = fx), color = "red", linetype = "dashed") +
+  geom_point(data = df.new, aes(x = x, y = y), color = "red")
+```
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+In this case the true data is generated as
+$$ (Y | X = x) \sim \exp(x) + 2x^2 + N(0, .25) $$
+and among the various ways of fitting a curve to the data, the best one is
+$$ \hat{f}(x) = 0.98 + 1.3372x + 2.5 x^2. $$
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+# Defining regression.
+Given data `\(\{(X_1, Y_1), \dots, (X_n, Y_n)\} \subset \mathbb{R}^2\)`, find/estimate a function `\(f\)` such that
+$$ Y_i \approx \hat{Y}_i = f(X_i) $$
+
+Q1. Why not just use `\(\hat{Y}_i = Y_i\)` ?
+
+A1. Cannot be use for new data. Is useless for summarizing/understanding existing data. 
+
+--
+
+Q2. But isn't there an infinite number of possible `\(f\)`!
+
+A2. Ah, but is there a countable or uncountable number of possible `\(f\)` ?
+
+
+---
+class: clear
+
+So restricting the class/type of `\(f\)` is necessary. 
+
++ A lot of restrictions `\(\Longrightarrow\)` parametric regression, 
+      + `\(f(x) = 0\)`
+      + `\(f(x) = \beta_0 + \beta_1 x; \quad \beta_0, \beta_1 \in \mathbb{R}\)`
+      + `\(f(x) = \sum_{k=0}^{p} \beta_k x^k; \quad \beta_0, \dots, \beta_p \in \mathbb{R}\)`
+      + `\(f(x) = \sum_{k=0}^{p} \beta_k f_k(x); \quad \beta_, \dots, \beta_p, \in \mathbb{R}, \quad f_k(x)\)` are **known** functions.
+
++ Little or no restrictions `\(\Longrightarrow\)` semiparametric/non-parametric regression
+      + `\(f\)` has a countable number of dis-continunity points. 
+      + `\(f\)` is continuous.
+      + `\(f\)` has continuous second-order derivatives on `\([-1, 1]\)`. 
+      + `\(f\)` satisfies `\(\int {(f''(x))^2 \, \mathrm{d}x} \leq 1\)`.
+      + `\(f = \sum_{k=0}^{p} \beta_k x^k + g(x); \quad \beta_0, \dots, \beta_p \in \mathbb{R}\)`, and `\(\int(g''(x))^2 \,\mathrm{d}x \leq 1\)`. 
+
+---
+class: clear
+Still, a criteria is needed to select one possible `\(f\)` among an infinite number of possible `\(f\)` (even in the parametric case)
+
+### Least square criterion
+`$$\hat{f} = \arg\min_{f \in \mathcal{C}} \sum_{i=1}^{n}(Y_i - f(X_i))^2$$`
+where `\(\mathcal{C}\)` indicates a class of functions to which `\(f\)` should be restricted.
+
+--
+
+Q. Does a minimizer `\(\hat{f}\)` exists ? Can we find one "efficiently" ? 
+
+A. In general, yes if `\(\mathcal{C}\)` is "parametric" and sometimes if `\(\mathcal{C}\)` is semiparametric/non-parametric. 
+
+--
+
+
+&gt; The method of least squares is the automobile of modern statistical
+&gt; analysis: despite its limitations, occasional accidents, and
+&gt; incidental pollution, it and its numerous variations, extensions, and
+&gt; related conveyances carry the bulk of statistical analyses, and are
+&gt; known and valued by nearly all.
+&gt; 
+&gt; Stigler (1981)
+
+---
+class: clear
+
+
+&gt; The method of least squares was the dominant theme --- the
+&gt;   leitmotif --- of nineteenth-century statistics. In several respects
+&gt;   it was to statistics what the calculus had been to mathematics a
+&gt;   century earlier.  "Proofs" of the method gave direction to the
+&gt;   development of statistical theory, handbooks explaining its use
+&gt;   guided the application of the higher methods, and disputes on the
+&gt;   priority of its discovery signaled the intellectual community's
+&gt;   recognition of the method's value. Like the calculus of
+&gt;   mathematics, this "calculus of observations" did not spring into
+&gt;   existence without antecedents, and the exploration of its
+&gt;   subtleties and potential took over a century.
+&gt; 
+&gt; --- Stigler (1986)
+
+See also S. Stigler article [Gauss and the investion of least squares](https://projecteuclid.org/euclid.aos/1176345451).
+
+---
+# Warmup: simple linear regression (I)
+Given data `\(\{(X_1, Y_1), \dots, (X_n, Y_n)\} \subset \mathbb{R}^2\)`, find/estimate a function `\(f(x) = \beta_0 + \beta_1 x\)` such that
+$$ Y_i \approx \hat{Y}_i = f(X_i) $$
+
+Here `\(f\)` is the class of linear functions in `\(x\)` and hence 
+`$$\hat{f}(x) = \hat{\beta}_0 + \hat{\beta}_1 x \quad \text{where} \quad (\hat{\beta}_0, \hat{\beta}_1) = \arg\min_{b_0, b_1} \sum_{i=1}^{n}(Y_i - b_0 - b_1 X_i)^2.$$`
+
+Letting `\(Q(b_0, b_1)\)` be the objective funcion to be minimized, take the patial derivatives of `\(Q\)` with respect to `\(b_0\)` and `\(b_1\)`, set the resulting expession to zero and solve for `\(\hat{\beta}_0\)` and `\(\hat{\beta}_1\)`, i.e.,
+---
+class: clear
+`$$\begin{gather*}
+\frac{\partial Q}{\partial b_0} = - \sum_{i} 2 (Y_i - b_0 - b_1
+    X_i)  \\
+    \frac{\partial Q}{\partial b_1} = - \sum_{i} 2 X_i (Y_i - b_0 -
+    b_1 X_i)
+\end{gather*}$$`
+
+`\((\hat{\beta}_0,\hat{\beta}_1)\)` is thus **a** solution of 
+`$$\begin{gather*}\sum_{i}  (Y_i - \hat{\beta}_0 - \hat{\beta}_1    X_i) = 0 \\
+ \sum_{i}  X_i (Y_i - \hat{\beta}_0 - \hat{\beta}_1 X_i) = 0
+\end{gather*}$$`
+
+This is a system of two equations in two unknowns and hence (`ez pz`)
+$$
+`\begin{gather*}
+\hat{\beta}_1 = \frac{\sum_{i} (X_i - \bar{X}) (Y_i -
+      \bar{Y})}{\sum_{i}(X_i - \bar{X})^2}; \quad \hat{\beta}_0 =
+    \bar{Y} - \hat{\beta}_1 \bar{X}
+\end{gather*}`
+$$
+where `\(\bar{X} = n^{-1} \sum_{i} X_i\)` and `\(\bar{Y} = n^{-1} \sum_{i} Y_i\)`. 
+
+---
+# Warmup: simple linear regression (II)
+Given data `\(\{(X_1, Y_1), \dots, (X_n, Y_n)\} \subset \mathbb{R}^2\)`, find/estimate a function `\(f(x) = \beta_0 + \beta_1 x + \beta_x^2\)` such that
+$$ Y_i \approx \hat{Y}_i = f(X_i) $$
+
+Here `\(f\)` is the class of quadratic functions in `\(x\)` and hence 
+`$$\hat{f}(x) = \hat{\beta}_0 + \hat{\beta}_1 x + \hat{\beta}_2 x^2 \quad \text{where}$$`
+`$$(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2) = \arg\min_{b_0, b_1, b_2} \sum_{i=1}^{n}(Y_i - b_0 - b_1 X_i - b_2 X_i^2)^2.$$`
+
+Letting `\(Q(b_0, b_1, b_2)\)` be the objective funcion to be minimized, take the patial derivatives of `\(Q\)` with respect to `\(b_0\)`, `\(b_1\)`, and `\(b_2\)`, set the resulting expession to zero and solve for `\(\hat{\beta}_0\)`, `\(\hat{\beta}_1\)`, and `\(\hat{\beta}_2\)`, i.e.,
+
+---
+class: clear
+`$$\begin{gather*}
+\frac{\partial Q}{\partial b_0} = - \sum_{i} 2 (Y_i - b_0 - b_1
+    X_i - b_2 X_i^2)  \\
+    \frac{\partial Q}{\partial b_1} = - \sum_{i} 2 X_i (Y_i - b_0 -
+    b_1 X_i - b_2 X_i^2) \\
+    \frac{\partial Q}{\partial b_2} = - \sum_{i} 2 X_i^2 (Y_i - b_0 -
+    b_1 X_i - b_2 X_i^2)  
+\end{gather*}$$`
+
+Letting `\(Z_i = X_i^2\)`, 
+`\((\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2)\)` is thus **a** solution of 
+`$$\begin{gather*}\sum_{i}  (Y_i - \hat{\beta}_0 - \hat{\beta}_1 X_i - \hat{\beta}_2 Z_i) = 0 \\
+ \sum_{i} X_i (Y_i - \hat{\beta}_0 - \hat{\beta}_1 X_i - \hat{\beta}_2 Z_i) = 0 \\
+  \sum_{i}  Z_i (Y_i - \hat{\beta}_0 - \hat{\beta}_1 X_i - \hat{\beta}_2 Z_i) = 0
+\end{gather*}$$`
+
+---
+class: clear
+This is a system of three equations in three unknowns and hence (`ez ez`)
+`$$\begin{gather*}
+  \hat{\beta}_2 = \tfrac{\sum_{i} (Z_i - \bar{Z})^2 \sum_{i} (X_i - \bar{X}) (Y_i - \bar{Y}) - \sum_{i} (X_i - \bar{X})(Z_i - \bar{Z}) \sum_{i} (Z_i - \bar{Z}) (Y_i - \bar{Y})}{\sum_{i}(X_i - \bar{X})^2 \sum_{i}(Z_i - \bar{Z})^2 - \Bigl(\sum_{i}(X_i - \bar{X})(Z_i - \bar{Z})\Bigr)^2} \\
+    \hat{\beta}_2 = \tfrac{\sum_{i} (X_i - \bar{X})^2 \sum_{i} (Z_i - \bar{Z}) (Y_i - \bar{Y}) - \sum_{i} (X_i - \bar{X})(Z_i - \bar{Z}) \sum_{i} (X_i - \bar{X}) (Y_i - \bar{Y})}{\sum_{i}(X_i - \bar{X})^2 \sum_{i}(Z_i - \bar{Z})^2 - \Bigl(\sum_{i}(X_i - \bar{X})(Z_i - \bar{Z})\Bigr)^2} \\
+    \hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X} - \hat{\beta}_2 \bar{Z}
+\end{gather*}$$`
+where `\(\bar{X} = n^{-1} \sum_{i} X_i\)`, `\(\bar{Y} = n^{-1} \sum_{i} Y_i\)`, and `\(\bar{Z} = n^{-1} \sum_{i} Z_i\)`.
+
+This system of solutions does not depend on `\(Z_i = X_i^2\)`.
+
+---
+# Warmup: Simple linear regression (III)
+Given data `\(\{(X_1, Y_1, Z_1, W_1), \dots, (X_n, Y_n, Z_n, W_n)\} \subset \mathbb{R}^4\)`, find/estimate a function `\(f(x,z,w) = \beta_0 + \beta_1 x + \beta_z + \beta_3 w\)` such that
+$$ Y_i \approx \hat{Y}_i = f(X_i, Z_i, W_i) $$
+
+`\(\hat{f}\)` now satifies
+
+`$$(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3) = \arg\min_{b_0, b_1, b_2, b_3} \sum_{i=1}^{n}(Y_i - b_0 - b_1 X_i - b_2 Z_i - b_3 W_i)^2.$$`
+
+Letting `\(Q(b_0, b_1, b_2, b_3)\)` be the objective funcion to be minimized, take the patial derivatives of `\(Q\)` with respect to `\(b_0\)`, `\(b_1\)`, and `\(b_2\)`, and `\(b_3\)` set the resulting expession to zero and solve for `\(\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3)\)` now yield a system of four equations in four unknowns whole solution is `ez ez` ...
+---
+class: clear
+
+## I don't know!!!
+
+--
+## Stop making me do algebra!!!
+
+--
+## I quit!
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

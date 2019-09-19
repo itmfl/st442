@@ -926,10 +926,24 @@ models %>% map(summary) %>%
 ]
 ---
 class: clear
+To clarify the previous slide, consider
+```{r output.lines = 12}
+str(models)
+names(models[[1]])
+```
+---
+class: clear
+```{r output.lines = 12}
+str(summary(models[[1]]))
+names(summary(models[[1]]))
+```
+---
+class: clear
 ```{r}
 x <- list(list(1,2,3), list(4,5,6), list(7,8,9))
 ## Extract 2nd element from each list
 x %>% sapply('[[',2) 
+x %>% sapply('[' ,2) ## this does not work
 x %>% map_dbl(2)
 ```
 ---
@@ -964,6 +978,13 @@ param <- list(
   list(size = 10, prob = 0.5)
 )
 invoke_map(f, param, n = 1)
+
+n <- list(list(n = 2),
+          list(n = 3),
+          list(n = 4))
+
+invoke_map(f, 
+  map2(.x = param, .y = n, c))
 ```
 ]
 

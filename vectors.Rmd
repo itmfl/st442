@@ -18,6 +18,26 @@ output:
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
 library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
 hook_output = knit_hooks$get('message')
 knit_hooks$set(message = function(x, options) {
   # this hook is used only when the linewidth option is not NULL
@@ -629,8 +649,15 @@ nested_lm %>% unnest(coefficients)
 ```
 ---
 class: clear
+```{r output.lines = 16}
+p <- nested_lm %>% filter(country == "Mali") %>% purrr::pluck("plot") %>% pluck(1)
+str(p)
+```
+---
+class: clear
 ```{r out.width="70%"}
-nested_lm %>% filter(country == "Mali") %>% purrr::pluck("plot") %>% pluck(1)
+names(p)
+p
 ```
 ---
 class: clear

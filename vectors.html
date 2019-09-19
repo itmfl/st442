@@ -4,7 +4,7 @@
     <title>Introduction to Data Science</title>
     <meta charset="utf-8" />
     <meta name="author" content="CSC/ST 442" />
-    <meta name="date" content="2019-09-17" />
+    <meta name="date" content="2019-09-19" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
@@ -16,7 +16,7 @@ class: center, middle, inverse, title-slide
 # Introduction to Data Science
 ## The vectors of R
 ### CSC/ST 442
-### 2019-09-17
+### 2019-09-19
 
 ---
 
@@ -1637,10 +1637,46 @@ nested_lm %&gt;% unnest(coefficients)
 class: clear
 
 ```r
-nested_lm %&gt;% filter(country == "Mali") %&gt;% purrr::pluck("plot") %&gt;% pluck(1)
+p &lt;- nested_lm %&gt;% filter(country == "Mali") %&gt;% purrr::pluck("plot") %&gt;% pluck(1)
+str(p)
 ```
 
-&lt;img src="vectors_files/figure-html/unnamed-chunk-67-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+```
+## List of 9
+##  $ data       :Classes 'tbl_df', 'tbl' and 'data.frame':	12 obs. of  4 variables:
+##   ..$ year     : int [1:12] 1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+##   ..$ lifeExp  : num [1:12] 33.7 35.3 36.9 38.5 40 ...
+##   ..$ pop      : int [1:12] 3838168 4241884 4690372 5212416 5828158 6491649 6998256 7634008 8416215 9384984 ...
+##   ..$ gdpPercap: num [1:12] 452 490 496 545 581 ...
+##  $ layers     :List of 2
+##   ..$ :Classes 'LayerInstance', 'Layer', 'ggproto', 'gg' &lt;ggproto object: Class LayerInstance, Layer, gg&gt;
+##     aes_params: list
+##     compute_aesthetics: function
+##     compute_geom_1: function
+##     compute_geom_2: function
+##     compute_position: function
+##     compute_statistic: function
+##     data: waiver
+##     draw_geom: function
+...
+```
+---
+class: clear
+
+```r
+names(p)
+```
+
+```
+## [1] "data"        "layers"      "scales"      "mapping"     "theme"      
+## [6] "coordinates" "facet"       "plot_env"    "labels"
+```
+
+```r
+p
+```
+
+&lt;img src="vectors_files/figure-html/unnamed-chunk-68-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Finally we present an example of using **dplyr::summarise** to create and simplify list columns.
