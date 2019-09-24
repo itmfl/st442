@@ -363,14 +363,14 @@ This system of solutions does not depend on `\(Z_i = X_i^2\)`.
 
 ---
 # Warmup: Simple linear regression (III)
-Given data `\(\{(X_1, Y_1, Z_1, W_1), \dots, (X_n, Y_n, Z_n, W_n)\} \subset \mathbb{R}^4\)`, find/estimate a function `\(f(x,z,w) = \beta_0 + \beta_1 x + \beta_z + \beta_3 w\)` such that
+Given data `\(\{(X_1, Y_1, Z_1, W_1), \dots, (X_n, Y_n, Z_n, W_n)\} \subset \mathbb{R}^4\)`, find/estimate a function `\(f(x,z,w) = \beta_0 + \beta_1 x + \beta_2 z + \beta_3 w\)` such that
 $$ Y_i \approx \hat{Y}_i = f(X_i, Z_i, W_i) $$
 
 `\(\hat{f}\)` now satifies
 
 `$$(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3) = \arg\min_{b_0, b_1, b_2, b_3} \sum_{i=1}^{n}(Y_i - b_0 - b_1 X_i - b_2 Z_i - b_3 W_i)^2.$$`
 
-Letting `\(Q(b_0, b_1, b_2, b_3)\)` be the objective funcion to be minimized, take the patial derivatives of `\(Q\)` with respect to `\(b_0\)`, `\(b_1\)`, and `\(b_2\)`, and `\(b_3\)` set the resulting expession to zero and solve for `\(\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3)\)` now yield a system of four equations in four unknowns whole solution is `ez ez` ...
+Letting `\(Q(b_0, b_1, b_2, b_3)\)` be the objective funcion to be minimized, take the patial derivatives of `\(Q\)` with respect to `\(b_0\)`, `\(b_1\)`, `\(b_2\)`, and `\(b_3\)` and set the resulting expession to zero and solve for `\(\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3)\)` now yield a system of four equations in four unknowns whole solution is `ez ez` ...
 ---
 class: clear
 
@@ -506,34 +506,60 @@ sat
 class: clear
 
 ```r
-mod &lt;- lm(math ~ expend + ratio + salary + takers, data = sat)
+mod &lt;- lm(math ~ expend + ratio + salary, data = sat)
+mod.alt &lt;- lm(math ~ expend + ratio, data = sat)
 summary(mod)
 ```
 
 ```
 ## 
 ## Call:
-## lm(formula = math ~ expend + ratio + salary + takers, data = sat)
+## lm(formula = math ~ expend + ratio + salary, data = sat)
 ## 
 ## Residuals:
 ##    Min     1Q Median     3Q    Max 
-## -54.27 -10.28  -1.55   8.80  45.56 
+## -74.44 -24.82  -2.74  20.60  72.04 
 ## 
 ## Coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  536.272     30.221   17.74  &lt; 2e-16 ***
-## expend         3.156      6.029    0.52     0.60    
-## ratio         -1.543      1.838   -0.84     0.41    
-## salary         1.008      1.365    0.74     0.46    
-## takers        -1.567      0.132  -11.86  1.9e-15 ***
+## (Intercept)   548.82      60.66    9.05  8.9e-12 ***
+## expend          9.63      12.06    0.80    0.428    
+## ratio           3.83       3.58    1.07    0.290    
+## salary         -4.64       2.57   -1.81    0.078 .  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 18.7 on 45 degrees of freedom
-## Multiple R-squared:  0.801,	Adjusted R-squared:  0.784 
-## F-statistic: 45.4 on 4 and 45 DF,  p-value: 3.02e-15
+## Residual standard error: 37.5 on 46 degrees of freedom
+## Multiple R-squared:  0.181,	Adjusted R-squared:  0.128 
+## F-statistic:  3.4 on 3 and 46 DF,  p-value: 0.0255
+```
+---
+
+```r
+summary(mod.alt)
 ```
 
+```
+## 
+## Call:
+## lm(formula = math ~ expend + ratio, data = sat)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -78.01 -28.80   0.92  18.75  73.55 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  584.085     58.790    9.94    4e-13 ***
+## expend       -10.743      4.339   -2.48    0.017 *  
+## ratio         -0.704      2.609   -0.27    0.788    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 38.4 on 47 degrees of freedom
+## Multiple R-squared:  0.123,	Adjusted R-squared:  0.0861 
+## F-statistic: 3.31 on 2 and 47 DF,  p-value: 0.0452
+```
 ---
 class: clear
 
@@ -542,18 +568,18 @@ model.matrix(mod) ## Design matrix
 ```
 
 ```
-##                (Intercept) expend ratio salary takers
-## Alabama                  1   4.41  17.2   31.1      8
-## Alaska                   1   8.96  17.6   48.0     47
-## Arizona                  1   4.78  19.3   32.2     27
-## Arkansas                 1   4.46  17.1   28.9      6
-## California               1   4.99  24.0   41.1     45
-## Colorado                 1   5.44  18.4   34.6     29
-## Connecticut              1   8.82  14.4   50.0     81
-## Delaware                 1   7.03  16.6   39.1     68
-## Florida                  1   5.72  19.1   32.6     48
-## Georgia                  1   5.19  16.3   32.3     65
-## Hawaii                   1   6.08  17.9   38.5     57
+##                (Intercept) expend ratio salary
+## Alabama                  1   4.41  17.2   31.1
+## Alaska                   1   8.96  17.6   48.0
+## Arizona                  1   4.78  19.3   32.2
+## Arkansas                 1   4.46  17.1   28.9
+## California               1   4.99  24.0   41.1
+## Colorado                 1   5.44  18.4   34.6
+## Connecticut              1   8.82  14.4   50.0
+## Delaware                 1   7.03  16.6   39.1
+## Florida                  1   5.72  19.1   32.6
+## Georgia                  1   5.19  16.3   32.3
+## Hawaii                   1   6.08  17.9   38.5
 ...
 ```
 
@@ -565,8 +591,8 @@ t(beta.hat)
 ```
 
 ```
-##      (Intercept) expend ratio salary takers
-## [1,]         536   3.16 -1.54   1.01  -1.57
+##      (Intercept) expend ratio salary
+## [1,]         549   9.63  3.83  -4.64
 ```
 ---
 # Inference in linear models
@@ -632,11 +658,10 @@ summary(mod)$coefficients
 
 ```
 ##             Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)   536.27     30.221  17.745 6.09e-22
-## expend          3.16      6.029   0.524 6.03e-01
-## ratio          -1.54      1.838  -0.839 4.06e-01
-## salary          1.01      1.365   0.739 4.64e-01
-## takers         -1.57      0.132 -11.855 1.94e-15
+## (Intercept)   548.82      60.66   9.048 8.88e-12
+## expend          9.63      12.06   0.799 4.28e-01
+## ratio           3.83       3.58   1.070 2.90e-01
+## salary         -4.64       2.57  -1.805 7.76e-02
 ```
 
 ```r
@@ -645,12 +670,11 @@ summary(mod)$sigma^2* summary(mod)$cov.unscaled
 ```
 
 ```
-##             (Intercept)   expend    ratio  salary  takers
-## (Intercept)      913.33 -97.1323 -44.6882 11.9346  0.1400
-## expend           -97.13  36.3441   8.2679 -7.4483  0.0722
-## ratio            -44.69   8.2679   3.3782 -1.8145  0.0599
-## salary            11.93  -7.4483  -1.8145  1.8621 -0.0629
-## takers             0.14   0.0722   0.0599 -0.0629  0.0175
+##             (Intercept) expend   ratio salary
+## (Intercept)      3679.4 -394.1 -182.19  50.17
+## expend           -394.1  145.4   32.35 -28.99
+## ratio            -182.2   32.4   12.80  -6.45
+## salary             50.2  -29.0   -6.45   6.60
 ```
 
 ```r
@@ -668,13 +692,13 @@ influence(mod)$hat ## Give the diagonal entries of the hat matrix H.
 
 ```
 ##        Alabama         Alaska        Arizona       Arkansas     California 
-##         0.0954         0.1803         0.0493         0.0538         0.2821 
+##         0.0773         0.1597         0.0481         0.0452         0.2790 
 ##       Colorado    Connecticut       Delaware        Florida        Georgia 
-##         0.0301         0.2255         0.0582         0.1407         0.0942 
+##         0.0300         0.2240         0.0357         0.1022         0.0362 
 ##         Hawaii          Idaho       Illinois        Indiana           Iowa 
-##         0.0516         0.0585         0.1348         0.0503         0.0588 
+##         0.0435         0.0584         0.0688         0.0348         0.0308 
 ##         Kansas       Kentucky      Louisiana          Maine       Maryland 
-##         0.1038         0.0411         0.0875         0.1397         0.0537 
+##         0.0526         0.0260         0.0875         0.0794         0.0442 
 ...
 ```
 
@@ -725,21 +749,27 @@ $$ \boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mat
 
 + If the model is true, then the estimated coefficients `\(\hat{\boldsymbol{\beta}}\)` are then **linear combinations** of independent normally distributed random variables and hence
 `$$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}).$$`
----
-class: clear
+
 
 + If the model is true, then the fitted values are also **linear combinations** of independent normally distributed random variables and hence
 `$$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathrm{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}).$$`
-+ The estimated coefficients `\(\hat{\boldsymbol{\beta}}\)` and the residuals `\(\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}\)` are **independent**. Thus `\(\hat{\boldsymbol{\beta}}\)` and the mean squared error `\(\mathrm{MSE}\)` are independent. The fitted values `\(\hat{\boldsymbol{y}}\)` and the residuals `\(\boldsymbol{e}\)` are also **independent**. 
-
-+ All of these facts form the basis for inference in linear models with normal errors. For example, the `\((1 \alpha) \times 100\%\)` confidence interval for a particular coefficent `\(\beta_j\)` is 
-`$$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$`
-where `\(\mathrm{s}^2\{\hat{\beta}_j\}\)` is the corresponding diagonal element of the matrix `\(\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]\)` and `\(c_{1 - \alpha/2}\)` is the appropriate percentile value. The `\((1 - \alpha) \times 100\%\)` confidence interval for a particular `\(\mathbb{E}[Y_*]\)` is
-`$$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}.$$`
 ---
 class: clear
 
-+ These confidence intervals are exact when the error is i.i.d. normal. If the error is i.i.d. but not normally distributed then, under mild conditions, the confidence intervals are approximate for sufficiently large `\(n\)`.
++ The estimated coefficients `\(\hat{\boldsymbol{\beta}}\)` and the residuals `\(\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}\)` are **independent**. Thus `\(\hat{\boldsymbol{\beta}}\)` and the mean squared error `\(\mathrm{MSE}\)` are independent. The fitted values `\(\hat{\boldsymbol{y}}\)` and the residuals `\(\boldsymbol{e}\)` are also **independent**. 
+
++ These facts form the basis for inference in linear models with normal errors. For example, the `\((1 - \alpha) \times 100\%\)` confidence interval for a particular coefficent `\(\beta_j\)` is 
+`$$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$`
+where `\(\mathrm{s}^2\{\hat{\beta}_j\}\)` is the corresponding diagonal element of the matrix `\(\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]\)` and `\(c_{1 - \alpha/2}\)` is the appropriate percentile value. 
+
++ The `\((1 - \alpha) \times 100\%\)` **confidence** interval for a particular `\(\mathbb{E}[Y_*]\)` is
+`$$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}.$$`
+The `\((1 - \alpha) \times 100\%\)` **prediction** interval for a particular `\(Y_*\)` is `$$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times (1 + \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*)}.$$`
+
+---
+class: clear
+
++ These confidence intervals are exact when the error is i.i.d. normal. If the error is i.i.d. but not normally distributed then, under mild conditions, the **confidence** intervals are approximate for sufficiently large `\(n\)` (the **prediction** intervals for `\(Y_*\)` might be terrible though)
 
 .pull-left[
 
@@ -748,12 +778,11 @@ confint(mod, level = 0.95)
 ```
 
 ```
-##              2.5 % 97.5 %
-## (Intercept) 475.40 597.14
-## expend       -8.99  15.30
-## ratio        -5.24   2.16
-## salary       -1.74   3.76
-## takers       -1.83  -1.30
+##              2.5 %  97.5 %
+## (Intercept) 426.73 670.923
+## expend      -14.64  33.905
+## ratio        -3.37  11.029
+## salary       -9.81   0.534
 ```
 
 ```r
@@ -763,11 +792,11 @@ predict(mod, sat, level = 0.95,
 
 ```
 ##                fit lwr upr
-## Alabama        542 531 554
-## Alaska         512 496 528
-## Arizona        512 503 520
-## Arkansas       544 535 552
-## California     486 466 506
+## Alabama        513 492 534
+## Alaska         480 450 510
+## Arizona        520 503 536
+## Arkansas       523 507 539
+## California     498 458 538
 ...
 ```
 ]
@@ -781,13 +810,13 @@ predict(mod, sat, level = 0.95,
 
 ```
 ##                fit lwr upr
-## Alabama        542 503 582
-## Alaska         512 471 553
-## Arizona        512 473 550
-## Arkansas       544 505 582
-## California     486 443 529
-## Colorado       514 476 553
-## Connecticut    465 424 507
+## Alabama        513 434 591
+## Alaska         480 399 562
+## Arizona        520 442 597
+## Arkansas       523 446 600
+## California     498 413 584
+## Colorado       511 435 588
+## Connecticut    457 373 540
 ...
 ```
 ]

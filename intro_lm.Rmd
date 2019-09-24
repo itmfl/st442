@@ -377,14 +377,14 @@ This system of solutions does not depend on $Z_i = X_i^2$.
 
 ---
 # Warmup: Simple linear regression (III)
-Given data $\{(X_1, Y_1, Z_1, W_1), \dots, (X_n, Y_n, Z_n, W_n)\} \subset \mathbb{R}^4$, find/estimate a function $f(x,z,w) = \beta_0 + \beta_1 x + \beta_z + \beta_3 w$ such that
+Given data $\{(X_1, Y_1, Z_1, W_1), \dots, (X_n, Y_n, Z_n, W_n)\} \subset \mathbb{R}^4$, find/estimate a function $f(x,z,w) = \beta_0 + \beta_1 x + \beta_2 z + \beta_3 w$ such that
 $$ Y_i \approx \hat{Y}_i = f(X_i, Z_i, W_i) $$
 
 $\hat{f}$ now satifies
 
 $$(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3) = \arg\min_{b_0, b_1, b_2, b_3} \sum_{i=1}^{n}(Y_i - b_0 - b_1 X_i - b_2 Z_i - b_3 W_i)^2.$$
 
-Letting $Q(b_0, b_1, b_2, b_3)$ be the objective funcion to be minimized, take the patial derivatives of $Q$ with respect to $b_0$, $b_1$, and $b_2$, and $b_3$ set the resulting expession to zero and solve for $\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3)$ now yield a system of four equations in four unknowns whole solution is `ez ez` ...
+Letting $Q(b_0, b_1, b_2, b_3)$ be the objective funcion to be minimized, take the patial derivatives of $Q$ with respect to $b_0$, $b_1$, $b_2$, and $b_3$ and set the resulting expession to zero and solve for $\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \hat{\beta}_3)$ now yield a system of four equations in four unknowns whole solution is `ez ez` ...
 ---
 class: clear
 
@@ -509,10 +509,14 @@ sat
 ---
 class: clear
 ```{r}
-mod <- lm(math ~ expend + ratio + salary + takers, data = sat)
+mod <- lm(math ~ expend + ratio + salary, data = sat)
+mod.alt <- lm(math ~ expend + ratio, data = sat)
 summary(mod)
 ```
-
+---
+```{r warning=FALSE, message = FALSE, echo = TRUE}
+summary(mod.alt)
+```
 ---
 class: clear
 ```{r output.lines = 12}
@@ -641,21 +645,27 @@ $$ \boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mat
 
 + If the model is true, then the estimated coefficients $\hat{\boldsymbol{\beta}}$ are then **linear combinations** of independent normally distributed random variables and hence
 $$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}).$$
----
-class: clear
+
 
 + If the model is true, then the fitted values are also **linear combinations** of independent normally distributed random variables and hence
 $$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathrm{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}).$$
-+ The estimated coefficients $\hat{\boldsymbol{\beta}}$ and the residuals $\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}$ are **independent**. Thus $\hat{\boldsymbol{\beta}}$ and the mean squared error $\mathrm{MSE}$ are independent. The fitted values $\hat{\boldsymbol{y}}$ and the residuals $\boldsymbol{e}$ are also **independent**. 
-
-+ All of these facts form the basis for inference in linear models with normal errors. For example, the $(1 \alpha) \times 100\%$ confidence interval for a particular coefficent $\beta_j$ is 
-$$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$
-where $\mathrm{s}^2\{\hat{\beta}_j\}$ is the corresponding diagonal element of the matrix $\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]$ and $c_{1 - \alpha/2}$ is the appropriate percentile value. The $(1 - \alpha) \times 100\%$ confidence interval for a particular $\mathbb{E}[Y_*]$ is
-$$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}.$$
 ---
 class: clear
 
-+ These confidence intervals are exact when the error is i.i.d. normal. If the error is i.i.d. but not normally distributed then, under mild conditions, the confidence intervals are approximate for sufficiently large $n$.
++ The estimated coefficients $\hat{\boldsymbol{\beta}}$ and the residuals $\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}$ are **independent**. Thus $\hat{\boldsymbol{\beta}}$ and the mean squared error $\mathrm{MSE}$ are independent. The fitted values $\hat{\boldsymbol{y}}$ and the residuals $\boldsymbol{e}$ are also **independent**. 
+
++ These facts form the basis for inference in linear models with normal errors. For example, the $(1 - \alpha) \times 100\%$ confidence interval for a particular coefficent $\beta_j$ is 
+$$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$
+where $\mathrm{s}^2\{\hat{\beta}_j\}$ is the corresponding diagonal element of the matrix $\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]$ and $c_{1 - \alpha/2}$ is the appropriate percentile value. 
+
++ The $(1 - \alpha) \times 100\%$ **confidence** interval for a particular $\mathbb{E}[Y_*]$ is
+$$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}.$$
+The $(1 - \alpha) \times 100\%$ **prediction** interval for a particular $Y_*$ is $$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times (1 + \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*)}.$$
+
+---
+class: clear
+
++ These confidence intervals are exact when the error is i.i.d. normal. If the error is i.i.d. but not normally distributed then, under mild conditions, the **confidence** intervals are approximate for sufficiently large $n$ (the **prediction** intervals for $Y_*$ might be terrible though)
 
 .pull-left[
 ```{r output.lines = 6}
