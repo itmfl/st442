@@ -514,6 +514,7 @@ mod.alt <- lm(math ~ expend + ratio, data = sat)
 summary(mod)
 ```
 ---
+class: clear
 ```{r warning=FALSE, message = FALSE, echo = TRUE}
 summary(mod.alt)
 ```
