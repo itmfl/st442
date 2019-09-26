@@ -567,6 +567,23 @@ summary(mod.alt)
 class: clear
 
 ```r
+## Note the negative correlation between expenditure and math
+## also the negative correlation betwen salary and math
+## and the positive correlation between salary and expenditure.
+cor(sat[c('math','expend','ratio','salary')]) 
+```
+
+```
+##           math expend    ratio   salary
+## math    1.0000 -0.349  0.09542 -0.40131
+## expend -0.3494  1.000 -0.37103  0.86980
+## ratio   0.0954 -0.371  1.00000 -0.00115
+## salary -0.4013  0.870 -0.00115  1.00000
+```
+---
+class: clear
+
+```r
 model.matrix(mod) ## Design matrix
 ```
 
@@ -597,6 +614,115 @@ t(beta.hat)
 ##      (Intercept) expend ratio salary
 ## [1,]         549   9.63  3.83  -4.64
 ```
+---
+# How to interpret a coefficent ?
+
+```r
+  library("SenSrivastava")
+  data(E2.2)
+  E2.2
+```
+
+```
+## # A tibble: 26 x 14
+##   Price   BDR   FLR    FP   RMS    ST   LOT   TAX   BTH   CON   GAR   CDN
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1    53     2   967     0     5     0    39   652   1.5     1   0       0
+## 2    55     2   815     1     5     0    33  1000   1       1   2       1
+## 3    56     3   900     0     5     1    35   897   1.5     1   1       0
+## 4    58     3  1007     0     6     1    24   964   1.5     0   2       0
+## 5    64     3  1100     1     7     0    50  1099   1.5     1   1.5     0
+## 6    44     4   897     0     7     0    25   960   2       0   1       0
+## # … with 20 more rows, and 2 more variables: L1 &lt;dbl&gt;, L2 &lt;dbl&gt;
+```
+ The housing price dataset from the **R** library \texttt{SenSrivastava}. The dataset
+  contains information about the selling price of
+  `\(26\)` houses in the Chicago area.
+
+---
+class: clear
+
+```r
+  mdl &lt;- lm(Price ~ FLR + RMS + BDR + BTH + GAR + LOT + FP + ST, E2.2)
+  summary(mdl)
+```
+
+```
+## 
+## Call:
+## lm(formula = Price ~ FLR + RMS + BDR + BTH + GAR + LOT + FP + 
+##     ST, data = E2.2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -10.306  -2.842  -0.151   3.288   7.952 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 18.63766    5.24096    3.56  0.00243 ** 
+## FLR          0.01757    0.00324    5.43  4.5e-05 ***
+## RMS          3.90437    1.61562    2.42  0.02719 *  
+## BDR         -7.69744    1.82943   -4.21  0.00059 ***
+## BTH          2.37459    2.55787    0.93  0.36622    
+## GAR          1.77086    1.40431    1.26  0.22433    
+## LOT          0.26352    0.13511    1.95  0.06781 .  
+## FP           6.90976    3.08358    2.24  0.03868 *  
+## ST          10.81866    2.30020    4.70  0.00020 ***
+...
+```
+
+---
+class: clear
+
+```r
+cor(E2.2[c('Price','FLR','RMS','BDR','BTH','GAR','LOT','FP','ST')])
+```
+
+```
+##       Price   FLR   RMS   BDR   BTH   GAR     LOT      FP      ST
+## Price 1.000 0.736 0.581 0.407 0.553 0.544  0.4228  0.3921  0.4563
+## FLR   0.736 1.000 0.740 0.675 0.525 0.405  0.3422  0.1622  0.1287
+## RMS   0.581 0.740 1.000 0.918 0.687 0.300  0.4311  0.1915  0.2337
+## BDR   0.407 0.675 0.918 1.000 0.633 0.239  0.4043  0.1729  0.2292
+## BTH   0.553 0.525 0.687 0.633 1.000 0.264  0.3723  0.1165  0.3508
+## GAR   0.544 0.405 0.300 0.239 0.264 1.000  0.1438  0.4121  0.1697
+## LOT   0.423 0.342 0.431 0.404 0.372 0.144  1.0000  0.3947 -0.0384
+## FP    0.392 0.162 0.192 0.173 0.117 0.412  0.3947  1.0000 -0.0185
+## ST    0.456 0.129 0.234 0.229 0.351 0.170 -0.0384 -0.0185  1.0000
+```
+
+```r
+coefficients(mdl)
+```
+
+```
+## (Intercept)         FLR         RMS         BDR         BTH         GAR 
+##     18.6377      0.0176      3.9044     -7.6974      2.3746      1.7709 
+##         LOT          FP          ST 
+##      0.2635      6.9098     10.8187
+```
+
+How should we interpret the coefficients ? For example, \texttt{BDR},
+the variable describing the number of bedrooms in the house, has a
+negative coefficient when used to predict the selling price.
+
+---
+class: clear
+
+Q. What does `\(\hat{\beta}_i\)` means in a regression with observational data ?
+
++ A1. "A unit change in the `\(i\)`-th predictor variable will produce, or is associated with, a
+    change of `\(\hat{\beta}_i\)` in the response". This is, on many occasions, invalid as there might be lurking
+    variables. For example, a unit change in shoe size do not really produce a change in `\(\hat{\beta}_i\)` in aptitude in small children.
+
++ A2. "$\hat{\beta}_i$ is the effect of the `\(i\)`-th variable when all
+    the other variables are held constant". In practice, individual
+    variables are intertwined, e.g., number of bedrooms and number of
+    rooms in a house, tax rates and budget. This also require
+    specification of the other predictor variables.
+    
++ A3: Ignore interpretation. Just focus on prediction a la Leo Breiman's [Statistical Modeling: The two cultures](https://projecteuclid.org/euclid.ss/1009213726)). But then there is no understanding ? Just blackbox magic ?
+
 ---
 # Inference in linear models
 Given `\(n\)` data points `\(\{(Y_i, X^{(1)}_i, X^{(2)}_i, \dots, X^{(p-1)}_i)\}_{i=1}^{n}\)`, suppose we fit a linear model
@@ -734,7 +860,7 @@ The general definition of a multivariate normal random vector is then simply
 
 **Definition**: `\(\boldsymbol{x}\)` is said to be a `\(p\)`-dimensional multivariate normal random vector with mean `\(\boldsymbol{\mu} \in \mathbb{R}^{p}\)` and `\(p \times p\)` covariance matrix `\(\boldsymbol{\Sigma}\)` if and only if there exists a `\(p \times q\)` matrix `\(\mathbf{A}\)` with `\(q = \mathrm{rk}(\boldsymbol{\Sigma}) \leq p\)` such that `\(\boldsymbol{\Sigma} = \mathbf{A} \mathbf{A}^{\top}\)` and
 `$$\boldsymbol{x} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\mu}; \quad \boldsymbol{z} = (Z_1, Z_2, \dots, Z_q) \sim \mathrm{MVN}(0, \mathbf{I}).$$`
-We denote this as `\(\bm{x} \sim \mathrm{MVN}(\bm{\mu}, \boldsymbol{\Sigma})\)`.
+We denote this as `\(\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma})\)`.
 
 ---
 class: clear
@@ -748,6 +874,21 @@ class: clear
 `$$(2 \pi)^{-n/2} \mathrm{det}(\boldsymbol{\Sigma})^{-1/2} \exp\Bigl(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^{\top} \boldsymbol{\Sigma}^{-1} (\boldsymbol{x} - \boldsymbol{\mu})\Bigr).$$`
 
 + If `\(\boldsymbol{\Sigma}\)` is not invertible, then `\(\boldsymbol{x}\)` has neither a probability density function nor a probability mass function.
+
+---
+class: clear
+
+The derivation of the density for the multivariate normal (in one direction) is as follows.
+Let `\(\mathbf{A}\)` be a `\(p \times p\)` invertible matrix and `\(\boldsymbol{z} = (z_1, z_2, \dots, z_p) \sim \mathrm{MVN}(0, \mathbf{I})\)`. Define `\(\boldsymbol{x} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\mu}\)` for some `\(\boldsymbol{\mu} \in \mathbb{R}^{p}\)`. Then given a "nice" set `\(S \subset \mathbb{R}^{p}\)`, 
+
+`$$\begin{split}\mathrm{pr}(\boldsymbol{x} \in S) &amp; = \int_{S} g(\boldsymbol{x}) d \boldsymbol{x} \\ &amp;= \int_{\mathbf{A}^{-1}(S - \boldsymbol{\mu})} f(\boldsymbol{z}) d \boldsymbol{z} \\ &amp;= \int_{S} f(\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})) \times \mathrm{det}(\mathbf{A}^{-1}) \, d \boldsymbol{x} \\
+&amp;= \int_{S} (2 \pi)^{-n/2} \mathrm{det}(\mathbf{A}^{-1}) \exp\Bigl(-\frac{1}{2} (\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu}))^{\top}(\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})\Bigr) \mathrm{d} \boldsymbol{x}
+\\ &amp;= (2 \pi)^{-n/2} \mathrm{det}(\boldsymbol{\Sigma})^{-1/2} \exp\Bigl(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^{\top} \boldsymbol{\Sigma}^{-1} (\boldsymbol{x} - \boldsymbol{\mu})\Bigr).
+\end{split}$$`
+
+where `\(\boldsymbol{\Sigma} = \mathbf{A} \mathbf{A}^{\top}\)` and hence `\(\boldsymbol{\Sigma}^{-1} = (\mathbf{A}^{-1})^{\top} \mathbf{A}^{-1}\)` and `\(\mathrm{det}(\boldsymbol{\Sigma}) = (\mathrm{det}(\mathbf{A}))^{2}\)`.
+
+The reverse direction, i.e., given an invertible covariance matrix `\(\boldsymbol{\Sigma}\)`, find the density, requires a bit more terminology and definitions that will be introduced later.
 
 ---
 # Normal error and linear models
@@ -832,10 +973,21 @@ predict(mod, sat, level = 0.95,
 ]
 
 ---
+class: clear
+
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/mindless_statistics.png" alt="Mindless statisics by G. Gigerenzer (2004)" width="60%" /&gt;
+&lt;p class="caption"&gt;Mindless statisics by G. Gigerenzer (2004)&lt;/p&gt;
+&lt;/div&gt;
+
+---
 
 class: clear
 
-&lt;img src="figures/robust_confint.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/robust_confint.png" alt="Robust misinterpretation of confidence intervals by Hoekstra et al. (2014)" width="80%" /&gt;
+&lt;p class="caption"&gt;Robust misinterpretation of confidence intervals by Hoekstra et al. (2014)&lt;/p&gt;
+&lt;/div&gt;
 
 ---
 class: clear
@@ -859,7 +1011,7 @@ class: clear
 Q. What about confidence regions for two or more coefficients ?
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_files/figure-html/unnamed-chunk-26-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-31-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
 &lt;p class="caption"&gt;Confidence ellipse and individual confidence intervals&lt;/p&gt;
 &lt;/div&gt;
 
@@ -869,33 +1021,182 @@ class: clear
 Q. What about confidence regions for two or more expected values ?
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_files/figure-html/unnamed-chunk-27-1.png" alt="Individual and simultaenous confidence intervals for the math score of 25 states" width="120%" height="90%" /&gt;
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-32-1.png" alt="Individual and simultaenous confidence intervals for the math score of 25 states" width="120%" height="90%" /&gt;
 &lt;p class="caption"&gt;Individual and simultaenous confidence intervals for the math score of 25 states&lt;/p&gt;
 &lt;/div&gt;
 
 ---
-# Transformations
+# Special kind of matrices
+
++ `\(\mathbf{A}\)` is said to be *symmetric* if `\(\mathbf{A} = \mathbf{A}^{\top}\)`. Symmetric matrices are necessarily square. The
+    class of symmetric matrices is closed under addition and scalar
+    multiplication. That is, if `\(\mathbf{A}_{1}, \mathbf{A}_{2}, \dots, \mathbf{A}_{K}\)` are symmetric matrices, then
+    `$$\mathbf{S} = c_{1} \mathbf{A}_{1} + c_{2} \mathbf{A}_{2} + \dots c_{K} \mathbf{A}_{K}$$`
+    is symmetric.
+    
++ A square matrix `\(\mathbf{A} = [a_{ij}]_{i,j=1}^{n}\)` is said
+    to be a *diagonal* matrix if `\(a_{ij} = 0\)` whenever `\(i \not = j\)`. Matrix multiplication of diagonal matrices result in
+    another diagonal matrix. Also, matrix multiplication of diagonal
+    matrices is commutative.
+
++ A square matrix `\(\mathbf{P}\)` is said to be *idempotent*
+  if `\(\mathbf{P} \mathbf{P} = \mathbf{P}\)`. For example,
+  `\(\mathbf{I}\)` is idempotent. As another example,
+  let `\(u\)` be any real number. Then
+     
+  `$$\mathbf{P} = \begin{bmatrix} u &amp; (1 - u)/2 \\ 2u &amp; 1 - u \end{bmatrix}$$`
+     
+  is idempotent.
+      
+---
+class: clear
+
+A square matrix `\(\mathbf{Q}\)` is said to be *orthogonal* if
+`\(\mathbf{Q} \mathbf{Q}^{\top} = \mathbf{I}\)`. For an orthogonal matrix
+`\(\mathbf{Q}\)`, `\(\mathbf{Q} \mathbf{Q}^{\top} = \mathbf{I}\)` if and only if
+`\(\mathbf{Q}^{\top} \mathbf{Q} = \mathbf{I}\)`. For example,
+
+`$$\mathbf{Q} = \frac{1}{2}\begin{bmatrix} \sqrt{3} &amp; -1 \\ 1 &amp; \sqrt{3} \end{bmatrix}; 
+\quad \mathbf{I}_{3}  = \begin{bmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp;
+1 \end{bmatrix}; \quad \mathbf{P} = \begin{bmatrix} 0 &amp; 1 &amp; 0
+&amp; 0 \\ 0 &amp; 0 &amp; 0 &amp; 1 \\ 1 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix}$$`
+    
+are all orthogonal matrices.
+    
+
+---
+# Positive semidefinite matrices
+
+**Definition**  A `\(n \times n\)` *symmetric* matrix `\(\mathbf{A}\)` is said to be
+positive definite if for all `\(\boldsymbol{v} = (v_1, v_2, \dots, v_n) \not = \boldsymbol{0}\)`,
+`$$\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v} = \sum_{i=1}^{n} \sum_{j=1}^{n} v_i
+    v_{j} a_{ij} &gt; 0$$`
+That is, a matrix `\(\mathbf{A}\)` is positive definite if it is
+symmetric and for any `\(\boldsymbol{v} \not = 0\)`, the quadratic form
+`\(\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v}\)` is positive.
+
+**Definition**  A `\(n \times n\)` *symmetric* matrix `\(\mathbf{A}\)` is said to be
+positive semidefinite definite if for all `\(\boldsymbol{v} = (v_1, v_2, \dots, v_n)\)`
+`$$\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v} = \sum_{i=1}^{n} \sum_{j=1}^{n} v_i v_j
+    a_{ij}$$`
+
+---
+class: clear
+
++ For any matrix `\(\mathbf{X}\)`, the matrix `\(\mathbf{A} = \mathbf{X} \mathbf{X}^{\top}\)` is positive semidefinite. Symmetric idempotent matrices are thus positive semidefinite.
+  
++ The class of positive semi-definite matrices form a cone. That is, for
+  any positive semi-definite matrix `\(\mathbf{A}_{1}, \mathbf{A}_{2}, \dots, \mathbf{A}_{K}\)` 
+  and any non-negative constants `\(c_1 \geq 0\)`, `\(c_2 \geq 0, \dots, c_{K} \geq 0\)`, we have
+ 
+  `$$\mathbf{S} = c_{1} \mathbf{A}_{1} + c_{2} \mathbf{A}_{2} + \dots + c_{K}  \mathbf{A}_{K}$$`
+  is positive semi-definite.
+
+  If the matrices `\(\mathbf{A}_{1}, \mathbf{A}_{2}, \dots, \mathbf{A}_{K}\)` are positive definite and the constants
+  `\(c_{1}, c_{2}, \dots, c_{K}\)` are positive, then `\(\mathbf{S}\)` as
+  defined above is also positive definite.
+  
++ Positive definite matrices serve as an analogue of positive numbers
+  on the real line while positive semi-definite matrices serve as
+  an analogue of non-negative numbers.
+  
+---
+# Spectral decomposition theorem
+
+We now present the spectral theorem, the crown jewel of matrix analysis and the most important result in data science!!!
+
+**Theorem** Let `\(\mathbf{A}\)` be a `\(n \times n\)` symmetric matrix. Then there
+    exists an `\(n  \times n\)` orthogonal matrix `\(\mathbf{U}\)` and a `\(n \times n\)` diagonal matrix `\(\mathbf{D}\)` (with real-valued entries) 
+    such that
+    `$$\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{T}.$$`
+    The diagonal entries of `\(\mathbf{D}\)` are the eigenvalues of
+    `\(\mathbf{A}\)` (which are all real-valued !!). The columns of `\(\mathbf{U}\)` are the eigenvectors of
+    `\(\mathbf{A}\)`. The decomposition 
+    `\(\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{T}\)` above is referred to as the **spectral
+    decomposition** or **eigen-decomposition** of `\(\mathbf{A}\)`.
+  
+---
+class: clear
+
+**Example**: Let `\(\mathbf{A}\)` be the matrix
+  `$$\mathbf{A} = \begin{bmatrix} 6 &amp; -2 \\ -2 &amp; 9 \end{bmatrix}.$$`
+  
+  Then the spectral decomposition of `\(\mathbf{A}\)` is
+  `\(\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top}\)` where 
+  
+  `$$\mathbf{U} = \frac{1}{\sqrt{5}} \begin{bmatrix} 1 &amp; 2 \\ -2 &amp; 1 \end{bmatrix}; \quad \mathbf{D} = \begin{bmatrix} 10 &amp; 0 \\ 0 &amp; 5 \end{bmatrix}.$$`
+
+---
+class: clear
+
+The spectral decomposition theorem allows us to define 
+functions of positive semidefinite/definite matrices other than inverse.
+
+**Theorem**: Let `\(f \colon [0, \infty) \mapsto \mathbb{R}\)` be a function
+on the non-negative real line. Then for any `\(n \times n\)` positive semidefinite matrix `\(\mathbf{A}\)`, `\(f\)` defines a `\(n \times n\)` symmetric matrix `\(f(\mathbf{A})\)` via
+`$$\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top} \Longrightarrow f(\mathbf{A}) = \mathbf{U} f(\mathbf{D}) \mathbf{U}^{\top}$$`
+where `\(f(\mathbf{D}) = \mathrm{diag}(f(d_{1}, f(d_{2}), \dots, f(d_{n})))\)` for `\(\mathbf{D} = \mathrm{diag}(d_{1},d_{2}, \dots, d_{n})\)`.
+
+As a corollary, for any positive semidefinite (psd) matrix `\(\mathbf{A}\)` and any positive number `\(r &gt; 0\)`, there exists a matrix `\(\mathbf{B}\)` such that
+`\(\mathbf{B}^{r} = \mathbf{A}\)`; we can take `\(\mathbf{B}\)` to also be (psd). Specifically, any positive definite (pd) matrix `\(\mathbf{A}\)` has a pd square root `\(\mathbf{A}^{1/2}\)`.
+
+**Important**: Using this construction, we can now derive the pdf for a multivariate normal in full generality. Let `\(\boldsymbol{\Sigma}\)` be a invertible covariance matrix. Then `\(\boldsymbol{\Sigma}\)` is positive definite and hence there exists a pd matrix `\(\mathbf{A}\)` with `\(\mathbf{A}^2 = \boldsymbol{\Sigma}\)`. Therefore, 
+
+`$$\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) \,\, \boldsymbol{\Sigma} \,\, \text{invertible} \Leftrightarrow
+\boldsymbol{\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})} \sim \mathrm{MVN}(0, \mathbf{I}) \,\, \text{for all} \,\, \mathbf{A}^2 = \boldsymbol{\Sigma}$$`
+
+---
+# A general theory for linear models.
+
+**Setup**: Let `\(\boldsymbol{y} = \underbrace{\mathbf{X}}_{n \times p} \underbrace{\boldsymbol{\beta}}_{p \times 1} + \boldsymbol{\epsilon}\)` where `\(\boldsymbol{\epsilon} \sim \mathrm{MVN}(0, \sigma^{2} \mathbf{I})\)` be a linear model. Assume the model is true.
+
+**This implies**: 
++ The least square estimates satisfies `$$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1})$$`.
++ For any `\(q \times p\)` matrix `\(\mathbf{C}\)`, 
+`$$\mathbf{C} \hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\mathbf{C} \boldsymbol{\beta}, \sigma^2 \mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})$$`
+---
+class: clear
+
++ If `\(\mathbf{C}\)` is of full-row rank, `\(\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})\)` is invertible and hence
+`$$\sigma^{-1} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1/2} \mathbf{C} (\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}) \sim \mathrm{MVN}(0, \mathbf{I}_q)$$`
+
+
++ This implies , for `\(\mathbf{C}\)` with full row-rank, `$$\sigma^{-2} (\hat{\boldsymbol{\beta}} - \boldsymbol{\beta})^{\top} \mathbf{C}^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} \mathbf{C} (\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}) \sim \chi^2_{q}.$$`
+
++ Assuming `\(\sigma^2\)` is known, a `\((1 - \alpha) \times 100\%\)` confidence region for `\(\mathbf{C} \boldsymbol{\beta}\)` is
+`$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq \sigma^2 \times \mathrm{qchisq}(1 - \alpha,q). \}$$`
+
++ Since `\(\sigma^2\)` is generally unknown, an estimate of `\(\sigma^2\)` is 
+`$$\mathrm{MSE} = \frac{1}{n-p}(\boldsymbol{y} - \hat{\boldsymbol{y}})^{\top} (\boldsymbol{y} - \hat{\boldsymbol{y}})$$`
+This estimate `\(\mathrm{MSE}\)` is **independent** of `\(\hat{\boldsymbol{\beta}}\)`.
+
++ If `\(\sigma^2\)` is unknown, a `\((1 - \alpha) \times 100\%\)` confidence region for `\(\mathbf{C} \boldsymbol{\beta}\)` is
+`$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq q \times \mathrm{MSE} \times \mathrm{qf}(1 - \alpha, q, n - p). \}$$`
+
+---
+# Do not discount simple transformations
 
 ```r
-tetrahymena &lt;- read.csv2("https://bit.ly/2ngMtJE", sep = ";", 
-                         dec = ".", header=TRUE, 
-                         colClasses = c("numeric","numeric","numeric"), na.strings=".")
-
-tetrahymena &lt;- subset(tetrahymena, glucose==0)
+library(dplyr)
+tetrahymena &lt;- read.csv2("https://bit.ly/2ngMtJE", 
+                         sep = ";", dec = ".", header=TRUE, 
+                         colClasses = c("numeric","numeric","numeric"), 
+                         na.strings=".")
+tetrahymena &lt;- tetrahymena %&gt;% filter(glucose == 0) %&gt;% select(-glucose)
 rownames(tetrahymena) &lt;- NULL
 tetrahymena
 ```
 
 ```
-## # A tibble: 19 x 3
-##   glucose concentration diameter
-##     &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
-## 1       0        630000     19.2
-## 2       0        501000     19.5
-## 3       0        332000     19.8
-## 4       0        285000     21  
-## 5       0        201000     21  
-## 6       0        175000     21  
+## # A tibble: 19 x 2
+##   concentration diameter
+##           &lt;dbl&gt;    &lt;dbl&gt;
+## 1        630000     19.2
+## 2        501000     19.5
+## 3        332000     19.8
+## 4        285000     21  
+## 5        201000     21  
+## 6        175000     21  
 ## # … with 13 more rows
 ```
 
@@ -903,9 +1204,9 @@ tetrahymena
 class: clear
 
 ```r
-m1 &lt;- lm(diameter ~ concentration, data = tetrahymena)
-m2 &lt;- lm(diameter ~ log(concentration), data = tetrahymena)
-summary(m1)$sigma^2 ## MSE for model 1
+mod1 &lt;- lm(diameter ~ concentration, data = tetrahymena)
+mod2 &lt;- lm(diameter ~ log(concentration), data = tetrahymena)
+summary(mod1)$sigma^2 ## MSE for model 1
 ```
 
 ```
@@ -913,12 +1214,14 @@ summary(m1)$sigma^2 ## MSE for model 1
 ```
 
 ```r
-summary(m2)$sigma^2 ## MSE for model 2
+summary(mod2)$sigma^2 ## MSE for model 2
 ```
 
 ```
 ## [1] 0.215
 ```
+
+&lt;img src="intro_lm_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
