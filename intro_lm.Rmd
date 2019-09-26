@@ -16,7 +16,7 @@ output:
 --- 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
-options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
 library(knitr)
 hook_output <- knit_hooks$get("output")
 knit_hooks$set(output = function(x, options) {
@@ -448,15 +448,17 @@ $$\mathbf{X}^{\top} \mathbf{X} \hat{\boldsymbol{\beta}} = \mathbf{X}^{\top} \bol
 ---
 # The normal equation
 
-Let $\{(Y_i, X^{(1)}_i, X^{(2)}_i, \dots, X^{(p-1)}_i)\}_{i=1}^{n}$ be $n$ data points. For the $i$th observation, $Y_i$ is the value of the response variable and $X_i^{(1)}$ is the value of the $k$th predictor variable.
+Let $\{(Y_i, X^{(1)}_i, X^{(2)}_i, \dots, X^{(p-1)}_i)\}_{i=1}^{n}$ be $n$ data points. For the $i$th observation, $Y_i$ is the value of the response variable and $X_i^{(k)}$ is the value of the $k$th predictor variable.
 Denote
 $$\boldsymbol{y} = \begin{bmatrix} Y_1 \\ Y_2 \\ \vdots \\ Y_n \end{bmatrix}; \quad \boldsymbol{x}^{(k)} = \begin{bmatrix} X^{(k)}_1 \\ X^{(k)}_2 \\ \vdots \\  X^{(k)}_n \end{bmatrix}; \quad \mathbf{X} = \underbrace{[\boldsymbol{1}, \boldsymbol{x}^{(1)},  \boldsymbol{x}^{(2)}, \dots, \boldsymbol{x}^{(p-1)}]}_{n \times p}; \quad \boldsymbol{b} = \begin{bmatrix} b_0 \\ b_1 \\ \vdots \\ b_{p-1} \end{bmatrix}$$
 
 
 Recall that for a **column** vector $\boldsymbol{a} = (a_1, a_2, \dots, a_n)^{\top} \in \mathbb{R}^{n}$,
 $$\boldsymbol{a}^{\top} \boldsymbol{a} = \sum_{i=1}^{n} a_i^2.$$
-The least square criterion for fitting the model $Y_i \approx \beta_0 + \beta_1 X^{(1)}_i + \beta_2 X^{(2)}_i + \dots + \beta_{p-1} X^{(p-1)}_i$ to the data is
-$$\arg \min_{\boldsymbol{b}} \sum_{i=1}^{n} (Y_i - b_0 - b_1 X^{(1)}_i - b_2 X^{(2)}_i - \dots - b_{p-1} X^{(p-1)}_i)^2 = \arg \min_{\boldsymbol{b}} (\boldsymbol{y} - \mathbf{X} \boldsymbol{b})^{\top} (\boldsymbol{y} - \mathbf{X} \boldsymbol{b}).$$
+
+The least square criterion for fitting $Y_i \approx \beta_0 + \sum_{k=1}^{p-1} \beta_k X^{(k)}_i$ is
+
+$$\min_{\boldsymbol{b}} \sum_{i=1}^{n} (Y_i - b_0 - b_1 X^{(1)}_i - b_2 X^{(2)}_i - \dots - b_{p-1} X^{(p-1)}_i)^2 = \min_{\boldsymbol{b}} (\boldsymbol{y} - \mathbf{X} \boldsymbol{b})^{\top} (\boldsymbol{y} - \mathbf{X} \boldsymbol{b}).$$
 
 ---
 class: clear
@@ -469,7 +471,7 @@ $$\mathbf{X}^{\top} \mathbf{X} \hat{\boldsymbol{\beta}} - \mathbf{X}^{\top} \bol
 Then for all $\boldsymbol{b}$
 $$\begin{split}Q(\boldsymbol{b}) &= (\boldsymbol{y} - \mathbf{X} \boldsymbol{b})^{\top}(\boldsymbol{y} - \mathbf{X} \boldsymbol{b}) \\ &= 
 (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}} + \mathbf{X} \hat{\boldsymbol{\beta}} - \mathbf{X} \boldsymbol{b})^{\top}(\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}} + \mathbf{X} \hat{\boldsymbol{\beta}} - \mathbf{X} \boldsymbol{b}) \\
-&= (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^{\top}(\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}}) + (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) - (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top}  (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}}) + (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) \\
+&= Q(\hat{\boldsymbol{\beta}}) + (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) - (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top}  (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}}) + (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) \\
 &= Q(\hat{\boldsymbol{\beta}}) + (\boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}})^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) + 0 + (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) \\ 
 &= Q(\hat{\boldsymbol{\beta}}) + 0 + 0 + (\hat{\boldsymbol{\beta}} - \boldsymbol{b})^{\top} \mathbf{X}^{\top} \mathbf{X} (\hat{\boldsymbol{\beta}} - \boldsymbol{b}) \\
 & \geq Q(\hat{\boldsymbol{\beta}}) \end{split}$$
@@ -557,21 +559,23 @@ $$\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}; \quad 
 ---
 class: clear
 
-Then
-$\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$ is an **estimate** (hence a random variable) of $\boldsymbol{\beta}$ and satisfies
+With the above assumptions,
+
++ $\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$ is an **estimate** (hence a random variable) of $\boldsymbol{\beta}$ and satisfies
 $$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\boldsymbol{\epsilon}] \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$
 
-In addition, the fitted value $\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}$ satisfies
-$$\mathbb{E}[\hat{Y}_i] = Y_i; \quad \mathrm{Var}[\hat{Y}_i] = \sigma^2 \boldsymbol{x}_i^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_i = \sigma^2 h_{ii}; \quad \mathrm{Var}[\hat{\boldsymbol{y}}] = \sigma^2 \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}.$$
++ The fitted value $\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}$ satisfies
+$$\begin{gather*} \mathbb{E}[\hat{Y}_i] = Y_i; \quad \mathrm{Var}[\hat{Y}_i] = \sigma^2 \boldsymbol{x}_i^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_i = \sigma^2 h_{ii}; \\ \mathrm{Var}[\hat{\boldsymbol{y}}] = \sigma^2 \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \end{gather*}.$$
 where $\boldsymbol{x}_i^{\top}$ is the $i$th-row of $\mathbf{X}$ and $h_{ii}$ is the $i$th **diagonal** element of the $n \times n$ hat matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}$
 
-When given a new vector of predictor variables $\boldsymbol{x}_* \in \mathbb{R}^{p}$, the model yield the estimate $\hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}}$ of the **expected** value $\mathbb{E}[Y_*]$ and $\mathrm{Var}[\hat{Y}_*] = \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*$.
++ For a new set of predictor variables $\boldsymbol{x}_* \in \mathbb{R}^{p}$, $\hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}}$ is an estimate of the **expected** value $\mathbb{E}[Y_*]$ with $\mathrm{Var}[\hat{Y}_*] = \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*$.
 
-We emphasize that the above expressions are interpreted under the assumption that
 
-+ The model $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ is really true and
++ (**Important**) The above expressions are interpreted under the assumption that
 
-+ Repeated sampling of $\boldsymbol{y}$ with $\mathbf{X}$ fixed.
+  -   The model $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ is really true and
+
+  - Repeated sampling of $\boldsymbol{y}$ with $\mathbf{X}$ fixed.
 
 ---
 class: clear
@@ -624,16 +628,20 @@ We denote this as $\boldsymbol{z} \sim \mathrm{MVN}(\boldsymbol{0}, \mathbf{I})$
 
 The general definition of a multivariate normal random vector is then simply
 
-**Definition**: $\boldsymbol{x}$ is said to be a $p$-dimensional multivariate normal random vector with mean $\boldsymbol{\mu} \in \mathbb{R}^{p}$ and $p \times p$ covariance matrix $\boldsymbol{\Sigma}$ if and only if there exists a $p \times q$ matrix $\mathbf{A}$ (with $1 \leq q \leq p$) such that $\boldsymbol{\Sigma} = \mathbf{A} \mathbf{A}^{\top}$ and
+**Definition**: $\boldsymbol{x}$ is said to be a $p$-dimensional multivariate normal random vector with mean $\boldsymbol{\mu} \in \mathbb{R}^{p}$ and $p \times p$ covariance matrix $\boldsymbol{\Sigma}$ if and only if there exists a $p \times q$ matrix $\mathbf{A}$ with $q = \mathrm{rk}(\boldsymbol{\Sigma}) \leq p$ such that $\boldsymbol{\Sigma} = \mathbf{A} \mathbf{A}^{\top}$ and
 $$\boldsymbol{x} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\mu}; \quad \boldsymbol{z} = (Z_1, Z_2, \dots, Z_q) \sim \mathrm{MVN}(0, \mathbf{I}).$$
+We denote this as $\bm{x} \sim \mathrm{MVN}(\bm{\mu}, \boldsymbol{\Sigma})$.
 
 ---
 class: clear
 
 + In essence, a multivariate normal random vector is an **affine combination** of independent standard normal random variables.
 
++ Therefore, if $\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ for some $\boldsymbol{\mu} \in \mathbb{R}^{p}$ and $p \times p$ matrix $\boldsymbol{\Sigma}$, then for any $q \times p$ matrix $\mathbf{B}$ and $\boldsymbol{\nu} \in \mathbb{R}^{q}$, 
+$$\mathbf{B} \boldsymbol{x} + \boldsymbol{\nu} \sim \mathrm{MVN}(\mathbf{B} \boldsymbol{\mu} + \boldsymbol{\nu}, \mathbf{B} \boldsymbol{\Sigma} \mathbf{B}^{\top}).$$
+
 + In the case when $\boldsymbol{\Sigma}$ is a $p \times p$ **invertible** matrix, then $\boldsymbol{x}$ has a probability density function of the form
-$$(2 \pi)^{-n/2} \mathrm{det}(\boldsymbol{\Sigma})^{-1/2} \exp(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^{\top} (\boldsymbol{\Sigma})^{-1} (\boldsymbol{x} - \boldsymbol{\mu}).$$
+$$(2 \pi)^{-n/2} \mathrm{det}(\boldsymbol{\Sigma})^{-1/2} \exp\Bigl(-\frac{1}{2} (\boldsymbol{x} - \boldsymbol{\mu})^{\top} \boldsymbol{\Sigma}^{-1} (\boldsymbol{x} - \boldsymbol{\mu})\Bigr).$$
 
 + If $\boldsymbol{\Sigma}$ is not invertible, then $\boldsymbol{x}$ has neither a probability density function nor a probability mass function.
 
@@ -649,17 +657,18 @@ $$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\math
 
 
 + If the model is true, then the fitted values are also **linear combinations** of independent normally distributed random variables and hence
-$$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathrm{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}).$$
+$$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathrm{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*).$$
 ---
 class: clear
 
 + The estimated coefficients $\hat{\boldsymbol{\beta}}$ and the residuals $\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}$ are **independent**. Thus $\hat{\boldsymbol{\beta}}$ and the mean squared error $\mathrm{MSE}$ are independent. The fitted values $\hat{\boldsymbol{y}}$ and the residuals $\boldsymbol{e}$ are also **independent**. 
 
-+ These facts form the basis for inference in linear models with normal errors. For example, the $(1 - \alpha) \times 100\%$ confidence interval for a particular coefficent $\beta_j$ is 
++ These facts form the basis for inference in linear models with normal errors. For example, the $(1 - \alpha) \times 100\%$ confidence interval for a **single** coefficent $\beta_j$ is 
 $$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$
-where $\mathrm{s}^2\{\hat{\beta}_j\}$ is the corresponding diagonal element of the matrix $\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]$ and $c_{1 - \alpha/2}$ is the appropriate percentile value. 
+where $\mathrm{s}^2\{\hat{\beta}_j\}$ is the corresponding diagonal element of the matrix $\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]$ and $c_{1 - \alpha/2}$ is the appropriate percentile value, i.e., the $(1 - \alpha/2) \times 100\%$ percentile of Student's $t$-distribution with $n - p$ degrees of freedom.
 
-+ The $(1 - \alpha) \times 100\%$ **confidence** interval for a particular $\mathbb{E}[Y_*]$ is
++ The $(1 - \alpha) \times 100\%$ **confidence** interval for a **single** 
+$\mathbb{E}[Y_*]$ is
 $$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}.$$
 The $(1 - \alpha) \times 100\%$ **prediction** interval for a particular $Y_*$ is $$\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times (1 + \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*)}.$$
 
@@ -689,4 +698,83 @@ class: clear
 
 ```{r echo = FALSE, out.width="80%"}
 knitr::include_graphics("figures/robust_confint.png")
+```
+
+---
+class: clear
+
+The confidence interval $\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$ is to be interpreted as 
+
++ Assume $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ where $\boldsymbol{\epsilon} \sim \mathrm{MVN}(\boldsymbol{0}, \sigma^2 \mathbf{I})$ is true
++ Fix the matrix $\mathbf{X}$ of predictor variables.
++ For $b = 1,2,\dots, B$, repeatedly sample independent replicates of $\boldsymbol{\epsilon}^{(b)} \sim \mathrm{MVN}(\boldsymbol{0}, \sigma^2 \mathbf{I})$ and set $\boldsymbol{y}^{(b)} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}^{(b)}$.
++ Compute $\hat{\boldsymbol{\beta}}^{(b)} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}^{(b)}$
++ Output the interval $\hat{\beta}_j^{(b)} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE}^{(b)} \times m_{ii}}$ where $m_{ii}$ is the $i$th diagonal element of $\mathbf{M} = (\mathbf{X}^{\top} \mathbf{X})^{-1}$.
+
+Then as $B \rightarrow \infty$, the fraction of times 
+$|\beta_j - \hat{\beta}_j^{(b)}| \leq c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE}^{(b)} \times m_{ii}}$ converges to $(1 - \alpha)$. 
+
+Q. How do you interpret the confidence interval $\boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}} \pm c_{1 - \alpha/2} \times \sqrt{\mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}$ for $\mathbb{E}[Y_*]$ ?
+
+---
+class: clear
+
+Q. What about confidence regions for two or more coefficients ?
+
+```{r out.width="80%", echo = FALSE, message = FALSE, fig.cap = "Confidence ellipse and individual confidence intervals"}
+library(ellipse) ## for drawing ellipse!
+library(ggplot2)
+ellipse.df <- data.frame(ellipse(mod, which = c('expend','ratio'),level = 0.95))
+ellipse.df %>% 
+  ggplot(aes(x = expend, y = ratio)) + 
+  geom_path(linetype = "dashed", color = "blue") + 
+  geom_point(aes(x = mod$coefficients['expend'], y = mod$coefficients['ratio']), 
+             size = 3, color = "red") + 
+  geom_errorbar(aes(x = mod$coefficients['expend'], 
+                 ymin = confint(mod,'ratio')[1], 
+                 ymax = confint(mod,'ratio')[2])) + 
+  geom_errorbarh(aes(y = mod$coefficients['ratio'], 
+                 xmin = confint(mod,'expend')[1], 
+                 xmax = confint(mod,'expend')[2]))
+```
+
+---
+class: clear
+
+Q. What about confidence regions for two or more expected values ?
+
+```{r out.height = "90%", echo = FALSE, fig.cap = "Individual and simultaenous confidence intervals for the math score of 25 states"}
+df <- cbind(sat, predict(mod, sat, level = 0.95, interval = "confidence")) 
+df <- df %>% mutate(se = (upr - lwr)/(2*qt(0.95,46)), 
+                    lwr.WH = fit - sqrt(4*qf(0.95,4,46)) * se, 
+                    upr.WH = fit + sqrt(4*qf(0.95,4,46)) * se,
+                    abb = state.abb)
+  
+ggplot(df[sample(1:50,25),], aes(reorder(x = abb, math), y = math)) + geom_point(color = "red", size = 3) + 
+  geom_errorbar(aes(ymin = lwr, ymax = upr)) + xlab("State") +
+  geom_errorbar(aes(ymin = lwr.WH, ymax = upr.WH), alpha = 0.6, color = "blue") + coord_flip() + theme_bw()
+```
+
+---
+# Transformations
+```{r}
+tetrahymena <- read.csv2("https://bit.ly/2ngMtJE", sep = ";", 
+                         dec = ".", header=TRUE, 
+                         colClasses = c("numeric","numeric","numeric"), na.strings=".")
+
+tetrahymena <- subset(tetrahymena, glucose==0)
+rownames(tetrahymena) <- NULL
+tetrahymena
+```
+
+---
+class: clear
+```{r message = FALSE, echo = -c(1:3)}
+library(sjlabelled)
+library(sjmisc)
+library(sjPlot)
+m1 <- lm(diameter ~ concentration, data = tetrahymena)
+m2 <- lm(diameter ~ log(concentration), data = tetrahymena)
+summary(m1)$sigma^2 ## MSE for model 1
+summary(m2)$sigma^2 ## MSE for model 2
 ```
