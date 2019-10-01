@@ -879,7 +879,7 @@ class: clear
 class: clear
 
 The derivation of the density for the multivariate normal (in one direction) is as follows.
-Let `\(\mathbf{A}\)` be a `\(p \times p\)` invertible matrix and `\(\boldsymbol{z} = (z_1, z_2, \dots, z_p) \sim \mathrm{MVN}(0, \mathbf{I})\)`. Define `\(\boldsymbol{x} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\mu}\)` for some `\(\boldsymbol{\mu} \in \mathbb{R}^{p}\)`. Then given a "nice" set `\(S \subset \mathbb{R}^{p}\)`, 
+Let `\(\mathbf{A}\)` be a `\(p \times p\)` invertible matrix and `\(\boldsymbol{z} = (z_1, z_2, \dots, z_p) \sim \mathrm{MVN}(0, \mathbf{I})\)`. Define `\(\boldsymbol{x} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\mu}\)` for some `\(\boldsymbol{\mu} \in \mathbb{R}^{p}\)`. Let `\(f\)` and `\(g\)` denote the probability density function for `\(\boldsymbol{z}\)` and `\(\boldsymbol{x}\)`, respectively. Then given a **nice** set `\(S \subset \mathbb{R}^{p}\)`, 
 
 `$$\begin{split}\mathrm{pr}(\boldsymbol{x} \in S) &amp; = \int_{S} g(\boldsymbol{x}) d \boldsymbol{x} \\ &amp;= \int_{\mathbf{A}^{-1}(S - \boldsymbol{\mu})} f(\boldsymbol{z}) d \boldsymbol{z} \\ &amp;= \int_{S} f(\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})) \times \mathrm{det}(\mathbf{A}^{-1}) \, d \boldsymbol{x} \\
 &amp;= \int_{S} (2 \pi)^{-n/2} \mathrm{det}(\mathbf{A}^{-1}) \exp\Bigl(-\frac{1}{2} (\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu}))^{\top}(\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})\Bigr) \mathrm{d} \boldsymbol{x}
