@@ -715,6 +715,37 @@ where $\boldsymbol{\Sigma} = \mathbf{A} \mathbf{A}^{\top}$ and hence $\boldsymbo
 The reverse direction, i.e., given an invertible covariance matrix $\boldsymbol{\Sigma}$, find the density, requires a bit more terminology and definitions that will be introduced later.
 
 ---
+#Independence in multivariate normals
+
+**Proposition** Let $\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ be a $p$-dimensional multivariate normal. Supose
+$\boldsymbol{x}$ can be decompose as
+$$\boldsymbol{x} = \begin{bmatrix} \boldsymbol{x}_1 \\ \boldsymbol{x}_2 \end{bmatrix}; \quad \boldsymbol{x}_1 \in \mathbb{R}^{q}, \,\, \boldsymbol{x}_2 \in \mathbb{R}^{p - q}$$
+Then $\boldsymbol{x}_1$ and $\boldsymbol{x}_2$ are **independent** if and only if $\mathrm{Cov}(\boldsymbol{x}_1, \boldsymbol{x}_2) = \boldsymbol{0}_{q \times (p-q)}$. 
+
+The previous proposition can be restated as: if $(\boldsymbol{u}, \boldsymbol{v})$ is **jointly** mulivariate normal, then $\boldsymbol{u}$ and $\boldsymbol{v}$ are independent if and only if $\boldsymbol{u}$ and $\boldsymbol{v}$ are **uncorrelated**.
+
+As a consequence of this proposition, let $\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ be a $p$-dimensional multivariate normal. Let $\mathbf{A}$ and $\mathbf{B}$ be deterministic $q \times p$ and $r \times p$ matrices. Then $\mathbf{A} \boldsymbol{x}$ and $\mathbf{B} \boldsymbol{x}$ are independent if and only if
+$$\mathrm{Cov}(\mathbf{A} \boldsymbol{x}, \mathbf{B} \boldsymbol{x}) = \mathbf{A} \boldsymbol{\Sigma} \mathbf{B}^{\top} = \boldsymbol{0}.$$
+
+---
+class: clear
+
+**Example**: We now demonstrate that if $Y_1, Y_2, \dots, Y_n$ are i.i.d. $N(\mu, \sigma^2)$ then the sample mean and the sample variance are independent. Let $\boldsymbol{y} = (Y_1, Y_2, \dots, Y_n)$ then $\boldsymbol{y} \sim \mathrm{MVN}(\mu \times \boldsymbol{1}, \sigma^2 \mathbf{I})$. Now $$\begin{gather*}\bar{Y} = \frac{1}{n}\boldsymbol{1}^{\top} \boldsymbol{y}; \quad (Y_1 - \bar{Y}, Y_2 - \bar{Y}, \dots, Y_n - \bar{Y}) = \boldsymbol{y} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top} \boldsymbol{y} = (\mathbf{I} - \frac{\boldsymbol{1}\boldsymbol{1}^{\top}}{n}) \boldsymbol{y}; \\ \mathrm{Cov}(\bar{Y}, (Y_1 - \bar{Y}, \dots, Y_n - \bar{Y})) = \mathrm{Cov}(\frac{1}{n}\boldsymbol{1}^{\top},(\mathbf{I} - \frac{\boldsymbol{1}\boldsymbol{1}^{\top}}{n}) \boldsymbol{y}) = \sigma^2 \frac{1}{n}\boldsymbol{1}^{\top} (\mathbf{I} - \frac{\boldsymbol{1}\boldsymbol{1}^{\top}}{n}) = \boldsymbol{0}\end{gather*}$$
+
+Therefore, $\bar{Y}$ and $(Y_1 - \bar{Y}, \dots, Y_n - \bar{Y})$ are independent. Since $(n-1)s^2 = \sum_{i} (Y_i - \bar{Y})^2$, $s^2$ is a **function** of the $(Y_1 - \bar{Y}, \dots, Y_n - \bar{Y})$ and thus $s^2$ and $\bar{Y}$ are independent.
+
+---
+class: clear
+
+**Example**: We now demonstrate that in a linear model $\boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I})$ with $\mathbf{X}$ being of full-column rank, that the least square estimates $\hat{\boldsymbol{\beta}}$ is independent of the residuals $\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}$. Indeed, $\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$ and $\boldsymbol{e} = \boldsymbol{y} - \mathbf{X} \hat{\boldsymbol{\beta}} = \boldsymbol{y} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y} = (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \boldsymbol{y}$. Therefore
+$$\begin{split}\mathrm{Cov}(\hat{\boldsymbol{\beta}}, \boldsymbol{e}) &= \mathrm{Cov}((\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y},(\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \boldsymbol{y}) \\ &= \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) = \boldsymbol{0}.\end{split}$$
+
+This implies: 
++ The fitted value $\hat{\boldsymbol{y}}$ is also independent of the residuals $\boldsymbol{e} = \boldsymbol{y} - \hat{\boldsymbol{y}}$
++ The least square estimates $\hat{\boldsymbol{\beta}}$ is independent of the mean square error $\mathrm{MSE} = \boldsymbol{e}^{\top} \boldsymbol{e}/(n-p)$
++ Note that all of these independence results depends on the assumption that $\boldsymbol{y}$ is multivariate normal with covariance matrix $\sigma^2 \mathbf{I}$. 
+
+---
 # Normal error and linear models
 The previous assumption, while sufficient for estimating the variability of $\hat{\boldsymbol{\beta}}$, does not yield the **sampling** distribution of $\hat{\boldsymbol{\beta}}$. For this we need distributional assumption for $\boldsymbol{\epsilon}$. 
 
@@ -1039,23 +1070,42 @@ $$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymb
 
 + These confidence regions are approximately valid when the $\epsilon_i$ are i.i.d. with mean $0$ and finite variance (and not normally distributed), provided that $n$ is sufficiently large .
 
+---
+class: clear
+
++ These confidence regions can be "inverted" to perform hypothesis tests. More specifically, to test the null hypothesis $\mathbb{H}_0 \colon \mathbf{C} \boldsymbol{\beta} = \boldsymbol{\gamma}$ against the alternative hypothesis $\mathbb{H}_A \colon \mathbf{C} \boldsymbol{\beta} = \boldsymbol{\gamma}$ for some $q \times p$ matrix $\mathbf{C}$ of full-row rank, form the test statistic
+$$F_*  = \frac{(\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})}{q \times \mathrm{MSE}}$$
+Under the null hypothesis that $\boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I})$ and $\mathbf{C} \boldsymbol{\beta} = \boldsymbol{\gamma}$, the statistic $F_*$ will follows a $F$ distribution with $q$ and $n - p$ degrees of freedom.
 
 ---
 class: clear
 
-+ These confidence regions can be "inverted" to perform hypothesis tests, e.g., to test the null hypothesis $\mathbb{H}_0 \colon \beta_j = c$ versus the alternative hypothesis $\mathbb{H}_A \colon \beta_j \not = c$ for some coefficient $\beta_j$, we let $\mathbf{C} = (c_0, c_1, \dots, c_{p-1})$ with $c_j = 1$ and $c_k = 0$ for all $k \not = j$. Then $\boldsymbol{\gamma} = c$ and the test statistic is equivalent to
++ (**Important**) It is outside the scope of our class but the above test statistic $F_*$ can also be obtained by comparing the sum of square errors for two models. More specifically, let $\mathrm{SSE}_0$ be the sum of square error when we fit the **reduced** (or restricted) model $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ where $\mathbf{C} \boldsymbol{\beta} = \boldsymbol{\gamma}$ and let $\mathrm{SSE}_1$ be the sum of square error for the **full** (or unrestricted) model $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$. Then $\mathrm{SSE}_1 = (n-p) \mathrm{MSE}$ and
+$$F_* = \frac{(\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})}{\mathrm{MSE}} = \frac{\mathrm{SSE}_0 - \mathrm{SSE}_1}{\mathrm{SSE}_1} \times \frac{n-p}{q}$$
+This approach to model comparison is the basis for the $\texttt{anova}$ command in **R**.
+
+---
+class: clear
+
++ Example: To test the null hypothesis $\mathbb{H}_0 \colon \beta_j = c$ versus the alternative hypothesis $\mathbb{H}_A \colon \beta_j \not = c$ for some coefficient $\beta_j$, we let $\mathbf{C} = (c_0, c_1, \dots, c_{p-1})$ with $c_j = 1$ and $c_k = 0$ for all $k \not = j$. Then $\boldsymbol{\gamma} = c$ and the test statistic is equivalent to
 $$\frac{(\hat{\beta}_j - c)^2}{s^2\{\hat{\beta}_j\}}$$
-where $s^2\{\hat{\beta}_j\}$ is the estimated variance of $\hat{\beta}_j$. The rejection region, assuming the null hypothesis is true, is given by the quantile of $F(1,n-p)$, the $F$ distribution with $1$ and $n - p$ degrees of freedom. We note that $F(1,n-p)$ is identically distributed to the square of a Student t with $(n-p)$ degrees of freedom and so the above test statistic can also be formulated using the Student $t$ distribution.
+where $s^2\{\hat{\beta}_j\}$ is the estimated variance of $\hat{\beta}_j$. The rejection region, assuming the null hypothesis is true, is given by the quantile of $F(1,n-p)$, the $F$ distribution with $1$ and $n - p$ degrees of freedom. We note that $F(1,n-p)$ is identically distributed to the square of a Student t with $(n-p)$ degrees of freedom and so the above test statistic can also be formulated using the Student $t$ distribution. The Student $t$ formulation allows for the formulation of one-sided null/alternative hypothesis, e.g., testing $\mathbb{H}_0 \colon \beta_j \leq c$ versu $\mathbb{H}_A \colon \beta_j > c$.
 
 ---
 class: clear
 
-+ To test the null hypothesis
++ Example: To test the null hypothesis $\mathbb{H}_0 \colon \sum_{j} a_j \beta_j = c$ versus the alternative hypothesis $\mathbb{H}_A \colon \sum_{j} \beta_j \not = c$ for some coefficient $\beta_j$, we can form the test statistic
+$$\frac{\boldsymbol{a}^{\top} \hat{\boldsymbol{\beta}} - c}{\sqrt{\mathrm{MSE} \times \boldsymbol{a}^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{a}}}$$
+
++ Example: To test the null hypothesis
 $\mathbb{H}_0 \colon \beta_2 = \beta_3 = \beta_4 = 0$ against the alternative hypothesis $\mathbb{H}_A \colon \beta_k \not = 0$ for some $k \in \{2,3,4\}$ we let
 $$\mathbf{C} = \begin{bmatrix} 0 & 0 & 1 & 0 & 0 & 0 & \dots \\ 0 & 0 & 0 & 1 & 0 & 0 & \dots \\ 0 & 0 & 0 & 0 & 1 & 0  & \dots \end{bmatrix}; \quad \boldsymbol{\gamma} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$$
 The rejection region, assuming the null hypothesis is true, is given by the $F$ distribution with $3$ and $n-p$ degrees of freedom.
 
-+ In the very special case when $\boldsymbol{\beta} = (\beta_0, \beta_1, \dots, \beta_{p-1})$ and we want to test the null hypothesis $\mathbb{H}_0 \colon \beta_1 = \beta_2 = \dots = \beta_{p-1} = 0$ against the alternative hypothesis that at least one of the $\beta_j \not = 0$, the special form of the matrix $\mathbf{C}$ will lead to the test statistic
+---
+class: clear
+
++ Example: In the very special case when $\boldsymbol{\beta} = (\beta_0, \beta_1, \dots, \beta_{p-1})$ and we want to test the null hypothesis $\mathbb{H}_0 \colon \beta_1 = \beta_2 = \dots = \beta_{p-1} = 0$ against the alternative hypothesis that at least one of the $\beta_j \not = 0$, the special form of the matrix $\mathbf{C}$ will lead to the test statistic
 $$\frac{\mathrm{SSTO} - \mathrm{SSE}}{\mathrm{SSE}} \times \frac{n-p}{p-1}.$$
 Here $\mathrm{SSTO} = \sum_{i}(Y_i - \bar{Y})^2$ is the sum of squared error for the **null** model $Y_i = \beta_0 + \epsilon_i$ and $\mathrm{SSE} = (n-p) \times \mathrm{MSE}$ is the sum of squared error for the **full** model (that uses all $p$ coefficients $\beta_0, \beta_1, \dots, \beta_{p-1}$). The rejection region, assuming the null hypothesis is true, will be compared against the $F$ distribution with $p-1$ and $n-p$ degrees of freedom.
 

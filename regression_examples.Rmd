@@ -1,15 +1,37 @@
 ---
-title: "Untitled"
+title: "Regression Examples"
 output: 
   html_document:
     df_print: tibble
 ---
 
 ```{r setup, include=FALSE}
+options(digits = 3)
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
 ```
 
-# Regression Example 1: SAT and spending
+# Example 1: SAT and spending
 ```{r message = FALSE}
 library(faraway)
 library(dplyr)
@@ -54,7 +76,7 @@ Fstar <- t(C %*% coef(mod2)) %*% solve(C %*% variance_matrix %*% t(C)) %*% (C %*
 Fstar/q ## compare with the anova output
 ```
 
-We see that the above comparison suggests that the two models are **comparable**. This is quite suprising/counter-intuitive as it suggests that increasing expenditure is associated with decreasing math scores. The following output indicates that this is due to confounding variable; in particular adding \texttt{takers} as a predictor variable decreases the MSE considerably and also make the coefficient for \texttt{expenditure} "well-behaved". 
+We see that the above comparison suggests that the two models are **comparable**. This is quite suprising/counter-intuitive as it suggests that increasing expenditure is associated with decreasing math scores. The following output indicates that this is due to confounding variable; in particular adding \texttt{takers} as a predictor variable decreases the MSE considerably and also make the coefficient for \texttt{expenditure} more intuitive.
 
 ```{r}
 mod3 <- lm(math ~ expend + takers, data = sat)
@@ -62,6 +84,14 @@ summary(mod3)
 ## Note how this anova is exactly the same as the marginal hypothesis test for \beta_{takers}
 anova(mod1, mod3) 
 ```
+
+We now compare **mod3** against a "full" model that includes all the predictor variables. We see that **mod3** is comparable to this "full" model.
+```{r}
+mod_full <- lm(math ~ expend + takers + ratio + salary, data = sat)
+summary(mod_full)
+anova(mod3, mod_full)
+```
+
 
 In summary, using model **mod3**, the estimated/confidence interval for the math SAT scores for the 50 US states is visualized below. The $\sqrt{\mathrm{MSE}}$ is `r summary(mod3)$sigma`, and looking at the confidence intervals, suggest that the posited relationship between expenditure and math SAT score is reasonably accurate.
 
@@ -77,4 +107,128 @@ ggplot(df, aes(reorder(x = abb, math), y = math)) + geom_point(color = "red", si
   geom_errorbar(aes(ymin = lwr, ymax = upr)) + xlab("State") +
   geom_errorbar(aes(ymin = lwr.WH, ymax = upr.WH), alpha = 0.6, color = "blue") + 
   coord_flip() + theme_bw()
+```
+
+# Example 2: Outliers and linear regression
+Linear regression using least square estimation can be highly non-robust in the presence of outliers. An outlier is, roughly speaking, any point that is "different" from most of the remaining points.
+
+```{r}
+library("faraway")
+library(ggplot2)   
+data(star)
+ggplot(star, aes(x = temp, y = light)) + 
+  xlab("log(Temperature") + ylab("log(Light Intensity)") + geom_smooth(method = "lm") + 
+  geom_point(aes(color = (temp < 3.6)))
+```   
+
+A plot of the light intensity and surface temperatures of 47
+stars. The data is available from the \textrm{faraway} \textbf{R}
+package. The red colored points correspond to ``outliers'' as
+detected by eye-balling the plot. The dashed line is the least
+square regression line.
+
+```{r message = FALSE}
+library(dplyr)
+ggplot(star, aes(x = temp, y = light)) + 
+  xlab("log(Temperature") + ylab("log(Light Intensity)") + 
+  geom_smooth(data = filter(star, temp > 3.6), method = "lm") + 
+  geom_point(aes(color = (temp < 3.6)))
+```  
+   
+If we now remove the eye-balled "outliers" and recompute the least
+square regression, we get the above plot. It is not always easy
+to automatically detect outliers when they occur in clusters such as in
+this example. What happens if the data include $3$ or more predictor variables ?
+
+# Example 3: Life Expectancy in Gapminder
+```{r}
+library(gapminder)
+gapminder
+```
+Suppose we want to model the life expectancy of the countries in terms of the year and the gdpPercap. Let us try a few models.
+
+### Simplest model
+
+```{r}
+mod1 <- lm(lifeExp ~ year + gdpPercap, data = gapminder)
+```
+
+```{r output.lines = 20}
+summary(mod1)
+```
+
+### Transforming variables
+The previous model output looks ok, excep that the coefficients are not particularly meaningful since the year goes from $1952$ to $2007$, which renders the intercept coefficient irrelevant (as $\texttt{year} = 0$ is never included in the model). We therefore subtract $1952$ from all the years. Similarly, the gdpPercap unit here is in dollars, and most countries have gdpPercap in a wide-range. This suggest looking at a logarithmic transform of the gdpPercap.
+```{r}
+mod1_alt <- lm(lifeExp ~ I(year - 1952) + log(gdpPercap), data = gapminder)
+summary(mod1_alt)
+```
+We see that the coefficients values are now more intepretable. Furthermore, the mean square error decreases substantially.
+
+## Adding qualitative predictor variables for year
+
+Let us now change the year to be a factor, i.e., the model is now
+$$\mathrm{lifeExp}_{i} = \beta_0 + \beta_1 \log(\mathrm{gdpPercap}_i) + \beta_2 \boldsymbol{1}\{year_i == 1957\} + \beta_3 \boldsymbol{1}\{year_i == 1962\} + \dots + \epsilon_i.$$
+```{r output.lines = 20}
+mod2 <- lm(lifeExp ~ log(gdpPercap) + as.factor(year), data = gapminder)
+summary(mod2)
+summary(mod2)$sigma^2
+anova(mod1_alt, mod2)
+```
+
+The above is an example of using a qualitative predictor variable (in this case converting \texttt{year} into a factor). The default category is now the year $1952$.
+
+## Adding qualitative predictor variables for country
+
+We revert to making \texttt{year} as a numeric variable but now introduce $\texttt{country}$ as a qualitative predictor variable. The default country is *Afghanistan*. The model is thus
+$$\mathrm{lifeExp}_{i} = \beta_0 + \beta_1 (\mathrm{year}_i - 1952) + \beta_2 \log(\mathrm{gdpPercap}_i) + \beta_3 \boldsymbol{1}\{\mathrm{country}_i == "Albania"\} + \beta_4 \boldsymbol{1}\{\mathrm{country}_i == "Algeria"\} + \dots + \epsilon_i.$$
+
+```{r output.lines = 20}
+mod3 <- lm(lifeExp ~ I(year - 1952) + log(gdpPercap) + country, data = gapminder)
+summary(mod3)
+summary(mod3)$sigma^2
+summary(mod1_alt)$sigma^2
+anova(mod1_alt, mod3)
+```
+
+For this model, different countries have different intercepts. We see that this model fits the data substantially better than our initial model. However, this model now has `r summary(mod3)$df[1]` parameters.
+
+## Adding interaction between variables
+
+We now add interation between country and year. The default country is still *Afghanistan*. The model is thus
+$$\begin{split}\mathrm{lifeExp}_{i} &= \beta_0 + \beta_1 (\mathrm{year}_i - 1952) + \beta_2 \log(\mathrm{gdpPercap}_i) \\ &+ \beta_3 \boldsymbol{1}\{\mathrm{country}_i == "Albania"\} + \beta_4 \boldsymbol{1}\{\mathrm{country}_i == "Albania"\} \times (\mathrm{year}_i - 1952) \\ &+ 
+\beta_5 \boldsymbol{1}\{\mathrm{country}_i == "Algeria"\} + \beta_4 \boldsymbol{1}\{\mathrm{country}_i == "Algeria"\} \times (\mathrm{year}_i - 1952) \\ &+
+\beta_5 \boldsymbol{1}\{\mathrm{country}_i == "Angola"\} + \beta_4 \boldsymbol{1}\{\mathrm{country}_i == "Angola"\} \times (\mathrm{year}_i - 1952) \\ &+
+\dots + \epsilon_i.\end{split} $$
+
+```{r output.lines = 20}
+mod4 <- lm(lifeExp ~ log(gdpPercap) + I(year - 1952)*country, data = gapminder)
+summary(mod4)
+summary(mod4)$sigma^2
+anova(mod3, mod4)
+```
+For this model, different countries have possibly distinct intercepts and distinct slopes. We see that this model fits the data substantially better than our model where each country have possibly distinct intercepts. However, this model now has `r summary(mod4)$df[1]` parameters.
+
+## Saturated model
+
+Can we try adding interaction between country and year, but now both country and year are qualitative predictor variables ?
+```{r output.lines = 20}
+mod5 <- lm(lifeExp ~ log(gdpPercap) + as.factor(year)*country, data = gapminder)
+summary(mod5)
+summary(mod5)$sigma^2
+```
+Oops, we now have too many predictor variables, i.e., `r summary(mod5)$df[1]` predictor variables. 
+The model is now saturated and so the coefficients are now meaningless.
+
+## Visualizing the result
+
+Let us now take model $\texttt{mod3}$. This model has $144$ parameters, and the estimated standard error $\sigma$ is `r summary(mod3)$sigma`, and so the average error for estimating the life expectancy using model $\texttt{mod3}$ is `r summary(mod3)$sigma` years, a reasonable number. Let us now visualize this result for a few countries.
+
+```{r}
+gapminder.fitted <- cbind(gapminder, predict(mod3, gapminder, level = 0.95, interval = "confidence")) 
+set.seed(123)
+gapminder.small <- gapminder.fitted %>% filter(country %in% sample(country, 15))
+ggplot(gapminder.small, aes(x = year)) + geom_point(aes(y = lifeExp), color = "black") + 
+  geom_line(aes(y = fit, group = country),color = "blue") + 
+  geom_ribbon(aes(ymin = lwr, ymax = upr, group = country), alpha = 0.4) + facet_wrap(~ country, ncol = 3) 
 ```
