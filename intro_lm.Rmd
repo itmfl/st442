@@ -952,6 +952,62 @@ $$\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) \,\, \
 \boldsymbol{\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})} \sim \mathrm{MVN}(0, \mathbf{I}) \,\, \text{for all} \,\, \mathbf{A}^2 = \boldsymbol{\Sigma}$$
 
 ---
+# Quadratic forms
+
+**Definition**: Let $\mathbf{M}$ be a $n \times n$ matrix and $\boldsymbol{x} = (x_1, x_2, \dots, x_n) \in \mathbb{R}^{n}$ be a $n \times 1$ column vector. Then
+$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = \sum_{i} \sum_{j} x_i x_j m_{ij}$$
+is a quadratic form.
+
+For example, let $$\mathbf{M} = \begin{bmatrix} 1 & 2 & 3 \\ 2 & 4 & 1 \\ 3 & 1 & 1 \end{bmatrix}$$.
+
+Then for $\boldsymbol{x} = (u,v,w) \in \mathbb{R}^{3}$, 
+$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = (u^2 + 4 uv + 6uw + 4v^2 + 2 vw + w^2)$$
+---
+# Quadratic forms and chi-square distribution
+
+Q. Let $\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{0}, \mathbf{I})$, $\boldsymbol{x} \in \mathbb{R}^{n}$ and let $\mathbf{A}$ be a $n \times n$ symmetric idempotent matrix, i.e., $\mathbf{A}^2 = \mathbf{A}$. What is the distribution of $\boldsymbol{x}^{\top} \mathbf{A} \boldsymbol{x}$ ?
+
+A. By the spectral decomposition theorem, $\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top}$. Since $\mathbf{U}$ is an orthogonal matrix, 
+$$\mathbf{U} \boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{0}, \mathbf{U} \mathbf{I} \mathbf{U}^{\top}) \overset{\mathrm{d}}{=} \mathrm{MVN}(\boldsymbol{0}, \mathbf{I}).$$
+Therefore, letting $\boldsymbol{z} = \mathbf{U} \boldsymbol{x}$
+$$\boldsymbol{x}^{\top} \mathbf{A} \boldsymbol{x} = \boldsymbol{z}^{\top} \mathbf{D} \boldsymbol{z} = \sum_{i} z_i^2 d_{i}$$
+where $z_1, z_2, \dots, z_n$ are i.i.d. $N(0,1)$ and $d_1, d_2, \dots, d_n$ are the diagonal elements of $\mathbf{D}$, i.e., the eigenvalues of $\mathbf{A}$.
+
+---
+class: clear
+
+Since $\mathbf{A}$ is idempotent, for any eigenvector $\boldsymbol{v}$ of $\mathbf{A}$
+with corresponding eigenvalue $\lambda$, 
+$$\lambda \boldsymbol{v} = \mathbf{A} \boldsymbol{v} = \mathbf{A}^2 \boldsymbol{v} = \mathbf{A} \lambda \boldsymbol{v} = \lambda^2 \boldsymbol{v}$$
+and hence $\lambda \in \{0,1\}$. We recall that the number of eigenvalues $d_i = 1$ is the **rank** of $\mathbf{A}$. Therefore
+$$\boldsymbol{x}^{\top} \mathbf{A} \boldsymbol{x} = \sum_{i} z_i^2 d_i \sim \chi^2_{\mathrm{rk}(\mathbf{A})}.$$
+
+---
+class: clear
+**Example**: Let $Y_1, Y_2, \dots, Y_n$ be i.i.d. $N(\mu, \sigma^2)$ random variables. Then $\boldsymbol{y} = (Y_1, Y_2, \dots, Y_n) \sim \mathrm{MVN}(\mu \times \boldsymbol{1}, \sigma^2 \mathbf{I})$. Then the sample variance $s^2$ satisfies
+$$(n-1) s^2 = \sum_{i} (Y_i - \bar{Y})^2 = (\boldsymbol{y} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top} \boldsymbol{y})^{\top} (\boldsymbol{y} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top} \boldsymbol{y}).$$
+Let $\mathbf{J} = \mathbf{I} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top}$ and note that $\mathbf{J}$ is symmetric and $\mathbf{J}^2 = \mathbf{J}$, i.e., $\mathbf{J}$ is symmetric and idempotent. Therefore
+$$(n-1) s^2 = \boldsymbol{y}^{\top} \mathbf{J}^2 \boldsymbol{y} = \boldsymbol{y}^{\top} \mathbf{J} \boldsymbol{y} = (\boldsymbol{y} - \mu \times \boldsymbol{1})^{\top} \mathbf{J} (\boldsymbol{y} - \mu \times \boldsymbol{1})$$
+as $\mathbf{J} \boldsymbol{1} = \boldsymbol{0}$. Now $\boldsymbol{y} - \mu \times \boldsymbol{1} \sim \mathrm{MVN}(\boldsymbol{0}, \sigma^2 \mathbf{I})$. Letting $\boldsymbol{z} = \sigma^{-1}(\boldsymbol{y} - \mu \times \boldsymbol{1}) \sim \mathrm{MVN}(\boldsymbol{0}, \mathbf{I})$, 
+$$(n-1) \frac{s^2}{\sigma^2} = \boldsymbol{z}^{\top} \mathbf{J} \mathbf{z} \sim \chi^2_{\mathrm{rk}(\mathbf{J})}$$
+
+It is straightforward to show that $\mathrm{rk}(\mathbf{J}) = (n-1)$, i.e.,
+$(n-1) s^2/\sigma^2$ is chi-square with $n-1$ degrees of freedom.
+
+---
+class: clear
+
+Continuing the same vein, let $\boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I})$ where $\mathbf{X}$ is a $n \times p$ matrix of full-column rank. Let $\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}$. Then the mean squared error (MSE) satisfies
+$$\begin{split} (n-p) \mathrm{MSE} &= (\boldsymbol{y} - \hat{\boldsymbol{y}})^{\top} (\boldsymbol{y} - \hat{\boldsymbol{y}}) \\ &=(\boldsymbol{y} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y})^{\top}(\boldsymbol{y} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}) \\ &= \boldsymbol{y}^{\top}(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top})(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top})\boldsymbol{y} \\
+&= \boldsymbol{y}^{\top}(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \boldsymbol{y} \\
+&= (\boldsymbol{y} - \mathbf{X} \boldsymbol{\beta})^{\top}(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) (\boldsymbol{y} - \mathbf{X} \boldsymbol{\beta}).
+\end{split}$$
+We emphasize that $(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top})$ is a symmetric and idempotent matrix.
+Letting $\boldsymbol{z} = \sigma^{-1}(\boldsymbol{y} - \mathbf{X} \boldsymbol{\beta}) \sim \mathrm{MVN}(0, \mathbf{I})$, we have
+$$\frac{(n-p) \mathrm{MSE}}{\sigma^2} = \boldsymbol{z}^{\top} (\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \boldsymbol{z} \sim \chi^2_{n-p}$$
+as $\mathrm{rk}(\mathbf{I} - \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) = n - p$. 
+
+---
 # A general theory for linear models.
 
 **Setup**: Let $\boldsymbol{y} = \underbrace{\mathbf{X}}_{n \times p} \underbrace{\boldsymbol{\beta}}_{p \times 1} + \boldsymbol{\epsilon}$ where $\boldsymbol{\epsilon} \sim \mathrm{MVN}(0, \sigma^{2} \mathbf{I})$ be a linear model. Assume the model is true.
@@ -970,14 +1026,40 @@ $$\sigma^{-1} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})
 + This implies , for $\mathbf{C}$ with full row-rank, $$\sigma^{-2} (\hat{\boldsymbol{\beta}} - \boldsymbol{\beta})^{\top} \mathbf{C}^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} \mathbf{C} (\hat{\boldsymbol{\beta}} - \boldsymbol{\beta}) \sim \chi^2_{q}.$$
 
 + Assuming $\sigma^2$ is known, a $(1 - \alpha) \times 100\%$ confidence region for $\mathbf{C} \boldsymbol{\beta}$ is
-$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq \sigma^2 \times \mathrm{qchisq}(1 - \alpha,q). \}$$
+$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq \sigma^2 \times \mathrm{qchisq}(1 - \alpha,q) \}.$$
+---
+class: clear
 
 + Since $\sigma^2$ is generally unknown, an estimate of $\sigma^2$ is 
 $$\mathrm{MSE} = \frac{1}{n-p}(\boldsymbol{y} - \hat{\boldsymbol{y}})^{\top} (\boldsymbol{y} - \hat{\boldsymbol{y}})$$
-This estimate $\mathrm{MSE}$ is **independent** of $\hat{\boldsymbol{\beta}}$.
+This estimate of $\mathrm{MSE}$ is **independent** of $\hat{\boldsymbol{\beta}}$.
 
 + If $\sigma^2$ is unknown, a $(1 - \alpha) \times 100\%$ confidence region for $\mathbf{C} \boldsymbol{\beta}$ is
-$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq q \times \mathrm{MSE} \times \mathrm{qf}(1 - \alpha, q, n - p). \}$$
+$$\{ \boldsymbol{\gamma} \colon (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma})^{\top} (\mathbf{C} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top})^{-1} (\mathbf{C} \hat{\boldsymbol{\beta}} - \boldsymbol{\gamma}) \leq q \times \mathrm{MSE} \times \mathrm{qf}(1 - \alpha, q, n - p) \}.$$
+
++ These confidence regions are approximately valid when the $\epsilon_i$ are i.i.d. with mean $0$ and finite variance (and not normally distributed), provided that $n$ is sufficiently large .
+
+
+---
+class: clear
+
++ These confidence regions can be "inverted" to perform hypothesis tests, e.g., to test the null hypothesis $\mathbb{H}_0 \colon \beta_j = c$ versus the alternative hypothesis $\mathbb{H}_A \colon \beta_j \not = c$ for some coefficient $\beta_j$, we let $\mathbf{C} = (c_0, c_1, \dots, c_{p-1})$ with $c_j = 1$ and $c_k = 0$ for all $k \not = j$. Then $\boldsymbol{\gamma} = c$ and the test statistic is equivalent to
+$$\frac{(\hat{\beta}_j - c)^2}{s^2\{\hat{\beta}_j\}}$$
+where $s^2\{\hat{\beta}_j\}$ is the estimated variance of $\hat{\beta}_j$. The rejection region, assuming the null hypothesis is true, is given by the quantile of $F(1,n-p)$, the $F$ distribution with $1$ and $n - p$ degrees of freedom. We note that $F(1,n-p)$ is identically distributed to the square of a Student t with $(n-p)$ degrees of freedom and so the above test statistic can also be formulated using the Student $t$ distribution.
+
+---
+class: clear
+
++ To test the null hypothesis
+$\mathbb{H}_0 \colon \beta_2 = \beta_3 = \beta_4 = 0$ against the alternative hypothesis $\mathbb{H}_A \colon \beta_k \not = 0$ for some $k \in \{2,3,4\}$ we let
+$$\mathbf{C} = \begin{bmatrix} 0 & 0 & 1 & 0 & 0 & 0 & \dots \\ 0 & 0 & 0 & 1 & 0 & 0 & \dots \\ 0 & 0 & 0 & 0 & 1 & 0  & \dots \end{bmatrix}; \quad \boldsymbol{\gamma} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$$
+The rejection region, assuming the null hypothesis is true, is given by the $F$ distribution with $3$ and $n-p$ degrees of freedom.
+
++ In the very special case when $\boldsymbol{\beta} = (\beta_0, \beta_1, \dots, \beta_{p-1})$ and we want to test the null hypothesis $\mathbb{H}_0 \colon \beta_1 = \beta_2 = \dots = \beta_{p-1} = 0$ against the alternative hypothesis that at least one of the $\beta_j \not = 0$, the special form of the matrix $\mathbf{C}$ will lead to the test statistic
+$$\frac{\mathrm{SSTO} - \mathrm{SSE}}{\mathrm{SSE}} \times \frac{n-p}{p-1}.$$
+Here $\mathrm{SSTO} = \sum_{i}(Y_i - \bar{Y})^2$ is the sum of squared error for the **null** model $Y_i = \beta_0 + \epsilon_i$ and $\mathrm{SSE} = (n-p) \times \mathrm{MSE}$ is the sum of squared error for the **full** model (that uses all $p$ coefficients $\beta_0, \beta_1, \dots, \beta_{p-1}$). The rejection region, assuming the null hypothesis is true, will be compared against the $F$ distribution with $p-1$ and $n-p$ degrees of freedom.
+
++ Finally, the $R^2$ criteria is $1 - \mathrm{SSE}/\mathrm{SSTO}$ which is widely used, albeit **terrible**  measure of how well the model fits the data.
 
 ---
 # Do not discount simple transformations

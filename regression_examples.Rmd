@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+output: 
+  html_document:
+    df_print: tibble
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Regression Example 1: SAT and spending
+```{r message = FALSE}
+library(faraway)
+library(dplyr)
+data(sat)
+sat$state <- rownames(sat)
+sat <- sat %>% select(state, everything())
+sat
+```
+
+This dataset contains the school expenditure and test scores for 50 USA states 
+in 1994-95.
+
+We first fit two linear models to the data
+```{r}
+mod1 <- lm(math ~ expend, data = sat)
+mod2 <- lm(math ~ expend + salary + ratio, data = sat)
+```
+
+The following summary output of **mod2** contains a bunch of information. The coefficients estimates are listed along with their estimated standard deviations, and the associated p-values for testing the **marginal** null hypothesis $\mathbb{H}_0 \colon \beta_j = 0 \,\, \text{other coefficients arbitrary}$. The F-test statistic is for testing the null hypothesis $\mathbb{H}_0 \colon \beta_{\mathrm{expend}} = \beta_{\mathrm{salary}} = \beta_{\mathrm{ratio}} = 0$ against the alternative hypothesis that at least one of these coefficients is non-zero. We view all of these $p$-values as **descriptive** statistics (since the null hypothesis is quite artificial) in the sense that if the $p$-value we obtained is "unexpected" (for example suggesting no relationship between some subset of predictor variables and the response variable when we expect a relationship) 
+then we will want to know why.
+
+```{r}
+summary(mod2)
+```
+
+The following code compares model **mod1** against model **mod2**. As **mod1** is nested in **mod2**, this comparison is equivalent to testing the null hypothesis that $\beta_{\mathrm{salary}} = \beta_{\mathrm{ratio}} = 0$ against the alternative hypothesis that at least one of these coefficients is non-zero. 
+```{r}
+summary(mod1)
+anova(mod1,mod2)
+```
+The above **anova** command compares the sum of square errors for model **mod1** and model **mod2**. An equivalent test statistic is obtained using the estimates $\hat{\boldsymbol{\beta}}$ in model **mod2**
+```{r}
+## equivalently
+C <- matrix(0,2,4)
+C[1,] <- c(0,0,1,0)
+C[2,] <- c(0,0,0,1)
+C
+q <- nrow(C) ## q = 2 for 2 parameters
+## Covariance matrix for \hat{\beta}
+variance_matrix <- summary(mod2)$cov.unscaled * summary(mod2)$sigma^2 
+Fstar <- t(C %*% coef(mod2)) %*% solve(C %*% variance_matrix %*% t(C)) %*% (C %*% coef(mod2))
+Fstar/q ## compare with the anova output
+```
+
+We see that the above comparison suggests that the two models are **comparable**. This is quite suprising/counter-intuitive as it suggests that increasing expenditure is associated with decreasing math scores. The following output indicates that this is due to confounding variable; in particular adding \texttt{takers} as a predictor variable decreases the MSE considerably and also make the coefficient for \texttt{expenditure} "well-behaved". 
+
+```{r}
+mod3 <- lm(math ~ expend + takers, data = sat)
+summary(mod3)
+## Note how this anova is exactly the same as the marginal hypothesis test for \beta_{takers}
+anova(mod1, mod3) 
+```
+
+In summary, using model **mod3**, the estimated/confidence interval for the math SAT scores for the 50 US states is visualized below. The $\sqrt{\mathrm{MSE}}$ is `r summary(mod3)$sigma`, and looking at the confidence intervals, suggest that the posited relationship between expenditure and math SAT score is reasonably accurate.
+
+```{r warning = FALSE}
+library(ggplot2)
+df <- cbind(sat, predict(mod3, sat, level = 0.95, interval = "confidence")) 
+df <- df %>% mutate(se = (upr - lwr)/(2*qt(0.95,46)), 
+                    lwr.WH = fit - sqrt(4*qf(0.95,4,46)) * se, 
+                    upr.WH = fit + sqrt(4*qf(0.95,4,46)) * se,
+                    abb = state.abb)
+  
+ggplot(df, aes(reorder(x = abb, math), y = math)) + geom_point(color = "red", size = 3) + 
+  geom_errorbar(aes(ymin = lwr, ymax = upr)) + xlab("State") +
+  geom_errorbar(aes(ymin = lwr.WH, ymax = upr.WH), alpha = 0.6, color = "blue") + 
+  coord_flip() + theme_bw()
+```
