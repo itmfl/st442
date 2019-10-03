@@ -1,0 +1,130 @@
+---
+title: "Sample Exam"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1
+
+For the next several questions, use the following dataset.
+
+```{r}
+library(gapminder)
+gapminder
+```
+
++ Q1: What is the most accurate way to compute the average life expectancy for each continent in 1952 ?
+```{r eval = FALSE}
+    ## (a) 
+    gapminder %>% filter(year == 1952) %>% summarise(avg_life_Exp = mean(lifeExp))
+    ## (b)
+    gapminder %>% filter(year == 1952) %>% mutate(total_life = lifeExp*pop) %>% 
+                  summarise(avg_life_Exp = mean(total_life))
+    ## (c)
+    gapminder %>% group_by(continent) %>% filter(year == 1952) %>% 
+      mutate(total_life = lifeExp*pop) %>%
+      summarise(total_life = sum(total_life), total_pop = sum(pop)) %>% 
+      mutate(avg_life_Exp = total_life/total_pop)
+    ## (d)
+    gapminder %>% filter(year == 1952) %>% group_by(continent) %>% 
+      summarise(avg_life_Exp = mean(lifeExp))
+```
+
+## Part 2
+Consider the following list
+```{r}
+list1 <- list(a = list(1,2), b = list(3,3), c = list("a","b","c","d"))
+```
+
++ Q1. What is the length of $\mathtt{list1}$ ?
+$$\mathrm{(a)} 4; \quad \mathrm{(b)}  2; \quad  \mathrm{(c)} 5; \quad \mathrm{(d)} 3$$
++ Q2. What is the length of $\mathtt{list1[2]}$ ?
+$$\mathrm{(a)} 1; \quad \mathrm{(b)}  2; \quad  \mathrm{(c)} 3; \quad \mathrm{(d)} 4$$
+
++ Q3. What is the result of the following code chunk ?
+```{r eval = FALSE}
+library(magrittr) ## This allows the use of the %>% operator
+list1 %>% lapply(length) %>% sapply(unique)
+```
+$$\mathrm{(a)} [1,2,4]; \quad \mathrm{(b)}  [2,2,4]; \quad  \mathrm{(c)} [2,1,4]; \quad \mathrm{(d)} [2,4]$$
+
+## Part 3
+Consider the following table, call it $\mathtt{table1}$.
+```{r echo = FALSE, message = FALSE}
+library(tidyverse)
+table1 <- tribble(
+  ~country, ~year, ~cases, ~population, ~expense,
+  "Afghanistan", 1999, 745, 19987071, 100,
+  "Afghanistan", 2000, 2666, 20595360, 150,
+  "Brazil", 1999, 37737, 172006362, 125,
+  "Brazil", 2000, 80488, 174504898, 200,
+  "China", 1999, 212258, 1272915272, 250,
+  "China", 2000, 213766, 1280428583, 175,
+)
+
+table2 <- gather(table1, key = "type", value = "value", cases, population, expense) %>% arrange(country, year)
+table3 <- table1 %>% unite(rate, cases, population, sep = "/")
+table4a <- table1 %>% select(-population,-expense) %>% spread(year, cases)
+table4b <- table1 %>% select(-cases,-expense) %>% spread(year, population)
+table4c <- table1 %>% select(-population,-cases) %>% spread(year, expense)
+table1 
+```
+
++ Q1. What is the dimension (number of rows and columns) of $\mathtt{table2}$ below ?
+```{r eval = FALSE}
+gather(table1, key = "type", value = "value", cases, population, expense) %>% arrange(country, year)
+```
+$$\mathrm{(a)} \text{12 and 5}; \quad \mathrm{(b)}  \text{12 and 4}; \quad  \mathrm{(c)} \text{18 and 4}; \quad \mathrm{(d)} \text{18 and 5}$$
+
++ Q2. How will you go from $\mathtt{table1}$ to the following table 
+```{r echo = FALSE}
+table4b
+```
+```{r eval = FALSE}
+## (a)
+table1 %>% select(-population,expense) %>% spread(year, cases)
+## (b)
+table1 %>% select(-cases,-expense) %>% spread(year, population)
+## (c)
+table1 %>% select(-population,-cases) %>% spread(year, expense)
+## (d)
+table1 %>% select(population,cases) %>% spread(year, population)
+```
+
++ Q3. How will you go from the following tables back to $\mathtt{table1}$ ? Denote these tables as $\mathtt{table\_abbr}$ and $\mathtt{table5a}$ and $\mathtt{table5b}$.
+```{r echo = FALSE, message = FALSE}
+table_abbr <- tribble(
+  ~fullname, ~abbr, 
+  "Afghanistan", "AF", 
+    "Brazil", "BR", 
+  "China", "CN",
+  "France", "FR",
+  "Spain", "SP",
+)
+table_abbr
+table5b <- table4b %>% left_join(table_abbr, by = c("country" = "fullname")) %>% select(-country)
+table5a <- table1 %>% select(-population)
+table5a
+table5b
+```
+```{r error = TRUE, message = FALSE, eval = FALSE}
+## (a)
+table_abbr %>% right_join(table5b) %>% select(-abbr) %>% 
+  gather(key = "year", value = "population", `1999`, `2000`, convert = TRUE) %>%
+  rename(country = fullname) %>% right_join(table5a)
+## (b)
+table_abbr %>% left_join(table5b) %>% select(-abbr) %>% 
+  gather(key = "year", value = "population", `1999`, `2000`, convert = TRUE) %>%
+  rename(country = fullname) %>% left_join(table5a)
+## (c)
+table_abbr %>% left_join(table5b) %>% select(-abbr) %>% 
+  gather(key = "year", value = "population", `1999`, `2000`, convert = TRUE) %>%
+  left_join(table5a)
+## (d)
+table_abbr %>% right_join(table5b) %>% select(-abbr) %>% 
+  gather(key = "year", value = "population", `1999`, `2000`, convert = TRUE) %>%
+  left_join(table5a, by = c("fullname" = "country"))
+```
