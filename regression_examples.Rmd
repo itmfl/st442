@@ -78,3 +78,27 @@ ggplot(df, aes(reorder(x = abb, math), y = math)) + geom_point(color = "red", si
   geom_errorbar(aes(ymin = lwr.WH, ymax = upr.WH), alpha = 0.6, color = "blue") + 
   coord_flip() + theme_bw()
 ```
+
+# Example 4: Statistically significant variables in full-model might no longer be statistically signifcant in reduced model
+One common error when looking at the output of a regression model is to put too much emphasis on the  reported $p$-value or statistical significance of a certain variable. The way these $p$-values are typically interpreted is that the reported $p$-value for an estimated coefficient $\hat{\beta}_j$ correspond to testing the null hypothesis $\mathbb{H}_0 \colon \beta_j = 0$ against the alternative hypothesis that $\mathbb{H}_A \colon \beta_j \not = 0$. However, implicit in the statements of these null and alternative hypothesis is the dependence on the remaining predictor variables. A more precise formulation of the null and alternative hypothesis are that 
+$$\begin{gather*} \mathbb{H}_0 \colon \beta_j = 0 \,\, \text{and} \,\, \beta_k, k \not = j \,\, \text{arbitrary} \\
+\mathbb{H}_A \colon \beta_j \not = 0 \,\, \text{and} \,\, \beta_k, k \not = j \,\, \text{arbitrary} \end{gather*} $$
+
+Therefore, by changing (or even reducing) the other predictor variables in a model, the marginal $p$-value for a coefficient $\hat{\beta}_j$ can increase or decrease, arbitrarily. 
+
+We illustrate this phenomenon via the following contrived example. We generate $n = 100$ observations. For each observation, we generate $40$ predictor variables, each of which are i.i.d. $N(0,1)$ random variables. The response variable is also $N(0,1)$ and is independent of the predictor variables. Thus, $\beta_j = 0$ for all $j = 1,2,\dots, 40$. The output of the least square regression indicates that there is strong evidence to reject the null hypothesis $\mathbb{H}_0 \colon \beta_j = 0$ for some coefficient $\beta_j$. The $F$-test, however, indicate that there is scant evidence to reject the null hypothesis that $\mathbb{H}_0 \colon \beta_1 = \beta_2 = \dots = \beta_40 = 0$. If we now select five of the predictor variables with the small $p$-values, then the $p$-values for these selected variables in the reduced model can be quite different from that in the full-model. Furthermore, the $F$-test now indicate that there is strong evidence to reject the null hypothesis $\mathbb{H}_0 \colon \beta_9 = \beta_{20} = \beta_{35} = \beta_{37} = \beta_{11} = 0$.
+
+```{r}
+set.seed(125)
+n <- 100
+p <- 40
+X <- matrix(rnorm(n*p), nrow = n, ncol = p)
+Y <- rnorm(n)
+mod <- lm(Y ~ X)
+summary(mod)
+## Find the 5 variables with smallest p-value (marginally)
+idx <- order(summary(mod)$coefficients[,4])[1:5] - 1 
+idx
+mod2 <- lm(Y ~ X[,idx])
+summary(mod2)
+```
