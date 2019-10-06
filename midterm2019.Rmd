@@ -1,0 +1,178 @@
+---
+title: "CSC/ST 442 Midterm I"
+output: 
+  pdf_document:
+    df_print: tibble
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+**Instruction:** Please write your name on the first page of the
+problem set before you begin. This exam consists of 30 problems. The
+problems are worth a combined total of 90 points. You have a total of
+75 minutes to complete the exam. 
+
+# Part 1
+The next several questions use weather data from the **nycflights13** library. This dataset records **hourly** weather data for three airports (EWR, JFK, and LGA) in 2013.
+A snippet of the data is given below. Using this data, answer the following questions.
+
+```{r echo = -3, message = FALSE}
+library(nycflights13)
+library(dplyr)
+weather
+```
+
+**Q1.** The average atmospheric pressure at sea level is approximately $1013$ millibars. When there's a storm or hurricane, the pressure can drop down by $20$ millibars with $\mathtt{wind\_speed}$ of at least $30$ miles per hour. Which of the following code is most accurate for detecting the presence of a storm in the data ?
+```{r eval = FALSE}
+## (a)
+weather %>% filter(pressure <= 993,wind_speed >= 30)
+
+## (b)
+weather %>% filter(pressure > 993, wind_speed >= 30)
+
+## (c)
+weather %>% filter(pressure <= 993 | wind_speed >= 30)
+
+## (d)
+weather %>% group_by(year,month,day) %>% filter(pressure <= 993, wind_speed >= 30)
+```
+
+**Q2.** Suppose we want to find the ten most rainy day in the NYC metro area in $2013$. Which of the following code is most accurate ?
+
+```{r error = TRUE, message = FALSE, eval = FALSE}
+library(dplyr)
+## (a)
+weather %>% group_by(month, day) %>% summarise(total_rain = sum(precip)) %>% 
+  arrange(total_rain) %>% head(10)
+
+## (b)
+weather %>% group_by(origin, month, day) %>% summarise(total_rain = sum(precip)) %>% 
+  arrange(desc(total_rain)) %>% head(10)
+
+## (c)
+weather %>% group_by(month, day) %>% summarise(total_rain = sum(precip)) %>% 
+  arrange(desc(total_rain)) %>% head(10)
+
+## (d)
+weather %>% summarise(total_rain = sum(precip)) %>%  arrange(total_rain) %>% head(10)
+```
+
+**Q3.** How will you find, for each airport, the month with the most days where the average daily temperature 
+is below freezing ?
+
+```{r eval = FALSE}
+## (a)
+weather %>% group_by(origin, month,day) %>% summarise(avg_daily = mean(temp)) %>%
+  summarise(num_days = n()) %>% arrange(num_days)
+
+## (b)
+weather %>% group_by(origin, month, day) %>% summarise(avg_daily = mean(temp)) %>%
+  filter(avg_daily <= 32) %>% summarise(num_days = n()) %>% arrange(desc(num_days))
+
+## (c)
+weather %>% group_by(month, day) %>% summarise(avg_daily = mean(temp)) %>%
+  filter(avg_daily <= 32) %>% summarise(num_days = n()) %>% arrange(desc(num_days))
+
+## (d)
+weather %>% group_by(origin, month, day) %>% summarise(avg_daily = mean(temp)) %>%
+  filter(avg_daily <= 32) %>% summarise(num_days = n()) %>% 
+  filter(num_days == max(num_days))
+```
+
+**Q4** Heatstrokes usually occurs on days where the **highest** temperature is $95$ degrees Farenheit or higher. Using the data for $\mathtt{JFK}$ airport, how will you determine whether or not there is a period of three **consecutive** days in $2013$ where the highest temperature is at least $95$ degrees Farenheit ?
+
+```{r error = TRUE, eval = FALSE}
+## (a)
+weather %>% filter(origin == 'JFK') %>% group_by(month,day) %>% 
+  summarise(high95 = any(temp >= 95)) %>% ungroup() %>% 
+  filter(high95, lag(high95,1), lag(high95,2))
+
+## (b)
+weather %>% filter(origin == 'JFK') %>% group_by(day) %>% 
+  summarise(high95 = any(temp >= 95)) %>% filter(high95, lag(high95,1), lag(high95,2))
+
+## (c)
+weather %>% filter(origin == 'JFK') %>% group_by(day) %>% 
+  summarise(high95 = mean(temp)) %>% filter(high95, lag(high95,1), lag(high95,2))
+
+## (d)
+weather %>% filter(origin == 'JFK') %>% group_by(day) %>% 
+  summarise(high95 = mean(temp)) %>% filter(lag(high95,3))
+```
+
+**Q5.** The three airports are all in the NYC metro area and hence we expect that they should have similar weather at any given hour. How will you find the dates and time of the **ten** observations
+with the largest temperature difference between the three airports ?
+
+```{r echo = -2, eval = FALSE}
+library(tidyr)
+weather <- weather[-c(7320,16025,24731),]
+weather.sml <- weather %>% select(origin:temp)
+
+## (a)
+weather.sml %>% spread(origin,temp) %>% 
+  mutate(tmp_diff = max(EWR,JFK,LGA) - min(EWR,JFK,LGA)) %>% 
+  arrange(desc(tmp_diff)) %>% head(10)
+
+## (b)
+weather.sml %>% group_by(origin, month, day, hour) %>% 
+  mutate(tmp_diff = max(temp) - min(temp))
+  arrange(desc(tmp_diff)) %>% head(10)
+
+## (c)
+weather.sml %>% spread(origin,temp) %>% 
+  mutate(tmp_diff = pmax(EWR,JFK,LGA) - pmin(EWR,JFK,LGA)) %>% 
+  arrange(desc(tmp_diff)) %>% head(10)
+
+## (d)
+weather.sml %>% group_by(month,day, hour) %>% 
+  mutate(tmp_diff = max(temp) - min(temp)) %>%
+  arrange(desc(tmp_diff)) %>% head(10)
+```
+
+
+
+# Part 2
+The next several questions use the following data.
+```{r}
+list1 <- list(a = 1:6, 
+              b = c(2,2,4,4,3,3), 
+              d = NULL)
+list1$c <- list(list1$a,list1$b)
+```
+
+**Q1.** What is the value of 
+  ```{r eval = FALSE}
+    length(list1[[4]])
+  ```
+  + (a) $3$
+  + (b) $12$
+  + (c) $2$
+  + (d) $0$
+
+**Q2.** Consider the following object $\mathtt{x}$. 
+  ```{r eval=FALSE}
+    x <- c(list1\$a,list1\$b,list1\$d)
+  ```
+  Which description best describe $\mathrm{x}$ ?
+
+  + (a) atomic vector of length $12$ 
+  + (b) list of length 12
+  + (c) list of length 3
+  + (d) atomic vector of length 3.
+
+
+**Q3.** What is the output of the following code chunk ?
+  ```{r eval = FALSE}
+  sapply(list1$c, function(vec) tapply(vec, list1$b, sum))
+  ```
+
+$$\mathtt{(a)} \begin{bmatrix} 3 & 4 \\ 11 & 6 \\ 7 & 8 \end{bmatrix} \quad
+  \mathtt{(b)} \begin{bmatrix} 4 & 3 \\ 6 & 11 \\ 8 & 7 \end{bmatrix} \quad
+  \mathtt{(c)} \begin{bmatrix} 3 & 6 \\ 11 & 4 \\ 7 & 8 \end{bmatrix} \quad
+  \mathtt{(d)} \begin{bmatrix} 3 & 8 \\ 11 & 6 \\ 7 & 4 \end{bmatrix}$$
+  
+
+# Part III
