@@ -11,8 +11,8 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 **Instruction:** Please write your name on the first page of the
-problem set before you begin. This exam consists of 30 problems. The
-problems are worth a combined total of 90 points. You have a total of
+problem set before you begin. This exam consists of 25 problems. The
+problems are worth a combined total of 75 points. You have a total of
 75 minutes to complete the exam. 
 
 # Part 1
@@ -132,9 +132,8 @@ weather.sml %>% group_by(month,day, hour) %>%
   arrange(desc(tmp_diff)) %>% head(10)
 ```
 
-
-
-# Part 2
+\newpage
+# Part II
 The next several questions use the following data.
 ```{r}
 list1 <- list(a = 1:6, 
@@ -147,21 +146,21 @@ list1$c <- list(list1$a,list1$b)
   ```{r eval = FALSE}
     length(list1[[4]])
   ```
-  + (a) $3$
-  + (b) $12$
-  + (c) $2$
-  + (d) $0$
+  (a) $3$
+  (b) $12$
+  (c) $2$
+  (d) $0$
 
 **Q2.** Consider the following object $\mathtt{x}$. 
   ```{r eval=FALSE}
-    x <- c(list1\$a,list1\$b,list1\$d)
+    x <- c(list1$a,list1$b,list1$d)
   ```
   Which description best describe $\mathrm{x}$ ?
 
-  + (a) atomic vector of length $12$ 
-  + (b) list of length 12
-  + (c) list of length 3
-  + (d) atomic vector of length 3.
+  (a) atomic vector of length $12$ 
+  (b) list of length $12$
+  (c) list of length $3$
+  (d) atomic vector of length $3$.
 
 
 **Q3.** What is the output of the following code chunk ?
@@ -173,6 +172,287 @@ $$\mathtt{(a)} \begin{bmatrix} 3 & 4 \\ 11 & 6 \\ 7 & 8 \end{bmatrix} \quad
   \mathtt{(b)} \begin{bmatrix} 4 & 3 \\ 6 & 11 \\ 8 & 7 \end{bmatrix} \quad
   \mathtt{(c)} \begin{bmatrix} 3 & 6 \\ 11 & 4 \\ 7 & 8 \end{bmatrix} \quad
   \mathtt{(d)} \begin{bmatrix} 3 & 8 \\ 11 & 6 \\ 7 & 4 \end{bmatrix}$$
-  
 
+**Q4.** What is the output of the following code chunk ?
+  ```{r eval = FALSE}
+  library(purrr)
+  list1 %>% map(unique) %>% map_int(length)
+  ```
+$$\mathtt{(a)} \begin{bmatrix} 6 & 3 & 0 & 2 \end{bmatrix}; \quad 
+  \mathtt{(b)} \begin{bmatrix} 6 & 3 & \mathtt{NULL} & 2 \end{bmatrix}; \quad 
+  \mathtt{(c)}\begin{bmatrix} 6 & 6 & \mathtt{NULL} & 12 \end{bmatrix}; \quad 
+  \mathtt{(d)} \begin{bmatrix} 6 & 3 & 0 & 12 \end{bmatrix}$$
+
+\newpage
 # Part III
+The next several questions uses the following data on the average amount of servings of alcholic beverage consumed by a person for $193$ countries for the year **$2007$**. A snippet of the $\mathtt{drinks}$ data is as follows (here the variable $\mathtt{total}$ records the total litres of pure alchohol consumed on average for a person in that country)
+```{r echo = 4, message = FALSE}
+library(fivethirtyeight)
+drinks <- drinks %>% 
+  rename(total = total_litres_of_pure_alcohol)
+drinks
+```
+
+**Q1.** What is the dimension (number of rows and columns) of $\mathtt{table2}$ below ?
+```{r eval = FALSE}
+drinks2 <- gather(drinks, key = "type", value = "value", 
+                  beer_servings, wine_servings, spirit_servings)
+```
+  (a) $386$ and $5$
+  (b) $386$ and $4$
+  (c) $579$ and $4$
+  (d) $579$ and $5$
+  
+**Q2.** How will you go from the table **drinks** to the following table ?
+```{r echo = FALSE}
+library(tidyr)
+drinks %>% select(-total,-spirit_servings) %>% gather(key = "type", value = "value", -country) %>%
+  separate(type, into = c("type", "servings"),sep = "_") %>% 
+  select(-servings) %>% arrange(country)
+```
+
+```{r error = TRUE, eval = FALSE}
+## (a)
+drinks %>% select(-total, -spirit_servings) %>% 
+  separate(type, into = c("type", "servings"),sep = "_") 
+
+## (b)
+drinks %>% gather(key = "type", value = "value", -country) %>%
+  separate(type, into = c("type", "servings"),sep = "_") %>% select(-servings)
+
+## (c)
+drinks %>% select(-total, -spirit_servings) %>% 
+  gather(key = "type", value = "value", -country) 
+
+## (d)
+drinks %>% select(-total, -spirit_servings) %>% 
+  gather(key = "type", value = "value", -country) %>%
+  separate(type, into = c("type", "servings"),sep = "_") %>% select(-servings)
+```
+
+**Q3:** We now recall the **gapminder** data frame
+```{r echo = 3}
+library(gapminder)
+gapminder
+```
+Suppose we want to find the (Pearson) correlation between disposable income and amount of alcohol consumption in **2007**. Which of the following code chunk is most appropriate for this ?
+```{r error = TRUE, eval = FALSE, message = FALSE, warning = FALSE}
+## (a)
+gapminder %>% inner_join(drinks) %>% 
+  summarise(cor = cor(total, gdpPercap))
+
+## (b)
+gapminder %>% filter(year == 2007) %>% left_join(drinks) %>% 
+  summarise(cor = cor(total, gdpPercap))
+
+## (c)
+gapminder %>% filter(year == 2007) %>% inner_join(drinks) %>% 
+  summarise(cor = cor(total, gdpPercap))
+
+## (d)
+gapminder %>% filter(year == 2007) %>%
+  summarise(cor = cor(total, gdpPercap))
+```
+
+**Q4:** The following table is obtained by splitting the countries into three groups according to the amount of alcohol consumed ("little", "moderate", and "heavy" drinking) by an average person and then finding the country with the lowest and highest life expectancy (in 2007) for each group. Note that we only uses countries for which $\mathtt{total} > 0$. Which of the following code chunk is most appropriate for reproducing this table ?
+```{r echo = FALSE, message = FALSE, error = TRUE, warning = FALSE}
+drinks <- drinks %>% filter(total > 0) %>% 
+  select(country, total) %>% 
+  mutate(categories = ntile(total,3))
+gapminder %>% filter(year == 2007) %>% inner_join(drinks) %>% 
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+```
+
+```{r error = TRUE, eval = FALSE}
+## Code chunks start here
+drinks <- drinks %>% filter(total > 0) %>% 
+  select(country, total) %>% 
+  mutate(categories = ntile(total,3))
+
+##(a)
+gapminder %>% filter(year == 2007) %>% inner_join(drinks) %>% 
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+
+##(b)
+gapminder %>% filter(year == 2007) %>% 
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+
+##(c)
+gapminder %>% filter(year == 2007) %>% left_join(drinks) %>% 
+filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+
+##(d)
+gapminder %>% filter(year == 2007) %>% left_join(drinks) %>% 
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+```
+
+**Q5.** How will you go from the **gapminder** data frame to the following data frame with **list columns** ? Call this data frame **gap_lm**.
+```{r echo = c(4:5)}
+library(purrr)
+country_model <- function(df){
+  lm(lifeExp ~ country + log(gdpPercap), data = df)
+}
+gap_lm  <- gapminder %>% group_by(continent, year) %>% nest() %>% 
+  mutate(model = map(data, country_model))
+gap_lm
+(gap_lm$model[[1]])$call
+```
+
+```{r eval = FALSE, error = TRUE}
+## Code chunks start here
+library(purrr)
+country_model <- function(df){
+  lm(lifeExp ~ country + log(gdpPercap), data = df)
+}
+## (a)
+gap_lm  <- gapminder %>% group_by(continent, year) %>% nest() %>% 
+  mutate(model = map_dbl(data, country_model))
+
+## (b)
+gap_lm  <- gapminder %>% group_by(continent) %>% nest() %>% 
+  mutate(map(data, country_model))
+
+## (c)
+gap_lm  <- gapminder %>% group_by(continent, year) %>% 
+  mutate(map(data, country_model))
+
+## (d)
+gap_lm  <- gapminder %>% group_by(continent, year) %>% nest()
+```
+                                                              
+
+\newpage
+# Part IV
+The following questions use the **diamonds** dataset on the selling price and other attributes of almost $54,000$ diamonds. A snippet of the data is as follows. The $\mathtt{cut}$ variable is a factor with $5$ levels denoting the quality of the cut and ranges from Fair (worst) to Ideal (best), while $x$, $y$ and $z$ denote the length, width, and dept of the diamond.
+
+```{r echo = FALSE}
+library(ggplot2)
+diamonds_sml <- diamonds %>% select(-depth,-table,-clarity,color)
+diamonds_sml
+```
+
+Several linear models were ran on the data, yielding the following output
+```{r echo = -1}
+options(contrasts = rep("contr.treatment", 2))
+mod1 <- lm(price ~ carat + cut, data = diamonds_sml)
+mod2 <- lm(price ~ cut, data = diamonds_sml)
+
+## 95% confidence interval for the coefficients
+confint(mod1, parm = c("(Intercept)","cutGood","cutVery Good", "cutPremium", "cutIdeal"), 
+        level = 0.95) 
+confint(mod2, level = 0.95)
+
+```
+
+**Q1:** Let $\beta_{I}$ denote the coefficient for the **Ideal** cut. What is the estimate for $\beta_I$ in model **mod2** ?
+
+  (a) approximately `r round(coef(mod2)["cutIdeal"])`
+  (b) approximately `r round(coef(mod2)["cutIdeal"]/2)`
+  (c) approximately `r round(coef(mod2)["cutIdeal"] + 100)`
+  (d) approximately `r round(coef(mod2)["cutGood"])`
+
+**Q2:** In model **mod1** we see that the **estimated** coefficients for the cuts are now quite different compared to that in model **mod2**. Suppose that the average price of a 0.5 carat, Ideal cut diamond is estimated (by model **mod1**) to be `r round(coef(mod1)[1] + coef(mod1)[2]*0.5 + coef(mod1)["cutIdeal"])`, what is a reasonable estimate for the carat coefficient ?
+  
+  (a) `r round(coef(mod1)[2]/2)`
+  (b) `r round(coef(mod1)[3])`
+  (c) `r round(coef(mod1)[4])`
+  (d) `r round(coef(mod1)[2])`
+
+**Q3:** The length of the $95\%$ confidence and **prediction** interval for a $1$ carat, Ideal cut diamond are estimated (using model **mod1**) to be 
+```{r echo = c(1,4), warning = FALSE}
+## 95% confidence interval
+predict(mod1, newdata = data_frame(carat = 1, cut = "Ideal"), level = 0.95, interval = "confidence")
+
+## 95% prediction interval
+predict(mod1, newdata = data_frame(carat = 1, cut = "Ideal"), level = 0.95, interval = "prediction")
+```
+Assuming that the $97.5\%$ quantile for the standard normal distribution is $2$, what is a reasonable estimate for $\sigma$ using model **mod1** ? Hint: $1+x \approx 1$ for small $x$.
+
+  + (a) approximately `r round(summary(mod2)$sigma/2)`
+  + (b) approximately `r round(summary(mod1)$sigma)`
+  + (c) approximately `r round(sqrt(summary(mod1)$sigma))`
+  + (d) approximately `r round(summary(mod1)$sigma/2)`
+  
+**Q4:** Consider the following output
+```{r}
+summary(mod1)$coefficients[,c(3,4)]
+```
+Assuming **mod1** is a reasonable model for the data, which of the following statements is most accurate ?
+
+(a) The probability that $\beta_{\mathrm{carat}} = 0$ is less than $10^{-6}$.
+(b) Model **mod1** has substantially smaller mean square error than model **mod2**.
+(c) The least square estimate for $\beta_{\mathrm{carat}}$ is negative.
+(d) The parameter $\beta_{\mathrm{carat}}$ is larger than $0$, in the presence of other variables.
+
+\newpage
+
+# Part V
+
+The next several questions use the  **NHANES** survey data recording the medical, behavioral, and physical measurements of invididuals. A snippet of the data, with a bunch of variables removed, is given below. Here weight and heigh are in $\mathtt{kg}$ and $\mathtt{cm}$, and $\mathtt{Poverty}$ records the ratio of family income to povery guidelines (smaller numbers indicate more poverty).
+```{r echo = 4:5}
+library(NHANES)
+NHANES_sml <- NHANES %>% select(Gender, Age, Race1, 
+                                Poverty, Weight, Height, BMI, TotChol,Diabetes)
+
+NHANES_sml
+levels(NHANES_sml$Race1)
+```
+
+**Q1** Which of the following code reproduce the following graphic ?
+```{r out.width="60%", fig.align = 'center', echo = FALSE, warning = FALSE, message = FALSE}
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + stat_smooth(aes(group = Gender))
+```
+
+```{r error = TRUE, eval = FALSE}
+## (a)
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + stat_smooth(aes(group = Gender))
+
+## (b)
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + stat_smooth(group = Gender)
+
+## (c)
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + stat_smooth(aes(group = Race1))
+
+## (d)
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + stat_smooth(aes(group = Diabetes))
+```
+
+\newpage
+**Q2** How many scatterplot smooths are computed (in total) for the following code chunk ?
+```{r eval = FALSE}
+ggplot(NHANES_sml, aes(x = Age, y = Height)) + geom_point() +
+  stat_smooth(aes(group = Gender)) + facet_wrap(~ Race1)
+```
+
+  (a) 2 scatterplot smooths
+  (b) 5 scatterplot smooths
+  (c) 10 scatterplot smooths
+  (d) 1 scatterplot smooth.
+  
+**Q3** What is the best **geom** object to add to the following **ggplot2** object $\mathtt{p}$ ?
+```{r eval = TRUE}
+p <- ggplot(filter(NHANES_sml,!is.na(Diabetes)), aes(x = Diabetes, y = BMI))
+```
+
+```{r error = TRUE, eval = FALSE}
+## (a)
+p + geom_point()
+
+## (b)
+p + geom_boxplot()
+
+## (c)
+p + geom_bar()
+
+## (d)
+p + geom_histogram()
+```
+
+**Q4** Which of the following **geom_object** understands all of the following aesthetics $\mathtt{x}$, $\mathtt{ymin}$ and $\mathtt{ymax}$ ?
+  
+  (a) $\mathtt{geom\_boxplot}$
+  (b) $\mathtt{geom\_ribbon}$
+  (c) $\mathtt{geom\_smooth}$
+  (d) $\mathtt{geom\_polygon}$
+
+**Q5**
