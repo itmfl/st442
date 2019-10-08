@@ -1,13 +1,14 @@
 ---
-title: "Sample Exam"
-output: html_document
+title: "Sample questions"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3)
 ```
 
-## Part 1
+# Part 1 (Wrangling data with dplyr)
 
 For the next several questions, use the following dataset.
 
@@ -18,22 +19,85 @@ gapminder
 
 + Q1: What is the most accurate way to compute the average life expectancy for each continent in 1952 ?
 ```{r eval = FALSE}
-    ## (a) 
-    gapminder %>% filter(year == 1952) %>% summarise(avg_life_Exp = mean(lifeExp))
-    ## (b)
-    gapminder %>% filter(year == 1952) %>% mutate(total_life = lifeExp*pop) %>% 
+## (a) 
+gapminder %>% filter(year == 1952) %>% summarise(avg_life_Exp = mean(lifeExp))
+    
+## (b)
+gapminder %>% filter(year == 1952) %>% mutate(total_life = lifeExp*pop) %>% 
                   summarise(avg_life_Exp = mean(total_life))
-    ## (c)
-    gapminder %>% group_by(continent) %>% filter(year == 1952) %>% 
-      mutate(total_life = lifeExp*pop) %>%
-      summarise(total_life = sum(total_life), total_pop = sum(pop)) %>% 
-      mutate(avg_life_Exp = total_life/total_pop)
-    ## (d)
-    gapminder %>% filter(year == 1952) %>% group_by(continent) %>% 
-      summarise(avg_life_Exp = mean(lifeExp))
+
+## (c)
+gapminder %>% group_by(continent) %>% filter(year == 1952) %>% 
+  mutate(total_life = lifeExp*pop) %>%
+  summarise(total_life = sum(total_life), total_pop = sum(pop)) %>% 
+  mutate(avg_life_Exp = total_life/total_pop)
+
+## (d)
+gapminder %>% filter(year == 1952) %>% group_by(continent) %>% 
+  summarise(avg_life_Exp = mean(lifeExp))
 ```
 
-## Part 2
++ Q2: How will you compute, for each year, the standardized gdpPercap for each country 
+(standardized by the continent the country belongs to) ?
+
+```{r error = TRUE, message = FALSE, eval = FALSE}
+library(dplyr)
+
+## (a) 
+gapminder %>% group_by(year) %>% mutate(std_gdp = scale(gdpPercap))
+
+## (b)
+gapminder %>% group_by(continent, year) %>% mutate(std_gdp = scale(gdpPercap))
+
+## (c)
+gapminder %>% group_by(continent, year) %>% summarise(std_gdp = scale(gdpPercap))
+
+## (d)
+gapminder %>% group_by(year) %>% summarise(std_gdp = scale(gdpPercap))
+```
+
++ Q3: The following table is obtained by splitting the **gapminder** data into $3$ groups based on the logarithm of gdpPercap in $1952$ (these buckets corresponds roughly the "undeveloped", "developing", and "developed" countries at that time) and then find the country with the sharpest population increase between $1952$ and $2007$, **grouped by the original development status in $1952$**. Which of the following code will reproduce this table ?
+
+```{r echo = FALSE, message = FALSE}
+library(dplyr)
+gapminder_1952 <- gapminder %>% filter(year == 1952) %>% mutate(develop = ntile(log(gdpPercap),3)) %>% select(country, develop)
+gapminder %>% left_join(gapminder_1952) %>% group_by(country) %>% 
+  mutate(pop_growth = pop[year == 2007]/pop[year == 1952]) %>% 
+  ungroup() %>% group_by(develop) %>% filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
+```
+
+```{r eval = FALSE,error = TRUE}
+
+## (a)
+gapminder %>% mutate(develop = ntile(log(gdpPercap), 3)) %>% group_by(country) %>% 
+  mutate(pop_growth = pop[year == 2007]/pop[year == 1952]) %>% 
+  ungroup() %>% group_by(develop) %>% 
+  filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
+
+## (b)
+gapminder_1952 <- gapminder %>% filter(year == 1952) %>% 
+  mutate(develop = ntile(log(gdpPercap),3)) %>% 
+  select(country, develop)
+gapminder %>% left_join(gapminder_1952) %>% group_by(country) %>% 
+  mutate(pop_growth = pop[year == 2007]/pop[year == 1952]) %>% 
+  ungroup() %>% group_by(develop) %>% 
+  filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
+
+## (c)
+gapminder_1952 <- gapminder %>% filter(year == 1952) %>% 
+  mutate(develop = ntile(log(gdpPercap),3)) 
+gapminder %>% left_join(gapminder_1952) %>% group_by(country) %>% 
+  mutate(pop_growth = pop[year == 2007]/pop[year == 1952]) %>% 
+  filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
+
+## (d)
+gapminder %>% mutate(develop = ntile(log(gdpPercap), 3)) %>% 
+  group_by(country,develop) %>% 
+  mutate(pop_growth = pop[year == 2007]/pop[year == 1952]) %>% 
+  filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
+```
+
+# Part 2 (Base R datastructures and automation)
 Consider the following list
 ```{r}
 list1 <- list(a = list(1,2), b = list(3,3), c = list("a","b","c","d"))
@@ -51,7 +115,13 @@ list1 %>% lapply(length) %>% sapply(unique)
 ```
 $$\mathrm{(a)} [1,2,4]; \quad \mathrm{(b)}  [2,2,4]; \quad  \mathrm{(c)} [2,1,4]; \quad \mathrm{(d)} [2,4]$$
 
-## Part 3
++ Q4: What is the relationship between a list and a vector in **R** ?
+  + (a) A list is a special type of vector.
+  + (b) A vector is a special kind of list.
+  + (c) A vector and a list are distinct data types.
+  + (d) The intersection of a list and a vector is the **NULL** object.
+
+# Part 3 (Tidying Data)
 Consider the following table, call it $\mathtt{table1}$.
 ```{r echo = FALSE, message = FALSE}
 library(tidyverse)
@@ -75,7 +145,8 @@ table1
 
 + Q1. What is the dimension (number of rows and columns) of $\mathtt{table2}$ below ?
 ```{r eval = FALSE}
-gather(table1, key = "type", value = "value", cases, population, expense) %>% arrange(country, year)
+table2 <- gather(table1, key = "type", value = "value", cases, population, expense) %>% 
+  arrange(country, year)
 ```
 $$\mathrm{(a)} \text{12 and 5}; \quad \mathrm{(b)}  \text{12 and 4}; \quad  \mathrm{(c)} \text{18 and 4}; \quad \mathrm{(d)} \text{18 and 5}$$
 
@@ -94,7 +165,7 @@ table1 %>% select(-population,-cases) %>% spread(year, expense)
 table1 %>% select(population,cases) %>% spread(year, population)
 ```
 
-+ Q3. How will you go from the following tables back to $\mathtt{table1}$ ? Denote these tables as $\mathtt{table\_abbr}$ and $\mathtt{table5a}$ and $\mathtt{table5b}$.
++ Q3. How will you go from the following tables back to $\mathtt{table1}$ ? Denote these tables as $\mathtt{table\_abbr}$, $\mathtt{table5a}$ and $\mathtt{table5b}$.
 ```{r echo = FALSE, message = FALSE}
 table_abbr <- tribble(
   ~fullname, ~abbr, 
@@ -104,11 +175,11 @@ table_abbr <- tribble(
   "France", "FR",
   "Spain", "SP",
 )
-table_abbr
-table5b <- table4b %>% left_join(table_abbr, by = c("country" = "fullname")) %>% select(-country)
-table5a <- table1 %>% select(-population)
-table5a
-table5b
+#table_abbr
+table5b <- table4b %>% left_join(table_abbr, by = c("country" = "fullname")) %>% select(-country) %>% select(abbr, everything())
+table5a <- table1 %>% select(-population) 
+
+knitr::kable(list(table_abbr, table5a, table5b))
 ```
 ```{r error = TRUE, message = FALSE, eval = FALSE}
 ## (a)
@@ -127,4 +198,146 @@ table_abbr %>% left_join(table5b) %>% select(-abbr) %>%
 table_abbr %>% right_join(table5b) %>% select(-abbr) %>% 
   gather(key = "year", value = "population", `1999`, `2000`, convert = TRUE) %>%
   left_join(table5a, by = c("fullname" = "country"))
+```
+
++ Q4: How will you go from **table1** to the following table (call it **table_q4**) ? Here $\mathtt{means}$ contain the sample average for each variable
+```{r echo = 3:4}
+colmeans <- function(df){
+  sapply(select(df, -year), mean)
+}
+table_q4 <- table1 %>% group_by(country) %>% nest() %>% mutate(means = map(data, colmeans))
+table_q4
+table_q4$means[[1]]
+```
+
+```{r error = TRUE, message = FALSE, eval = FALSE}
+
+colmeans <- function(df){
+  sapply(select(df, -year), mean)
+}
+
+##(a)
+table_q4 <- table1 %>% group_by(country) %>% nest() %>% 
+  mutate(means = map(data, colmeans)) %>% unnest()
+
+##(b)
+table_q4 <- table1 %>% group_by(country,year) %>% nest() %>% map(data, colmeans)
+##(c)
+table_q4 <- table1 %>% group_by(country) %>% nest() %>% map(data, colmeans)
+```
+
+# Part 4 (Basic statistics and linear models)
+
+For this part, read the following description. DrinkDrankDrunk\textregistered is a beverage company. The company is interested in finding the effect of choice of beverages on employees productivity. The company performs a
+study in which the predictor variable $X$ is the amount of coffee (in pint) consumed by an employee per day for a duration of one month,
+$Z$ is the amount of soda (in pint) consumed by an employee per day for a duration of one month, and $W$ is the
+amount of energy drink (in pint) consumed by an employee per day for a duration of
+one month. The response variable $Y$ is a measure of productivity of the employee for the month. The number of data points is $n = 40$. The values of the predictor variable $X$ ranges from $1$ to $5$, the values of the predictor variable $Z$ ranges from $1$ to $4$ and the values of the predictor variables $W$ ranges from $0$ to $3$. A snippet of the data is as follows
+
+```{r echo = FALSE, message=FALSE, warning = FALSE}
+set.seed(123)
+n <- 40
+X <- rep(c(1,2,3,4), each = 10)
+Z <- rep(c(5,3,2,1), each = 10)
+W <- Z/2 + rnorm(n, sd = 0.1)
+Y <- 1 + 1.2*W + 0.5*X + 2*Z + rnorm(n, sd = 0.2)
+Xmat <- matrix(0,n,4)
+Xmat[,1] <- 1
+Xmat[,2] <- W
+Xmat[,3] <- X
+Xmat[,4] <- Z
+df <- data_frame(Y = Y, W = W, X = X, Z = Z)
+df
+P <- solve(t(Xmat) %*% Xmat)
+```
+
+
+The design matrix $\mathbf{X}$ satisfies
+
+$$\mathbf{X} = \begin{bmatrix} 1 & X_1 & Z_1 & W_1 \\ 1 &  X_2 & Z_2 & W_2 \\ \vdots & \vdots & \vdots \\ 1 & X_n & Z_n & 
+W_n \end{bmatrix}; \quad (\mathbf{X}^{T} \mathbf{X})^{-1}
+= \begin{bmatrix} 12.18 & 0.28 & -2.65  & -2.15 \\ -0.28 & 3.2 & -0.06 & -1.64 
+\\ -2.65 & -0.06 & 0.58 & 0.47 \\ -2.15 & -1.64 & 0.47 & 1.18   \end{bmatrix}$$ 
+
+
+The following output are the $95\%$ confidence interval obtained from **R** for fitting the model
+$Y_i = \beta_0 + \beta_W W_i + \beta_X X_i + \beta_Z Z_i + \epsilon_i$
+to the data where the $\epsilon_i$ are assumed i.i.d. $N(0, \sigma^2)$.
+
+```{r echo = TRUE}
+mod <- lm(Y ~ W + X + Z, df)
+confint(mod, level = 0.95)
+```
+
+
+From the above ouput, answer the following question.
+
+
+Q1. What is the least square estimate for $\hat{\beta}_W$ ?
+
+$$\mathrm{(a)} `r coef(mod)[2]`; \quad \mathrm{(b)} `r coef(mod)[2] + 0.5`; \quad \mathrm{(c)} `r coef(mod)[2] - 0.5`; \quad \mathrm{(d)} `r coef(mod)[2]/2`$$
+Q2. What is a reasonable estimate of $\sigma^2$ for this data (assuming the posited model is "correct") ? You can assume that the $97.5\%$ quantile for the appropriate Student-$t$ distribution is $2$.
+$$\mathrm{(a)} `r summary(mod)$sigma^2 + 1`; \quad \mathrm{(b)} `r summary(mod)$sigma`; \quad \mathrm{(c)} `r summary(mod)$sigma^2`; \quad \mathrm{(d)} `r summary(mod)$sigma^2/2`$$
+Q3. What is a reasonable **prediction** interval for $Y_*$ when $\boldsymbol{x}_* = (W_*, X_*, Z_*) = (2,3,4)$ ?
+(This is a fill-in a blank question. You don't have to provide the exact numbers but you need to demonstrate that you know how to obtain the answer from the output given above).
+
+Q4. Can you conclude, from the above output, that (assuming the model is true), there is scant evidence supporting the hypothesis that 
+$\beta_X = 0.65$ and $\beta_Z = 1$ **simultaneously** (with $\beta_0$ and $\beta_W$ arbitrary) ? Why or why not ? 
+
+
+# Part 5 (Visualizing data)
+
+For this part, use the following dataset on highway efficiency of cars.
+```{r}
+mpg
+```
+
+Q1. Which code will reproduce the following figure ?
+```{r eval = TRUE, echo = FALSE}
+library(ggplot2)
+mpg %>% ggplot(aes(x = reorder(drv,hwy), y = hwy, color = factor(year))) + 
+  geom_point() + geom_boxplot(aes(group = drv)) + xlab("drv") + ylab("hwy")
+```
+
+```{r eval = FALSE}
+## (a)
+mpg %>% ggplot(aes(x = drv, y = hwy, color = factor(year))) + geom_point() + 
+  geom_boxplot(aes(group = drv))
+
+## (b)
+mpg %>% ggplot(aes(x = drv, y = hwy, color = factor(year))) + 
+  geom_point() + geom_boxplot()
+
+## (c)
+mpg %>% ggplot(aes(x = reorder(drv,hwy), y = hwy, color = factor(year))) + 
+  geom_point() + geom_boxplot()
+
+## (d)
+mpg %>% ggplot(aes(x = reorder(drv,hwy), y = hwy, color = factor(year))) + 
+  geom_point() + geom_boxplot(aes(group = drv))
+```
+
+
+Q2. Which code will reproduce the following figure ?
+```{r eval = TRUE, echo = FALSE}
+mpg %>% ggplot(aes(x = displ,  y = cty, group = factor(year))) + geom_point() + 
+  stat_smooth(method = "lm", se = FALSE) + facet_wrap( ~ drv)
+```
+
+```{r eval = FALSE, error = TRUE, message = FALSE}
+## (a)
+mpg %>% ggplot(aes(x = displ,  y = cty, color = year)) + geom_point() + 
+  stat_smooth(method = "lm", se = FALSE) 
+
+## (b)
+mpg %>% ggplot(aes(x = displ,  y = cty, group = factor(year))) + geom_point() + 
+  stat_smooth(method = "lm", se = FALSE) + facet_wrap(~ drv)
+
+## (c)
+mpg %>% ggplot(aes(x = displ,  y = cty, color = year)) + geom_point() + 
+  stat_smooth() + facet_wrap(~ drv)
+
+## (d)
+mpg %>% ggplot(aes(x = displ,  y = cty, color = year)) + geom_point() + 
+  stat_smooth(aes(group = drv))
 ```
