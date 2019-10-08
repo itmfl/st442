@@ -1,6 +1,6 @@
 ---
 title: "Sample questions"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -37,6 +37,8 @@ gapminder %>% filter(year == 1952) %>% group_by(continent) %>%
   summarise(avg_life_Exp = mean(lifeExp))
 ```
 
+**Answer** (c) as we need to compute the weighted average (as the population for each country differs)
+
 + Q2: How will you compute, for each year, the standardized gdpPercap for each country 
 (standardized by the continent the country belongs to) ?
 
@@ -55,6 +57,8 @@ gapminder %>% group_by(continent, year) %>% summarise(std_gdp = scale(gdpPercap)
 ## (d)
 gapminder %>% group_by(year) %>% summarise(std_gdp = scale(gdpPercap))
 ```
+
+**Answer** (b) you need to do a grouped mutate; here the mutate (standardization) are based on the different continent and different year.
 
 + Q3: The following table is obtained by splitting the **gapminder** data into $3$ groups based on the logarithm of gdpPercap in $1952$ (these buckets corresponds roughly the "undeveloped", "developing", and "developed" countries at that time) and then find the country with the sharpest population increase between $1952$ and $2007$, **grouped by the original development status in $1952$**. Which of the following code will reproduce this table ?
 
@@ -97,6 +101,8 @@ gapminder %>% mutate(develop = ntile(log(gdpPercap), 3)) %>%
   filter(pop_growth == max(pop_growth), year %in% c(1952, 2007))
 ```
 
+**Answer** (b). The answer (c) might work, except that we do not want to join by **year**, only by **country** name, so we need to either remove year, or specify the join key explicitly.
+
 # Part 2 (Base R datastructures and automation)
 Consider the following list
 ```{r}
@@ -105,8 +111,13 @@ list1 <- list(a = list(1,2), b = list(3,3), c = list("a","b","c","d"))
 
 + Q1. What is the length of $\mathtt{list1}$ ?
 $$\mathrm{(a)} 4; \quad \mathrm{(b)}  2; \quad  \mathrm{(c)} 5; \quad \mathrm{(d)} 3$$
+
+**Answer** (d) as **list1** is a list with $3$ elements.
+
 + Q2. What is the length of $\mathtt{list1[2]}$ ?
 $$\mathrm{(a)} 1; \quad \mathrm{(b)}  2; \quad  \mathrm{(c)} 3; \quad \mathrm{(d)} 4$$
+
+**Answer** (a) as $[]$ returns a sub-list, in this case a list with $1$ element corresponding to the sub-list of $\mathtt{list1}$ with one element.
 
 + Q3. What is the result of the following code chunk ?
 ```{r eval = FALSE}
@@ -115,11 +126,16 @@ list1 %>% lapply(length) %>% sapply(unique)
 ```
 $$\mathrm{(a)} [1,2,4]; \quad \mathrm{(b)}  [2,2,4]; \quad  \mathrm{(c)} [2,1,4]; \quad \mathrm{(d)} [2,4]$$
 
+**Answer** (b) as the first $\mathtt{lapply}$ returns a list with three elements, each element being the length of $\mathtt{list1\$a}$, $\mathtt{list1\$b}$, $mathtt{list1\$c}$, 
+and the $\mathtt{sapply}$ returns a vector, each element of which is obtained by calling unique on the elements obtained from the $\mathtt{lapply}$.
+
 + Q4: What is the relationship between a list and a vector in **R** ?
   + (a) A list is a special type of vector.
   + (b) A vector is a special kind of list.
   + (c) A vector and a list are distinct data types.
   + (d) The intersection of a list and a vector is the **NULL** object.
+  
+**Answer** (a) (see slide 2 of the lecture slides on Vectors in **R**).
 
 # Part 3 (Tidying Data)
 Consider the following table, call it $\mathtt{table1}$.
@@ -150,6 +166,8 @@ table2 <- gather(table1, key = "type", value = "value", cases, population, expen
 ```
 $$\mathrm{(a)} \text{12 and 5}; \quad \mathrm{(b)}  \text{12 and 4}; \quad  \mathrm{(c)} \text{18 and 4}; \quad \mathrm{(d)} \text{18 and 5}$$
 
+**Answer** (c) (run the code)
+
 + Q2. How will you go from $\mathtt{table1}$ to the following table 
 ```{r echo = FALSE}
 table4b
@@ -164,6 +182,8 @@ table1 %>% select(-population,-cases) %>% spread(year, expense)
 ## (d)
 table1 %>% select(population,cases) %>% spread(year, population)
 ```
+
+**Answer** (b) (run the code)
 
 + Q3. How will you go from the following tables back to $\mathtt{table1}$ ? Denote these tables as $\mathtt{table\_abbr}$, $\mathtt{table5a}$ and $\mathtt{table5b}$.
 ```{r echo = FALSE, message = FALSE}
@@ -200,6 +220,8 @@ table_abbr %>% right_join(table5b) %>% select(-abbr) %>%
   left_join(table5a, by = c("fullname" = "country"))
 ```
 
+**Answer** (a) (run the code). But more specifically, we want to keep **table5b** so we need a $\mathtt{right\_join}(\mathtt{table\_abbr}, \mathtt{table5b})$. In addition, we also need to join $\mathtt{table5a}$ using both country name and year, so option (d), which do a join using only country name, is wrong. In this case by renaming fullname to country, option (a) then allow us to join by both country name and year.
+
 + Q4: How will you go from **table1** to the following table (call it **table_q4**) ? Here $\mathtt{means}$ contain the sample average for each variable
 ```{r echo = 3:4}
 colmeans <- function(df){
@@ -216,15 +238,21 @@ colmeans <- function(df){
   sapply(select(df, -year), mean)
 }
 
-##(a)
+## (a)
 table_q4 <- table1 %>% group_by(country) %>% nest() %>% 
   mutate(means = map(data, colmeans)) %>% unnest()
 
-##(b)
+## (b)
 table_q4 <- table1 %>% group_by(country,year) %>% nest() %>% map(data, colmeans)
-##(c)
+## (c)
 table_q4 <- table1 %>% group_by(country) %>% nest() %>% map(data, colmeans)
+
+## (d)
+table_q4 <- table1 %>% group_by(country) %>% nest() %>% 
+  mutate(means = map(data, colmeans))
 ```
+
+**Answer** (d) run the code
 
 # Part 4 (Basic statistics and linear models)
 
@@ -276,14 +304,25 @@ From the above ouput, answer the following question.
 Q1. What is the least square estimate for $\hat{\beta}_W$ ?
 
 $$\mathrm{(a)} `r coef(mod)[2]`; \quad \mathrm{(b)} `r coef(mod)[2] + 0.5`; \quad \mathrm{(c)} `r coef(mod)[2] - 0.5`; \quad \mathrm{(d)} `r coef(mod)[2]/2`$$
+
+**Answer**: $\hat{\beta}_W$ is the mid-point of the $95\%$ confidence interval for $\beta_W$.
+
 Q2. What is a reasonable estimate of $\sigma^2$ for this data (assuming the posited model is "correct") ? You can assume that the $97.5\%$ quantile for the appropriate Student-$t$ distribution is $2$.
 $$\mathrm{(a)} `r summary(mod)$sigma^2 + 1`; \quad \mathrm{(b)} `r summary(mod)$sigma`; \quad \mathrm{(c)} `r summary(mod)$sigma^2`; \quad \mathrm{(d)} `r summary(mod)$sigma^2/2`$$
+
+**Answer**: An estimate of $\sigma^2$ is the MSE. We note that the length of the $95\%$ confidence interval for say $\beta_W$ is given by $2 \times c_{0.975} \times \sqrt{MSE} \times \sqrt{1.18}$ where $1.18$ is the diagonal entry of $(\mathbf{X}^{\top} \mathbf{X})^{-1}$ corresponding to $W$. Thus, $\mathrm{MSE}$ in this case is `r summary(mod)$sigma^2`.
+
 Q3. What is a reasonable **prediction** interval for $Y_*$ when $\boldsymbol{x}_* = (W_*, X_*, Z_*) = (2,3,4)$ ?
 (This is a fill-in a blank question. You don't have to provide the exact numbers but you need to demonstrate that you know how to obtain the answer from the output given above).
+
+**Answer** The prediction interval is simply 
+$$\hat{\beta}_0 + 2 \hat{\beta}_W + 3 \hat{\beta}_X + 4 \hat{\beta}_Z \pm 2 \times \sqrt{\mathrm{MSE}} \times \sqrt{1 + \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*}$$
+where $\boldsymbol{x}_* = (1, X_*, Z_*, W_*) = (1,3,2,4)$. 
 
 Q4. Can you conclude, from the above output, that (assuming the model is true), there is scant evidence supporting the hypothesis that 
 $\beta_X = 0.65$ and $\beta_Z = 1$ **simultaneously** (with $\beta_0$ and $\beta_W$ arbitrary) ? Why or why not ? 
 
+**Answer** The marginal confidence intervals suggests that $\beta_X$ is unlikely to be $0.65$ and $\beta_Z$ is unlikely to be $1$. However, $(0.65,1)$ could potentially lie in the **joint** confidence region for $\beta_X$ and $\beta_Z$, but it is hard, without a computer, to see how the joint confidence region for $\beta_X$ and $\beta_Z$ looks like using only the above output.
 
 # Part 5 (Visualizing data)
 

@@ -10,12 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
 ```
 
-**Instruction:** Please write your name on the first page of the
-problem set before you begin. This exam consists of 25 problems. The
-problems are worth a combined total of 75 points. You have a total of
+**Instruction:** Please write **your name** on the first page of the
+problem set before you begin. This exam consists of 24 questions. The
+questions are worth a combined total of 72 points. You have a total of
 75 minutes to complete the exam. 
 
-# Part 1
+# Part I
 The next several questions use weather data from the **nycflights13** library. This dataset records **hourly** weather data for three airports (EWR, JFK, and LGA) in 2013.
 A snippet of the data is given below. Using this data, answer the following questions.
 
@@ -40,6 +40,7 @@ weather %>% filter(pressure <= 993 | wind_speed >= 30)
 weather %>% group_by(year,month,day) %>% filter(pressure <= 993, wind_speed >= 30)
 ```
 
+\newpage
 **Q2.** Suppose we want to find the ten most rainy day in the NYC metro area in $2013$. Which of the following code is most accurate ?
 
 ```{r error = TRUE, message = FALSE, eval = FALSE}
@@ -82,6 +83,7 @@ weather %>% group_by(origin, month, day) %>% summarise(avg_daily = mean(temp)) %
   filter(num_days == max(num_days))
 ```
 
+\newpage
 **Q4** Heatstrokes usually occurs on days where the **highest** temperature is $95$ degrees Farenheit or higher. Using the data for $\mathtt{JFK}$ airport, how will you determine whether or not there is a period of three **consecutive** days in $2013$ where the highest temperature is at least $95$ degrees Farenheit ?
 
 ```{r error = TRUE, eval = FALSE}
@@ -150,7 +152,7 @@ list1$c <- list(list1$a,list1$b)
   (b) $12$
   (c) $2$
   (d) $0$
-
+  
 **Q2.** Consider the following object $\mathtt{x}$. 
   ```{r eval=FALSE}
     x <- c(list1$a,list1$b,list1$d)
@@ -193,7 +195,7 @@ drinks <- drinks %>%
 drinks
 ```
 
-**Q1.** What is the dimension (number of rows and columns) of $\mathtt{table2}$ below ?
+**Q1.** What is the dimension (number of rows and columns) of table $\mathtt{drinks2}$ below ?
 ```{r eval = FALSE}
 drinks2 <- gather(drinks, key = "type", value = "value", 
                   beer_servings, wine_servings, spirit_servings)
@@ -271,11 +273,13 @@ drinks <- drinks %>% filter(total > 0) %>%
 
 ##(a)
 gapminder %>% filter(year == 2007) %>% inner_join(drinks) %>% 
-  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>%
+  arrange(categories,lifeExp)
 
 ##(b)
 gapminder %>% filter(year == 2007) %>% 
-  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>%
+  arrange(categories,lifeExp)
 
 ##(c)
 gapminder %>% filter(year == 2007) %>% left_join(drinks) %>% 
@@ -283,7 +287,8 @@ filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
 
 ##(d)
 gapminder %>% filter(year == 2007) %>% left_join(drinks) %>% 
-  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>% arrange(categories,lifeExp)
+  group_by(categories) %>% filter(lifeExp %in% range(lifeExp)) %>%
+  arrange(categories,lifeExp)
 ```
 
 **Q5.** How will you go from the **gapminder** data frame to the following data frame with **list columns** ? Call this data frame **gap_lm**.
@@ -325,7 +330,7 @@ gap_lm  <- gapminder %>% group_by(continent, year) %>% nest()
 # Part IV
 The following questions use the **diamonds** dataset on the selling price and other attributes of almost $54,000$ diamonds. A snippet of the data is as follows. The $\mathtt{cut}$ variable is a factor with $5$ levels denoting the quality of the cut and ranges from Fair (worst) to Ideal (best), while $x$, $y$ and $z$ denote the length, width, and dept of the diamond.
 
-```{r echo = FALSE}
+```{r echo = FALSE, warning = FALSE}
 library(ggplot2)
 diamonds_sml <- diamonds %>% select(-depth,-table,-clarity,color)
 diamonds_sml
@@ -381,8 +386,15 @@ Assuming **mod1** is a reasonable model for the data, which of the following sta
 
 (a) The probability that $\beta_{\mathrm{carat}} = 0$ is less than $10^{-6}$.
 (b) Model **mod1** has substantially smaller mean square error than model **mod2**.
-(c) The least square estimate for $\beta_{\mathrm{carat}}$ is negative.
+(c) The least square estimate for $\beta_{0}$ is positive.
 (d) The parameter $\beta_{\mathrm{carat}}$ is larger than $0$, in the presence of other variables.
+
+**Q5.** Let $\mathbf{X}$ be a $n \times p$ matrix with full-column rank. Which of the following statements are correct ?
+
+(a) $\mathbf{X}^{\top} \mathbf{X}$ is positive semi-definite but not positive definite.
+(b) $(\mathbf{X}^{\top} \mathbf{X})^{-1}$ is positive definite.
+(c) $\mathbf{X}^{\top} \mathbf{X}$ is **not** invertible.
+(d) $\mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1/2} \mathbf{X}^{\top}$ is idempotent.
 
 \newpage
 
@@ -392,7 +404,7 @@ The next several questions use the  **NHANES** survey data recording the medical
 ```{r echo = 4:5}
 library(NHANES)
 NHANES_sml <- NHANES %>% select(Gender, Age, Race1, 
-                                Poverty, Weight, Height, BMI, TotChol,Diabetes)
+                                Poverty, Weight, Height, BMI, Diabetes)
 
 NHANES_sml
 levels(NHANES_sml$Race1)
@@ -448,11 +460,38 @@ p + geom_bar()
 p + geom_histogram()
 ```
 
-**Q4** Which of the following **geom_object** understands all of the following aesthetics $\mathtt{x}$, $\mathtt{ymin}$ and $\mathtt{ymax}$ ?
+**Q4** Which of the following **geom_object** understands **all** of the following aesthetics (1) $\mathtt{x}$, (2) $\mathtt{ymin}$ and (3) $\mathtt{ymax}$ ?
   
   (a) $\mathtt{geom\_boxplot}$
   (b) $\mathtt{geom\_ribbon}$
   (c) $\mathtt{geom\_smooth}$
   (d) $\mathtt{geom\_polygon}$
 
-**Q5**
+\newpage
+**Q5** Which of the following code chunk will reproduce the following graphics ? Here we have filter the data to only include people thirty years or older.
+```{r echo = FALSE, fig.align = 'center', out.width='80%', warning = FALSE}
+ggplot(filter(NHANES, Age >= 30, !is.na(Diabetes)), 
+       aes(x = Diabetes, y = BMI, color = Gender)) + geom_boxplot() + coord_flip()
+```
+
+```{r eval = FALSE, warning = FALSE, message = FALSE}
+## (a)
+ggplot(filter(NHANES, Age >= 30), 
+       aes(x = Diabetes, y = BMI, color = Gender)) + 
+  geom_boxplot(aes(group = Diabetes)) + coord_flip()
+
+## (b)
+ggplot(filter(NHANES, Age >= 30), 
+       aes(x = Diabetes, y = BMI, color = Gender)) +
+  geom_boxplot() + coord_flip()
+
+## (c)
+ggplot(filter(NHANES, Age >= 30), 
+       aes(x = Diabetes, y = BMI, color = Gender)) +
+  geom_boxplot()
+
+## (d)
+ggplot(filter(NHANES, Age >= 30), 
+       aes(x = Diabetes, y = BMI, color = Race1)) + 
+  geom_boxplot()
+```
