@@ -108,7 +108,7 @@ weather %>% filter(origin == 'JFK') %>% group_by(day) %>%
 **Q5.** The three airports are all in the NYC metro area and hence we expect that they should have similar weather at any given hour. How will you find the dates and time of the **ten** observations
 with the largest temperature difference between the three airports ?
 
-```{r echo = -2, eval = FALSE}
+```{r echo = -2, eval = FALSE, error = TRUE}
 library(tidyr)
 weather <- weather[-c(7320,16025,24731),]
 weather.sml <- weather %>% select(origin:temp)
@@ -237,7 +237,7 @@ drinks %>% select(-total, -spirit_servings) %>%
 library(gapminder)
 gapminder
 ```
-Suppose we want to find the (Pearson) correlation between disposable income and amount of alcohol consumption in **2007**. Which of the following code chunk is most appropriate for this ?
+Note that the **gapminder** data frame contains data on **`r length(unique(gapminder$country))`** countries for the years $1952$ through $2007$. Suppose we want to find the (Pearson) correlation between disposable income and amount of alcohol consumption in **2007**. Which of the following code chunk is most appropriate for this ?
 ```{r error = TRUE, eval = FALSE, message = FALSE, warning = FALSE}
 ## (a)
 gapminder %>% inner_join(drinks) %>% 
@@ -328,11 +328,11 @@ gap_lm  <- gapminder %>% group_by(continent, year) %>% nest()
 
 \newpage
 # Part IV
-The following questions use the **diamonds** dataset on the selling price and other attributes of almost $54,000$ diamonds. A snippet of the data is as follows. The $\mathtt{cut}$ variable is a factor with $5$ levels denoting the quality of the cut and ranges from Fair (worst) to Ideal (best), while $x$, $y$ and $z$ denote the length, width, and dept of the diamond.
+The following questions use the **diamonds** dataset on the selling price and other attributes of almost $54,000$ diamonds. A snippet of the data is as follows. The $\mathtt{cut}$ variable is a factor with $5$ levels denoting the quality of the cut and ranges from Fair (worst) to Ideal (best), while $x$, $y$ and $z$ denote the length, width, and depth of the diamond.
 
 ```{r echo = FALSE, warning = FALSE}
 library(ggplot2)
-diamonds_sml <- diamonds %>% select(-depth,-table,-clarity,color)
+diamonds_sml <- diamonds %>% select(-depth,-table,-clarity,-color)
 diamonds_sml
 ```
 
@@ -442,7 +442,7 @@ ggplot(NHANES_sml, aes(x = Age, y = Height)) + geom_point() +
   (d) 1 scatterplot smooth.
   
 **Q3** What is the best **geom** object to add to the following **ggplot2** object $\mathtt{p}$ ?
-```{r eval = TRUE}
+```{r eval = FALSE}
 p <- ggplot(filter(NHANES_sml,!is.na(Diabetes)), aes(x = Diabetes, y = BMI))
 ```
 
