@@ -1,0 +1,664 @@
+\documentclass{beamer}
+\usepackage{etex}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=green}
+\usetheme[]{metropolis}
+%\useoutertheme{metropolis}
+%\useinnertheme{metropolis}
+%\usefonttheme{metropolis}
+%\usecolortheme{rose}
+\usefonttheme{professionalfonts} % required for mathspec
+\usepackage{mathspec}
+\setsansfont[BoldFont={Fira Sans},
+Numbers={OldStyle}]{Fira Sans Light}
+\setmathsfont(Digits)[Numbers={Lining, Proportional}]{Fira
+Sans Light} 
+
+%\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{longtable}
+%\usepackage[all]{xy}
+\usepackage{parskip}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,minimum height=2em]
+    
+\newtheorem{question}[theorem]{Question}
+\newtheorem{openquestion}[theorem]{Open Question}
+\newtheorem{proposition}{Proposition}
+\setbeamercolor{question title}{bg = red}
+\setbeamercolor{block body question}{bg=blue!60}
+
+
+<<setup, include=FALSE>>=
+# the default output hook
+ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$out.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more, tail(x,lines))
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+knit_hooks$set(document = function(x) {
+  gsub('\\\\(begin|end)\\{kframe\\}', '', x)
+})
+
+inline_hook <- function (x) {
+  if (is.numeric(x)) {
+    # ifelse does a vectorized comparison
+    # If integer, print without decimal; otherwise print two places
+    res <- ifelse(x == round(x),
+      sprintf("%d", x),
+      sprintf("%.3f", x)
+    )
+    paste(res, collapse = ", ")
+  }
+}
+
+knit_hooks$set(inline = inline_hook)
+
+# smaller font size for chunks
+opts_chunk$set(size = 'footnotesize')
+@ 
+
+\begin{document}
+\title{CSC/ST 442: Introduction to Data Science}
+\subtitle{Extensions to least square regression}
+  \institute[]{
+Department of Statistics, North Carolina State University.
+}
+\date{}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{Gauss-Markov theorem}
+  
+  \begin{exampleblock}{Theorem}
+    Let $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ be a linear
+    model where $\boldsymbol{\epsilon}$ satisfies the Gauss-Markov conditions, 
+    
+  \begin{enumerate} 
+    \item $\mathbb{E}[\boldsymbol{\epsilon}] = \boldsymbol{0}$
+    \item $\mathrm{Var}[\boldsymbol{\epsilon}] = \sigma^2 \mathbf{I}$. (constant variance)
+   \end{enumerate}
+    
+Suppose furthermore that $\mathbf{X}$ is a $n \times p$ matrix of
+full-column rank. Then for any $\boldsymbol{\lambda} \in \mathbb{R}^{p}$, 
+$$\boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}} = \boldsymbol{\lambda}^{\top}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$$
+  is the {\em best linear unbiased estimator} (BLUE) of
+$\boldsymbol{\lambda}^{\top} \boldsymbol{\beta}$. Here
+$\hat{\boldsymbol{\beta}}$ is the (ordinary) least square estimate of
+$\boldsymbol{\beta}$.
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}
+\begin{enumerate}
+  \item An estimate $\hat{\theta}$ for $\boldsymbol{\lambda}^{\top}
+\boldsymbol{\beta}$ is a {\em linear} estimator if there is a vector
+$\boldsymbol{f}$ (not dependent on $\boldsymbol{y})$ and a scalar $c$
+(also not dependent on $\boldsymbol{y}$) such that $\hat{\theta} =
+\boldsymbol{f}^{\top} \boldsymbol{y} + c$.
+
+\item An estimate $\hat{\theta} = \boldsymbol{f}^{\top} \boldsymbol{y}
++ c$ is an {\em unbiased} estimator for $\boldsymbol{\lambda}^{\top}
+\boldsymbol{\beta}$ if $\mathbb{E}[\hat{\theta}] =
+\boldsymbol{\lambda}^{\top} \boldsymbol{\beta}$
+
+\item The estimate $\boldsymbol{\lambda}^{\top}
+\hat{\boldsymbol{\beta}}$ is the best linear unbiased estimator as
+\begin{equation*}
+  \begin{split} \mathrm{Var}[\boldsymbol{\lambda}^{\top}
+    \hat{\boldsymbol{\beta}}] &= \sigma^2 \boldsymbol{\lambda}^{\top}
+    (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{\lambda} \\ &\leq
+    \mathrm{Var}[\boldsymbol{f}^{\top} \boldsymbol{y} + c] =
+    \mathrm{Var}[\boldsymbol{f}^{\top} \boldsymbol{y}] = \sigma^2
+    \boldsymbol{f}^{\top} \boldsymbol{f} \end{split} \end{equation*}
+for all $\boldsymbol{f}$ and constant $c$ such that
+$\mathbb{E}[\boldsymbol{f}^{\top} \boldsymbol{y} + c] =
+\boldsymbol{\lambda}^{\top} \boldsymbol{\beta}$.
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame} \frametitle{Proof of the Gauss-Markov theorem} 
+  
+ Suppose there exists a scalar $c$ and a vector $\boldsymbol{f}$ such
+that $d + \boldsymbol{f}^{\top} \boldsymbol{y}$ is a linear unbiased
+estimator of $\boldsymbol{\lambda}^{\top} \boldsymbol{\beta}$.  Then
+$$\mathbb{E}[c + \boldsymbol{f}^{\top} \boldsymbol{y}] =
+\mathbb{E}[c + \boldsymbol{f}^{\top}(\mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon})] = c + \boldsymbol{f}^{\top} \mathbf{X} \boldsymbol{\beta} = \boldsymbol{\lambda}^{\top} \boldsymbol{\beta}$$
+for all $\boldsymbol{\beta}$. This implies $c = 0$ and 
+$\boldsymbol{\lambda} = \mathbf{X}^{\top} \boldsymbol{f}$.
+
+
+We then have
+\begin{equation*} 
+  \begin{split} \mathrm{Var}[\boldsymbol{f}^{\top} \boldsymbol{y}] &= \mathrm{Var}[\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}} + \boldsymbol{\lambda}^{\top}
+ \hat{\boldsymbol{\beta}}] \\
+ &= \mathrm{Var}[\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}] +
+ \mathrm{Var}[\boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}] + 2 \mathrm{Cov}(\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}, \boldsymbol{\lambda}^{\top}
+ \hat{\boldsymbol{\beta}})
+  \end{split} \end{equation*}
+\end{frame}
+
+\begin{frame}
+
+Furthermore, with $r = \mathrm{Cov}(\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}, \boldsymbol{\lambda}^{\top}
+ \hat{\boldsymbol{\beta}})$,  
+\begin{equation*}
+  \begin{split} r &=  \mathrm{Cov}(\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{f}^{\top} \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}, \boldsymbol{f}^{\top} \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}) \\ &= \mathrm{Cov}(\boldsymbol{f}^{\top} (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \boldsymbol{y}, \boldsymbol{f}^{\top} \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}) \\
+ & = \boldsymbol{f}^{\top} (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \mathrm{Var}[\boldsymbol{y}] \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{f} \\ &=
+ \sigma^2 \boldsymbol{f}^{\top} (\mathbf{I} - \mathbf{X}
+ (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \mathbf{X}
+ (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{f}
+ = \boldsymbol{0} \end{split} \end{equation*}
+
+
+We therefore have
+$$\mathrm{Var}[\boldsymbol{f}^{\top} \boldsymbol{y}] =  
+\mathrm{Var}[\boldsymbol{f}^{\top}
+ \boldsymbol{y} - \boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}] +
+ \mathrm{Var}[\boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}] \geq  \mathrm{Var}[\boldsymbol{\lambda}^{\top} \hat{\boldsymbol{\beta}}]$$ 
+ as desired.
+ 
+ \end{frame}
+ 
+ \begin{frame}
+   \frametitle{Generalized least squares}
+ 
+  Consider the linear model $\bm{y} = \mathbf{X} \bm{\beta}+
+\bm{\epsilon}$ with $\mathbb{E}[\bm{\epsilon}] = \bm{0}$ but now the
+$\bm{\epsilon}$ no longer satisfies $\mathrm{Var}[\bm{\epsilon}] =
+\sigma^{2} \mathbf{I}$. Instead, $\mathrm{Var}[\bm{\epsilon}] =
+\sigma^{2} \mathbf{V}$ for some (possibly unknown) matrix
+$\mathbf{V}$. We shall assume that $\mathbf{V}$ is positive definite.
+
+  How do we estimate $\bm{\beta}$ for the above model ?
+
+  Let us first consider least square
+  estimates $\hat{\bm{\beta}}$ as were done previously. We then have
+  $$\mathbb{E}[\hat{\bm{\beta}}] = \mathbb{E}[(\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}] = (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{X} \bm{\beta} = \bm{\beta}$$
+    
+ That is, the least square estimate $\hat{\bm{\beta}} = (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}$ is still an unbiased
+    estimate for $\bm{\beta}$.
+ \end{frame}
+ 
+ \begin{frame}
+However, its variance is now
+  \begin{equation*}\begin{split}
+    \mathrm{Var}[\hat{\bm{\beta}}] &= \mathrm{Var}[(\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}] \\ &= (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\bm{y}] \mathbf{X}
+    (\mathbf{X}^{\top} \mathbf{X})^{-1} \\ &= \sigma^{2} (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V} \mathbf{X}
+    (\mathbf{X}^{\top} \mathbf{X})^{-1}
+    \end{split}\end{equation*}
+  and depending on the structure of $\mathbf{V}$, the variance of
+  $\bm{\lambda}^{\top} \hat{\bm{\beta}}$ could be large, i.e., $\bm{\lambda}^{\top}
+  \hat{\bm{\beta}}$ is no longer BLUE for estimating $\bm{\lambda}^{\top} \bm{\beta}$.
+  
+ \end{frame}
+ 
+\begin{frame}
+  Let us now assume that $\mathbf{V}$ is known and let $\mathbf{L}
+  \mathbf{L}^{\top} = \mathbf{V}$ be any decomposition of
+  $\mathbf{V}$. For example, $\mathbf{L}$ could be the square root of
+  $\mathbf{V}$. In practice, $\mathbf{L}$ is usually computed based on
+  the \emph{Cholesky} decomposition of $\mathbf{V}$ as it is more
+  computationally friendly.
+
+  Let us now consider, instead of the linear model $\bm{y} =
+  \mathbf{X} \bm{\beta} + \bm{\epsilon}$ with
+  $\mathbb{E}[\bm{\epsilon}] = \bm{0}$ and $\mathrm{Var}[\bm{e}] =
+  \sigma^{2} \mathbf{V}$, the transformed model
+  \begin{equation*}
+    \mathbf{L}^{-1} \bm{y} = \mathbf{L}^{-1} \mathbf{X} \bm{\beta} +
+    \mathbf{L}^{-1} \bm{\epsilon}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Denoting $\bm{y}^{*} = \mathbf{L}^{-1} \bm{y}$, $\mathbf{X}^{*} =
+  \mathbf{L}^{-1} \mathbf{X}$ and $\bm{\epsilon}^{*} = \mathbf{L}^{-1}
+  \bm{\epsilon}$, the above model can be written as
+  \begin{equation*}
+    \bm{y}^{*} = \mathbf{X}^{*} \bm{\beta} + \bm{\epsilon}^{*}
+  \end{equation*}
+  where now $\mathbb{E}[\bm{\epsilon}^{*}] =
+  \mathbb{E}[\mathbf{L}^{-1} \bm{\epsilon}] = \bm{0}$ and
+  \begin{equation*}
+   \mathrm{Var}[\bm{\epsilon}^{*}] = \mathrm{Var}[\mathbf{L}^{-1}
+  \bm{\epsilon}] = \mathbf{L}^{-1} \mathrm{Var}[\bm{\epsilon}]
+  (\mathbf{L}^{-1})^{\top}  = \sigma^{2} \mathbf{L}^{-1} \mathbf{V}
+  (\mathbf{L}^{-1})^{\top} = \sigma^{2} \mathbf{I}
+  \end{equation*}
+
+  That is $\bm{y}^{*} = \mathbf{X}^{*} \bm{\beta} + \bm{\epsilon}^{*}$
+  is our usual linear models with errors term satisfying the
+  Gauss-Markov conditions.
+\end{frame}
+
+\begin{frame}
+  The normal equation for $\bm{y}^{*} = \mathbf{X}^{*} \bm{\beta}$ is then
+  \begin{equation*}
+    (\mathbf{X}^{*})^{\top} \mathbf{X}^{*} \bm{\beta} = (\mathbf{X}^{*})^{\top} \bm{y}^{*}
+  \end{equation*}
+  which corresponds to
+  \begin{equation*}
+    \mathbf{X}^{\top} \mathbf{V}^{-1} \mathbf{X} \bm{\beta} = \mathbf{X}^{\top}
+    \mathbf{V}^{-1} \bm{y}
+  \end{equation*}
+  and the least square estimate $\hat{\bm{\beta}}_{\mathrm{GLS}}$ is then simply
+  \begin{equation*}
+    \hat{\bm{\beta}}_{\mathrm{GLS}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  One can then verify that
+  \begin{equation*}
+    \begin{split}
+    \mathrm{Var}[\hat{\bm{\beta}}_{\mathrm{GLS}}] &= \mathrm{Var}[(\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}] \\ &= (\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathrm{Var}[\bm{y}] \mathbf{V}^{-1} \mathbf{X} (\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X})^{-1} \\ &= \sigma^{2} (\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X})^{-1}
+    \end{split}
+  \end{equation*}
+
+  The fitted value $\hat{\bm{y}}^{*}$ is then simply $\mathbf{X}^{*}
+  \hat{\bm{\beta}}_{\mathrm{GLS}}$ and the residual $\bm{e}^{*} =
+  \bm{y} - \hat{\bm{y}}^{*}$.
+
+  The estimate $\mathrm{MSE}^{*}$ of $\sigma^2$ is then given by
+  \begin{equation*}
+    \begin{split}
+    \mathrm{MSE}^{*} &= \frac{1}{n-p}(\bm{y}^{*} - \hat{\bm{y}}^{*})^{\top}
+    (\bm{y}^{*} - \hat{\bm{y}}^{*}) \\ &=
+    \frac{1}{n-p}(\bm{y}^{*} - \mathbf{X}^{*}
+    \hat{\bm{\beta}}_{GLS})^{\top} (\bm{y}^{*} - \mathbf{X}^{*}
+    \hat{\bm{\beta}}_{GLS}) \\ &= \frac{1}{n-p} (\bm{y}^{\top}
+    \mathbf{V}^{-1} \bm{y} - \hat{\bm{\beta}}_{GLS}^{\top} \mathbf{X}^{\top}
+    \mathbf{V}^{-1} \bm{y})
+    \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Using the new variables $\bm{y}^{*}$, $\mathbf{X}^{*}$, and
+  $\bm{e}^{*}$, all procedures on testing, confidence intervals, and
+  diagnostics can be caried out as before.
+
+  For example, to test the general linear hypothesis
+  \begin{equation*}
+    \mathbb{H}_{0} \colon \mathbf{C} \bm{\beta} = \bm{\gamma}; \quad
+    \mathbb{H}_{A} \colon \mathbf{C} \bm{\beta} \not = \bm{\gamma}
+  \end{equation*}
+  where $\mathbf{C}$ is a $q \times p$ matrix with $q \leq p$, then
+  $\mathbb{H}_{0}$ is rejected at significance level $\alpha$ if
+  \begin{equation*}
+    \frac{(\mathbf{C} \hat{\bm{\beta}}_{\mathrm{GLS}} - \bm{\gamma})^{\top}
+    \Bigl(\mathbf{C} (\mathbf{X}^{\top} \mathbf{V}^{-1}
+    \mathbf{X}^{\top})^{-1} \mathbf{C}^{\top}\Bigr)^{-1}(\mathbf{C}
+    \hat{\bm{\beta}}_{\mathrm{GLS}} - \bm{\gamma})}{q \mathrm{MSE}^{*}}
+  \geq \delta
+  \end{equation*}
+  where $\delta = \mathrm{qf}(1 - \alpha; q, n - p)$.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generalized Least Square: Example 1}
+  Unfortunately, $\mathbf{V}$ is usually unknown and needs to be
+  estimated. We present below but a simple example. A detailed
+  treatment is outside the scope of this lecture note.
+  <<gls-example1, cache = FALSE, tidy = TRUE, results = 'asis', size = 'tiny', echo=3:4, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  library("faraway")
+  library("xtable")
+  data(longley)
+  nrow(longley)
+  print(xtable(head(longley, 8)), size = '\\tiny')
+  @
+  The \textrm{longley} dataset from Longley (1967).
+\end{frame}
+
+\begin{frame}[fragile]
+  <<gls-example2, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  g <- lm(Employed ~ GNP + Population, longley)
+  summary(g)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  There are usually serial correlations in data collected
+  overtime. The simplest model for such serial correlations is
+  \begin{equation*}
+    \epsilon_t = \rho\epsilon_{t-1} + u_t
+  \end{equation*}
+  for some $\rho \in (0,1)$ (the correlation between error terms) and
+  $u_i \sim N(0, \tau^2)$ are some random variables independent of the $\epsilon_t$.
+
+  For simplicity, we shall assume that the serial correlation have
+  been in effects for an arbitrary long time.
+\end{frame}
+
+\begin{frame}
+  Repeated applications of the above equation for $\epsilon_t$ gives
+  \begin{equation*}
+    \begin{split}
+    \epsilon_t &= \rho \epsilon_{t-1} + u_t \\ &= \rho^{2} \epsilon_{t-2} +
+    \rho u_{t-1} + u_t \\ &= \rho^{3} \epsilon_{t-3} + \rho^{2} u_{t-2} +
+    \rho u_{t-1} + u_t \\ & \vdots \\ &=\rho^{r+1} \epsilon_{t - r - 1} +
+    \sum_{s=0}^{r} \rho^{s} u_{t-s} \\ & \rightarrow
+    \sum_{s=0}^{\infty} \rho^{s} u_{t-s}
+    \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Therefore,
+  \begin{equation*}
+    \mathrm{Var}[\epsilon_t] = \tau^2 \sum_{s=0}^{\infty} \rho^{2s} = \tau^{2} (1 - \rho^2)
+  \end{equation*}
+
+  In addition,
+  \begin{equation*}
+    \begin{split}
+    \mathrm{Cov}(\epsilon_{t}, \epsilon_{t + k}) &= \mathrm{Cov}( \sum_{s=0}^{\infty} \rho^{s} u_{t-s},
+    \sum_{s=0}^{\infty} \rho^{s} u_{t + k -s}) \\ &= \sum_{s=0}^{\infty}
+    \rho^{2s+k} \tau^2 \\ &= \rho^{k} \tau^2/(1 - \rho^2)
+    \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Therefore, the covariance matrix for $\bm{\epsilon}$ can be written as
+  \begin{equation*}
+    \mathrm{Var}[\bm{\epsilon}] = \frac{\tau^{2}}{1 - \rho^2} \begin{bmatrix} 1 & \rho & \rho^2 &
+      \cdots & \rho^{n-1} \\
+      \rho & 1 & \rho & \cdots & \rho^{n-2} \\
+      \rho^{2} & \rho & 1 & \cdots & \rho^{n-3} \\
+      \vdots & \vdots & \vdots & \ddots & \vdots \\
+      \rho^{n-1} & \rho^{n-2} & \rho^{n-3} & \cdots & 1 \end{bmatrix}
+  \end{equation*}
+
+  The above form for $\mathrm{Var}[\bm{\epsilon}]$ can then be used in
+  generalized least squares.
+\end{frame}
+
+\begin{frame}[fragile]
+   Using the residuals as a surrogate for the $\epsilon_i$, we now
+  estimate $\rho$ for the above \textrm{longley} dataset
+
+  <<gls-example4, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  plot(1:16, residuals(g))
+  (rho.hat <- cor(residuals(g)[-1], residuals(g)[-nrow(longley)]))
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  By the above reasoning, we can then compute.
+  \vskip 10pt
+   <<gls-example5, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  Sigma <- diag(16)
+  Sigma <- rho.hat^abs(row(Sigma) - col(Sigma))
+  sm <- chol(Sigma)
+  smi <- solve(t(sm))
+  x <- model.matrix(g)
+  sx <- smi %*% x
+  sy <- smi %*% longley$Empl
+  g.gls <- lm(sy ~ sx - 1)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+    <<gls-example6, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+    summary(g.gls)
+    @
+\end{frame}
+
+\begin{frame}[fragile]
+  We might want to iterate the above process several times.
+  <<gls-example7, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+    x <- model.matrix(g)
+    res <- longley$Empl - x %*% g.gls$coef ## Beware the residuals!
+    (rho.hat2 <- cor(res[-1], res[-length(res)])) 
+    Sigma2 <- diag(length(res))
+    Sigma2 <- rho.hat2^abs(row(Sigma) - col(Sigma))
+    sm2 <- chol(Sigma2)
+    smi2 <- solve(t(sm2))
+    x <- model.matrix(g)
+    sx2 <- smi2 %*% x
+    sy2 <- smi2 %*% longley$Empl
+    g.gls2 <- lm(sy2 ~ sx2 - 1)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<gls-example7b, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  summary(g.gls2)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+      <<gls-example8, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth', out.lines = 25>>=
+    ## Equivalently
+    library("nlme")
+    g.nlme <- gls(Employed ~ GNP + Population, correlation = corAR1(form = ~ Year), data = longley, method = 'ML')
+    summary(g.nlme)
+    @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generalized Least Square: Example 2}
+<<family-example, echo = FALSE, tidy = TRUE, size = 'tiny', fig.align = 'center', out.width='.5\\textwidth'>>= 
+  library("ggplot2")
+  famdat <- read.table("data/Family.txt", header = T, stringsAsFactors = F)
+  ggplot(famdat, aes(x = Weight, y = Height, colour = as.factor(FamilyID))) + geom_point() + theme_bw() + theme(legend.position = "none")
+@
+
+The above scatterplot displays the height (in inches) and weight (in pounds) for
+$71$ individuals from $18$ different families. Each data point is
+color-coded according to family. 
+\end{frame}
+
+\begin{frame}
+  We are interested in ``predicting''
+  the height of an individual given his or her weight.
+  Since we expect individuals from the same family to has similar
+  characteristics, a possible linear model for regressing weight
+  on height is as follows
+  $$ \texttt{weight}_{ij} = \beta_{0i} + \beta_1 \texttt{height}_{ij}
+  + \epsilon_{ij} $$
+  where $i = 1,2, \dots, 18$ index the families, $j =
+  1,2\dots,n_i$ index the individuals within family $i$, and the
+  $\epsilon_{ij}$ are independent $N(0, \sigma^2)$ random variables. Under this
+  model, each family has its own {\em fixed} intercept.
+  
+  However, we are not really interested in these 18 specific families
+  per se; rather, we just want to model the fact that our observed
+  individuals can be grouped into clusters (as defined by their
+  families membership). 
+\end{frame}
+
+\begin{frame}
+  We could thus consider instead the model
+  $$ \texttt{weight}_{ij} = \beta_{0} + \eta_i + \beta_1 \texttt{height}_{ij}
+  + \epsilon_{ij} $$
+  where $i = 1,2, \dots, 18$ index the families, $j =
+  1,2\dots,n_i$ index the individuals within family $i$, 
+  $\epsilon_{ij}$ are independent $N(0, \sigma^2)$ random variables,
+  and $\eta_i$ are independent $N(0, \tau^2)$ random variables, with
+  the $\epsilon_{ij}$ independent of the $\tau_i$.  
+  Under this model, each family has its own intercept $\beta_0 + \eta_i$, but
+  these intercepts are a combination of a {\em fixed} parameter (or
+  fixed effect) $\beta_0$ and realizations of random variables (or random effects) $\eta_i$. This is an example of a {\em mixed} model. 
+\end{frame}
+
+\begin{frame}
+  The model 
+  $$ \texttt{weight}_{ij} = \beta_{0} + \beta_1 \texttt{height}_{ij}
+  + \eta_i + \epsilon_{ij} $$
+  with $\epsilon_{ij} \sim N(0, \sigma^2)$ and $\eta_i \sim N(0,
+  \tau^2)$, yields a covariance structure of the form
+  
+  \begin{gather*}\mathrm{Var}[\texttt{weight}_{ij}] = \sigma^2 + \tau^2 \\
+  \mathrm{Cov}(\texttt{weight}_{ij}, \texttt{weight}_{il}) = \tau^2 \,\,
+  \text{if $j \not = l$} \\ \quad  \mathrm{Cov}(\texttt{weight}_{ij},
+  \texttt{weight}_{kl}) = 0 \,\, \text{if $i \not = k$}
+  \end{gather*}
+\end{frame}
+
+\begin{frame}
+  Let $\mathbf{V}$ be the $71 \times 71$ matrix whose elements are the
+  covariances $\mathrm{Cov}(\texttt{weight}_{ij},
+  \texttt{weight}_{kl})$ specified above. If we know $\mathbf{V}$, then
+  the estimation of $\bm{\beta} = [\beta_0, \beta_1]^{\top}$ can be
+  carried out easily using generalized least squares. However,
+  $\mathbf{V}$ is unknown, and hence to estimate $\mathbf{V}$, we must
+  estimate $\sigma^2$ and $\tau^2$ (``equivalently'', estimate
+  $\sigma^2/\tau^2$). This is known as estimation of the variance
+  components.   
+\end{frame}
+
+\begin{frame}[fragile]
+  We can proceed as follows. The model 
+   $$ \texttt{weight}_{ij} = \beta_{0} + \beta_1 \texttt{height}_{ij}
+  + \eta_i + \epsilon_{ij} $$
+  with $\epsilon_{ij} \sim N(0, \sigma^2)$ and $\eta_i \sim N(0,
+  \tau^2)$ is a special case of the linear mixed models
+  $ \bm{y} = \mathbf{X} \bm{\beta} + \mathbf{Z} \bm{\gamma} + \bm{\epsilon}$
+  \begin{enumerate}
+  \item $\bm{y}$ is a $n \times 1$ vector, $\mathbf{X}$ is a {\em known} $n \times p$ matrix, $\mathbf{Z}$ is a {\em known} $n \times q$ matrix, 
+  \item $\bm{\beta}$ is a $p \times 1$ vector of fixed but unknown parameter, 
+  \item $\bm{\gamma}$ is a $q \times 1$ random vector with distribution $N(0, \mathbf{G})$ for some unknown positive definite matrix $\mathbf{G}$,
+    \item $\bm{\epsilon}$ is a $n \times 1$ random vector with distribution $N(0, \mathbf{R})$ for some unknown positive definite matrix $\mathbf{R}$,   
+    \item and $\bm{\gamma}$ and $\bm{\epsilon}$ are independent of one another.
+  \end{enumerate}
+  
+  In our example above, $\mathbf{X}$ is of dimension $71 \times 2$, $\bm{\beta}$ is a $2 \times 1$ vector, $\mathbf{Z}$ is a $71 \times 18$ matrix and $\bm{\gamma}$ is a $18 \times 1$ vector. 
+\end{frame}
+
+\begin{frame}
+  The linear mixed model then implies $$\mathrm{Var}[\bm{y}] = \mathrm{Var}[\mathbf{X} \bm{\beta} + \mathbf{Z} \bm{\gamma} + \bm{\epsilon}] = \mathrm{Var}[\mathbf{Z} \bm{\gamma}] + \mathrm{Var}[\bm{\epsilon}] = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R}$$ 
+  and hence $\bm{y} \sim N(\mathbf{X} \bm{\beta}, \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R})$. 
+
+  Letting $\mathbf{V} = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R}$, the log-likelihood of $\bm{y}$ is then
+  $$ \ell(\bm{\beta}, \mathbf{V}) = -\frac{1}{2} \Bigl(n \log{2 \pi} + \log |\mathbf{V}| + (\bm{y} - \mathbf{X} \bm{\beta})^{\top} \mathbf{V}^{-1} (\bm{y} - \mathbf{X} \bm{\beta})\Bigr) $$
+Therefore, the maximum likelihood estimates for $\hat{\bm{\beta}}$ and $\hat{\mathbf{V}}$ is given by maximizing the right hand side of the above display. 
+
+Optimizing $\ell(\bm{\beta}, \mathbf{V})$ first with respect to
+$\bm{\beta}$ yields, for any fixed $\mathbf{V}$, that
+$\ell(\bm{\beta}, \mathbf{V})$ is maximized over $\bm{\beta}$ by
+$$\hat{\bm{\beta}}_{\mathbf{V}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
+\mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}.$$
+\end{frame}
+
+\begin{frame}
+  Substituting $\hat{\bm{\beta}}_{\mathbf{V}}$ into the expression for the log-likelihood $\ell(\bm{\beta}, \mathbf{V})$ and ignoring the constant term $n \log{2 \pi}$, we obtain the {\em profile} log-likelihood 
+  \begin{equation*}
+    \begin{split}
+    \ell_{p}(\mathbf{V}) & = -\frac{1}{2} \Bigl(\log |\mathbf{V}| + (\bm{y} - \mathbf{X} \hat{\bm{\beta}}_{\mathbf{V}})^{\top} \mathbf{V}^{-1} (\bm{y} - \mathbf{X} \hat{\bm{\beta}}_{\mathbf{V}})\Bigr) \\
+    &= -\frac{1}{2} \Bigl(\log |\mathbf{V}| + \bm{y}^{\top} \mathbf{V}^{-1} (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{V}^{-1} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1}) \bm{y}\Bigr) 
+    \end{split}
+  \end{equation*}
+  We can now maximize $\ell_{p}(\mathbf{V})$ over some subset of positive definite matrices $\mathbf{V}$ to obtain $\hat{\mathbf{V}}$ and from $\hat{\mathbf{V}}$, obtain $\hat{\bm{\beta}}$. 
+  
+  Usually, $\mathbf{V}$ will have a ``simple'' form. For example, in our weight vs height example, $\mathbf{V} = \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I}$. Since $\mathbf{Z}$ is known, $\hat{\mathbf{V}}$ is obtained  by maximizing $\ell_{p}( \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I})$ over the parameter space $\tau^2 > 0, \sigma^2 > 0$. 
+\end{frame}
+  
+\begin{frame}[fragile]
+  The details is outside the scope of today's lecture; nevertheless
+  <<family-example2, echo = TRUE, tidy = TRUE, size = 'tiny'>>=
+  out.lme <- lme(fixed = Weight ~ Height, random = ~ 1 | FamilyID, data
+  = famdat, method = "ML")
+  summary(out.lme)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Generalized least square: Example 3}
+
+  We recall the \emph{gapminder} dataset.
+  <<gapminder-example, size = 'tiny'>>=
+  library(gapminder)
+  gapminder
+  @ 
+  
+  We now try to fit a model to predict the life expectancy of each
+  country in terms of the $\mathtt{gdpPercap}$.
+\end{frame}  
+
+\begin{frame}[fragile]
+  <<gapminder-example2, size = 'tiny', out.lines = 15>>=
+  mod.ls <- lm(lifeExp ~ factor(country)*I(year - 1952) + gdpPercap, data = gapminder)
+  summary(mod.ls)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<gapminder-example2b, size = 'tiny'>>=
+  mod.gls <- lme(lifeExp ~ I(year - 1952) + gdpPercap, 
+                 random = ~ 1 + I(year - 1952) |  country, data = gapminder)
+  summary(mod.gls)
+  @
+\end{frame}
+
+\begin{frame}
+  In this example, the least square regression model for the $j$-th observed
+  lifeExpectancy for the $i$-th country is
+\begin{equation*}
+  \mathtt{lifeExp}_{ij} = \beta_{0i} + \beta_{1i} (\mathrm{year}_{ij}
+  - 1952) + \beta_2 \mathtt{gdpPercap}_{ij} + \epsilon_{ij}
+\end{equation*}
+where the $\beta_{0i}$ and $\beta_{1i}$ are parameters to be
+estimated. There are in total $286$ parameters (including $\sigma^2$) to be estimated.
+
+ The mixed effects model is of the form
+ \begin{equation*}
+  \mathtt{lifeExp}_{ij} = (\beta_{0} + \tau_{i}) + (\beta_{1} + \gamma_i) (\mathrm{year}_{ij}
+  - 1952) + \beta_2 \mathtt{gdpPercap}_{ij} + \epsilon_{ij}.
+  \end{equation*}
+  Here the $(\tau_i, \gamma_i) \overset{\mathrm{i.i.d}}{\sim}
+  \mathrm{MVN}(0, \bm{\Gamma})$. There are in total $7$ parameters
+  (including $\sigma^2$) to
+  be estimated.
+  
+ Both model has the same estimated mean square error, namely
+ $\Sexpr{mod.gls$sigma^2}$. 
+
+\end{frame}
+
+\end{document}
