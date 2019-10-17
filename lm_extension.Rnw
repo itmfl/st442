@@ -33,7 +33,8 @@ Sans Light}
 \newtheorem{proposition}{Proposition}
 \setbeamercolor{question title}{bg = red}
 \setbeamercolor{block body question}{bg=blue!60}
-
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 <<setup, include=FALSE>>=
 # the default output hook
@@ -50,10 +51,10 @@ knit_hooks$set(output = function(x, options) {
   if (length(lines)==1) {        # first n lines
     if (length(x) > lines) {
       # truncate the output, but add ....
-      x <- c(head(x, lines), more, tail(x,lines))
+      x <- c(head(x, lines), more)
     }
   } else {
-    x <- c(more, x[lines], more)
+    x <- c(head(x,lines[1]), more, tail(x,lines[2]))
   }
   # paste these lines together
   x <- paste(c(x, ""), collapse = "\n")
@@ -203,21 +204,21 @@ $\mathbf{V}$. We shall assume that $\mathbf{V}$ is positive definite.
 
   How do we estimate $\bm{\beta}$ for the above model ?
 
-  Let us first consider least square
-  estimates $\hat{\bm{\beta}}$ as were done previously. We then have
-  $$\mathbb{E}[\hat{\bm{\beta}}] = \mathbb{E}[(\mathbf{X}^{\top}
+  Let us first consider the (ordinary) least square
+  estimate $\hat{\bm{\beta}}_{\mathrm{OLS}} = (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}$ as were done previously. We then have
+  $$\mathbb{E}[\hat{\bm{\beta}}_{\mathrm{OLS}}] = \mathbb{E}[(\mathbf{X}^{\top}
     \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}] = (\mathbf{X}^{\top}
     \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{X} \bm{\beta} = \bm{\beta}$$
     
- That is, the least square estimate $\hat{\bm{\beta}} = (\mathbf{X}^{\top}
-    \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}$ is still an unbiased
+ The least square estimate $\hat{\bm{\beta}}_{\mathrm{OLS}}$ is thus still an unbiased
     estimate for $\bm{\beta}$.
  \end{frame}
  
  \begin{frame}
 However, its variance is now
   \begin{equation*}\begin{split}
-    \mathrm{Var}[\hat{\bm{\beta}}] &= \mathrm{Var}[(\mathbf{X}^{\top}
+    \mathrm{Var}[\hat{\bm{\beta}}_{\mathrm{OLS}}] &= \mathrm{Var}[(\mathbf{X}^{\top}
     \mathbf{X})^{-1} \mathbf{X}^{\top} \bm{y}] \\ &= (\mathbf{X}^{\top}
     \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\bm{y}] \mathbf{X}
     (\mathbf{X}^{\top} \mathbf{X})^{-1} \\ &= \sigma^{2} (\mathbf{X}^{\top}
@@ -225,8 +226,8 @@ However, its variance is now
     (\mathbf{X}^{\top} \mathbf{X})^{-1}
     \end{split}\end{equation*}
   and depending on the structure of $\mathbf{V}$, the variance of
-  $\bm{\lambda}^{\top} \hat{\bm{\beta}}$ could be large, i.e., $\bm{\lambda}^{\top}
-  \hat{\bm{\beta}}$ is no longer BLUE for estimating $\bm{\lambda}^{\top} \bm{\beta}$.
+  $\bm{\lambda}^{\top} \hat{\bm{\beta}}_{\mathrm{OLS}}$ could be large, i.e., $\bm{\lambda}^{\top}
+  \hat{\bm{\beta}}_{\mathrm{OLS}}$ is no longer BLUE for estimating $\bm{\lambda}^{\top} \bm{\beta}$.
   
  \end{frame}
  
@@ -279,7 +280,7 @@ However, its variance is now
     \mathbf{X}^{\top} \mathbf{V}^{-1} \mathbf{X} \bm{\beta} = \mathbf{X}^{\top}
     \mathbf{V}^{-1} \bm{y}
   \end{equation*}
-  and the least square estimate $\hat{\bm{\beta}}_{\mathrm{GLS}}$ is then simply
+  and the (generalized) least square estimate $\hat{\bm{\beta}}_{\mathrm{GLS}}$ is simply
   \begin{equation*}
     \hat{\bm{\beta}}_{\mathrm{GLS}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
     \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}
@@ -473,13 +474,150 @@ However, its variance is now
 \end{frame}
 
 \begin{frame}[fragile]
-      <<gls-example8, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth', out.lines = 25>>=
+      <<gls-example8, cache = FALSE, tidy = TRUE, size = 'tiny', echo=TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth', out.lines = c(18,6)>>=
     ## Equivalently
     library("nlme")
     g.nlme <- gls(Employed ~ GNP + Population, correlation = corAR1(form = ~ Year), data = longley, method = 'ML')
     summary(g.nlme)
     @
 \end{frame}
+
+\begin{frame}
+  \frametitle{Detour: MLE for linear models (normally distributed error)}
+  Let $\bm{y} = \mathbf{X} \bm{\beta} + \bm{\epsilon}$ be a linear
+  model. Assume that $\bm{\epsilon} \sim \mathrm{MVN}(0, \sigma^2
+  \mathbf{I})$. Then $\bm{y} \sim \mathrm{MVN}(\mathbf{X} \bm{\beta},
+  \sigma^{2} \mathbf{I})$ and the likelihood of observing $\bm{y}$
+  (given the parameters $\bm{\beta}$ and $\sigma^2$) is
+
+  \begin{equation*} \begin{split}\mathcal{L}(\bm{y} \mid \bm{\beta}, \sigma^2) &= (2 \pi)^{-n/2} \sigma^{-n}
+  \exp\Bigl(-\frac{1}{2\sigma^2} (\bm{y} - \mathbf{X}
+  \bm{\beta})^{\top}(\bm{y} - \mathbf{X} \bm{\beta})\Bigr)  \end{split} \end{equation*}
+
+  Maximum likelihood estimation correspond to maximizing
+  $\mathcal{L}(\bm{y} \mid \bm{\beta}, \sigma^2)$ with respect to
+  $\bm{\beta}$ and $\sigma^2$. 
+ \end{frame}
+ 
+ \begin{frame}
+  Since $\log$ is a monotone increasing
+  function, we have
+  
+  \begin{equation*} \begin{split} (\hat{\bm{\beta}}, \hat{\sigma}) &= 
+      \argmax_{\bm{\beta}, \sigma} \mathcal{L}(\bm{y} \mid
+      \bm{\beta}, \sigma^2) \\ &= \argmax_{\bm{\beta}, \sigma} -\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2
+        \sigma^2} (\bm{y} - \mathbf{X}
+  \bm{\beta})^{\top}(\bm{y} - \mathbf{X} \bm{\beta}) \\ &=
+  \argmin_{\bm{\beta}, \sigma} \frac{n}{2} \log(2 \pi \sigma^2) + \frac{1}{2
+        \sigma^2} (\bm{y} - \mathbf{X}
+  \bm{\beta})^{\top}(\bm{y} - \mathbf{X} \bm{\beta}) \\
+  &= \argmin_{\sigma} \argmin_{\bm{\beta}} \frac{n}{2} \log(2 \pi \sigma^2) + \frac{1}{2
+        \sigma^2} (\bm{y} - \mathbf{X}
+  \bm{\beta})^{\top}(\bm{y} - \mathbf{X} \bm{\beta}) 
+  \end{split}
+  \end{equation*}
+  Now, given an estimate for $\sigma$, the inner minimization (with
+  respect to $\bm{\beta}$) is simply the ordinary least square
+  estimate $\hat{\bm{\beta}}_{\mathrm{OLS}} = (\mathbf{X}^{\top} \mathbf{X})^{-1}
+  \mathbf{X}^{\top} \bm{y}$. 
+ \end{frame}
+  
+\begin{frame} Substituting this estimate back to the
+  maximum likelihood criterion yield
+
+  $$\hat{\sigma} = \argmin_{\sigma} \frac{n}{2} \log(2 \pi \sigma^2) + \frac{1}{2
+        \sigma^2} (\bm{y} - \mathbf{X}
+  \hat{\bm{\beta}}_{\mathrm{OLS}})^{\top}(\bm{y} - \mathbf{X} \hat{\bm{\beta}}_{\mathrm{OLS}})$$
+  
+  Letting $\mathrm{SSE} = (\bm{y} - \mathbf{X}
+\hat{\bm{\beta}}_{\mathrm{OLS}})^{\top}(\bm{y} - \mathbf{X}
+\hat{\bm{\beta}}_{\mathrm{OLS}})$, and then taking partial derivative
+with respect to $\sigma$, we see that $\hat{\sigma}$ satisfies
+
+$$\frac{n}{\hat{\sigma}} - \frac{\mathrm{SSE}}{\hat{\sigma}^3} = 0
+\quad \Rightarrow \hat{\sigma}^2 = \frac{\mathrm{SSE}}{n}.$$
+
+\end{frame}
+
+\begin{frame}
+
+In conclusion, assuming the error $\epsilon_i$ are i.i.d. $N(0,
+\sigma^2)$
+
+\begin{enumerate}
+  \item the maximum likelihood estimate for $\bm{\beta}$ coincides
+with the (ordinary) least square estimates
+$\hat{\bm{\beta}}_{\mathrm{OLS}}$. 
+\item The maximum
+likelihood estimate for $\sigma^2$ and the mean square error estimate
+in ordinary least square are related by
+$$\hat{\sigma}^2 = \frac{\mathrm{SSE}}{n} = \frac{n-p}{n} \times \frac{\mathrm{SSE}}{n-p}
+= \frac{n-p}{n} \times \mathrm{MSE}.$$
+\end{enumerate}
+
+Least square estimation is thus the ``canonical'' estimation method
+for normally distributed error. Conversely, normally distributed error is the
+``canonical'' error model for least square estimation.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Detour: MLE for linear models (Laplace error)}
+  Suppose once again that $\bm{y} = \mathbf{X} \bm{\beta} +
+  \bm{\epsilon}$ is a linear model. Assume however that $\bm{\epsilon}
+  = (\epsilon_1, \epsilon_2, \dots, \epsilon_n)$ are i.i.d. random
+  variables according to the Laplace distribution with location
+  parameter $0$ and
+  scale parameter $\sigma$. A random variable $z$ has a
+  $\mathrm{Laplace}(\mu, \sigma)$ distribution if its probability
+  density function is of the form
+  $$f(z \mid \mu, \sigma) = \frac{1}{2 \sigma} \exp \Bigl(-\frac{|x -
+    \mu|}{\sigma} \Bigr).$$
+  
+  The likelihood for observing $\bm{y}$ given the parameters
+  $\bm{\beta}$ and $\sigma$ in this model is then
+  $$\mathcal{L}(\bm{y} \mid \bm{\beta}, \bm{\sigma}) = (2 \sigma)^{-n}
+  \exp \Bigl(- \sum_{i=1}^{n} \frac{|Y_i - \bm{x}_i^{\top}}{\sigma} \Bigr)
+  $$
+\end{frame}
+
+\begin{frame}
+  Maximum likelihood estimation for $\bm{\beta}$ and $\bm{\sigma}$ in
+  this model is then
+  \begin{equation*}
+    \begin{split}
+    (\hat{\bm{\beta}}, \hat{\sigma}) &= \argmin_{\bm{\beta}, \sigma} n
+  \log (2 \sigma) + \frac{1}{\sigma} \sum_{i=1}^{n} |Y_i -
+  \bm{x}_i^{\top} \bm{\beta}| \\ &= \argmin_{\sigma} \argmin_{\bm{\beta}} n
+  \log (2 \sigma) + \frac{1}{\sigma} \sum_{i=1}^{n} |Y_i -
+  \bm{x}_i^{\top} \bm{\beta}| 
+  \end{split}
+  \end{equation*}
+  For a fix $\sigma$, the inner minimization with respect to
+  $\bm{\beta}$ yield $\hat{\bm{\beta}}$ as the minimizer of
+  $$\sum_{i=1}^{n} |Y_i - \bm{x}_i^{\top} \bm{\beta}|$$
+  There is no longer a close form solution for $\hat{\bm{\beta}}$ in
+  this context.
+  
+  Nevertheless, with $\hat{\bm{\beta}}$ found, the MLE of $\sigma$ is
+  given by
+  $$ \hat{\sigma} = \frac{\sum_{i} |Y_i - \bm{x}_i^{\top} \hat{\bm{\beta}}|}{n}.$$
+\end{frame}
+
+\begin{frame}
+  These two examples illustrate that
+  \begin{enumerate}
+    \item Least square estimation is ``just'' an estimation
+      technique. There is nothing ``unique'' about it. Other
+      estimation technique such as least absolute deviation can also
+      be use.
+    \item Least square estimation along with normally distributed
+      error assumption provides a nice blend of theory and practicality.
+    \item There are many ways to extend least square estimation. But
+      we cannot do that unless we really ``understand'' least square
+      estimation. We now provide two more examples.
+  \end{enumerate}
+\end{frame}
+
 
 \begin{frame}[fragile]
   \frametitle{Generalized Least Square: Example 2}
@@ -567,26 +705,33 @@ color-coded according to family.
     \item $\bm{\epsilon}$ is a $n \times 1$ random vector with distribution $N(0, \mathbf{R})$ for some unknown positive definite matrix $\mathbf{R}$,   
     \item and $\bm{\gamma}$ and $\bm{\epsilon}$ are independent of one another.
   \end{enumerate}
-  
-  In our example above, $\mathbf{X}$ is of dimension $71 \times 2$, $\bm{\beta}$ is a $2 \times 1$ vector, $\mathbf{Z}$ is a $71 \times 18$ matrix and $\bm{\gamma}$ is a $18 \times 1$ vector. 
 \end{frame}
 
-\begin{frame}
-  The linear mixed model then implies $$\mathrm{Var}[\bm{y}] = \mathrm{Var}[\mathbf{X} \bm{\beta} + \mathbf{Z} \bm{\gamma} + \bm{\epsilon}] = \mathrm{Var}[\mathbf{Z} \bm{\gamma}] + \mathrm{Var}[\bm{\epsilon}] = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R}$$ 
-  and hence $\bm{y} \sim N(\mathbf{X} \bm{\beta}, \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R})$. 
+ \begin{frame}[fragile]
 
-  Letting $\mathbf{V} = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R}$, the log-likelihood of $\bm{y}$ is then
+  In our example above, $\mathbf{X}$ is of dimension $71 \times 2$,
+$\bm{\beta}$ is a $2 \times 1$ vector, $\mathbf{Z}$ is a $71 \times
+18$ matrix and $\bm{\gamma}$ is a $18 \times 1$ vector.
+
+  The linear mixed model then implies $$\mathrm{Var}[\bm{y}] =
+\mathrm{Var}[\mathbf{X} \bm{\beta} + \mathbf{Z} \bm{\gamma} +
+\bm{\epsilon}] = \mathrm{Var}[\mathbf{Z} \bm{\gamma}] +
+\mathrm{Var}[\bm{\epsilon}] = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top}
++ \mathbf{R}$$ and hence $\bm{y} \sim N(\mathbf{X} \bm{\beta},
+\mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} + \mathbf{R})$.
+
+  Letting $\mathbf{V} = \mathbf{Z} \mathbf{G} \mathbf{Z}^{\top} +
+\mathbf{R}$, the log-likelihood of $\bm{y}$ is then
   $$ \ell(\bm{\beta}, \mathbf{V}) = -\frac{1}{2} \Bigl(n \log{2 \pi} + \log |\mathbf{V}| + (\bm{y} - \mathbf{X} \bm{\beta})^{\top} \mathbf{V}^{-1} (\bm{y} - \mathbf{X} \bm{\beta})\Bigr) $$
 Therefore, the maximum likelihood estimates for $\hat{\bm{\beta}}$ and $\hat{\mathbf{V}}$ is given by maximizing the right hand side of the above display. 
+ \end{frame}
 
+\begin{frame}
 Optimizing $\ell(\bm{\beta}, \mathbf{V})$ first with respect to
 $\bm{\beta}$ yields, for any fixed $\mathbf{V}$, that
 $\ell(\bm{\beta}, \mathbf{V})$ is maximized over $\bm{\beta}$ by
 $$\hat{\bm{\beta}}_{\mathbf{V}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
 \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}.$$
-\end{frame}
-
-\begin{frame}
   Substituting $\hat{\bm{\beta}}_{\mathbf{V}}$ into the expression for the log-likelihood $\ell(\bm{\beta}, \mathbf{V})$ and ignoring the constant term $n \log{2 \pi}$, we obtain the {\em profile} log-likelihood 
   \begin{equation*}
     \begin{split}
@@ -594,19 +739,47 @@ $$\hat{\bm{\beta}}_{\mathbf{V}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
     &= -\frac{1}{2} \Bigl(\log |\mathbf{V}| + \bm{y}^{\top} \mathbf{V}^{-1} (\mathbf{I} - \mathbf{X} (\mathbf{X}^{\top} \mathbf{V}^{-1} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1}) \bm{y}\Bigr) 
     \end{split}
   \end{equation*}
-  We can now maximize $\ell_{p}(\mathbf{V})$ over some subset of positive definite matrices $\mathbf{V}$ to obtain $\hat{\mathbf{V}}$ and from $\hat{\mathbf{V}}$, obtain $\hat{\bm{\beta}}$. 
-  
-  Usually, $\mathbf{V}$ will have a ``simple'' form. For example, in our weight vs height example, $\mathbf{V} = \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I}$. Since $\mathbf{Z}$ is known, $\hat{\mathbf{V}}$ is obtained  by maximizing $\ell_{p}( \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I})$ over the parameter space $\tau^2 > 0, \sigma^2 > 0$. 
+
+  We can now maximize $\ell_{p}(\mathbf{V})$ over some subset of
+positive definite matrices $\mathbf{V}$ to obtain $\hat{\mathbf{V}}$
+and from $\hat{\mathbf{V}}$, obtain $\hat{\bm{\beta}}$.
 \end{frame}
-  
+
+\begin{frame}
+  Usually, $\mathbf{V}$ will have a ``simple'' form. For example, in our weight vs height example, $\mathbf{V} = \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I}$. Since $\mathbf{Z}$ is known, $\hat{\mathbf{V}}$ is obtained  by maximizing $\ell_{p}( \tau^{2} \mathbf{Z} \mathbf{Z}^{\top} + \sigma^2 \mathbf{I})$ over the parameter space $\tau^2 > 0, \sigma^2 > 0$. 
+
+  The details is outside the scope of today's lecture; nevertheless ...
+\end{frame}
+
 \begin{frame}[fragile]
-  The details is outside the scope of today's lecture; nevertheless
-  <<family-example2, echo = TRUE, tidy = TRUE, size = 'tiny'>>=
-  out.lme <- lme(fixed = Weight ~ Height, random = ~ 1 | FamilyID, data
-  = famdat, method = "ML")
+  <<family-example1b, echo = -1, size = 'tiny'>>=
+  famdat <- tibble::as_tibble(famdat) 
+  famdat
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<family-example2, echo = TRUE, tidy = FALSE, size = 'tiny'>>=
+  out.lme <- lme(Weight ~ Height, random = ~ 1 | FamilyID, 
+                 data = famdat, method = "ML")
   summary(out.lme)
   @
 \end{frame}
+
+\begin{frame}[fragile]
+  <<family-example2b, echo = TRUE, tidy = TRUE, size = 'tiny', out.lines = c(18,6)>>=
+  out.lm <- lm(Weight ~ Height + factor(FamilyID), data = famdat)
+  summary(out.lm)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<family-example2c, echo = TRUE, tidy = TRUE, size = 'tiny'>>=
+  out.lm2 <- lm(Weight ~ Height, data = famdat)
+  summary(out.lm2)
+  @
+\end{frame}
+
 
 \begin{frame}[fragile]
   \frametitle{Generalized least square: Example 3}
@@ -622,7 +795,7 @@ $$\hat{\bm{\beta}}_{\mathbf{V}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
 \end{frame}  
 
 \begin{frame}[fragile]
-  <<gapminder-example2, size = 'tiny', out.lines = 15>>=
+  <<gapminder-example2, size = 'tiny', out.lines = c(14,14)>>=
   mod.ls <- lm(lifeExp ~ factor(country)*I(year - 1952) + gdpPercap, data = gapminder)
   summary(mod.ls)
   @
@@ -659,6 +832,755 @@ estimated. There are in total $286$ parameters (including $\sigma^2$) to be esti
  Both model has the same estimated mean square error, namely
  $\Sexpr{mod.gls$sigma^2}$. 
 
+\end{frame}
+
+\begin{frame}
+\frametitle{Weighted Least Squares}
+  Consider the linear model $\bm{y} = \mathbf{X} \bm{\beta}
+  + \bm{\epsilon}$ with $\mathbb{E}[\bm{\epsilon}] = \bm{0}$ but now
+  $\mathrm{Var}[\bm{\epsilon}] =
+  \sigma^{2} \mathbf{V}$ for some diagonal matrix
+  $\mathbf{V}$.
+
+  The error terms $\bm{\epsilon}$ are uncorrelated with possibly
+  unequal variance. Thus $\mathbf{V}$ is of the form
+  \begin{equation*}
+    \mathbf{V} = \begin{bmatrix} \sigma_1^{2} & 0 & 0 & \cdots & 0 \\
+     0 & \sigma_{2}^{2} & 0 & \cdots & 0 \\
+     0 & 0 & \sigma_{3}^{2} & \cdots & 0 \\
+     \vdots & \vdots & \vdots & \ddots & \vdots \\
+     0 & 0 & 0 & \cdots & \sigma_{n}^{2}
+     \end{bmatrix}
+  \end{equation*}
+  For ease of notation, we write the above as $\mathbf{V} =
+  \mathrm{diag}(\{\sigma_i^2\})$.
+\end{frame}
+
+\begin{frame}
+  Assume $\mathbf{V}$ is known.  Viewing this as special case of generalized least squares
+  we transform $\bm{y}$, $\mathbf{X}$, and $\bm{\epsilon}$
+  as
+  \begin{equation*}
+    \bm{y}^{*} = \mathbf{L}^{-1} \mathbf{X} \bm{\beta} +
+    \mathbf{L}^{-1} \bm{\epsilon} = \mathbf{X}^{*} \bm{\beta} + \bm{\epsilon}^{*}
+  \end{equation*}
+  and perform ordinary least square (OLS) on the $\bm{y}^{*}$ and $\mathbf{X}^{*}$.
+
+  As $\mathbf{V} = \mathrm{diag}(\{\sigma_i^2\})$,
+  $\mathbf{L} = \mathrm{diag}(\{\sigma_{i}\})$ and $\mathbf{L}^{-1} =
+  \mathrm{diag}(\{1/\sigma_i\})$.
+
+  OLS using $\bm{y}^{*}$ and
+  $\mathbf{X}^{*}$ thus corresponds to minimizing
+  \begin{equation*}
+    \begin{split}
+    Q_{\mathrm{WLS}}(\bm{\beta}) &= \sum_{i=1}^{n}(y_{i}^{*} - (\bm{x}^{*}_{i})^{\top}
+    \beta) = \sum_{i=1}^{n}(\sigma_i^{-1} y_i - \sigma_{i}^{-1} \bm{x}_{i}^{\top} \bm{\beta})^{2} \\ &= \sum_{i=1}^{n}
+    \frac{1}{\sigma_i^2}(y_i - \bm{x}_{i}^{\top} \bm{\beta})^2
+    \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Weighted least squares thus corresponds simply to
+  ordinary least squares, except that each data point
+  $(y_i, \bm{x}_{i})$ is weighted by the inverse of its variance. Therefore, points with higher variance
+  will get a smaller weight and thus will not be as influential.
+
+%%   Recalling the previous discussion on generalized least squares, the
+%%   normal equation is
+%%   \begin{equation*}
+%%     \mathbf{X}^{\top} \mathbf{V}^{-1} \mathbf{X} \bm{\beta} =
+%%     \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y}
+%%   \end{equation*}
+%%   Therefore
+%%   \begin{gather*}
+%%     \hat{\bm{\beta}}_{\mathrm{WLS}} = (\mathbf{X}^{\top} \mathbf{V}^{-1}
+%%     \mathbf{X})^{-1} \mathbf{X}^{\top} \mathbf{V}^{-1} \bm{y} \\
+%%     \mathrm{Var}[\hat{\bm{\beta}}_{WLS}] = \sigma^{2}(\mathbf{X}^{\top}
+%%     \mathbf{V}^{-1} \mathbf{X})^{-1} \\
+%%   \end{gather*}
+%% \end{frame}
+
+%% \begin{frame}
+  Since $\mathbf{V}$ is generally unknown, we have to estimate it from
+  the data. We usually denote an estimate of
+  $\mathbf{V}^{-1}$ by a diagonal matrix $\mathbf{W} =
+  \mathrm{diag}(\{w_i\})$ whose diagonal
+  entries are the weights as used for weighted least squares.
+
+  In summary, the general formulation for weighted least squares is to
+  find the $\hat{\bm{\beta}}$ that minimizes
+  \begin{equation*}
+    Q_{\mathrm{WLS}}(\bm{\beta}) = \sum_{i=1}^{n} w_i(y_i - \bm{x}_{i}^{\top} \bm{\beta})^{2}
+  \end{equation*}
+  for some collection of positive weights $\{w_i\}$.
+\end{frame}
+
+\begin{frame}
+  There are various ways to choose the weights $\{w_i\}$. For example,
+  \begin{enumerate}
+  \item If the error terms $\epsilon_i$ has variance proportional to a
+    predictor variable, e.g., $\mathrm{Var}[\epsilon_i] \propto
+    X_{ij}$, then $w_i = 1/{X_{ij}}$ is possible
+  \item If $Y_i$ is the average of $n_i$ observations then
+    $\mathrm{Var}[\epsilon_i] \propto 1/n_i$ and so $w_i = n_i$.
+  \item We could also model the variance of the error terms
+    $\epsilon_i$ through the residuals $e_i$. For example, a simple,
+    commonly used model is the \emph{power-of-the-mean} model in which
+    $\sigma_i$ is modeled as
+    \begin{equation*}
+      \sigma_i = \sigma \mathbb{E}[Y_i]^{\theta}
+    \end{equation*}
+    for some parameter $\theta$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  We now discuss in a little more detail the power-of-the-mean
+  model. Note that if we perform weighted least squares, then an
+  estimate for $\mathrm{Var}[\epsilon_i]$ is given by $e_i^2$
+  where $\bm{e} = \bm{y} - \mathbf{X} \hat{\bm{\beta}}_{\mathrm{WLS}}$.
+
+  Therefore, we can write the above power-of-the-mean model as
+  \begin{equation*}
+    |e_i| \approx \sigma \hat{Y}_i^{\theta}
+  \end{equation*}
+  where we used the $\hat{Y}_i$ as an estimate for
+  $\mathbb{E}[Y_i]$. Taking logarithm, the above corresponds to
+  \begin{equation*}
+    \log{|e_i|} \approx \log{\sigma} + \theta \log{\hat{Y}_i}
+  \end{equation*}
+  and this corresponds approximately a simple linear regression
+  \begin{equation*}
+    \log{|e_i|} \approx \gamma_0 + \theta \log{\hat{Y}_i}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  After solving the above simple linear regression problem to obtain
+  an estimate $\hat{\gamma}_0$ and $\hat{\theta}$ of $\gamma_0$ and
+  $\theta_0$, we can obtain an estimate for $\sigma_i$ via
+  \begin{equation*}
+    \hat{\sigma}_i = e^{\hat{\gamma}_0} (\hat{Y}_i)^{\hat{\theta}}
+  \end{equation*}
+  the weights are then given by $w_i = 1/\hat{\sigma}_i^{2}$.
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Iteratively reweighted least squares (IRWLS)}
+  We can summarize the above procedure (which can also be extended to many
+  other cases) as follows.
+
+  \begin{enumerate}
+  \item Fit a regression model by ordinary (unweighted) least squares
+    to analyze the residuals. If the residuals exhibit non-constant
+    variance, then
+  \item Estimate the variance $\sigma_i^2$ or standard deviation
+    $\sigma_i$ by regressing the squared residuals or the absolute
+    value of the residuals on the appropriate predictor variables.
+  \item Use the fitted values from the above regression to obtain the
+    weights $w_i$.
+    \framebreak
+  \item Estimate the regression coefficients using these weights.
+  \item Repeat the above steps if necessary, e.g., until the
+    regression coefficients do not fluctuate too much, or until the
+    weights $w_i$ stabilized, and so on.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Loess (local regression) and weighted least squares}
+ LOESS (locally estimated scaterplot smoothing) is a 
+ technique based on weighted least squares.
+ 
+ Given data points $\{(X_i, Y_i)\}_{i=1}^{n}$, LOESS
+ proceeds as follows. 
+  <<loess, echo = FALSE, out.width="80%">>=
+  knitr::include_graphics("figures/loess.png")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{enumerate}
+    \item The previous algorithm is presented for univariate $X_i$ but is easily generalizable to
+      multivariate $X_i$ (however, beware the curse of dimensionality).
+    \item There are numerous choices for the weights $K_{i0}$. Popular
+      choices include
+      \begin{gather*} K_{i0} = \Bigl(1 - \frac{\|x_i - x_0\|^3}{h^3} \Bigr)_{+}^{3} \\
+      \quad K_{i0} = \exp\Bigl(-\frac{\|x_i - x_0\|^2}{h^2}\Bigr)
+      \end{gather*}
+      Here $h$ is a scaling parameter and $(f(x))_{+} = \max\{f(x),
+      0\}$. 
+    \item For a visualization of loess regression see
+      \href{https://rafalab.github.io/dsbook/smoothing.html#local-weighted-regression-loess}{here}
+    \end{enumerate}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Outliers and influential points}
+   <<outlier-example, cache = TRUE, tidy = TRUE, size = 'tiny', echo=FALSE,fig.width=8, fig.height = 6, fig.align='center',out.width='.6\\linewidth'>>=
+  library("ggplot2")
+
+  n <- 20
+  X <- c(runif(n), 5)
+  Y1 <- 0.5 + 4*X + rnorm(n+1, mean = 0, sd = 0.2)
+  Y1[n+1] <- Y1[(n+1)] - 1
+  Y2 <- c(Y1[-(n+1)], 5)
+  beta1.hat <- sum((X - mean(X))*(Y1 - mean(Y1)))/sum((X - mean(X))^2)
+  beta0.hat <- mean(Y1) - beta1.hat*mean(X)
+  Y1hat <- beta0.hat + beta1.hat*X
+  beta1.hat <- sum((X - mean(X))*(Y2 - mean(Y2)))/sum((X - mean(X))^2)
+  beta0.hat <- mean(Y2) - beta1.hat*mean(X)
+  Y2hat <- beta0.hat + beta1.hat*X
+
+  beta1.hat <- sum((X[1:n] - mean(X[1:n]))*(Y1[1:n] -
+  mean(Y1[1:n])))/sum((X[1:n] - mean(X[1:n]))^2)
+
+  beta0.hat <- mean(Y1[1:n]) - beta1.hat*mean(X[1:n])
+
+  Y3hat <- beta0.hat + beta1.hat*X
+
+  plot(X, Y1, col = "black", type = "n", xlab = "X", ylab = "Y")
+  points(X[-(n+1)], Y1[-(n+1)], col = "black")
+  points(c(X[n+1], X[n+1]), c(Y1[n+1], Y2[n+1]), col = c("blue",
+  "green"), pch = c(17,19))
+  lines(X, Y1hat, col = "blue", lty = 2)
+  lines(X, Y2hat, col = "green", lty = 2)
+  lines(X, Y3hat, col = "black", lty = 2)
+  @
+  There are two possible outliers in the data, depicted as the blue triangle and green
+  circle. The black dashed line is the linear
+  regression line when none of the outliers are included. The colored lines are the least square regression line
+  when adding a {\bf single} colored point to the data.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Robust Regression}
+  Why the need for robust regression ?
+  \begin{enumerate}
+  \item Least square estimation is best when errors terms $\bm{\epsilon}$ are
+    normal. However, nonnormal error terms often occurs.
+  \item Least square estimation is unstable when a data set contains
+    outliers and anomalous data. Almost all datasets contain bad data.
+  \end{enumerate}
+
+  Robust regression is a way to perform regression that produce
+  \emph{resistant estimates}. A \emph{resistant estimate} is an
+  estimate that is relatively unaffected by large changes in a small
+  part of the data or small changes in a large part of the data.
+\end{frame}
+
+%% \begin{frame}
+%%   There are many ways of performing robust regression. We outline here
+%%   two representative approaches
+%%   \begin{enumerate}
+%%   \item $M$-estimation.
+%%   \item Bounded-influence estimation.
+%%   \end{enumerate}
+%%   For a good introduction, see also this \href{http://users.stat.umn.edu/~sandy/courses/8053/handouts/robust.pdf}{here}.
+%% \end{frame}
+
+\begin{frame}
+  \frametitle{Breakdown and Robustness}
+  The breakdown point of an estimator is the smallest fraction
+  $\alpha$ of ``bad'' data values such that if the ``bad'' values get
+  arbitrarily big (or arbitrarily small), then the estimator also
+  becomes arbitrarily big (or arbitrarily small). For example, given
+  $x_1, x_2, \dots, x_n$, the
+  sample mean $\bar{x}$ is written as
+  \begin{equation*}
+    \bar{x} = \sum_{i=1}^{n} \frac{x_i}{n} = \frac{n-1}{n}
+    \sum_{i=1}^{n-1} \frac{x_i}{n-1} + \frac{x_n}{n}
+  \end{equation*}
+  and so if $x_n$ gets arbitrarily large then $\bar{x}$ also gets
+  arbitrarily large. The breakdown point of $\bar{x}$ as an estimate for the population mean is then $1/n$.
+
+  The sample median on the other hand, has a break down point of $\alpha \approx 0.5$.
+\end{frame}
+
+\begin{frame}
+  \frametitle{M-estimation}
+  In linear regression, least square estimation has a breakdown point
+  analogous to that of the sample mean, i.e., a few extreme
+  observations can influence the estimated parameters
+  significantly.
+
+  We can write OLS as minimizing
+  \begin{equation*}
+   \sum_{i=1}^{n} (Y_i - \hat{Y_i})^2 = \sum_{i=1}^{n} (Y_i -
+   \bm{x}_i^{\top} \bm{b})^2 = \sum_{i=1}^{n} \rho_{\mathrm{LS}}(Y_i -
+   \bm{x}_{i}^{\top} \bm{b})
+ \end{equation*}
+ where $\rho_{\mathrm{LS}}$ is just the quadratic function.
+
+ $M$-estimation is a general framework that replaces $\rho_{\mathrm{LS}}$ by some non-negative (smooth) function $\rho$ satisfying
+ \begin{equation*}
+   \rho(0) = 0; \quad \rho(-e_i) = \rho(e_i); \quad \rho(e_1) \geq
+   \rho(e_2) \,\, \text{if $|e_1| > |e_2|$}.
+ \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Taking the partial derivative of the objective function (based
+  on $\rho$) and setting the result to $0$, we get
+  \begin{equation*}
+    \bm{0} = \frac{\partial}{\partial \bm{b}} \sum_{i=1}^{n} \rho( Y_i -
+    \bm{x}_{i}^{\top} \bm{b}) = \sum_{i=1}^{n} \psi(y_i - \bm{x}_i^{\top}
+    \bm{b}) \bm{x_i}
+  \end{equation*}
+  where $\psi$ is the derivative of $\rho$.
+
+  Letting $w_i = \psi(y_i - \bm{x}_{i}^{\top} \bm{b})/(y_i -
+  \bm{x}_{i}^{\top} \bm{b})$, the above corresponds to
+  \begin{equation*}
+    \bm{0} = \sum_{i=1}^{n} w_i (y_i - \bm{x}_{i}^{\top} \bm{b}) \bm{x}_i
+  \end{equation*}
+  and this is simply the normal equation for a weighted least
+  square regression. Robust regression based on $M$-estimation can
+  thus be performed using IRWLS.
+\end{frame}
+
+\begin{frame}
+  There are several choices for $\rho$. Two widely used choices are
+  (1) Huber's estimator and (2) Tukey bisquare/biweight estimator.
+
+  Huber's estimator is given by
+  \begin{gather*}
+    \rho_{H}(r) = \begin{cases} \tfrac{1}{2} r^2 & \text{if $|r| \leq
+        c$} \\
+      c|r| - \tfrac{1}{2} c^2 & \text{for $|r| > c$.}
+  \end{cases} \\
+  w_{H}(r) = \begin{cases} 1 & \text{if $|r| \leq c$} \\
+    c/|r| & \text{if $|r| > c$}
+    \end{cases}
+  \end{gather*}
+\end{frame}
+
+\begin{frame}
+ <<huber1, cache = FALSE, tidy = TRUE, size = 'tiny',echo = FALSE, out.width='5cm', out.height='5cm', fig.show = 'hold'>>=
+ x <- seq(-5,5, by = 0.1)
+ y <- numeric(length(x))
+ idx <- which(abs(x) <= 2)
+ y[idx] = x[idx]*x[idx]/2
+ y[-idx] = 2*abs(x[-idx]) - 2
+ qplot(x, y) 
+ z <- numeric(length(x))
+ z[idx] <- 1
+ z[-idx] <- 2/abs(x[-idx])
+ qplot(x,z)
+ @
+ Plot of $\rho_{H}(r)$ and $w_{H}(r)$ for $c = 2$. 
+\end{frame}
+
+\begin{frame}
+  Tukey's bisquare estimator is given by
+  \begin{gather*}
+    \rho_{B}(r) = \begin{cases} \tfrac{c^2}{6} \Bigl(1 - (1 - (r/c)^2)^3\Bigr) & \text{if $|r| \leq
+        c$} \\
+      c^2/6 & \text{for $|r| > c$.}
+  \end{cases} \\
+  w_{B}(r) = \begin{cases} (1 - (r/c)^2)^2 & \text{if $|r| \leq c$} \\
+   0 & \text{if $|r| > c$}
+ \end{cases}
+\end{gather*}
+\end{frame}
+
+\begin{frame}
+ <<tukey1, cache = FALSE, tidy = TRUE, size = 'tiny',echo = FALSE, out.width='5cm', out.height='5cm', fig.show = 'hold'>>=
+ x <- seq(-5,5, by = 0.1)
+ y <- numeric(length(x))
+ idx <- which(abs(x) <= 2)
+ y[idx] = 2*2/6 * ( 1 - (1 - (x[idx]/2)**2)**3)
+ y[-idx] = 2*2/6
+ qplot(x, y) 
+ z <- numeric(length(x))
+ z[idx] <- (1 - (x[idx]/2)**2)**2
+ z[-idx] <- 0
+ qplot(x,z)
+ @
+ Plot of $\rho_{B}(r)$ and $w_{B}(r)$ for $c = 2$. 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Too much information!}
+  The choice of constant $c$ in Huber's and Tukey's estimator above is
+  somewhat interesting. The recommended constant is $c = 1.345
+  \hat{\sigma}$ for Huber's and $4.685 \hat{\sigma}$ for Tukey's where
+  $\hat{\sigma}$ is an estimate of the standard deviation for the
+  error terms, e.g., $\hat{\sigma}$ is chosen to be the median
+  absolute residual (MAR) where
+  \begin{equation*}
+    \mathrm{MAR} = \mathrm{median} |e_i - \mathrm{median}(e_i)|
+  \end{equation*}
+\end{frame}
+
+\begin{frame}[fragile]
+ <<robust-example1, cache = TRUE, tidy = TRUE, size = 'tiny', echo = TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.45\\linewidth'>>=
+ library("MASS")
+ data(phones)
+ plot(calls ~ year, data=phones)
+ @
+ The \textrm{phones} dataset give data on annual numbers of Belgium
+ telephone calls. The dataset was originally from Rousseeuw and Leroy
+ (1987). According to Rosseeuw and Leroy, in
+ 1964--1969, the total length of calls in minutes had been recorded
+ rather than the number.
+\end{frame}
+
+\begin{frame}[fragile]
+ <<robust-example2, cache = TRUE, tidy = TRUE, size = 'tiny', echo = TRUE, dependson = 'robust-example1', fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+ phones.ls <- lm(calls ~ year, data = phones)
+ plot(calls ~ year, data=phones)
+ abline(coef(phones.ls))
+ ## Perform robust regression with Huber's weights
+ phones.m.huber <- rlm(calls ~ year, phones, maxit = 50)
+ abline(coef(phones.m.huber), lty = 1, col = 2)
+ phones.m.tukey <- rlm(calls ~ year, phones, maxit = 50, psi = psi.bisquare)
+ abline(coef(phones.m.tukey), lty = 1, col = 3)
+ legend("topleft", lty = 1, col = 1:3, legend = c("LS", "Huber", "Bisquare"))
+ @
+\end{frame}
+
+\begin{frame}[fragile]
+ <<robust-example3, cache = TRUE, tidy = TRUE, size = 'tiny', echo = TRUE, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+ summary(phones.m.huber)
+ summary(phones.m.tukey)
+ @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<robust-example3b, cache = TRUE, tidy = TRUE, size = 'tiny', echo = TRUE, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  plot(1:length(phones$year), phones.m.huber$w, col = "red", type =
+  "b", ylim = c(0,1), xlab = "year of observations", ylab = "weight")
+  points(1:length(phones$year), phones.m.tukey$w, col = "blue")
+ @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<robust-example5, cache = TRUE, tidy = TRUE, size = 'tiny', echo = 1, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+ data(star)
+ plot(star$temp, star$light, col = 1 + (star$temp < 3.6), xlab = "log(Temperature)", ylab = "log(Light Intensity)")
+ gs1 <- lm(light ~ temp, star)
+ abline(coef(gs1))
+ gs2 <- rlm(light ~ temp, star)
+ abline(coef(gs2), col = 2)
+ gs4 <- rlm(light ~ temp, star, psi = psi.bisquare)
+ abline(coef(gs4), col = 3)
+  legend("topright", lty = 1, col = 1:3, legend = c("LS", "Huber", "Bisquare"))
+ @
+ As another example, we revisit the \textrm{star} dataset. The three regression lines above
+ was obtained via ordinary least square, robust regressions with
+ Huber's and Tukey's bisquare $\psi$ functions. None of the method 
+ ignored the group of outliers and influential points 
+ in the top-left corner.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Is robust regression really robust ?}
+  Robust regression using $M$-estimation 
+  is robust (or resistant) with respect to outliers
+  in the response variable.
+  <<leverage-example1, cache = TRUE, tidy = TRUE, size = 'tiny', echo = FALSE, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+ x <- c(1,2,3,4,5)
+ y <- 2*x
+ x.mod <- c(5,2,3,4,5)
+ plot(x,y, xlim = c(0,5))
+ lines(x,y)
+ g <- lm(y ~ x.mod)
+ points(x.mod[1], y[1], col = "red", cex = 2)
+ abline(coef(g), lty = 2, col = 2)
+ g.huber <- rlm(y ~ x.mod, maxit = 50)
+ abline(coef(g.huber), lty = 3, col = 3)
+ g.tukey <- rlm(y ~ x.mod, maxit = 50, psi = psi.bisquare)
+ abline(coef(g.tukey), lty = 4, col = 4)
+ legend("topleft", lty = 2:4, col = 2:4, legend = c("LS", "Huber", "Bisquare"))
+ @
+\end{frame}
+
+
+\begin{frame}
+  Robust regression using $M$-estimation, 
+  however, is not necessarily robust against
+  outliers in the predictor variables. 
+  <<leverage-example2, cache = TRUE, tidy = TRUE, size = 'tiny', echo = FALSE, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+ x <- c(1,2,3,4,5)
+ y <- 2*x
+ x.mod <- c(10,2,3,4,5)
+ plot(x,y, xlim = c(0,10))
+ lines(x,y)
+ g <- lm(y ~ x.mod)
+ points(x.mod[1], y[1], col = "red", cex = 2)
+ abline(coef(g), lty = 2, col = 2)
+ g.huber <- rlm(y ~ x.mod, maxit = 50)
+ abline(coef(g.huber), lty = 3, col = 3)
+ g.tukey <- rlm(y ~ x.mod, maxit = 50, psi = psi.bisquare)
+ abline(coef(g.tukey), lty = 4, col = 4)
+ legend("topleft", lty = 2:4, col = 2:4, legend = c("LS", "Huber", "Bisquare"))
+ @
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Bootstrapping: a universal technique}
+  Given data point $X_1, X_2, \dots, X_n$ sampled i.i.d from $F$, let
+  $\theta$ be a parameter of interest and $\hat{\theta} =
+  \hat{\theta}(X_1, X_2, \dots, X_n)$ be an estimate of $\theta$. We
+  want to find the variability (or an estimate of the variability) of
+  $\hat{\theta}$ as an estimate for $\theta$. Let us denote this by
+  $\sigma(\hat{\theta}, n , F)$.
+
+  If $\hat{\theta}$ is sufficiently simple, then $\sigma(\hat{\theta},n,F)$
+  is known. For example, if $\theta$ is the sample mean $\bar{X}$,
+  then $\sigma(\hat{\theta}, n, F)$ is just
+  $\sqrt{\mathrm{Var}[X]/n}$ and an estimate
+  $\hat{\sigma}(\hat{\theta}, n, F)$ is just $\sqrt{s^2/n}$ where
+  $s^2$ is the sample variance of the $\{X_i\}$
+
+  On the other hand, what happens if $\hat{\theta}$ is a 
+  complicated quantity ? e.g., $\hat{\theta}$ is the estimate of $\bm{\beta}$
+  obtained using some robust regression procedure ?
+\end{frame}
+
+\begin{frame}
+  The bootstrap is a technique introduced by Bradley Efron in 1979 to
+  deal with these kind of question.
+
+  The bootstrap algorithm can be summarized simply as follows
+  \begin{enumerate}
+  \item Let $\hat{F}_n$ be the uniform distribution over the sampled
+    $X_1, X_2, \dots, X_n$.
+  \item Draw a ``bootstrap'' sample $\{X_i^{(b)}\}$ from $\hat{F}_n$, i.e.,
+    \begin{equation*}
+      X_{1}^{(b)}, X_{2}^{(b)}, \dots, X_{n}^{(b)}
+      \overset{\mathrm{i.i.d}}{\sim} \hat{F}_n
+    \end{equation*}
+    and calculate $\hat{\theta}^{(b)} = \hat{\theta}(\{X_{1}^{(b)},
+    X_{2}^{(b)}, \dots, X_{n}^{(b)}\})$.
+  \item Independently repeat the above step $2$ for $b = 1, 2, \dots, B$, for some
+    sufficiently large $B$ to obtain $\hat{\theta}^{(1)},
+    \hat{\theta}^{(2)}, \dots, \hat{\theta}^{(b)}$.
+  \item Estimate $\sigma(\hat{\theta}, n, F)$ by
+      $\sqrt{\frac{1}{B-1} \sum_{b=1}^{B} (\hat{\theta}^{(b)} - \hat{\mu})^2}$
+    where $\hat{\mu} = \tfrac{1}{B} \sum_{b=1}^{B}
+    \hat{\theta}^{(b)}$ is just the sample mean of the
+    $\hat{\theta}^{(b)}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+      \begin{quotation}
+      {\emph Good} simple ideas, of which the bootstrap is a prime
+      example, are our most precious intellectual commodity, so there
+      is no need to apologize for the easy mathematical level.
+     \\ \hspace*\fill{\small--- Bradley Efron ``The Jacknife, the
+       Bootstrap and Other Resampling Plans''}
+   \end{quotation}
+\end{frame}
+
+\begin{frame}
+  If we could let $B$, the number of bootstrap replicates, be large,
+  then the above estimate for $\sigma(\hat{\theta}, n, F)$ would be
+  quite close to the true estimate for $\sigma(\hat{\theta}, n, F)$.
+
+  We can now use the idea of bootstrapping to estimate the variance of
+  the coefficients $\hat{\bm{\beta}}_{R}$ for robust regression.
+\end{frame}
+
+\begin{frame}
+  There are several ways of performing bootstrapping for
+  regression. Two of the most popular are residuals resampling and
+  case resampling.
+  \begin{enumerate}
+  \item If we assume $\mathbf{X}$ is fixed and non-random, and the only
+    randomness are in $\bm{\epsilon}$, then, using the
+    residuals $\bm{e}$ as a surrogate for $\bm{\epsilon}$, bootstrap 
+    by (uniform) sampling with replacement from the
+    $e_1, e_2, \dots, e_n$.
+
+  \item If we assume both $\mathbf{X}$ and $\bm{y}$ are 
+    random, then bootstrap by uniform sampling with
+    replacement from the $\{(\bm{x}_i, Y_i)\}$.
+
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  Let us consider a quick example of bootstrapping
+   <<bootstrap-example1, cache = TRUE, tidy = TRUE, size = 'tiny', echo = TRUE, fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+   X <- model.matrix( ~ 1 + temp, star)
+   ## MM-bounded influence extension to Huber robust regression.
+   g <- rlm(light ~ temp, data = star, method = "MM")    
+   bcoef <- matrix(0, 1000,2)
+   for(i in 1:1000){
+     newy <- predict(g) + residuals(g)[sample(length(star$temp),
+     replace = T)]
+     bbs <- rlm(newy ~ star$temp, method = "MM")
+     bcoef[i,] <- bbs$coef
+   }
+   sd(bcoef[,2])
+   quantile(bcoef[,2], probs = c(0.025, 0.975))
+   g
+   @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Summary of robust regression}
+  \begin{itemize}
+  \item Robust regressions provide protection against outliers or
+    non-normality of error terms $\epsilon$, but they do not
+    necessarily protects one model mis-specification (e.g., choice of
+    predictor variables) or correlated errors.
+  \item Inference for robust regressions are more involved. One can
+    estimate, for example $\hat{\bm{\beta}}$ and maybe their variances
+    for robust regression with $M$-estimation, but things such as
+    testing, confidence intervals are not direct. Bootstrapping is
+    thus a useful technique here.
+  \end{itemize}
+  \end{frame}
+  \begin{frame}
+    \begin{itemize}
+  \item Diagnostics for robust regressions are also less
+    straightforward. We can use robust
+    methods as a way of confirming that least squares regression is
+    appropriate, e.g., if the estimates for $\bm{\beta}$ via robust
+    regressions is ``close'' to that of least squares then we are more
+    confident. Another useful diagnostics is a residuals-residuals
+    plot wherein we plot the residuals
+    of least square regression against that of robust regression
+  \item Many other interesting things. But we
+    will bade goodbye and move on.
+  \end{itemize}
+\end{frame}
+
+\appendix
+\begin{frame}
+  \frametitle{Too much information, part 2: Bounded-influence regression}
+  We saw that $M$-estimation can be vunerable to
+  observations with high-leverage. This issue is circumvented using the class of
+  \emph{bounded-influence estimators} for regressions which has very high breakdown point
+  (near $0.5$).
+
+  Very high break-down estimators should be used only
+  when we have faith that the model we are fitting is correct, because
+  these estimates do not lend themselve readily to diagnosis of model
+  misspecification. Bounded-influence estimators, however, can serve
+  as good starting points for $M$-estimation.
+\end{frame}
+
+\begin{frame}
+  An example of a bounded-influence estimator is least median of
+  squares or LMS. LMS replaces the sum of squared residuals by the
+  median of the squared residuals, i.e., the estimate
+  $\hat{\bm{\beta}}_{LMS}$ of $\bm{\beta}$ is obtained by minimizing
+  \begin{equation*}
+    \mathrm{median}\{(y_1 - \bm{x}_{1}^{\top} \bm{b})^2, (y_{2} -
+    \bm{x}_{2}^{\top} \bm{b})^2, \cdots, (y_n - \bm{x}_{n}^{\top} \bm{b})^2\}
+  \end{equation*}
+
+  As the breakdown point of the median is almost $0.5$, the influence
+  of outliers on LMS are minimal.
+
+  \begin{quotation}
+   There seems no reason other than historical to use the 'lms' and
+     'lqs' options.  LMS estimation is of low efficiency (converging at
+     rate $n^{-1/3})$ whereas LTS has the same asymptotic efficiency as
+     an M estimator with trimming at the quartiles
+     \\ \hspace*\fill{\small--- From the documentation for lqs in R}
+   \end{quotation}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Least trimmed squares}
+  First order the squared residuals from smallest
+  to largest: $e^{2}_{(1)}, e^{2}_{(2)}, \dots, e^{2}_{(n)}$. The
+  least trimmed squares estimator chooses $\hat{\bm{\beta}}$ to minimize the sum of the
+  smallest $m$ of the squared residuals
+  \begin{equation*}
+    LTS(\bm{b}) = \sum_{i=1}^{m} e^{2}_{(i)}
+  \end{equation*}
+  $m$ is usally taken to be $\lfloor n/2 \rfloor + \lfloor (c+2)/2
+  \rfloor$ for some value $c$. That is to say, LTS trimmed away all
+  observations whole residuals exceed the $\lfloor n/2 \rfloor + \lfloor (c+2)/2
+  \rfloor$ smallest values.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<robust-example4, cache = TRUE, tidy = TRUE, size = 'tiny', echo = 1, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  phones.lts <- lqs(calls ~ year, phones)
+ plot(calls ~ year, data=phones)
+ abline(coef(phones.ls))
+ abline(coef(phones.m.huber), lty = 1, col = 2)
+ abline(coef(phones.m.tukey), lty = 1, col = 3)
+  abline(coef(phones.lts), lty = 1, col = 4)
+ legend("topleft", lty = 1, col = 1:4, legend = c("LS", "Huber", "Bisquare", "LTS"))
+ @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<robust-example5b, cache = TRUE, tidy = TRUE, size = 'tiny', echo = 1, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+ data(star)
+ plot(light ~ temp, star)
+ gs1 <- lm(light ~ temp, star)
+ abline(coef(gs1))
+ gs2 <- rlm(light ~ temp, star)
+ abline(coef(gs2), col = 2)
+ gs3 <- lqs(light ~ temp, star)
+ abline(coef(gs3), col = 3)
+ gs4 <- rlm(light ~ temp, star, psi = psi.bisquare)
+ abline(coef(gs4), col = 4)
+  legend("topright", lty = 1, col = 1:4, legend = c("LS", "Huber", "LTS", "Bisquare"))
+ @
+ We revisit the \textrm{star} dataset. Here least trimmed square
+captured the trend in the main group of points and ignored the group
+of outliers and influential points win the top-left corner.
+\end{frame}
+
+\begin{frame}
+  \frametitle{$MM$-estimation}
+  We can combine the bounded-influence method of regression with
+  the general $M$-estimation for robust regression to get what is
+  known as $MM$-estimation. The $MM$-estimation procedure is outlined
+  as follows.
+
+  \begin{enumerate}
+  \item We first estimate the coefficients
+    $\hat{\bm{\beta}}_{R}^{(1)}$ and corresponding residuals
+    $\bm{e}^{(1)}$ via some highly resistant robust regression, e.g.,
+    least trimmed squares (LTS).
+ \item Perform weighted least squares based on
+    the residuals $\bm{e}^{(1)}$ where the weights are given by Huber
+    of Tukey bi-square, i.e., update $\hat{\bm{\beta}}_{R}^{(1)}$ to
+    get $\hat{\bm{\beta}}^{(2)}$ via solving
+    \begin{equation*}
+      \argmin_{\bm{b}}
+      \sum_{i=1}^{n} \psi(e_{i}^{(1)})/e_{i}^{(1)} (y_i -
+      \bm{x}_{i}^{\top} \bm{b}) \bm{x}_{i} = \bm{0}
+    \end{equation*}
+  \end{enumerate}
+
+\end{frame}
+
+\begin{frame}[fragile]
+   $MM$-estimation generally has a high breakdown
+  point due to bounded influence estimation along with higher
+  efficiency/smaller variability due to $M$-estimation.
+  
+   <<robust-example6, cache = TRUE, tidy = TRUE, size = 'tiny', echo = 1:2, warning = FALSE, dependson = 'robust-example2', fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+   data(star)
+   plot(light ~ temp, star)
+   gs1 <- lm(light ~ temp, star)
+   abline(coef(gs1))
+   gs2 <- rlm(light ~ temp, star)
+   abline(coef(gs2), col = 2)
+   gs3 <- rlm(light ~ temp, star, psi = psi.bisquare)
+   abline(coef(gs3), col = 3)
+   gs4 <- rlm(light ~ temp, star, psi = psi.bisquare, method = "MM")
+   abline(coef(gs4), col = 4)
+   legend("topright", lty = 1, col = 1:4, legend = c("LS", "Huber", "Tukey Bisquare", "Tukey Bisquare with MM"))
+
+   @
 \end{frame}
 
 \end{document}

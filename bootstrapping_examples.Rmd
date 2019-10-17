@@ -1,0 +1,234 @@
+---
+title: "Bootstrapping basics"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+header-includes: \usepackage{bm}
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(digits=3)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+### Example 1: Parametric bootstrapping
+
+```{r}
+library(boot)
+data(aircondit)
+aircondit
+```
+The *aircondit* data frame reported $n = 12$ times between failures of the air-conditioning equipment in several Boeing 720 aircrafts. We wish to estimate the underlying mean time to next failure. A simple model for this problem is that the times are sampled from an exponential distribution
+$$ f(x; \lambda) = \begin{cases} \lambda e^{- \lambda x} & \text{if $x \geq 0$} \\ 0 & \text{if $x < 0$} \end{cases} $$
+The parameter $\lambda$ is the *failure rate* and $\theta = 1/\lambda$ is the mean time to the next failure. 
+```{r fig.show='hold', out.width='50%'}
+x <- seq(from = 0, to = 10, by = 0.01)
+plot(x, dexp(x, rate = 2), type = "l", main = "PDF of exponential distribution with mean 0.5")
+plot(x, pexp(x, rate = 2), type = "l", main = "CDF of exponential distribution with mean 0.5")
+```
+
+Fitting an exponential distribution (via maximume likelihood estimation) to the *aircondit* dataset yield $\widehat{\theta} = \bar{Y} = `r round( mean(aircondit$hours),3)`$. 
+```{r, fig.show='hold',out.width='48%'}
+n <- 12
+plot(aircondit$hours, (1:n)/n, type = 's', ylim = c(0, 1), xlab = 'Failure times', 
+     ylab = 'CDF', main = 'Empirical vs Estimated Cumulative Distribution')
+
+xseq <- seq(from = min(aircondit$hours), to = max(aircondit$hours), by = 1)
+lines(xseq, pexp(xseq, rate = 1/mean(aircondit$hours)), col = "blue")
+qqplot(qexp(ppoints(50),rate = 1/mean(aircondit$hours)),aircondit$hours,
+       xlab = "Empirical Quantiles", ylab = "Theoretical Quantiles")
+qqline(aircondit$hours, distribution = function(p) qexp(p, rate = 1/mean(aircondit$hours)), col = "blue")
+```
+
+Suppose now we want a $95\%$ confidence interval for $\widehat{\theta}$. 
+```{r}
+nmc <- 1000
+n <- 12
+bvec <- numeric(nmc)
+hat.theta <- mean(aircondit$hours)
+for(i in 1:nmc){
+  hours.i <- rexp(n, 1/hat.theta)
+  bvec[i] <- mean(hours.i)
+}
+quantile(bvec,probs = c(0.025,0.975))
+```
+
+### Example 2: nonparametric bootstrapping
+```{r}
+library(boot)
+data(bigcity)
+head(bigcity, n = 10)
+plot(u ~ x, bigcity)
+```
+
+The *bigcity* data frame records the population (in 1000's) of $49$ U.S. cities in $1920$ and $1930$. 
+The $49$ cities are a random sample taken from the $196$ largest cities in the U.S. in 1920. 
+If we assume the cities form a random sample $(U,X)$, then we are interested in the parameter $\theta = \mathbb{E}[X]/\mathbb{E}[U]$ --- the ratio of the means --- as this would enable us to estimate the total population in the U.S. in $1930$ from the $1920$ figure. 
+
+A natural estimate of $\theta$ is $\widehat{\theta} = \bar{X}/\bar{U} = `r round(mean(bigcity$x),3)`/`r round(mean(bigcity$u),3)` \approx `r round(mean(bigcity$x)/mean(bigcity$u),3)`$. We would like to get an estimate of $\mathrm{Var}[\widehat{\theta}]$. In contrast to the *aircondit* dataset in Example 1, it is not clear what parametric model one can assume for the joint distribution of $(U,X)$. We therefore resort to a non-parametric bootstrap estimate for $\mathrm{Var}[\widehat{\theta}]$.
+
+```{r out1.chunk}
+n <- nrow(bigcity)
+nmc <- 1000
+theta.vec <- numeric(nmc)
+for(i in 1:nmc){
+  idx.i <- sample(1:n, replace = TRUE)
+  theta.vec[i] <- mean(bigcity$x[idx.i])/mean(bigcity$u[idx.i])
+}
+estimated.var <- var(theta.vec)
+```
+The non-parametric bootstrap estimate yield $\widehat{\mathrm{Var}}[\widehat{\theta}] = 
+`r round(var(theta.vec),4)`$ and a $95\%$ confidence interval for $\widehat{\theta}$ of $(`r round(quantile(theta.vec, probs = c(0.025)),3)`, `r round(quantile(theta.vec, probs = c(0.975)),3)`)$. 
+
+### Example 3: Testing of differences
+```{r}
+library(boot)
+data(darwin)
+darwin
+```
+The *darwin* data frame contains $15$ observations from an experiment by Charles Darwin to examine the superiority of cross-fertilized plants over self-fertilized plants. Each observation consisted of one cross-fertilized plant and one self-fertilized plant which germinated at the same time and grew in the same pot. The plants were measured at a fixed time after planting and the difference in heights between the cross- and self-fertilized plants are recorded in eighths of an inch. We are interested in testing the null hypothesis of no treatment difference between cross-fertilized plants over self-fertilized plants. 
+Vieweing the $Y_i$ as i.i.d. $F$ for some symmetric distribution $F$, 
+this can be formulated as testing the null hypothesis $\mathbb{H}_0 \colon \mu_F = 0$ against the alternative hypothesis that $\mathbb{H}_1 \colon \mu_F > 0$. We emphasize that no parametric assumption is made regarding $F$, other than that it is symmetric around $0$. 
+
+A reasonable test statistic is then $T = \bar{Y}$. For this dataset, $T = `r round(mean(darwin$y),3)`$. 
+To obtain the critical value for $T$ under $\mathbb{H}_0$, 
+we can think of "permuting"/"swapping" the label of the plants from a single observation. More specifically
+
+```{r}
+nmc <- 1000
+T <- mean(darwin$y)
+n <- length(darwin$y)
+T.vec <- numeric(nmc)
+for(i in 1:nmc){
+  labels.i <- rbinom(n,1,0.5)*2 - 1
+  T.vec[i] <- mean(labels.i*darwin$y)
+}
+cv <- quantile(T.vec, probs = c(0.95,0.99))
+cv
+```
+Thus, for this problem, we will reject the null hypothesis $\mathbb{H}_0$ at significance level $\alpha = 0.05$ and conclude that there is some evidence that there is a positive difference between cross-fertilized and self-fertilized plants. 
+
+### Example 4: Correlation test
+```{r}
+library(boot)
+data(claridge)
+head(claridge, n = 15)
+plot(hand ~ dnan, claridge)
+```
+
+The *claridge* data frame contains observations from an experiment designed to look for a relationship between certain genetic characteristic and left-handedness. $37$ subjects (mother with children) were enrolled in the study, and for each mother, a genetic measurement of their DNA was made. Larger values of this measurement are hypothesized to be linked to a progressive shift away from right-handednessas measured in a scale rangin from $1$ (always favouring the right hand) to $8$ (always favoring the left hand). Suppose we are interested in determining whether such a link exist. Denoting each observation as a sample from a random pair $(U,X)$, we formulate this as a test of the null hypothesis $\mathbb{H}_0 \colon \text{$U$ and $X$ are independent}$ against the alternative hypothesis that $\mathbb{H}_1 \colon \text{$U$ is larger as $X$ increases}$.
+
+A reasonable test statistic for this problem is then the sample Pearson correlation 
+$$\widehat{\rho} = \frac{\sum_{i=1}^{n} (U_i - \bar{U}) (X_i - \bar{X})}{\sqrt{
+\sum_{i=1}^{n} (U_i - \bar{U})^2}\sqrt{
+\sum_{i=1}^{n} (X_i - \bar{X}})^2} \approx `r round(cor(claridge)[1,2],3)`$$
+If the pair $(U,X)$ is bivariate normal with correlation $\rho$, then $\sqrt{n}(\widehat{\rho} - \rho)$ is asymptotically normally distributed with mean $0$ and variance $(1 - \rho^2)^2$. However, for the *claridge* data, we see that the assumption of bivariate normality for $(U,X)$ is untenable.
+
+We resort to a permutation test. We can think of permuting the labels of the $U_i$ while keeping the labels of the $X_i$ fixed. If the null hypothesis is true, i.e., that $U$ and $X$ are independent, then permuting the labels of the $U_i$ will still preserve the independence. More specifically,
+```{r}
+n <- nrow(claridge)
+nmc <- 4000
+rho.vec <- numeric(nmc)
+for(i in 1:nmc){
+  idx.i <- sample(1:n)
+  rho.vec[i] <- cor(claridge$dnan[idx.i],claridge$hand)
+}
+hist(rho.vec,main = "Histogram of bootstrapped correlation estimates")
+cv <- quantile(rho.vec,probs=c(0.95,0.99))
+cv
+```
+Thus, for this problem, we will reject the null hypothesis at significance level $\alpha = 0.01$ and conclude that there is strong evidence that larger value of $U$ is associated with larger value of $X$. 
+
+### Example 5: Bootstrap estimate of the median
+```{r}
+set.seed(123)
+n <- 30000
+X <- rnorm(n)
+nmc <- 10000
+med.vec <- numeric(nmc)
+for(i in 1:nmc){
+  idx.i <- sample(1:n, replace = TRUE)
+  med.vec[i] <- median(X[idx.i])
+}
+var.median <- var(med.vec)
+n*var.median ## Theoretical value in this case is pi/2 \approx 1.571
+```
+
+### Example 6: Bootstrapping regression
+```{r}
+library(MASS)
+library(car)
+data(Duncan)
+mod.duncan <- rlm(prestige ~ income + education, data = Duncan)
+summary(mod.duncan)
+```
+
+We now consider bootstrapping using cases-resampling
+```{r}
+boot.huber <- function(data, indices, maxit = 20){
+dat.i <- data[indices,]
+mod <- rlm(prestige ~ income + education, dat.i, maxit = maxit)
+coefficients(mod)
+}
+duncan.boot <- boot(Duncan, boot.huber, 999, maxit = 100)
+duncan.boot
+plot(duncan.boot, index = 2)
+plot(duncan.boot, index = 3)
+dataEllipse(duncan.boot$t[,2], duncan.boot$t[,3], xlab="income coefficient", 
+             ylab="education coefficient", cex=.3, levels=c(.5, .95, .99), robust=T)
+```
+
+We next consider bootstrapping using fixed-$x$-resampling
+```{r}
+fit <- fitted(mod.duncan)
+e <- residuals(mod.duncan)
+X <- model.matrix(mod.duncan)
+boot.huber.fixed <- function(data, indices, maxit=20){
+y <- fit + e[indices]
+mod <- rlm(y ~ X - 1, maxit=maxit) 
+coefficients(mod)
+}
+duncan.fix.boot <- boot(Duncan, boot.huber.fixed, 1999, maxit=100) 
+duncan.fix.boot
+plot(duncan.boot, index = 2)
+plot(duncan.boot, index = 3)
+dataEllipse(duncan.boot$t[,2], duncan.boot$t[,3], xlab="income coefficient", 
+             ylab="education coefficient", cex=.3, levels=c(.5, .95, .99), robust=T)
+```
+
+We are now interested in testing say the null hypothesis $\mathbb{H}_0 \colon \beta_1 = \beta_2$ agains the alternative hypothesis that $\mathbb{H}_1 \colon \beta_1 \not = \beta_2$. 
+```{r}
+b <- coefficients(mod.duncan)
+sumry <- summary(mod.duncan)
+V <- sumry$cov.unscaled * sumry$stddev^2
+L <- c(0,1,-1)
+b1 <- b[2] - b[3]
+(t <- b1/sqrt(L %*% V %*% L)) ## Test statistic from the fitted model
+## Now let us bootstrap
+boot.test <- function(data, indices, maxit=20){
+  data <- data[indices,]
+  mod <- rlm(prestige ~ income + education, data=data, maxit=maxit)
+  sumry <- summary(mod)
+  V.star <- sumry$cov.unscaled * sumry$stddev^2
+  b.star <- coefficients(mod)
+  b1.star <- b.star[2] - b.star[3]
+  ## Be careful here, we have to properly pivot our test statistic.
+  t <- (b1.star - b1)/sqrt(L %*% V.star %*% L) 
+  t
+}
+duncan.test.boot <- boot(Duncan, boot.test, 999, maxit=100) 
+summary(duncan.test.boot$t)
+
+
+hist(duncan.test.boot$t, breaks=50)
+box()
+abline(v=t, lwd=3)
+
+2*pnorm(t, lower.tail = FALSE) ## p-value under asymptotic limiting theory
+2*(1 + sum(duncan.test.boot$t > as.vector(t)))/1000 ## Bootstrapped p-value
+```
+
