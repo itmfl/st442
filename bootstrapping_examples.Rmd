@@ -14,6 +14,22 @@ knitr::opts_chunk$set(digits=3)
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
+### Example 0: Bootstrapping $\mathrm{Var}[\bar{X}]$.
+```{r cache = TRUE}
+n <- 100
+X <- rnorm(n, mean = 1, sd = 1) ## Standard deviation of \bar{X} is 1/sqrt(n)
+B <- 1000
+Xbar.bootstrap <- numeric(B)
+for(b in 1:B){
+  Xb <- X[sample(1:n,n,replace = TRUE)]
+  Xbar.bootstrap[b] <- mean(Xb)
+}
+## Equivalently
+## Xbar.bootstrap <- sapply(1:B, function() mean(X[sample(n,n,replace = TRUE)]))
+sd.Xbar <- sd(Xbar.bootstrap)
+sd.Xbar
+```
+
 
 ### Example 1: Parametric bootstrapping
 
@@ -39,18 +55,18 @@ plot(aircondit$hours, (1:n)/n, type = 's', ylim = c(0, 1), xlab = 'Failure times
 
 xseq <- seq(from = min(aircondit$hours), to = max(aircondit$hours), by = 1)
 lines(xseq, pexp(xseq, rate = 1/mean(aircondit$hours)), col = "blue")
-qqplot(qexp(ppoints(50),rate = 1/mean(aircondit$hours)),aircondit$hours,
+qqplot(aircondit$hours,qexp(ppoints(50),rate = 1/mean(aircondit$hours)),
        xlab = "Empirical Quantiles", ylab = "Theoretical Quantiles")
 qqline(aircondit$hours, distribution = function(p) qexp(p, rate = 1/mean(aircondit$hours)), col = "blue")
 ```
 
 Suppose now we want a $95\%$ confidence interval for $\widehat{\theta}$. 
-```{r}
-nmc <- 1000
+```{r cache = TRUE}
+B <- 1000
 n <- 12
-bvec <- numeric(nmc)
+bvec <- numeric(B)
 hat.theta <- mean(aircondit$hours)
-for(i in 1:nmc){
+for(i in 1:B){
   hours.i <- rexp(n, 1/hat.theta)
   bvec[i] <- mean(hours.i)
 }
@@ -144,9 +160,31 @@ cv
 Thus, for this problem, we will reject the null hypothesis at significance level $\alpha = 0.01$ and conclude that there is strong evidence that larger value of $U$ is associated with larger value of $X$. 
 
 ### Example 5: Bootstrap estimate of the median
-```{r}
+```{r cache = TRUE}
 set.seed(123)
-n <- 30000
+n <- 300
+X <- rnorm(n)
+nmc <- 10000
+med.vec <- numeric(nmc)
+for(i in 1:nmc){
+  idx.i <- sample(1:n, replace = TRUE)
+  med.vec[i] <- median(X[idx.i])
+}
+var.median <- var(med.vec)
+n*var.median ## Theoretical value in this case is pi/2 \approx 1.571
+
+n <- 3000
+X <- rnorm(n)
+nmc <- 10000
+med.vec <- numeric(nmc)
+for(i in 1:nmc){
+  idx.i <- sample(1:n, replace = TRUE)
+  med.vec[i] <- median(X[idx.i])
+}
+var.median <- var(med.vec)
+n*var.median ## Theoretical value in this case is pi/2 \approx 1.571
+
+n <- 10000
 X <- rnorm(n)
 nmc <- 10000
 med.vec <- numeric(nmc)
