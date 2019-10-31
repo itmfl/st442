@@ -455,6 +455,209 @@ that there exists \alert{simple} and yet universally consistent classification r
   error in the limit and no classification rule can do
   better than $k$-NN (in the limit).
 \end{frame}
+
+\begin{frame}
+  \frametitle{Kernel rule}
+  There are other universally consistent classification rules. In
+  particular, the kernel rule
+      $$g_n(x) = \begin{cases} 1 & \text{if $\sum_{i} K(\tfrac{\|x - X_i\|}{h})
+          \mathbb{I}(Y_i = 1) \geq \sum_{i} K(\tfrac{\|x - X_i\|}{h})
+          \mathbb{I}(Y_i = 0)$} \\
+        0 & \text{otherwise} \end{cases} $$
+      is universally consistent when the kernel
+      function $K$ is \alert{regular} and that $h \rightarrow 0$ and $n h^{d}
+      \rightarrow \infty$ as $n \rightarrow \infty$. 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Limitations of $k$-NN}
+  $k$-NN has many advantages, including the fact that no training is necessary.
+  There are, however, two main limitations of $k$-NN, namely (1) computational
+  cost and (2) curse of dimensionality.
   
+  Given $\mathcal{D}_n$, the computational time to classify a new data point
+  is, naively, $O(\min\{nK, n \log{n}\})$. There are numerous
+  classifiers that only require $O(1)$ time to classify new data.
+  
+  The curse of dimensionality is that as the dimension $d$ of the
+  feature vectors increase, the distance to the $k$-NN (for fixed
+  $k$), can also increase, and so the $k$-NN points are now ``far away''.
+\end{frame}
+
+\begin{frame}
+  More specifically, suppose $X$ is uniformly distributed inside
+  a unit cube $[0,1]^{d}$. Let $f > 0$ be arbitrary. Then any cube $A$ such that $\mathrm{pr}(X
+  \in A) = f$, i.e., $\mathrm{Vol}(A) = f$, will have axis length
+  $f^{1/d}$. As $d \rightarrow \infty$, $f^{1/d} \rightarrow 1$ and so
+  almost all points in $A$ are ``near the boundary'' of the cube.  
+  
+  While this sounds ominous, $X$ is rarely, if ever, uniformly
+  distributed in high-dimensional space. Nevertheless, there are many
+  situations in which finite-sample performance of $k$-NN
+  performance in high-dimension is problematic.
+\end{frame}
+
+\begin{frame}
+   <<figure_curse, echo = FALSE, fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
+  knitr::include_graphics("figures/curse_dimension.png")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{$k$-NN in R}
+    <<knn-example1, echo = TRUE, size = 'tiny', fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
+  library(ISLR)
+  data(Smarket)
+  tibble::as_tibble(Smarket)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+    <<knn-example2, echo = TRUE, size = 'tiny', fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
+  ## Set aside 60 percent of the data as training
+  library(class)
+  train.idx <- sample(1:nrow(Smarket), round(0.6*nrow(Smarket)))   
+  train.X <- cbind(Smarket$Lag1, Smarket$Lag2)[train.idx,] 
+  test.X <- cbind(Smarket$Lag1, Smarket$Lag2)[-train.idx,] 
+  train.Y <- Smarket$Direction[train.idx]
+  test.Y <- Smarket$Direct[-train.idx]
+  knn.pred <- knn(train.X, test.X, train.Y, k = 1)
+  table(knn.pred, test.Y) ## Confusion matrix
+  zz <- table(knn.pred, test.Y)
+  err.rate = (zz[1,2] + zz[2,1])/sum(zz)
+  err.rate
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<knn-example3, echo = TRUE, size = 'tiny', tidy = FALSE, fig.cap = "From Hastie et al. (1996)", out.width = "0.6\\linewidth">>=
+  kseq <- seq(from = 1, to = 51, by = 2)
+  error.vec <- numeric(length(kseq))
+
+  for(i in 1:length(kseq)){
+    knn.pred <- knn(train.X, test.X, train.Y, k = kseq[i])
+    zz <- table(knn.pred, test.Y)
+    error.vec[i] = (zz[1,2] + zz[2,1])/sum(zz)
+  }
+  plot(kseq, error.vec, xlab = "k", ylab = "mis-classification rate")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Arbitrary slow rate of convergence}
+  We see that there exists classifier rules $\{g_n \colon n \geq 1\}$ that are universally
+  consistent, i.e., $\lim_{n \rightarrow \infty} L(g_n) = L^{*}$
+  for all distribution $F_{XY}$. 
+  
+  A natural question is whether there
+  exists a classifier rule $\{g_n \colon n \geq 1\}$ such that $L(g_n)
+  - L^{*}$ converges to $0$ at a particular rate, say $1/\sqrt{n}$,
+  uniformly over all $F_{XY}$, e.g., there exists a positive integer $n_0$ such that
+  for all $n \geq n_0$,
+  $$\max_{F_{XY}} |L(g_n) - L^{*}| \leq n^{-1/2}$$
+\end{frame}
+
+\begin{frame}
+  The answer turns out to be sadly no. 
+  \begin{theorem}[Theorem 7.1 of Devroye, Gyorfi and Lugosi (1996)]
+    Let $\epsilon > 0$ be arbitrary. Then for any integer $n$ and
+    classification rule $\{g_n \colon n \geq 1\}$, there exists a
+    distribution of $(X, Y)$ with $L^{*} = 0$ such that
+    $$\mathbb{E}L(g_n) \geq 1/2 - \epsilon$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  \begin{theorem}[Theorem 7.2 of Devroye, Gyorfi and Lugosi (1996)]
+    Let $\{a_n \colon n \geq 1\}$ be any sequence of positive numbers
+    converging to zero with $1/16 \geq a_1 \geq a_2 \geq \dots$. Then
+    for any classification rule $\{g_n \colon n \geq 1\}$ there exists
+    a distribution of $(X, Y)$ with $L^{*} = 0$ such that
+    $$\mathbb{E} L(g_n) \geq a_n$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  \begin{theorem}
+    For every $n$, for any estimate $\widehat{L}_n$ of the Bayes error
+    probability $L^{*}$, and for every $\epsilon > 0$, there exists a
+    distribution of $(X, Y)$ such that
+    $$\mathbb{E}[|\widehat{L}_n - L^{*}|] \geq \frac{1}{4} - \epsilon $$
+  \end{theorem}
+  We can't even estimate the Bayes error!
+\end{frame}
+
+
+ \begin{frame}
+   We sketch here a proof of Theorem 7.1 of DGL. 
+   The other results are beyond the scope of this
+   class. 
+  
+   Let $X$ be uniformly distributed on $\{1,2,\dots,K\}$ (for some
+   $K$ to be specified later) and let the joint distribution of
+   $(X,Y)$ be parametrized by a number $b \in [0,1)$, i.e., every $b
+   \in [0,1)$ defines a $F_{XY}$ as follows. Let $b$ have binary
+   expansion $b = 0.b_0b_1b_2\dots$ and let $Y = b_X$. As $Y$ is a
+   function of $X$, $L^{*} = 0$. 
+  
+   For any classifier $g_n$, let $R_n(b) = \mathbb{E}_b[L(g_n)]$, i.e.,
+   $R_n(b)$ is the average error of $g_n$ when $F_{XY} = b$. Then
+   $$\max_{b \in [0,1)} R_n(b) \geq \mathbb{E}[R_n(B)]$$
+   where $B$ is random variable uniformly distributed on $[0,1]$.
+ \end{frame}
+
+\begin{frame}
+  Now let $\mathcal{D}_n = \{(X_i, Y_i)\}_{i=1}^{n}$ be given and
+  let $B$ be \alert{independent} of $X$
+  and $X_1, X_2, \dots, X_n$. As $B$ is uniformly distributed in
+  $[0,1)$, its binary expansion $B = 0.B_0 B_1 B_2 \dots$ is a sequence of independent
+  random variables with $\mathrm{pr}(B_i = 0) = \mathrm{pr}(B_i = 1) =
+  0.5$. Furthermore
+  
+  \begin{equation*}
+    \begin{split} \mathbb{E}[R_n(B)] & = \mathrm{pr}(g_n(X; \mathcal{D}_n) \not = Y) =
+  \mathrm{pr}(g_n(X; \mathcal{D}_n) \not = B_X) 
+  \\ &= \mathrm{pr}(g_n(X; X_1, B_{X_1}, \dots, X_n, B_{X_n}) \not =
+  B_X) \\ & \geq \frac{1}{2} \mathrm{pr}(X \not = X_1, X \not = X_2, \dots,
+  X \not = X_n) \\ &= 
+  \frac{1}{2} \prod_{i=1}^{n} \mathrm{pr}(X \not = X_i) 
+  = \frac{1}{2} \mathrm{pr}(X \not = X_1)^{n} = \frac{1}{2}(1 - 1/K)^{n} 
+  \end{split}
+  \end{equation*}
+  For a fix given $n$, we can now choose $K$ sufficiently large such
+  that $\frac{1}{2}(1 - 1/K)^{n} \geq 1/2 - \epsilon$, as desired.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Classification is easier than regression}
+  Recall that the Bayes classifier is given by $g^{*}(x) =
+  \mathbb{I}(\eta(x) > 1/2)$ where $\eta(x) \mathrm{pr}(Y = 1 \mid X =
+  x)$. We could thus try to estimate $\eta(x)$ via some function
+  $\eta_n(x)$ (as done for example in $k$-NN) and then use the
+  plugin classifier $g_n(x) = \mathbb{I}(\eta_n(x) > 1/2)$. The
+  following result indicate that this will generally lead to wasted
+  effort. 
+\end{frame}
+
+\begin{frame}
+  \begin{theorem}
+    Let $\eta_n$ be a consistent regression estimate, i.e.,
+    $$\lim_{n \rightarrow \infty} \mathbb{E}[(\eta_n(X) - \eta(X))^2]
+    = 0$$
+    Then the plugin-classifier $g_n(x) = \mathbb{I}(\eta_n(x) > 1/2)$ satisfies
+    $$ \lim_{n \rightarrow \infty} \frac{\mathbb{E}[L(g_n)] -
+      L^{*}}{\sqrt{\mathbb{E}[(\eta_n(X) - \eta(X))^2]}} = 0$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  <<figure1, echo = FALSE, fig.cap = "From Devroye, Gyorfi and Lugosi (1996)", out.width = "0.8\\linewidth">>=
+  knitr::include_graphics("figures/regression_classification.png")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Choosing a classifier (part 1): Empirical risk mininimization}
+\end{frame}
 
 \end{document}
