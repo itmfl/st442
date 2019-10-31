@@ -1,0 +1,460 @@
+\documentclass{beamer}
+\usepackage{etex}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=green}
+\usetheme[]{metropolis}
+%\useoutertheme{metropolis}
+%\useinnertheme{metropolis}
+%\usefonttheme{metropolis}
+%\usecolortheme{rose}
+\usefonttheme{professionalfonts} % required for mathspec
+\usepackage{mathspec}
+\setsansfont[BoldFont={Fira Sans},
+Numbers={OldStyle}]{Fira Sans Light}
+\setmathsfont(Digits)[Numbers={Lining, Proportional}]{Fira
+Sans Light} 
+
+%\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{longtable}
+%\usepackage[all]{xy}
+\usepackage{parskip}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,minimum height=2em]
+    
+\newtheorem{question}[theorem]{Question}
+\newtheorem{openquestion}[theorem]{Open Question}
+\newtheorem{proposition}{Proposition}
+\setbeamercolor{question title}{bg = red}
+\setbeamercolor{block body question}{bg=blue!60}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+<<setup, include=FALSE>>=
+# the default output hook
+ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6, tibble.max_extra_cols = 10)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$out.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(head(x,lines[1]), more, tail(x,lines[2]))
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+knit_hooks$set(document = function(x) {
+  gsub('\\\\(begin|end)\\{kframe\\}', '', x)
+})
+
+inline_hook <- function (x) {
+  if (is.numeric(x)) {
+    # ifelse does a vectorized comparison
+    # If integer, print without decimal; otherwise print two places
+    res <- ifelse(x == round(x),
+      sprintf("%d", x),
+      sprintf("%.3f", x)
+    )
+    paste(res, collapse = ", ")
+  }
+}
+
+knit_hooks$set(inline = inline_hook)
+
+# smaller font size for chunks
+opts_chunk$set(size = 'footnotesize')
+@ 
+
+\begin{document}
+\title{CSC/ST 442: Introduction to Data Science}
+\subtitle{Classification, an opionated survey}
+  \institute[]{
+Department of Statistics, North Carolina State University.
+}
+\date{}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+  \frametitle{From the internet}
+
+Q. How many data scientists does it takes to change a LED light bulb ?
+
+A. Only one, but they need a billion training examples.
+
+Q. How many data scientists does it takes to change a halogen light
+bulb ?
+
+A. ERROR!! That was not in the training data.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Classification: Setup}
+  Let $(x, y)$ be a data point with $x \in \mathbb{R}^{d}$ and $y \in \{0,1\}$. A classifier is a
+  rule/function $g(x) \colon \mathbb{R}^{d} \mapsto \{0,1\}$ which
+  represents one's guess of $y$ given an observed $x$. The classifier
+  errs on $x$ if $g(x) \not = y$.
+  
+  For example $x$ could be a vector of weather data and $y$ is $0$ (no
+  storm brewing) and $1$ (storm brewing), or $x$ could be
+  electrocardiogram time series and $y$ is $0$ (low risk for heart
+  attack) and $1$ (high risk for heart attack)
+\end{frame}
+
+\begin{frame}
+  In many settings, $x$ is not sufficiently detailed to uniquely
+  determine $y$. For example, if $x$ is water content in a person
+  body, then $y = 0$ (low water intake) and $y = 1$ (cholera) are
+  both possible. 
+  
+  Thus we introduce a probabilistic setting and assume
+  that $(x,y)$ is the realization of a random variable $(X, Y)$ with
+  (join) distribution $F_{XY}$. An error occurs if $g(X) \not = Y$ and
+  the probability of error for a classifier $g$ is
+  $$L(g) = \mathrm{pr}(g(X) \not = Y)$$
+  
+  Q. Does there exists a classifier $g^{*}$ such that
+  $$L(g^{*}) = \mathrm{pr}(g^{*}(X) \not = Y) = \argmin_{g \colon
+    \mathbb{R}^{d} \mapsto \{0,1\}} \mathrm{pr}(g(X) \not = Y)?$$
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Down by the Bayes}
+  Let $(X, Y)$ be a pair of random variables with $X \in
+  \mathbb{R}^{d}$ and $Y \in \{0,1\}$. Let $F_{XY}$ be the joint
+  distribution of $(X, Y)$.
+  
+  For any $x \in \mathbb{R}^{d}$, define
+  $$\eta(x) = \mathrm{pr}(Y = 1 \mid X = x) = \mathbb{E}[Y \mid X = x].$$
+  
+  Using $\eta$, define the \alert{Bayes decision function}
+  $$g^{*}(x) = \begin{cases} 1 & \text{if $\eta(x) > 1/2$} \\
+    0 & \text{if $\eta(x) \leq 1/2$} 
+    \end{cases}$$
+ \end{frame}
+\begin{frame} 
+    \begin{theorem}
+      For any decision function $g \colon \mathbb{R}^{d} \mapsto \{0,1\}$
+      $$\mathrm{pr}(g^{*}(X) \not = Y) \leq \mathrm{pr}(g(X) \not = Y),$$
+      i.e., $g^{*}$ is the optimal decision.
+    \end{theorem}
+    
+    {\bf Proof}: For any classifier $g$, given $X = x$
+    \begin{equation*}
+      \begin{split} & \mathrm{pr}(g(X) \not = Y \mid  X = x) \\ &= 1 - \mathrm{pr}(Y = g(X)
+    \mid X = x) \\
+    &= 1 - \mathrm{pr}(Y = 1, g(x) = 1 \mid X = x) - \mathrm{pr}(Y =
+    0, g(x) = 0 \mid X = x) \\
+    &= 1 - \mathbb{I}(g(x) = 1) \mathrm{pr}(Y = 1 \mid X = x) -
+    \mathbb{I}(g(x) = 0) \mathrm{pr}(Y = 0 \mid X = x) \\
+    &= 1 - \mathbb{I}(g(x) = 1) \eta(x) - \mathbb{I}(g(x) = 0) (1 - \eta(x))
+    \end{split}
+    \end{equation*}
+    where $\mathbb{I}$ is the indicator function.
+\end{frame}
+
+\begin{frame}
+  Thus, for every $x$
+  \begin{equation*}
+    \begin{split} & \mathbb{P}(g(X) \not = Y \mid X = x) - \mathbb{P}(g^{*}(X) \not =
+  Y \mid X = x) \\
+  &= \eta(x)(\mathbb{I}(g^{*}(x) = 1) - \mathbb{I}(g(x) = 1)) \\ &+ (1 -
+ \eta(x))(\mathbb{I}(g^{*}(x) = 0) - \mathbb{I}(g(x) = 0)) \\
+ &= (2 \eta(x) - 1) (\mathbb{I}(g^{*}(x) = 1) - \mathbb{I}(g(x) = 1))
+ \geq 0
+  \end{split}
+  \end{equation*}
+  by the definition of $g^{*}$. As this holds for every $x$, the
+  result follows by integrating both sides with respect to $F_X$. 
+  
+  {\bf Note:} The previous derivation also implies
+  \begin{equation*}
+    \begin{split} L(g^{*}) &= 1 - \mathbb{E}[\mathbb{I}(\eta(X) > 1/2)
+  \eta(X) + \mathbb{I}(\eta(X) \leq 1/2) (1 - \eta(X))] \\ &=
+  \mathbb{E}[\min\{\eta(X), 1 -
+  \eta(X)\}] \end{split} \end{equation*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Bayes example: multivariate normal}
+  Let $(X, Y)$ be jointly distributed such that
+  \begin{itemize}
+    \item $\mathrm{pr}(Y = 0) = \pi_0$, $\mathrm{pr}(Y = 1) = \pi_1$,
+      $\pi_0 + \pi_1 = 1$. 
+    \item Given $Y = i$, $X$ is multivariate normal with mean $\mu_i$
+      and \alert{invertible} covariance matrix $\Sigma_i$.
+  \end{itemize}
+  
+  Then $\eta(x)$ satisfies
+  \begin{equation*}
+    \begin{split} \eta(x) &= \mathrm{pr}(Y = 1 \mid X = x) \\ &= \frac{\mathrm{pr}(Y = 1,
+    X = x)}{\mathrm{pr}(X = x)} \\ &= \frac{\mathrm{pr}(X = x \mid Y = 1)
+    \mathrm{pr}(Y = 1)}{\mathrm{pr}(X = x \mid Y = 1) \mathrm{pr}(Y =
+    1) + \mathrm{pr}(X = x \mid Y = 0) \mathrm{pr}(Y =
+    0)}
+  \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}[fragile]
+  Now $\eta(x) > 1/2$, i.e., $g^{*}(x) = 1$, if and only if
+  $$\mathrm{pr}(X = x \mid Y = 1)
+    \mathrm{pr}(Y = 1) > \mathrm{pr}(X = x \mid Y = 0)
+    \mathrm{pr}(Y = 0)$$
+    
+  {\bf Note:} As an aside, the above derivation implies the general result that whenever $X
+  \mid Y = 0$ has probability density function $f_0(x)$ and $X \mid Y
+  = 1$ has probability density function $f_1(x)$, then the Bayes
+  decision rule is equivalent to
+  $$ \pi_1 f_1(x) > \pi_0 f_0(x).$$
+  
+  This is equivalent to
+  $$\log(f_1(x) - \log(f_0(x)) > \log \pi_0 - \log \pi_1$$
+  The probability density function for $f_i(x)$ is
+  $$(2 \pi)^{-d/2} \mathrm{det}(\Sigma_i)^{-1/2}
+  \exp\Bigl(-\frac{1}{2}(x - \mu_i)^{\top} \Sigma_i^{-1} (x -
+  \mu_i)\Bigr)$$
+\end{frame}
+\begin{frame}
+  Thus $\eta(x) > 1/2$ if and only if
+  \begin{equation*}
+    \begin{split} & (x - \mu_0)^{\top} \Sigma_0^{-1} (x - \mu_0)  - (x - \mu_1)^{\top} \Sigma_1^{-1} (x -
+  \mu_1) \\ &> \log \mathrm{det}(\Sigma_1) - \log
+  \mathrm{det}(\Sigma_0) + 2 (\log \pi_0 - \log \pi_1)
+  \end{split}
+  \end{equation*}
+
+  This is known as the \alert{quadratic discriminant}. In the special
+  case when $\Sigma_0 = \Sigma_1 = \Sigma$, the quadratic discriminant
+  simplifies to the \alert{linear discriminant} of the form:
+  $g^{*}(x) = 1$ if and only if
+  $$x^{\top} \Sigma^{-1} (\mu_1 - \mu_0) + \frac{1}{2} \mu_0^{\top} \Sigma^{-1}
+  \mu_0 - \frac{1}{2} \mu_1^{\top} \Sigma^{-1} \mu_1 > \log \pi_0 - \log \pi_1
+  $$
+\end{frame}
+
+\begin{frame}
+  \frametitle{Multiple classes and different costs: Bayes decision rule}
+  In our previous discussion we assume that $Y \in \{0,1\}$ and that
+  the cost of guessing $g(X) \not = Y$ is the same for all choice of
+  $Y$. This might be inappropriate in many scenarios, e.g., emergency
+  room procedure where $Y = 1$ (heart attack) and $Y = 0$ (heart burn). 
+  
+  For a general framework, we assume that $Y \in \{1,2,\dots,M\}$. Let
+  $\mathbf{C}$ be a $M \times M$ matrix where $c_{ij}$ denote the cost of
+  guessing/predicting that $Y = j$ when the true class is $i$.
+
+  For any classifier $g$, the loss of $g$ with respect to the matrix $\mathbf{C}$ is
+  $$\mathrm{L}(g) = \sum_{i} \sum_{j} c_{ij} \times \mathrm{pr}(g(X) = i, Y = j)$$
+  
+\end{frame}
+
+\begin{frame}
+  We can extend the previous argument for the case when $M = 2$ and
+  $c_{ij} = \mathbb{I}(i \not = j)$ to show that the Bayes error rate
+  $L^{*} = \argmin_{g} L(g)$ is now achieved by the Bayes decision rule
+  $$g^{*} = \argmin_{i \in \{1,\dots,M\}} \sum_{j=1}^{M} c_{ij} \times \mathrm{pr}(Y = j \mid X = x).$$
+  
+  Thus, without (too much) loss of generality, we will focus mostly on
+  the case of $M = 2$ and binary $0-1$ loss in this class.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Enter the data}
+  In practice, a classifier is constructed on the basis of 
+  prior knowledge or data. 
+
+  Let $\mathcal{D}_n = \{(X_1, Y_1), \dots, (X_n, Y_n)\}$ be $n$ i.i.d. data points
+  sampled according to some distribution $F_{XY}$. Assume $X_i \in
+  \mathbb{R}^{d}$ and $Y_i \in \{0,1\}$. Given $\mathcal{D}_n$, a classifier is constructed on the basis
+  of $\mathcal{D}_n$ and is denoted as $g_n(\cdot;
+  \mathcal{D}_n)$, i.e., $Y$ is guessed by $g_n(X;
+  \mathcal{D}_n)$. The process of constructing $g_n$ is called
+  (supervised) learning. 
+\end{frame}
+
+\begin{frame}
+  The performance of $g_n$ is measured by the \alert{conditional
+    probability of error}
+  $$L_n = L(g_n) = \mathrm{pr}(g_n(X; \mathcal{D}_n) \not = Y \mid \mathcal{D}_n)$$
+  and is a \alert{random variable} as it depends on the data
+  $\mathcal{D}_n$. 
+  
+  More specifically $L_n$ averages over the distribution of $(X, Y)$,
+  but the data is held fixed. Averaging over the data $\mathcal{D}_n$
+  as well is unnatural, because in almost all settings, one has to
+  live with the data at hand.
+\end{frame}
+
+\begin{frame}
+  We will refer to an individual mapping $g_n$ for a fixed given $n$
+  as a classifier, and refers to the sequence $\{g_n \colon n \geq
+  1\}$ as a classification/discrimination rule.
+  
+  Several natural questions then arises, namely
+  \begin{itemize}
+    \item How does one construct a good classifier ?
+    \item How good can a classifier be ? Is classifier $A$ better than
+      classifier $B$ ?
+    \item Can we estimate how good a classifier/classification rule is ?
+    \item Is there a best classifier/classification rule ?
+ \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: Linear and quadratic discriminant rule}
+  Recall that the quadratic discriminant for multivariate normal is given by
+  \begin{equation*}
+    \begin{split}&(x - \mu_0)^{\top} \Sigma_0^{-1} (x - \mu_0)  - (x - \mu_1)^{\top} \Sigma_1^{-1} (x -
+  \mu_1) \\ &> \log \mathrm{det}(\Sigma_1) - \log
+  \mathrm{det}(\Sigma_0) + 2 (\log \pi_0 - \log \pi_1)\end{split}
+\end{equation*}
+  Thus, given $\mathcal{D}_n$, we can construct the quadratic
+  discriminant rule by estimating the unknown quantities via
+  \begin{gather*}\hat{\mu}_i = \tfrac{1}{n_i} \sum_{j \colon Y_j = i} X_j; \quad
+  \hat{\Sigma}_i = \tfrac{1}{n_i} \sum_{j \colon Y_j = i} (X_j -
+  \hat{\mu}_i) (X_j - \hat{\mu}_i)^{\top} \\ n_i = \sum_{j}
+  \mathbb{I}(Y_j = i); \quad \hat{\pi}_i = n_i/n \end{gather*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Consistency and universal consistency of a classifier rule}
+Let $\{g_n \colon n \geq 1\}$ be a classifier rule. Then $\{g_n \colon
+n \geq 1\}$ is \alert{consistent} for $F_{XY}$ if
+$$ \lim_{n \rightarrow \infty} L_n = L^{*} = L(g^{*}).$$
+
+For example, the quadratic discriminant rule is consistent for those
+$F_{XY}$ for which $F_{X \mid Y}$ is multivariate normal.
+
+We said that $\{g_n \colon n \geq 1\}$ is \alert{universally
+  consistent} if, \alert{for all} $F_{XY}$
+$$ \lim_{n \rightarrow \infty} L_n = L^{*} = L(g^{*}).$$
+
+One of the most beautiful and important result in machine learning is
+that there exists \alert{simple} and yet universally consistent classification rules.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{$k$-nearest neighbor rule}
+  Motto: Simple rules survive 
+
+  Let $g_n(X; \mathcal{D}_n)$ be the decision rule
+  $$g_n(x) = \begin{cases} 1 & \text{if $\sum_{i=1}^{n} w_{ni}
+      \mathbb{I}(Y_i = 1) > \sum_{i=1}^{n} w_{ni} \mathbb{I}(Y_i = 0)$} \\
+      0 & \text{otherwise} \end{cases} $$
+  where $w_{ni} = 1/k$ if $X_i$ is among the $k$ nearest neighbors of
+  $x$ (with ties broken randomly) and $w_{ni} = 0$ otherwise.
+  
+  What can we say about the performance of $k$-NN as $n \rightarrow
+  \infty$ ?
+\end{frame}
+
+\begin{frame}
+  \begin{theorem}
+    Let $\{g_n \colon n \geq 1\}$ be the nearest neighbor rule, i.e.,
+    $k$-NN with $k = 1$. Then for any distribution of $(X, Y)$
+    $$\lim_{n \rightarrow \infty} L_n = \mathbb{E}[2 \eta(X) (1 -
+    \eta(X))] \leq 2 L^*$$
+  \end{theorem}
+    In other words, for any distribution of $(X,Y)$, the one nearest
+    neighbor rule error is, in the limit, at most twice that of the Bayes error.
+\end{frame}
+
+\begin{frame}
+  We provide here a heuristic argument for this result. For any $x \in
+  \mathbb{R}^{d}$, let $X_{(k)}(x)$ denote the $k$-th nearest neighbor
+  of $x$ in the data $\mathcal{D}_n$. Then, for $n \rightarrow \infty$
+  such that $k/n \rightarrow 0$, with probability $1$
+  $$\|X_{(k)}(x) - x\| \rightarrow 0.$$
+  
+  If we now assume that the training data $\mathcal{D}_n$ is
+  \alert{independent} is sampled independently from the point to be
+  classified $(X, Y)$, then $X_{(k)}(X)$ is \alert{asymptotically
+    independent} of $X$. (This is where we wave our hand, furiously!!)
+\end{frame}
+
+\begin{frame}
+  We therefore have, for the $1$-nearest neighbor rule,
+  \begin{equation*}
+    \begin{split} & \lim_{n \rightarrow \infty} \mathrm{pr}(g_n(X; \mathcal{D}_n) \not = Y \mid \mathcal{D}_n, X =
+  x) \\ &=
+  \lim_{n \rightarrow \infty} \mathrm{pr}(Y(X_{(1)}(X)) \not = Y \mid \mathcal{D}_n, X = x) \\ &=
+  \mathrm{pr}(Y(X_{(1)}) \not = Y  \mid X_{(1)}(X) = X = x) \\ &=
+  \mathrm{pr}(Y' = 1,  Y = 0 \mid
+  X = x) + \mathrm{pr}(Y' = 0, Y = 0 \mid X = x)
+  \end{split}
+  \end{equation*}
+  where $Y'$ is an independent copy of $Y$, given $X = x$. 
+  
+\end{frame}
+
+\begin{frame} Now
+  $\mathrm{pr}(Y' = 1, Y = 0 \mid X = x) = \mathrm{pr}(Y' = 1 \mid X =
+  x) \times \mathrm{pr}(Y' = 0, \mid X = x) = \eta(x)(1 - \eta(x))$
+  and hence
+  $$\lim_{n \rightarrow \infty} \mathrm{pr}(g_n(X; \mathcal{D}_n) \not
+  = Y \mid \mathcal{D}_n) = \mathbb{E}[2 \eta(X) (1 - \eta(X))]
+  $$
+  Recall our previous expression $L^{*} = \mathbb{E}[\min\{\eta(X), 1
+  - \eta(X)\}]$, and note that $\eta(X) (1 - \eta(X)) \leq
+  \min\{\eta(X), 1 - \eta(X)\}$ as $\eta(X) \in [0,1]$. Thus
+  $$\lim_{n \rightarrow \infty} L(g_n) = \mathbb{E}[2 \eta(X) (1 -
+  \eta(X))] \leq 2L^{*}$$
+  as desired.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Stone's theorem}
+  Going back to the $k$-NN rule, we see that as $n \rightarrow \infty$
+  and $k/n \rightarrow 0$, the $k$-NN decision rule
+  $$g_n(x) = \begin{cases} 1 & \text{if $\sum_{i=1}^{n} w_{ni}
+      \mathbb{I}(Y_i = 1) > \sum_{i=1}^{n} w_{ni} \mathbb{I}(Y_i = 0)$} \\
+      0 & \text{otherwise} \end{cases} $$
+    yield $g_n(x)$ as an estimate of $\eta(x)$.    
+    
+   For a fixed $x$, $g_n(x)$ will be a \alert{consistent} estimate of
+   $\eta(x)$, i.e., $|\eta(x) - g_n(x)| \rightarrow 0$ if $k
+   \rightarrow \infty$. 
+   
+   Making this statement precise is surprisingly
+   non-trivial. Nevertheless, a classic result of
+   \href{https://projecteuclid.org/euclid.aos/1176343886}{Stone
+     (1977)} implies
+\end{frame}
+
+\begin{frame}
+  \begin{theorem}
+  Let $\{g_n \colon n \geq 1\}$ be a $k$-NN rule. Suppose furthermore
+  that as $n \rightarrow \infty$, $k \rightarrow \infty$ and $k/n
+  \rightarrow 0$. Then for all distributions $F_{XY}$
+  $$\lim_{n \rightarrow \infty} L(g_n) = L^{*}$$
+  \end{theorem}
+  
+  In summary, the $k$-NN rule is \alert{universally consistent} for
+  all distributions $F_{XY}$, i.e., $k$-NN always achieve minimum
+  error in the limit and no classification rule can do
+  better than $k$-NN (in the limit).
+\end{frame}
+  
+
+\end{document}

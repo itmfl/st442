@@ -915,7 +915,7 @@ $\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v}$ is positive.
 **Definition**  A $n \times n$ *symmetric* matrix $\mathbf{A}$ is said to be
 positive semidefinite definite if for all $\boldsymbol{v} = (v_1, v_2, \dots, v_n)$
 $$\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v} = \sum_{i=1}^{n} \sum_{j=1}^{n} v_i v_j
-    a_{ij}$$
+    a_{ij} \geq 0$$
 
 ---
 class: clear
@@ -969,10 +969,10 @@ class: clear
 The spectral decomposition theorem allows us to define 
 functions of positive semidefinite/definite matrices other than inverse.
 
-**Theorem**: Let $f \colon [0, \infty) \mapsto \mathbb{R}$ be a function
-on the non-negative real line. Then for any $n \times n$ positive semidefinite matrix $\mathbf{A}$, $f$ defines a $n \times n$ symmetric matrix $f(\mathbf{A})$ via
+**Theorem**: Let $f \colon \mathbb{R} \mapsto \mathbb{R}$ be a real-valued function. Let $\mathbf{A}$ be a symmetric matrix with eigenvalues $d_1, d_2, \dots, d_n$. Suppose furthermore that $f(d_i)$ is well-defined for all $i$. 
+Then $f$ defines a $n \times n$ symmetric matrix $f(\mathbf{A})$ via
 $$\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top} \Longrightarrow f(\mathbf{A}) = \mathbf{U} f(\mathbf{D}) \mathbf{U}^{\top}$$
-where $f(\mathbf{D}) = \mathrm{diag}(f(d_{1}, f(d_{2}), \dots, f(d_{n})))$ for $\mathbf{D} = \mathrm{diag}(d_{1},d_{2}, \dots, d_{n})$.
+where $f(\mathbf{D}) = \mathrm{diag}(f(d_{1}), f(d_{2}), \dots, f(d_{n}))$.
 
 As a corollary, for any positive semidefinite (psd) matrix $\mathbf{A}$ and any positive number $r > 0$, there exists a matrix $\mathbf{B}$ such that
 $\mathbf{B}^{r} = \mathbf{A}$; we can take $\mathbf{B}$ to also be (psd). Specifically, any positive definite (pd) matrix $\mathbf{A}$ has a pd square root $\mathbf{A}^{1/2}$.
@@ -1137,3 +1137,52 @@ tetrahymena %>% ggplot(aes(x = concentration, y = diameter)) +
   geom_smooth(method = "lm", formula = y ~ I(log(x)), color = "blue", se = FALSE)
 ```
 
+set.seed(123)
+n <- 50
+X <- seq(from = 0, to = 1, length.out = n)
+W <- X^2
+Z <- sqrt(X)
+Y <- c()
+bX <- 1
+bW <- 2
+bZ <- 3
+q <- 3
+p <- 4
+a_answer <- 0
+b_answer <- 0
+c_answer <- 0
+conf_level <- 0.95
+all_models <- c()
+for (j in 1:500) {
+  for (i in 1:n) {
+    Y[i] <- 0.5 + bX*X[[i]] + bW*W[[i]] + bZ*Z[[i]] + rnorm(1, 0, 0.04)
+  }
+  datar <- data.frame("Y"=Y, "X"=X, "W"=W, "Z"=Z)
+  mod <- lm(Y ~ X + W + Z, data=datar)
+  all_models[[j]] <- mod
+ 
+  conf <- confint(mod, level=conf_level)
+ 
+  C <- matrix(0,3,4)
+  C[1,2] <- C[2,3] <- C[3,4] <- 1
+  Cbeta <- C %*% mod$coefficients
+  gamma <- c(bX, bW, bZ)
+  Xmat <- model.matrix(mod)
+  XTX <- solve(t(Xmat) %*% Xmat)
+  Yhat <- mod$fitted.values
+  MSE <- t(Y - Yhat) %*% (Y - Yhat) / (n - p)
+  LHS <- t(Cbeta - gamma) %*% solve(C %*% XTX %*% t(C)) %*% (Cbeta - gamma)
+  RHS <- q * MSE * qf(conf_level, q, n - p)
+  if (bX > conf[[2,1]] && bX < conf[[2,2]]) {
+    a_answer <- a_answer + 1
+  }
+  if (bX > conf[[2,1]] && bX < conf[[2,2]]
+      && bW > conf[[3,1]] && bW < conf[[3,2]]
+      && bZ > conf[[4,1]] && bZ < conf[[4,2]]) {
+    b_answer <- b_answer + 1
+  }
+  cat(LHS, " ", RHS, "\n")
+  if (LHS <= RHS) {
+    c_answer <- c_answer + 1
+  }
+}

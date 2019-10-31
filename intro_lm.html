@@ -1109,7 +1109,7 @@ symmetric and for any `\(\boldsymbol{v} \not = 0\)`, the quadratic form
 **Definition**  A `\(n \times n\)` *symmetric* matrix `\(\mathbf{A}\)` is said to be
 positive semidefinite definite if for all `\(\boldsymbol{v} = (v_1, v_2, \dots, v_n)\)`
 `$$\boldsymbol{v}^{\top} \mathbf{A} \boldsymbol{v} = \sum_{i=1}^{n} \sum_{j=1}^{n} v_i v_j
-    a_{ij}$$`
+    a_{ij} \geq 0$$`
 
 ---
 class: clear
@@ -1163,10 +1163,10 @@ class: clear
 The spectral decomposition theorem allows us to define 
 functions of positive semidefinite/definite matrices other than inverse.
 
-**Theorem**: Let `\(f \colon [0, \infty) \mapsto \mathbb{R}\)` be a function
-on the non-negative real line. Then for any `\(n \times n\)` positive semidefinite matrix `\(\mathbf{A}\)`, `\(f\)` defines a `\(n \times n\)` symmetric matrix `\(f(\mathbf{A})\)` via
+**Theorem**: Let `\(f \colon \mathbb{R} \mapsto \mathbb{R}\)` be a real-valued function. Let `\(\mathbf{A}\)` be a symmetric matrix with eigenvalues `\(d_1, d_2, \dots, d_n\)`. Suppose furthermore that `\(f(d_i)\)` is well-defined for all `\(i\)`. 
+Then `\(f\)` defines a `\(n \times n\)` symmetric matrix `\(f(\mathbf{A})\)` via
 `$$\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top} \Longrightarrow f(\mathbf{A}) = \mathbf{U} f(\mathbf{D}) \mathbf{U}^{\top}$$`
-where `\(f(\mathbf{D}) = \mathrm{diag}(f(d_{1}, f(d_{2}), \dots, f(d_{n})))\)` for `\(\mathbf{D} = \mathrm{diag}(d_{1},d_{2}, \dots, d_{n})\)`.
+where `\(f(\mathbf{D}) = \mathrm{diag}(f(d_{1}), f(d_{2}), \dots, f(d_{n}))\)`.
 
 As a corollary, for any positive semidefinite (psd) matrix `\(\mathbf{A}\)` and any positive number `\(r &gt; 0\)`, there exists a matrix `\(\mathbf{B}\)` such that
 `\(\mathbf{B}^{r} = \mathbf{A}\)`; we can take `\(\mathbf{B}\)` to also be (psd). Specifically, any positive definite (pd) matrix `\(\mathbf{A}\)` has a pd square root `\(\mathbf{A}^{1/2}\)`.

@@ -1,0 +1,1788 @@
+\documentclass{beamer}
+\usepackage{etex}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=green}
+\usetheme[]{metropolis}
+%\useoutertheme{metropolis}
+%\useinnertheme{metropolis}
+%\usefonttheme{metropolis}
+%\usecolortheme{rose}
+\usefonttheme{professionalfonts} % required for mathspec
+\usepackage{mathspec}
+\setsansfont[BoldFont={Fira Sans},
+Numbers={OldStyle}]{Fira Sans Light}
+\setmathsfont(Digits)[Numbers={Lining, Proportional}]{Fira
+Sans Light} 
+
+%\usepackage{subfigure}
+\usepackage{bm}
+\usepackage{enumerate}
+\usepackage{longtable}
+%\usepackage[all]{xy}
+\usepackage{parskip}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,minimum height=2em]
+    
+\newtheorem{question}[theorem]{Question}
+\newtheorem{openquestion}[theorem]{Open Question}
+\newtheorem{proposition}{Proposition}
+\setbeamercolor{question title}{bg = red}
+\setbeamercolor{block body question}{bg=blue!60}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+<<setup, include=FALSE>>=
+# the default output hook
+ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6, tibble.max_extra_cols = 10)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$out.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(head(x,lines[1]), more, tail(x,lines[2]))
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+knit_hooks$set(document = function(x) {
+  gsub('\\\\(begin|end)\\{kframe\\}', '', x)
+})
+
+inline_hook <- function (x) {
+  if (is.numeric(x)) {
+    # ifelse does a vectorized comparison
+    # If integer, print without decimal; otherwise print two places
+    res <- ifelse(x == round(x),
+      sprintf("%d", x),
+      sprintf("%.3f", x)
+    )
+    paste(res, collapse = ", ")
+  }
+}
+
+knit_hooks$set(inline = inline_hook)
+
+# smaller font size for chunks
+opts_chunk$set(size = 'footnotesize')
+@ 
+
+\begin{document}
+\title{CSC/ST 442: Introduction to Data Science}
+\subtitle{Ridge-regression and regression splines}
+  \institute[]{
+Department of Statistics, North Carolina State University.
+}
+\date{}
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+%% \begin{frame}
+%%   \frametitle{Transforming predictor variables}
+%%   We have discussed Box-Cox transformations for response variables.
+%%   You can also perform a Box-Cox style approach for the predictor
+%%   variables, choosing for each predictor variables a transformation
+%%   that will minimizes the residual sum of square. Note that with
+%%   predictor variables, we do not need to worry about change of scale
+%%   in transformations, this is in contrast with Box-Cox transformations
+%%   on the response variables. However, doing the above to the predictor
+%%   variables take time.
+
+%%   Another technique is to perform residual diagnostic plots, e.g.,
+%%   partial residual plots, and identify the appropriate transformations.
+
+%%   For our current discussion, we will focus on some additional methods
+%%   for transforming the variables.
+%% \end{frame}
+
+%% \begin{frame}[fragile]
+%%   \frametitle{Broken-stick regression}
+%%  <<savings-l8-example1, cache = TRUE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+%%   library("faraway")
+%%   g <- lm (sr ~., savings)
+%%    plot(savings$pop15, residuals(g) + coefficients(g)["pop15"]*savings$pop15, xlab = "pop15", ylab = "Partial residual")
+%%    abline(0, coefficients(g)["pop15"])
+%%    @
+%%    Recall the saving ratio dataset. The partial regression plot
+%%   indicates that there might be two different regression models,
+%%   depending on whether the value of the \textrm{pop15} variables is
+%%   at most $35$ or at least $35$.
+%% \end{frame}
+
+%% \begin{frame}[fragile]
+%%  <<savings-l8-example2, cache = TRUE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+%%   g1 <- lm(sr ~ pop15, savings, subset = (pop15 < 35))
+%%   g2 <- lm(sr ~ pop15, savings, subset = (pop15 > 35))
+%%   plot(sr ~ pop15, savings, xlab = "Population under 15")
+%%   abline(v = 35, lty = 5)
+%%   segments(20, g1$coef[1] + g1$coef[2]*20, 35, g1$coef[1] + g1$coef[2]*35)
+%%   segments(48, g2$coef[1] + g2$coef[2]*48, 35, g2$coef[1] + g2$coef[2]*35)
+%%   @
+%%   If we fit two separate regression models to the above dataset, then
+%%   the two parts of the fit do not meet.
+%% \end{frame}
+
+%% \begin{frame}
+%%   If we want a continuous fit as the predictor varies, we can
+%%   consider a broken stick regression fit, which is defined as
+%%   follows. Let $B_{l}$ and $B_r$ be functions defined by
+%%   \begin{equation*}
+%%     B_{l}(x) = \begin{cases} c - x & \text{if $x < c$} \\
+%%       0 & \text{otherwise} \end{cases} \qquad B_{r}(x) = \begin{cases} x - c &
+%%         \text{if $x > c$} \\ 0 & \text{otherwise} \end{cases}
+%%   \end{equation*}
+%%   for some constant $c$ which marks the division between the two groups.
+
+%%   We can then fit, for a linear regression with a single predictor
+%%   variable, a model of the form
+%%   \begin{equation*}
+%%     Y = \beta_0 + \beta_1 B_{l}(x) + \beta_{2} B_{r}(x) + \epsilon
+%%   \end{equation*}
+
+%%   Extensions to multiple predictor variables can be done
+%%   analogously. We just have to define different $B_{l}$ and $B_{r}$ for the
+%%   various predictor variables.
+%% \end{frame}
+
+%% \begin{frame}[fragile]
+%%   <<savings-l8-example3, dependson = 'savings-l8-example2', cache = TRUE, tidy = TRUE, size = 'tiny',echo=1:3,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+%%   lhs <- function(x){ifelse(x < 35, 35 -x, 0)}
+%%   rhs <- function(x){ifelse(x < 35, 0, x - 35)}
+%%   gb <- lm(sr ~ lhs(pop15) + rhs(pop15), savings)
+%%   x <- seq(20, 48, by = 1)
+%%   py <- gb$coef[1] + gb$coef[2]*lhs(x) + gb$coef[3]*rhs(x)
+%%   plot(sr ~ pop15, savings, xlab = "Population under 15")
+%%   abline(v = 35, lty = 5)
+%%   segments(20, g1$coef[1] + g1$coef[2]*20, 35, g1$coef[1] + g1$coef[2]*35)
+%%   segments(48, g2$coef[1] + g2$coef[2]*48, 35, g2$coef[1] + g2$coef[2]*35)
+
+%%   lines(x, py, lty = 2)
+%%   @
+%% \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Polynomial regression}
+  One popular approaches for adding/transforming predictor variables
+  is to introduce polynomial terms and/or interaction terms of the predictor variables.
+
+  For example, for linear regression with a single predictor
+  variables, we can consider
+  \begin{equation*}
+    Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \cdots + \beta_{d} X^{d}
+  \end{equation*}
+  In general, we do not want too large values of $d$. In addition, we should not eliminate lower order terms
+  when higher order terms are present.
+\end{frame}
+
+\begin{frame}[fragile]
+   <<savings-l8-example4a, cache = TRUE, size = 'tiny',echo=c(1,2,4),fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+  ## Package containing a variety of datasets
+  library(datasets)
+  savings <- tibble::as_tibble(LifeCycleSavings, rownames = "country")
+  savings
+  @
+  Here $\mathtt{dpi}$ and $\mathtt{ddpi}$ denote the per-capita
+  disposable income and the percent growth rate of $\mathtt{dpi}$,
+  respectively. The variable $\mathtt{sr}$ denote the saving rates
+  (personal saving divided by disposable income).
+Here 
+\end{frame}
+
+\begin{frame}[fragile]
+  <<savings-l8-example4, dependson = 'savings-l8-example2', cache = TRUE, tidy = TRUE, size = 'tiny',echo=1:3,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+  summary(lm(sr ~ ddpi, savings))
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<savings-l8-example4b, dependson = 'savings-l8-example2', cache = TRUE, tidy = TRUE, size = 'tiny',echo=1:3,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+  summary(lm(sr ~ ddpi + I(ddpi^2), savings))
+  @
+\end{frame}
+
+%% \begin{frame}[fragile]
+%%   <<savings-l8-example5, dependson = 'savings-l8-example4', cache = TRUE, tidy = TRUE, size = 'tiny',echo=1:3,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+%%   summary(lm(sr ~ poly(ddpi, 3), savings))
+%%   @
+%%   It is often useful to not use the ordinary polynomials but to use
+%%   orthogonal polynomials as they have better numerical stability and
+%%   ease of use.
+%% \end{frame}
+
+\begin{frame}[fragile]
+  <<savings-l8-example6, dependson = 'savings-l8-example4', cache = TRUE, tidy = TRUE, size = 'tiny',echo=1,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+ g <- lm(sr ~ ddpi + I(ddpi^2) + I(ddpi^3) + I(ddpi^4), savings)
+  sr <- savings$sr
+  ddpi <- savings$ddpi
+  grid <- seq(0, 15, by = 1)
+  plot(predict(g, data.frame(ddpi = grid)), type = "l", xlab = "ddpi", ylab = "sr")
+  points(ddpi, sr)
+  @
+  Polynomials are smooth but have the disadvantage that each data
+  points affect the fit globally. We therefore want smooth but local
+  functions. These can be given by regression splines.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Regression splines}
+  Regression splines are a collection of smooth functions defined over
+  disjoint intervals but are continuous (and differentiable) at their common endpoints.
+  
+  More specifically, a spline function $s(x)$ on $[a,b]$ of order $M$
+   with knots $\xi_0 = a < \xi_1 < \xi_2 < \cdots < \xi_K < b
+  = \xi_{K+1}$ is a function with the following properties
+  \begin{enumerate}
+  \item In each of the intervals $\xi_{k} < x \leq \xi_{k+1}$, $s(x)$
+    is a polynomial of degree at most $M - 1$.
+  \item $s(x)$ and its derivative up to order $M - 2$ are continuous.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  The cubic spline is in general a satisfactory function for fitting
+  data in most situations (it is claimed to be the lowest-order spline
+  for which the discontinuity of the derivatives at the knot is not visible 
+  to the naked eye). A cubic spline can be represented in the form
+  \begin{equation*}
+    s(x) = \alpha_0 + \alpha_1 x + \alpha_2 x^2 + \alpha_3 x^3 +
+    \sum_{k=1}^{K} \alpha_{3 + k} ( x- \xi_k)_{+}^{3}
+  \end{equation*}
+  where $(u)_+$ is defined as
+  \begin{equation*}
+    (u)_+ = \begin{cases} u & \text{if $u \geq 0$} \\
+      0 & \text{otherwise}
+      \end{cases}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Given a sequence of univariate values $X_1, X_2, \dots,
+  X_n$ of a predictor variable and
+  a sequence of values $Y_1, Y_2, \dots, Y_n$ of the response
+  variable, the {\em semiparametric} regression problem of regressing
+  $Y$ on $X$ can be formulated as the problem of estimating the
+  coefficients $\alpha_k$ (and selecting the knots $\xi_k$) in the
+  above spline formulation.  
+\end{frame}
+
+\begin{frame}
+  \frametitle{B-spline}
+  A more computational friendly representation of a cubic-spline is in
+  terms of B-splines or basis spline. Given a set of knots $\xi_1 \leq
+  \xi_2 \leq \dots \leq \xi_K$, the $i$-th $B$-spline basis function
+  of degree $m$ can be defined
+  recursively as follows
+    \begin{gather*}
+      B_{i,1}(x) = \begin{cases} 1 & \text{if $x \in [\xi_i,
+          \xi_{i+1}]$} \\ 0 & \text{otherwise} \end{cases} \quad \\
+      B_{i,m}(x) = \frac{x - \xi_i}{\xi_{i+m-1} - \xi_i} B_{i,m-1}(x)
+      + \frac{\xi_{i+m} - x}{\xi_{i+m} - \xi_{i+1}} B_{i+1,m-1}(x)
+  \end{gather*} 
+  
+  The cubic spline $s(x)$ with knots $\xi_1 \leq \xi_2 \leq \dots \leq
+  \xi_K$ can be written as
+  $s(x) = \sum_{k=1}^{K} \gamma_{k} B_{k,3}(x)$
+  where the $B_{j,3}(x)$ are the $B$-spline basis functions constructed over the knots $\{\xi_k\}_{k=1}^{K}$ 
+\end{frame}
+
+\begin{frame}[fragile]
+   <<splines-l8-example0aa, cache = TRUE, size = 'tiny', fig.width=8, fig.height = 8, fig.align='center', echo = FALSE, out.width='.8\\linewidth',fig.cap='From Hastie et al. Elements of Statistical Learning'>>=
+   knitr::include_graphics("figures/splines.png")
+   @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Spline regression example}
+  Consider the following contrived dataset
+   <<splines-l8-example0a, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, fig.height = 8, fig.align='center', echo = TRUE, out.width='.4\\linewidth'>>=
+   pi <- acos(0)*2
+  contrived <- function(x) sin(2*pi*x^3)^3
+  x <- seq(from = 0, to = 1, by = 0.01)
+  y <- contrived(x) + rnorm(101, sd = 0.1)
+  matplot(x, cbind(y, contrived(x)), type = "pl", ylab = "y", pch = 18, lty = 1)
+  @
+  Here $y = \sin^{3}(2 \pi x^3) + \epsilon$ with $\epsilon \sim N(0, 0.01)$. 
+\end{frame}
+
+\begin{frame}[fragile,allowframebreaks]
+   <<splines-l8-example0b, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, dependson= 'splines-l8-example0a', fig.height = 8, fig.align='center', echo = TRUE, out.width='.6\\linewidth'>>=
+  library("splines")
+  knots <- c(rep(0,4), 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, rep(1,4))
+  bx <- splineDesign(knots, x)
+  matplot(x, bx, type = "l")
+  matplot(x, cbind(y, lm(y ~ bx)$fit, contrived(x)), type = "pll", ylab = "y", pch = 18, lty = 1)
+  @
+  The green curve is the regression spline regression line.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<splines-l8-example0c, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, dependson= 'splines-l8-example0b', fig.height = 8, fig.align='center', echo = TRUE, out.width='.6\\linewidth'>>=
+  nrow(bx)
+  bx[1:15,]
+  @
+\end{frame}
+\begin{frame}[fragile]
+  <<splines-l8-example0d, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, dependson= 'splines-l8-example0b', fig.height = 8, fig.align='center', echo = TRUE, out.width='.6\\linewidth'>>=
+  bx[16:30,]
+  @
+\end{frame}
+\begin{frame}[fragile]
+  <<splines-l8-example0e, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, dependson= 'splines-l8-example0b', fig.height = 8, fig.align='center', echo = TRUE, out.width='.6\\linewidth'>>=
+  bx[41:55,]
+  @
+\end{frame}
+\begin{frame}[fragile]
+  <<splines-l8-example0f, cache = TRUE, tidy = TRUE, size = 'tiny', fig.width=8, dependson= 'splines-l8-example0b', fig.height = 8, fig.align='center', echo = TRUE, out.width='.6\\linewidth'>>=
+  bx[86:101,]
+  @
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  <<splines-l8-example1, cache = TRUE, tidy = TRUE, size = 'tiny', echo=1:3,fig.width=8, fig.height = 8, fig.align='center', echo = FALSE, out.width='.5\\linewidth'>>=
+  library("MASS")
+  data(GAGurine)
+  plot(GAG ~ Age, data = GAGurine, ylab = "GAG concentration", xlab = "Age")
+  @
+  The \textrm{GAGurine} dataset from \textrm{MASS}.  The data were
+  collected on the concentration of the chemical glycosaminoglycan (GAG)
+  in the urine of 314 children aged from zero to seventeen years.  The aim of the study
+  was to produce a chart to help a pediatrician to assess if a child's
+  GAG concentration is normal.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<splines-l8-example1b, cache = TRUE, tidy = TRUE, size = 'tiny',echo=1:3,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+  GAG.lm <- lm(GAG ~ Age + I(Age^2) + I(Age^3) + I(Age^4) + I(Age^5) +
+  I(Age^6) + I(Age^7) + I(Age^8), GAGurine)
+  anova(GAG.lm)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<splines-l8-example2, cache = TRUE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.6\\linewidth'>>=
+  lm.bs <- lm(GAG ~ bs(Age, df = 7), data = GAGurine)
+  lm.poly6 <- lm(GAG ~ poly(Age, 6), data = GAGurine)
+  plot(GAG ~ Age, data = GAGurine, ylab = "GAG concentration", xlab = "Age")
+  lines(GAGurine$Age, fitted(lm.bs), col = 2, lwd = 2)
+  lines(GAGurine$Age, fitted(lm.poly6), col = 4, lwd = 2)
+  legend("topright", lty = 1, col = c(2,4), legend = c("B-spline", "Poly 6"))
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<splines-gmst-example1, cache = FALSE, tidy = TRUE, size = 'tiny', results='asis', echo = FALSE, fig.width=8, fig.height = 8, fig.align='center', out.width='.6\\linewidth'>>=
+   gmst <- read.csv("gmst.csv", header = T)
+   library(xtable)
+  print(xtable(head(gmst)), size = '\\tiny')
+  @
+
+  The gmst dataset (available
+\href{http://www.biostat.umn.edu/~hodges/RPLMBook/Datasets/05_Global_mean_surface_temperature/Global_mean_surface_temperature_data.csv}{here})
+contains the global mean surface temperature deviations for the years
+1881 through 2005 inclusive.  The \texttt{temp.dev} column gives the
+temperature deviation for that year (in units of 0.01 degree celcius).
+\end{frame}
+
+\begin{frame}[fragile]
+  <<splines-gmst-example2, cache = FALSE, tidy = TRUE, size = 'tiny', echo = TRUE, fig.width=8, fig.height = 8, fig.align='center', out.width='.6\\linewidth'>>=
+  library("SemiPar")
+  fit.gmst <- spm(gmst$temp.dev ~ f(gmst$Year))
+  plot(fit.gmst, ylab = "Temperature Deviation", xlab = "Year", main = "Cubic Fit")
+  points(gmst)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Knots selection}
+  <<lecture1-lidar-example1, warnings = FALSE, echo = TRUE, tidy = TRUE, size = 'tiny', out.width='.6\\textwidth', fig.align = 'center'>>=
+  library("SemiPar")
+  library("ggplot2")
+  data(lidar)
+  ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() + geom_point()
+  @
+\end{frame}
+
+\begin{frame}
+  For this dataset (and to illustrate the general issues behind knots
+  selection), we will only use splines of degree $1$, i.e., letting $Y$ denote the variable \texttt{logratio} and $X$ denote the
+  variable \texttt{range}, consider fitting a linear model of the form
+  $$Y_i = \beta_0 + \beta_1 X_i + \sum_{k=1}^{m} \gamma_k \ast (X_i -
+  c_k)_{+} + \epsilon_i $$
+  for some collection of knots $c_1 < c_2 < \dots < c_m$.
+  
+  Here $(x - c)_{+}$ is defined as
+  $$(x - c)_{+} = \begin{cases} 0 & \text{if $x < c$} \\
+    x - c & \text{if $x \geq c$} \\
+  \end{cases}. $$
+
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-example2, echo = TRUE, warning = FALSE, tidy = FALSE, size = 'tiny', out.width='.6\\textwidth', fig.align = 'center'>>=
+  basis.design <- function(x){
+    Xmat <- cbind(rep(1, length(x)), x)
+    Xmat <- cbind(Xmat, ifelse(x < 500, 0, x - 500))
+    return( Xmat)
+  }
+  ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() +
+  geom_point() + geom_smooth(method = "lm", formula = y ~ basis.design(x), se = FALSE)
+  @
+\end{frame}
+
+%% \begin{frame}[fragile]
+%%   <<lecture1-lidar-example3, warning = FALSE, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.6\\textwidth', fig.align = 'center'>>=
+%%   basis.design <- function(x){
+%%     Xmat <- cbind(rep(1, length(x)), x)
+%%     Xmat <- cbind(Xmat, ifelse(x < 500, 0, x - 500))
+%%     Xmat <- cbind(Xmat, ifelse(x < 550, 0, x - 550))
+%%     return( Xmat)
+%%   }
+%%   ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() +
+%%   geom_point() + geom_smooth(method = "lm", formula = y ~ basis.design(x), se = FALSE)
+%%   @
+%% \end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-example4, warning = FALSE, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.6\\textwidth', fig.align = 'center'>>=
+  basis.design <- function(x){
+    Xmat <- cbind(rep(1, length(x)), x)
+    Xmat <- cbind(Xmat, ifelse(x < 500, 0, x - 500))
+    Xmat <- cbind(Xmat, ifelse(x < 550, 0, x - 550))
+    Xmat <- cbind(Xmat, ifelse(x < 600, 0, x - 600))
+    return( Xmat)
+  }
+  ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() +
+  geom_point() + geom_smooth(method = "lm", formula = y ~ basis.design(x), se = FALSE)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-example5, echo = TRUE, warning = FALSE, tidy = FALSE, size = 'tiny', fig.show = 'hold', out.width='.45\\textwidth', fig.align = 'center'>>=
+  basis.design <- function(x,knots){
+    Xmat <- cbind(rep(1, length(x)), x)
+    for(i in 1:length(knots)){
+      Xmat <- cbind(Xmat, ifelse(x < knots[i], 0, x - knots[i]))
+    }
+    return( Xmat)
+  }
+  knots.seq1 <- seq(from = 400, to = 700, by = 12.5)
+  ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() + geom_point() + ggtitle("knots sequence 1") + 
+  geom_smooth(method = "lm", formula = y ~ basis.design(x,knots.seq1), se = FALSE) 
+  knots.seq2 <- c(seq(from = 400, to = 600, by = 12.5), 625, 637.5, 675, 700)
+  ggplot(lidar, aes(x = range, y = logratio)) + theme_bw() + geom_point() + ggtitle("knots sequence 2") +
+  geom_smooth(method = "lm", formula = y ~ basis.design(x,knots.seq2), se = FALSE)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  Letting $Y$ denote the variable \texttt{logratio} and $X$ denote the
+  variable \texttt{range}, we see that the linear model
+  $$Y_i = \beta_0 + \beta_1 X_i + \sum_{k=1}^{m} \gamma_k \ast (X_i -
+  c_k)_{+} + \epsilon_i $$
+  could fit the data well, provided that the knots $\{c_k\}$
+   are chosen ``appropriately''.
+  
+  Q. How can we choose the knots ?
+  \begin{itemize}
+    \item Too few knots or knots at the wrong location lead to an inflexible curve which could have large ``bias''.
+    \item Too many knots lead to a very wiggly curve which could have large ``variance''. 
+  \end{itemize}
+  
+  A. A possibly simpler approach is to use a lot of knots, but
+  \alert{penalize} or \alert{shrink} their complexity.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Biased estimation and shrinkage}
+  We begin with the basic idea due to James and Stein
+  (1961). Suppose that we observe a $p \times 1$ vector $\bm{z} =
+  (Z_1, Z_2, \dots, Z_p)$ which
+  is assumed to have a $N(\bm{\mu}, \sigma^{2} \mathbf{I}_{p})$ where
+  $p > 2$.
+
+  The obvious estimate for $\bm{\mu}$ is $\bm{z}$ which is in fact the
+  minimum variance \emph{unbiased} estimate. However, $\bm{z}$ is
+  unsatisfactory as an estimate for $\bm{\mu}$ in the following sense:
+  \begin{equation*}
+    \mathbb{E}[\|\bm{z}\|^2] = \sum_{i=1}^{p} \mathbb{E}[Z_i^2] =
+    \sum_{i=1}^{p} (\sigma^2 + \mu_i^2) = p \sigma^2 + \| \bm{\mu} \|^2
+    > \|\bm{\mu}\|^2.
+  \end{equation*}
+  That is to say, at least one (or some) of the elements of the
+  estimate $\bm{z}$ is too large.
+\end{frame}
+
+\begin{frame}
+  Consider instead a ``shrinked'' version of the estimate
+  $\tilde{\bm{\mu}} = c \bm{z}$ for some $c \in (0,1)$.
+
+  $\tilde{\bm{\mu}}$ is a biased estimator for $\bm{\mu}$. However,
+  \begin{equation*}
+    \begin{split}
+    \mathbb{E}[\| \tilde{\bm{\mu}} - \bm{\mu}\|^2] &= \sum_{i=1}^{p}
+    \mathbb{E}[(cZ_i - \mu_i)^2] \\ &= \sum_{i=1}^{p}\mathbb{E}[(c(Z_i -
+    \mu_i) - (1 - c) \mu_i)^2] \\ &= \sum_{i=1}^{p} \Bigl(c^2 \sigma^2 + (1 -
+    c)^2 \mu_i^2\Bigr) \\ &= c^2 p \sigma^2 + (1 - c)^2 \|\bm{\mu}\|^2
+    \end{split}
+  \end{equation*}
+  which is minimized by choosing $c = \|\bm{\mu}\|^2/(p \sigma^2 +
+  \|\bm{\mu}\|^2)$.
+\end{frame}
+
+\begin{frame}
+  So the ``best'' estimate for $\bm{\mu}$ (in terms of the mean
+  squared error) can be written as
+  \begin{equation*}
+    \tilde{\bm{\mu}} = \Bigl(1 - \frac{p\sigma^2}{p\sigma^2 +
+      \|\bm{\mu}\|^2}\Bigr) \bm{z}
+  \end{equation*}
+
+  However, as $\|\bm{\mu}\|^2$ is unknown, this is not a practical
+  estimate. Instead, if $\sigma^2$ is known, then using $\|\bm{z}\|^2$
+  as an estimate for $p\sigma^2 + \|\bm{\mu}\|^2$, we get a ``shrinkage''
+  estimator for $\bm{\mu}$ of the form
+  \begin{equation*}
+    \tilde{\bm{\mu}} = \Bigl(1 - \frac{p\sigma^2}{\|\bm{z}\|^2}\Bigr) \bm{z}
+  \end{equation*}
+
+  James and Stein (1961) showed that the best shrinkage estimate
+  $\tilde{\bm{\mu}}$ of the form $(1 - b/\|\bm{z}\|^2) \bm{z}$ is
+  obtained by chosing $b = (p - 2) \sigma^2$ when $p > 2$.
+\end{frame}
+
+\begin{frame}
+  The James and Stein estimator is related to the
+  \emph{Stein's paradox} in statistic. See
+  \href{http://statweb.stanford.edu/~ckirby/brad/other/Article1977.pdf}{here}
+  for a beautiful exposition.
+
+  \begin{theorem}
+    Let $\bm{z} \sim \mathrm{MVN}(\bm{\mu}, \mathbf{I})$ where $\bm{\mu} \in \mathbb{R}^{p}$. 
+   Define the James-Stein estimator for $\bm{\mu}$ to be $$\hat{\bm{\mu}}^{(\mathrm{JS})} = \Bigl(1 - \frac{p - 2}{\|\bm{z}\|^2}\Bigr) \bm{z}. $$ The maximum likelihood estimator (and hence the uniformly minimum-variance unbiased estimator) for $\bm{\mu}$ is simply $\bm{z}$. We then have, for $p > 2$, that
+   $$ \mathbb{E}_{\bm{\mu}}\Bigl[ \|\hat{\bm{\mu}}^{(\mathrm{JS})} - \bm{\mu}\|^2\Bigr] < \mathbb{E}_{\bm{\mu}}\Bigl[ \|\bm{z} - \bm{\mu}\|^2\Bigr]$$
+  where $\mathbb{E}_{\bm{\mu}}$ denotes the expectation taken with respect to $\bm{z} \sim \mathrm{MVN}(\bm{\mu}, \mathbf{I})$. 
+  \end{theorem}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Baseball and James-Stein estimate}
+  <<baseball-example1, echo = FALSE, tidy = TRUE, size = 'tiny'>>=
+  library("pscl")
+  data(EfronMorris)
+  tibble::as_tibble(EfronMorris)
+  @
+  The data contains the batting averages for the $1970$ season. 
+  Here $r$ is the number of hits in the first $45$ number of at bats and
+  $y = r/45$. $n$ and $p$ is the number of at bats and the batting average in the remainder of the
+  $1970$ season, respectively.
+\end{frame}
+
+\begin{frame}[fragile]
+  We now suppose that \texttt{p} is the {\em true} batting average for each of these players and that \texttt{y} is the sampled batting average. The variant of the James-Stein estimate for $\texttt{p}$ is given by
+  $$ \hat{\texttt{p}}^{(\mathrm{JS})} = \bm{1} \bar{\texttt{y}} + \Bigl(1 - \frac{(p - 3) s^2}{\|\texttt{y} - \bm{1} \bar{\texttt{y}}\|^2} \Bigr) (\texttt{y} - \bm{1} \bar{\texttt{y}})$$
+  where $\bar{\texttt{y}} = 0.265$ is the grand average, $s^{2} = \bar{\texttt{y}} (1 - \bar{\texttt{y}})/45 = \Sexpr{0.265*(1 - 0.265)/45}$ is the estimated variance.
+\end{frame}
+
+\begin{frame}[fragile]
+<<baseball-example2, echo = FALSE, tidy = TRUE, results='asis'>>=
+    library(xtable)
+EfronMorris$p.JS <- mean(EfronMorris$y) + (1 - 15*(0.265*(1 - 0.265)/45)/sum((EfronMorris$y - mean(EfronMorris$y))^2))*(EfronMorris$y - mean(EfronMorris$y))
+print(xtable(EfronMorris[,c("name", "y", "p.JS", "p")], digits = 3), size = 'small', include.rownames = FALSE)
+@ 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Too much info (part 1): Proof of James-Stein estimator}
+  A short proof of the above result proceeds as follows. Assume,
+  without loss of generality, that $\sigma^2 = 1$. 
+  Let $\hat{\mu}_i$ and $\mu_i$ denote the $i$-th element of $\hat{\bm{\mu}}^{(\mathrm{JS})}$ and $\bm{\mu}$, respectively. We note that
+  $$ (\hat{\mu}_i - \mu_i)^{2} = (z_i - \hat{\mu}_i)^{2} - (z_i - \mu_i)^{2} + 2 (\hat{\mu}_i - \mu_i)(z_i - \mu_i).$$ 
+ 
+  Taking expectation on both side of the above display, we obtain
+  \begin{equation*}
+    \begin{split}
+  \mathbb{E}_{\bm{z}}[(\hat{\mu}_i - \mu_i)^{2}] &= \mathbb{E}_{\bm{z}}[(z_i - \hat{\mu}_i)^{2} - (z_i - \mu_i)^{2}] + \mathbb{E}_{\bm{z}}[2(\hat{\mu}_i - \mu_i)(z_i - \mu_i)] \\ &=  \mathbb{E}_{\bm{z}}[(z_i - \hat{\mu}_i)^{2}] - \mathbb{E}_{\bm{z}}[(z_i - \mu_i)^{2}] + \mathbb{E}_{\bm{z}}[2\hat{\mu}_i(z_i - \mu_i)]. 
+  \end{split}
+  \end{equation*}
+ \end{frame}
+ 
+ \begin{frame}
+  Next, we note that $\mathbb{E}_{\bm{z}}[2\hat{\mu}_i(z_i - \mu_i)]$ can be written as
+$$ (2 \pi)^{-p/2} \int_{\mathbb{R}} \dots \int_{\mathbb{R}} 2 \hat{\mu}_i (z_i - \mu_i) e^{-(z_i - \mu_i)^{2}/2} dz_i \Bigl(\prod_{j \not = i} e^{-(z_j - \mu_j)^{2}/2} dz_j \Bigr). $$
+
+Integration by parts yield
+$$ \int_{\mathbb{R}} \hat{\mu}_i (z_i - \mu_i) e^{-\tfrac{(z_i - \mu_i)^2}{2}} dz_i = - \hat{\mu}_i e^{-\tfrac{(z_i - \mu_i)^2}{2}}\Bigl|_{-\infty}^{\infty} + \int  \frac{\partial \hat{\mu}_i}{\partial z_i} e^{-\tfrac{(z_i - \mu_i)^2}{2}} dz_i$$
+
+  Therefore, $\mathbb{E}_{\bm{z}}[2\hat{\mu}_i(z_i - \mu_i)]$ can be written as
+  $$  (2 \pi)^{-p/2} \int_{\mathbb{R}} \dots \int_{\mathbb{R}} 2 \frac{\partial \hat{\mu}_i}{\partial z_i} e^{-\tfrac{(z_i - \mu_i)^{2}}{2}} dz_i \Bigl(\prod_{j \not = i} e^{-\tfrac{(z_j - \mu_j)^{2}}{2}} dz_j \Bigr) = 2 \mathbb{E}_{\bm{z}} \Bigl[ \frac{\partial \hat{\mu}_i}{\partial z_i} \Bigr]$$ 
+\end{frame}
+
+\begin{frame}
+  Hence
+  $$  \mathbb{E}_{\bm{z}}[(\hat{\mu}_i - \mu_i)^{2}] =  \mathbb{E}_{\bm{z}}[(z_i - \hat{\mu}_i)^{2}] - \mathbb{E}_{\bm{z}}[(z_i - \mu_i)^{2}] + 2 \mathbb{E}_{\bm{z}} \Bigl[\frac{\partial \hat{\mu}_i}{\partial z_i} \Bigr]. $$
+  Summing the above expression over $i = 1,2,\dots,p$ yield
+  $$ \mathbb{E}_{\bm{z}}[\|\hat{\bm{\mu}}^{(\mathrm{JS})} - \bm{\mu}\|^{2}] = \mathbb{E}_{\bm{z}}[\|\bm{z} - \hat{\bm{\mu}}^{(\mathrm{JS})}\|^{2}] - \mathbb{E}_{\bm{z}}[\|\bm{z} - \bm{\mu}\|^{2}] + 2 \sum_{i} \mathbb{E}_{\bm{z}} \Bigl[\frac{\partial \hat{\mu}_i}{\partial z_i} \Bigr].$$   
+  Now, $\bm{z} - \hat{\bm{\mu}}^{(\mathrm{JS})} = \frac{(p-2)\bm{z}}{\|\bm{z}\|^2}$ and $\mathbb{E}_{\bm{z}}[\|\bm{z} - \bm{\mu}\|^{2}] = p$. Hence
+  $$ \mathbb{E}_{\bm{z}}[\|\hat{\bm{\mu}}^{(\mathrm{JS})} - \bm{\mu}\|^{2}] = \mathbb{E}_{\bm{z}}\Bigl[\frac{(p-2)^2}{\|\bm{z}\|^2}\Bigr] - p + 2 \sum_{i}  \mathbb{E}_{\bm{z}} \Bigl[\frac{\partial \hat{\mu}_i}{\partial z_i} \Bigr].$$   
+\end{frame}
+
+\begin{frame}
+  Finally, we note that
+  $$ \frac{\partial \hat{\mu}_i}{\partial z_i} = \frac{\partial}{\partial z_i} \Bigl(z_i - \frac{(p-2)z_i}{\sum_{j} z_j^2}\Bigr) = 1 - (p-2)\frac{\sum_{j} z_j^2 - 2 z_i^2}{(\sum_{j} z_j^2)^2}$$
+  and hence
+  \begin{equation*}
+    \begin{split}
+    2 \sum_{i}  \mathbb{E}_{\bm{z}} \Bigl[\frac{\partial \hat{\mu}_i}{\partial z_i} \Bigr] &= 2 \mathbb{E}_{\bm{z}} \Bigl[ \sum_{i} 1 - (p-2)\frac{\sum_{j} z_j^2 - 2 z_i^2}{(\sum_{j} z_j^2)^2}\Bigr] \\ &= 
+    2p - \mathbb{E}_{\bm{z}}\Bigl[\frac{2(p-2)^2}{\|\bm{z}\|^2}\Bigr]
+    \end{split}
+    \end{equation*}
+    We thus conclude,
+    $$\mathbb{E}_{\bm{z}}[\|\hat{\bm{\mu}}^{(\mathrm{JS})} - \bm{\mu}\|^{2}] = p - \mathbb{E}_{\bm{z}} \Bigl[\frac{(p-2)^2}{\|\bm{z}\|^2}\Bigr] < p = \mathbb{E}_{\bm{z}}[\|\bm{z} - \bm{\mu}\|^2]$$
+    as desired.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ridge regression}
+  Ridge regression is a ``shrinkage'' technique for estimating
+  regression coefficients.
+  
+  Let $\bm{y}$ be a $n \times 1$ 
+  vector of response values and $\mathbf{X}$ be a $n \times p$ 
+  matrix of predictor variables, {\em not including} the intercept term.
+  
+  Suppose we are interested in fitting a linear model of the form
+  $\bm{y} = \beta_0 \bm{1} + \mathbf{X} \bm{\beta} + \bm{\epsilon}$
+  where $\bm{\beta} = (\beta_1, \beta_2, \dots, \beta_p)$. 
+\end{frame}
+
+\begin{frame}
+  The ridge regression estimate $(\hat{\beta}_0^{(\eta)},
+  \hat{\bm{\beta}}^{(\eta)})$
+  for $(\beta_0, \bm{\beta})$ is then 
+  \begin{equation*}
+    \begin{split}
+    (\hat{\beta}_0^{(\eta)}, \hat{\bm{\beta}}^{(\eta)}) &=
+    \argmin_{\beta_0, \bm{\beta}}
+    \sum_{i=1}^{n}(y_i - \beta_0 - \bm{x}_{i}^{T} \bm{\beta})^2 + \eta \sum_{j=1}^{p}
+    \beta_j^2 \\ &= \argmin_{\beta_0,\bm{\beta}}
+    \|\bm{y} - \beta_0 \bm{1} - \mathbf{X} \bm{\beta}\|^2 + \eta \|\bm{\beta}\|^2    \end{split}
+  \end{equation*}
+  where $\eta$ is a tuning parameter. The term
+  $\eta \|\bm{\beta}\|^{2}$ is the penalty.
+\end{frame}
+
+\begin{frame}
+ \begin{equation*}
+    \begin{split}
+    (\hat{\beta}_0^{(\eta)}, \hat{\bm{\beta}}^{(\eta)}) &= \argmin_{\bm{\beta}} \sum_{i=1}^{n}(y_i -
+    (\bm{x}_{i})^{T} \bm{\beta})^2 + \eta \sum_{j=1}^{p}
+    \beta_j^2 \\ &= \argmin_{\bm{\beta}}
+    \|\bm{y} - \mathbf{X} \bm{\beta}\|^2 + \eta \|\bm{\beta}\|^2    \end{split}
+  \end{equation*}
+  \begin{enumerate}
+  \item If $\eta = 0$, then $\hat{\bm{\beta}}^{(\eta)}$ is the same as the
+    ordinary least square estimate
+  \item If $\eta \rightarrow \infty$, then
+    $\hat{\bm{\beta}}^{(\eta)} \rightarrow 0$.
+  \item Intermediate values of $\eta$ between $0$ and $\infty$
+    controls the \emph{shrinkage} of
+    $\hat{\bm{\beta}}^{(\eta)}$. 
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  Let $Q_{\mathrm{ridge}, \eta}$ be the
+  objective function for ridge regression, i.e.,
+  \begin{equation*}
+    Q_{\mathrm{ridge},\eta}(\beta_0, \bm{\beta}) = \|\bm{y} - \beta_0
+    \bm{1} - \mathbf{X} \bm{\beta}\|^2 + \eta \|\bm{\beta}\|^2
+  \end{equation*}
+  
+  To find $\hat{\beta_0}^{(\eta)}$ and $\hat{\bm{\beta}}^{(\eta)}$ 
+  minimizing $Q_{\mathrm{ridge},\eta}$, we proceed as follows. 
+
+  Taking partial derivatives of $Q_{\mathrm{ridge}}$ with respect to
+  $\beta_0$ and setting the result to $0$ yield 
+  \begin{gather*}
+  \frac{\partial Q}{\partial \beta_0} = 0 \Longleftrightarrow -2
+  \bm{1}^{\top} (\bm{y} - \mathbf{X} \bm{\beta}) + 2 \bm{1}^{\top}
+  \bm{1} \beta_0 = 0 
+\end{gather*}
+  and hence, since $\bm{1}^{\top} \bm{1} = n$
+  $$\hat{\beta}_0^{(\eta)} = \frac{1}{n} \bm{1}^{\top} \bm{y} -
+  \frac{1}{n} \bm{1}^{\top} \mathbf{X} \bm{\beta} = \bar{Y} - \sum_{j=1}^{p} \bar{X}_j \beta_j  $$
+  where $\bar{X}_j$ is the sample mean of the $j$-th predictor
+  variable. 
+\end{frame}
+\begin{frame}
+  
+  We are thus led to consider the (modified) objective function
+  \begin{equation*}
+    \begin{split}
+    \tilde{Q}_{\mathrm{ridge},\eta}(\bm{\beta}) &= \|\bm{y} -
+    \frac{1}{n} \bm{1} \bm{1}^{\top} \bm{y} + \frac{1}{n} \bm{1} \bm{1}^{\top} \mathbf{X} \bm{\beta} -
+    \mathbf{X} \bm{\beta}\|^2 + \eta \|\bm{\beta}\|^2 \\ &= \|(\mathbf{I} - \tfrac{\bm{1}\bm{1}^{\top}}{n}) \bm{y} -
+    (\mathbf{I} - \tfrac{\bm{1}\bm{1}^{\top}}{n}) \mathbf{X} \bm{\beta} \|^{2} + \eta \|\bm{\beta}\|^{2}
+    \end{split}
+  \end{equation*}
+  
+  Once again, taking the partial derivative of $\tilde{Q}$ with
+  respect to $\bm{\beta}$ and setting it to $\bm{0}$ yield the normal
+  equation for ridge regression to be (as $(\mathbf{I} -
+  \tfrac{\bm{1}\bm{1}^{\top}}{n})$ is a symmetric idempotent matrix) 
+  $$ - 2 \mathbf{X}^{\top} (\mathbf{I} -
+  \tfrac{\bm{1}\bm{1}^{\top}}{n}) \bm{y} + 2 \mathbf{X}^{\top}
+  (\mathbf{I} - \tfrac{\bm{1}\bm{1}^{\top}}{n}) \mathbf{X} \bm{\beta} + 2
+  \eta \bm{\beta} = \bm{0}$$
+  from which we obtain
+  $$ \hat{\bm{\beta}}^{(\eta)} = (\mathbf{X}^{\top} (\mathbf{I} -
+  \tfrac{\bm{1}\bm{1}^{\top}}{n}) \mathbf{X} + \eta \mathbf{I})^{-1}  
+  \mathbf{X}^{\top} (\mathbf{I} - \tfrac{\bm{1}\bm{1}^{\top}}{n}) \bm{y} 
+  $$
+\end{frame}
+
+\begin{frame}
+  Collecting the above observations, we conclude that to fit a ridge
+  regression model to $\bm{y}$ using the predictor matrix
+  $\mathbf{X}$, we can proceed as follows. 
+  \begin{enumerate}
+    \item First center the matrix of predictor variables $\mathbf{X}$
+      by transforming $X_{ij}$ (the $ij$-th element of $\mathbf{X}$)
+      into $X_{ij} - \bar{X}_j$. Let $\mathbf{X}^{*} = (\mathbf{I} -
+      \tfrac{\bm{1}\bm{1}^{\top}}{n}) \mathbf{X}$ denote this
+      centered matrix. 
+    \item Compute $\hat{\bm{\beta}}^{(\eta)}$ by
+      $$ \hat{\bm{\beta}}^{(\eta)} = ((\mathbf{X}^{*})^{\top} \mathbf{X}^{*}) + \eta
+      \mathbf{I})^{-1} (\mathbf{X}^{*})^{\top}\bm{y}^{*} $$
+      where $\bm{y}^{*} = \bm{y} - \bm{1} \bar{Y}$ has sample mean
+      $0$. 
+    \item Obtain the fitted value $\hat{\bm{y}}^{(\eta)}$ via
+      $$ \mathbf{X}^{*} \hat{\bm{\beta}}^{(\eta)} + \bm{1} \bar{Y} =
+      \mathbf{X} \hat{\bm{\beta}}^{(\eta)} - \frac{\bm{1}
+        \bm{1}^{\top}}{n} \mathbf{X} \hat{\bm{\beta}}^{(\eta)} + \bm{1} \bar{Y}.$$
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \begin{enumerate}
+    \item
+  When doing ridge regression, we thus usually assume that the matrix $\mathbf{X}$ is already
+  centered, i.e., the sample mean of each column of $\mathbf{X}$ is
+  $0$, and sometimes even the response vector $\bm{y}$ is also
+  centered. 
+  
+  \item It is usually assumed that in addition to centering
+  $\mathbf{X}$, we also scaled the columns of $\mathbf{X}$ so that
+  each column has sample variance $1$ so that the predictor
+  variables are all on the same scale and thus the magnitude of the
+  ``estimated'' coefficients $\hat{\bm{\beta}}$ are comparable, and so
+  penalization by $\|\bm{\beta}\|^{2}$ is reasonable.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  If $\mathbf{X}^{*}$ is a scaled version of $\mathbf{X}$, then
+  $\mathbf{X}^{*} = \mathbf{X}
+  \mathbf{S}^{-1}$ for some diagonal matrix $\mathbf{S}^{-1}$ (the diagonal
+  entries of $\mathbf{S}$ are the standard deviation of
+  the columns of $\mathbf{X}$). 
+
+  The estimated coefficients $\hat{\bm{\beta}}_{*}^{(\eta)}$ for $\mathbf{X}^{*}$ can thus be transformed
+  into the estimated coefficients $\hat{\bm{\beta}}^{(\eta)}$ for $\mathbf{X}$ via $\hat{\bm{\beta}}^{(\eta)} = \mathbf{S}^{-1}
+  \hat{\bm{\beta}}_*^{(\eta)}$. 
+
+  Hence, with some abuse of notation, we shall assume that the columns
+  of $\mathbf{X}$ is already centered (and possibly scaled). 
+\end{frame}
+
+\begin{frame}
+  Recall that the
+  ridge-regression estimate of $\bm{\beta}$ is
+  $$ \hat{\bm{\beta}}^{(\eta)} = (\mathbf{X}^{\top} \mathbf{X} + \eta
+  \mathbf{I})^{-1} \mathbf{X}^{\top} \bm{y} $$
+  
+  This is equivalent to
+  \begin{equation*}
+    \begin{split}
+    \hat{\bm{\beta}}^{(\eta)} &= (\mathbf{X}^{\top}
+    \mathbf{X} + \eta \mathbf{I})^{-1} \mathbf{X}^{\top} \bm{y} \\ &=
+    (\mathbf{X}^{\top} \mathbf{X} + \eta \mathbf{I})^{-1} \mathbf{X}^{\top}
+    \mathbf{X} \hat{\bm{\beta}}_{\mathrm{OLS}} \\ &= \Bigl(\mathbf{X}^{\top}
+    \mathbf{X} (\mathbf{I} + \eta (\mathbf{X}^{\top}
+    \mathbf{X})^{-1})\Bigr)^{-1} \mathbf{X}^{\top} \mathbf{X}
+    \hat{\bm{\beta}}_{\mathrm{OLS}} \\ &= \Bigl(\mathbf{I} + \eta
+    (\mathbf{X}^{\top} \mathbf{X})^{-1}\Bigr)^{-1}
+    \hat{\bm{\beta}}_{\mathrm{OLS}} \\ &= \mathbf{C} \hat{\bm{\beta}}_{\mathrm{OLS}}
+    \end{split}
+  \end{equation*}
+\end{frame}
+
+%% \begin{frame}
+%%   \frametitle{Too much info (part 2): Ridge-regression vs OLS}
+%%   Assume that $\mathbb{E}[\bm{y}] = \mathbf{X} \bm{\beta}$
+%%   and that $\mathrm{Var}[\bm{y}] = \sigma^{2} \mathbf{I}$,
+%%   Using $\mathbf{X} \hat{\bm{\beta}}^{(\eta)}$ as a predictor
+%%   for $\mathbf{X} \bm{\beta}$, we obtain
+%%   \begin{equation*}
+%%     \begin{split}
+%%     \mathbb{E}[\mathrm{ME}] &= \mathbb{E}[\|\mathbf{X} \bm{\beta} - \mathbf{X}
+%%     \hat{\bm{\beta}}^{(\eta)}\|^2] \\ &=
+%%     \mathbf{E}[\|\mathbf{X}(\mathbf{C} \hat{\bm{\beta}}_{\mathrm{OLS}}
+%%     - \bm{\beta})\|^2] \\
+%%     &= \mathbb{E}[\|\mathbf{X}
+%%     \mathbf{C}(\hat{\bm{\beta}}_{\mathrm{OLS}} - \bm{\beta}) +
+%%     \mathbf{X}(\mathbf{C} - \mathbf{I})\bm{\beta}\|^2] \\
+%%     &= \mathbb{E}[\|\mathbf{X} \mathbf{C} (\hat{\bm{\beta}}_{\mathrm{OLS}} -
+%%     \bm{\beta})\|^2] + \mathbb{E}[\|\mathbf{X}(\mathbf{C} -
+%%     \mathbf{I}) \bm{\beta}\|^2] \\ &= \mathbb{E}[(\hat{\bm{\beta}}_{\mathrm{OLS}} -
+%%     \bm{\beta})^{\top} \mathbf{C}^{\top} \mathbf{X}^{\top} \mathbf{X}
+%%     \mathbf{C}(\hat{\bm{\beta}}_{\mathrm{OLS}} - \bm{\beta})] \\ &+
+%%     \bm{\beta}^{\top} (\mathbf{C} - \mathbf{I})^{\top} \mathbf{X}^{\top}
+%%     \mathbf{X} (\mathbf{C} - \mathbf{I}) \bm{\beta}
+%%     \end{split}
+%%   \end{equation*}
+%%   where the cross term $2 \mathbb{E}[(\mathbf{X} \mathbf{C}\hat{\bm{\beta}}_{\mathrm{OLS}} -
+%%   \bm{\beta})^{\top} \mathbf{X} (\mathbf{C} -
+%%   \mathbf{I})\bm{\beta}]$ vanishes as
+%%   $\mathbb{E}[\hat{\bm{\beta}}_{\mathrm{OLS}}] = \bm{\beta}$. 
+%% \end{frame}
+
+%% \begin{frame}
+%%   The first term of the above can be written as
+%%   \begin{equation*}
+%%     \mathbb{E}[\mathrm{tr}(\hat{\bm{\beta}}_{\mathrm{OLS}} -
+%%     \bm{\beta})^{\top} \mathbf{C}^{\top} \mathbf{X}^{\top} \mathbf{X}
+%%     \mathbf{C}(\hat{\bm{\beta}}_{\mathrm{OLS}} - \bm{\beta})] =
+%%     \sigma^2 \mathrm{tr}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top}
+%%     \mathbf{X}^{\top} \mathbf{X} \mathbf{C}
+%%   \end{equation*}
+
+%%   Let $\mathbf{X}^{\top} \mathbf{X} = \mathbf{U} \bm{\Lambda}
+%%   \mathbf{U}^{\top}$ be the spectral decomposition of $\mathbf{X}^{\top}
+%%   \mathbf{X}$ where $\bm{\Lambda} = \mathrm{diag}(\lambda_1,
+%%   \lambda_2, \dots, \lambda_p)$ is the matrix of eigenvalues, then
+%%   \begin{equation*}
+%%     \mathbf{C} = (\mathbf{I} + \eta (\mathbf{X}^{\top} \mathbf{X})^{-1})^{-1} = \mathbf{U} \mathbf{D} \mathbf{U}^{\top}
+%%   \end{equation*}
+%%   where $\mathbf{D} = \mathrm{diag}(\lambda_1/(\lambda_1 + \eta),
+%%   \cdots, \lambda_{p}/(\lambda_p + \eta))$.
+
+%%   We then have
+%%   \begin{equation*}
+%%    \sigma^2\mathrm{tr} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{C}^{\top}
+%%     \mathbf{X}^{\top} \mathbf{X} \mathbf{C} = \sigma^2
+%%     \mathrm{tr}\mathbf{U} \bm{\Lambda}^{-1} \mathbf{D} \bm{\Lambda}
+%%     \mathbf{D} \mathbf{U}^{\top} = \sigma^{2} \sum_{j=1}^{p}
+%%     \frac{\lambda_j^2}{(\eta + \lambda_j)^2}
+%%   \end{equation*}
+%% \end{frame}
+
+%% \begin{frame}
+%%   Letting $\bm{\alpha} = \mathbf{U} \bm{\beta}$, the second term
+%%   ``reduces'' to
+%%   \begin{equation*}
+%%      \mathrm{tr}\bm{\beta}^{\top} (\mathbf{C} - \mathbf{I})^{\top} \mathbf{X}^{\top}
+%%     \mathbf{X} (\mathbf{C} - \mathbf{I}) \bm{\beta} = \sum_{j=1}^{p} \frac{\alpha_j^2
+%%     \eta^2 \lambda_j}{(\eta + \lambda_j)^2}
+%%   \end{equation*}
+
+%%   The two can then be combined to give
+%%   \begin{equation*}
+%%     \mathbb{E}[\mathrm{ME}] = \sum_{j=1}^{p} \frac{\alpha_j^2 \eta^2
+%%     \lambda_j + \sigma^2 \lambda_j^2}{(\eta + \lambda_j)^2}
+%%   \end{equation*}
+%%   The derivative of the above with respect to $\eta$ is then just
+%%   \begin{equation*}
+%%     \sum_{j=1}^{p} \frac{2 \lambda_j^2 (\alpha_j^2 \eta -
+%%       \sigma^2)}{(\eta + \lambda_j)^3}
+%%   \end{equation*}
+%%   which is {\bf negative} for {\bf some positive values} of $\eta$, so there is
+%%   a value of $\eta$ for which the expected model error using
+%%   $\mathbf{X} \hat{\bm{\beta}}^{(\eta)}_{\mathrm{ridge}}$ is smaller than that
+%%   based on the least square estimate.
+%% \end{frame}
+
+%% \begin{frame}
+%%   Similar reasoning allows us to show that
+%%   \begin{equation*}
+%%     \mathbb{E}[\| \hat{\bm{\beta}}^{(\eta)}_{\mathrm{ridge}} - \bm{\beta} \|^2]
+%%     =  \sum_{j=1}^{p} \frac{\sigma^2\lambda_{j} + \alpha_j^2 \eta^2}{(\lambda_j + \eta)^2}
+%%   \end{equation*}
+%%   and therefore, by taking the derivative of the above with respect to
+%%   $\eta$, show that there exists some value of $\eta$ for which the
+%%   mean square error of 
+%%   $\hat{\bm{\beta}}^{(\eta)}_{\mathrm{ridge}}$ is smaller than that of
+%%   $\hat{\bm{\beta}}_{\mathrm{OLS}}$.
+%% \end{frame}
+
+\begin{frame}
+  \frametitle{Number of parameters in ridge regression}
+  The fitted values via ridge regression is 
+  \begin{equation*}
+   \mathbf{X}
+  \hat{\bm{\beta}}^{(\eta)}_{\mathrm{ridge}} = \mathbf{X}(\mathbf{X}^{\top}
+  \mathbf{X} + \eta \mathbf{I})^{-1} \mathbf{X}^{\top} \bm{y} + \bm{1} \bar{Y} =
+  \mathbf{H}_{\eta} \bm{y} + \bm{1} \bar{Y}
+  \end{equation*}
+  where $\mathbf{H}_{\eta} = \mathbf{X}(\mathbf{X}^{\top}
+  \mathbf{X} + \eta \mathbf{I})^{-1} \mathbf{X}^{\top}$.
+
+  The notion of the number of parameters for ridge-regression can be
+  defined to be $\mathrm{tr}(\mathbf{H}_{\eta})$, which is
+  \begin{equation*}
+    \mathrm{tr}(\mathbf{H}_{\eta}) =
+    \sum_{j=1}^{p} \frac{\mathrm{\lambda_j}}{\lambda_{j} + \eta}
+  \end{equation*}
+  Here $\mathrm{tr}$ is the trace of a square matrix, i.e., the sum of its
+  diagonal elements, which coincide with the sum of its eigenvalues,
+  and the $\{\lambda_j\}$ are the eigenvalues of $\mathbf{H}_{\eta}$.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Ridge regression example 1 (Life Expectancy dataset)}
+  <<ridge-example3a, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+  ## state.x77 is a dataset accompanying the R datasets package.
+  statedata <- as.matrix(state.x77)
+  rownames(statedata) <- state.abb
+  tibble::as_tibble(statedata, rownames = "state")
+  @
+\end{frame}
+
+
+\begin{frame}[fragile]
+  <<ridge-example3, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+  g.ridge <- lm.ridge(statedata[,4] ~ statedata[,-4], lambda = c(seq(0,10,0.01)))
+  matplot(g.ridge$lambda, t(g.ridge$coef), type = "l", lty = 1, xlab =
+  expression(lambda), ylab = expression(hat(beta)))
+  MASS::select(g.ridge)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Beware the scaling in lm.ridge}
+<<ridge-example3bc,size='tiny'>>=
+g.lm <- lm(statedata[,4] ~ statedata[,-4]); 
+g.lm$coef ## OLS regression coefficients
+g.ridge$coef[,1] ##  coefficients for ridge regression (transformed scale)
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+<<ridge-example3bcd,size='tiny'>>=
+coef(g.ridge)[1,] ## coefficients for ridge regression (original scale)
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+<<ridge-example3cd,size='tiny'>>=
+names(g.ridge)
+g.ridge$ym
+g.ridge$xm
+g.ridge$scales
+@ 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Leave one-out cross-validation for OLS}
+  Let $\bm{y} = \mathbf{X} \bm{\beta} + \bm{\epsilon}$ be a linear
+  model. 
+  
+  Let $\bm{y}^{(i)}$ be the vector of response variables with the
+  $i$-th response $Y_i$ removed and let $\mathbf{X}^{(i)}$ be the regression matrix with the $i$-th row
+  deleted. 
+  
+  Let $\hat{\bm{\beta}}^{(i)}$ be the least square estimate of $\bm{\beta}$ when the data is
+  $\bm{y}^{(i)}$ and $\mathbf{X}^{(i)}$.
+  
+  The leave-one-out cross-validated error for OLS is defined as
+  $$\mathrm{LOOCV} = \frac{1}{n}\sum_{i=1}^{n} (Y_i - \bm{x}_i^{\top} \hat{\bm{\beta}}^{(i)})^2.$$
+  
+  The quantity $\mathrm{LOOCV}$ attempts to measure the \alert{true}
+  error of the OLS estimate. A naive computation of $\mathrm{LOOCV}$
+  requires the fitting of $n$ linear models.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Too much information (part 2): Simplifying LOOCV}
+  We start with the simple observation
+  \begin{equation*}
+    (\mathbf{X}^{(i)})^{\top} \mathbf{X}^{(i)} = \mathbf{X}^{\top}
+    \mathbf{X} - \bm{x}_{i} \bm{x}_{i}^{\top}
+  \end{equation*}
+  By the Sherman-Morrison-Woodbury formula\footnote{Suppose
+    $\mathbf{A}$ is an invertible matrix and $\bm{u}$ and $\bm{v}$ are
+    column vectors. If $1 + \bm{v}^{\top} \mathbf{A}^{-1} \bm{u} \not
+    = 0$, then $$ (\mathbf{A} + \bm{u} \bm{v}^{\top})^{-1} =
+    \mathbf{A}^{-1} - \frac{\mathbf{A}^{-1} \bm{u} \bm{v}^{\top}
+      \mathbf{A}^{-1}}{1 + \bm{v}^{\top} \mathbf{A}^{-1} \bm{u}}$$}
+  \begin{equation*}
+    \begin{split}
+    ((\mathbf{X}^{(i)})^{\top} \mathbf{X}^{(i)})^{-1} &= (\mathbf{X}^{\top}
+    \mathbf{X} - \bm{x}_{i} \bm{x}_{i}^{\top})^{-1} \\ &=
+    (\mathbf{X}^{\top} \mathbf{X})^{-1} + \frac{(\mathbf{X}^{\top}
+      \mathbf{X})^{-1} \bm{x}_i \bm{x}_i^{\top} (\mathbf{X}^{\top}
+      \mathbf{X})^{-1}}{1 - \bm{x}_{i}^{\top} (\mathbf{X}^{\top}
+      \mathbf{X})^{-1} \bm{x}_i} \\
+    &=     (\mathbf{X}^{\top} \mathbf{X})^{-1} + \frac{(\mathbf{X}^{\top}
+      \mathbf{X})^{-1} \bm{x}_i \bm{x}_i^{\top} (\mathbf{X}^{\top}
+      \mathbf{X})^{-1}}{1 - h_i}
+  \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  We then have, 
+  \begin{equation*}
+    \begin{split}
+    \hat{\bm{\beta}}^{(i)} &= (\mathbf{X}^{(i)})^{\top} \mathbf{X}^{(i)})^{-1}
+    (\mathbf{X}^{(i)})^{\top} \bm{y}^{(i)} \\
+    %%  &= ((\mathbf{X}^{(i)})^{\top} \mathbf{X}^{(i)})^{-1}
+    %% (\mathbf{X}^{\top} \bm{y} - \bm{x}_{i} y_i) \\
+    &= \Bigl((\mathbf{X}^{\top} \mathbf{X})^{-1} + \frac{(\mathbf{X}^{\top}
+      \mathbf{X})^{-1} \bm{x}_i \bm{x}_i^{\top} (\mathbf{X}^{\top}
+      \mathbf{X})^{-1}}{1 - h_i}\Bigr) (\mathbf{X}^{\top} \bm{y} - \bm{x}_{i}
+    y_i) \\
+    &= \hat{\bm{\beta}} - (\mathbf{X}^{\top} \mathbf{X})^{-1} \bm{x}_i
+    y_i + \frac{(\mathbf{X}^{\top} \mathbf{X})^{-1}
+      \bm{x}_{i}}{1 -h_i} \Bigl( \bm{x}_{i}^{\top}
+    \hat{\bm{\beta}} - \bm{x}_i^{\top} (\mathbf{X}^{\top}
+    \mathbf{X})^{-1} \bm{x}_i y_i\Bigr) \\ &= \qquad \vdots \\ & = 
+    \hat{\bm{\beta}} - \frac{(\mathbf{X}^{\top} \mathbf{X})^{-1}
+      \bm{x}_{i} e_i}{1 -h_i}
+    \end{split}
+  \end{equation*}
+  Here $h_i = \bm{x}_i^{\top} (\mathbf{X}^{\top}
+  \mathbf{X})^{-1} \bm{x}_i$ is the $i$th element of $\mathbf{X}
+  (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}$ 
+\end{frame}
+
+\begin{frame}
+    \begin{proposition}
+    \label{prop:1}
+    Consider the linear model $\bm{y} = \mathbf{X} \bm{\beta} +
+    \bm{\epsilon}$. Let $\hat{\bm{\beta}}$ and
+    $\hat{\bm{\beta}}^{(i)}$ be the least squares estimate of
+    $\bm{\beta}$ with and without the $i$-th observation included in
+    the data. Then
+    \begin{equation*}
+      \hat{\bm{\beta}} - \hat{\bm{\beta}}^{(i)} =
+      \frac{(\mathbf{X}^{\top} \mathbf{X})^{-1} \bm{x}_{i} e_i}{1 - h_i}
+    \end{equation*}
+    where $e_i = y_i - \bm{x}_i^{\top} \hat{\bm{\beta}}$ is the $i$-th residual
+    when fitted on the whole data.
+  \end{proposition}
+
+  We thus have the following simplifying expression
+  $$\mathrm{LOOCV} = \frac{1}{n} \sum_{i=1}^{n} (Y_i - \bm{x}_i^{\top}
+  \hat{\bm{\beta}}^{(i)})^2 = \frac{1}{n} \sum_{i=1}^{n}  \Bigl(\frac{Y_i - \bm{x}_i^{\top}
+    \hat{\bm{\beta}}}{1 - h_i} \Bigr)^2.$$
+\end{frame}
+
+\begin{frame}
+  \frametitle{Generalized cross-validation score for ridge regression}
+  The generalized cross-validation is a variant of the leave-one-out
+  cross-validation measure
+  $$ \mathrm{CV}_{\eta} = \frac{1}{n} \sum_{i} (y_i - \bm{x}_i^{\top}
+  \hat{\bm{\beta}}_R^{(\eta,i)})^2 = \frac{1}{n} \sum_{i} \Bigl(\frac{y_i - \bm{x}_i^{\top}
+    \hat{\bm{\beta}}_R^{(\eta)}}{1 - h_i^{(\eta)}}\Bigr)^2$$
+  Here $\hat{\bm{\beta}}_R^{(\eta,i)}$ is the ridge regression estimation
+  with tuning parameter $\eta$ and the $i$-th data point removed and $\hat{\bm{\beta}}_{R}^{(\eta)}$
+  is the ridge regression estimate with tuning parameter $\eta$ on the
+  full data. In addition, $h_i^{(\eta)}$ is the $i$-th diagonal element of
+  $\mathbf{H}_{\eta}$. 
+\end{frame}
+
+\begin{frame}
+  The generalized cross-validation $\mathrm{GCV}_{\eta}$ is then
+  obtained by replacing the $h_{i}^{(\eta)}$ with their average values
+  $\tfrac{1}{n} \mathrm{tr}(\mathbf{H}_{\eta})$, i.e., 
+  $$ \mathrm{GCV}_{\eta} = \frac{1}{n} \sum_{i} \Bigl(\frac{y_i - \hat{y}_i^{(\eta)}}{1 - \mathrm{tr}(\mathbf{H}_{\eta})/n}\Bigr)^2.$$
+  We can then choose the parameter $\eta$ to minimize $\mathrm{GCV}_{\eta}$. 
+\end{frame}
+
+%% \begin{frame}[fragile]
+%%   \frametitle{Beware the implicit scaling of lm.ridge}
+%%   <<ridge-example4bc, dependson = 'ridge-example3', cache = TRUE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+%%   g1 <- lm(Life.Exp ~ ., data = statedata)
+%%   coef(g1)
+%%   g2 <- lm.ridge(statedata[,4] ~ statedata[,-4], lamb = c(seq(0,10,0.01)))
+%%   @
+%% \end{frame}
+
+\begin{frame}[fragile]
+  <<ridge-example4, dependson = 'ridge-example3', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+  which.min(g.ridge$GCV)
+  coef(g.ridge)[1,]
+  coef(g.ridge)[278,]
+  @
+\end{frame}
+\begin{frame}[fragile]
+  <<ridge-example4b, dependson = 'ridge-example3', tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+  sum(coef(g.ridge)[1,-1]^2)
+  sum(coef(g.ridge)[278,-1]^2)
+  @
+  The norm of the ridge regression estimate is smaller than that of the linear model and thus indicates shrinkage. Note that individual
+  coefficients need not be shrinked.
+\end{frame}
+
+%% \begin{frame}[fragile]
+%%   As another example for selecting $\lambda$, we plot how the AIC measure changes as lambda varies.
+%%   <<ridge-example5, dependson = 'ridge-example4b', tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=6, fig.height = 6, fig.align='center',out.width='.25\\linewidth'>>=
+%%   log.rss <- numeric(length(g.ridge$lambda))
+%%   for(i in 1:length(g.ridge$lambda)){
+%%     g.coef.i <- coef(g.ridge)[i,-1]
+%%     log.rss[i] <- log(sum((statedata[,4] - as.matrix(statedata[,-4]) %*% g.coef.i - 
+%%     g.ridge$ym + sum(g.ridge$xm*g.coef.i))^2))
+%%   } 
+%%   scaled.statedata <- scale(statedata)
+%%   eigenvals <- eigen(t(scaled.statedata[,-4]) %*% scaled.statedata[,-4], 
+%%                        only.values = TRUE)$values
+%%   dfmat1 <- outer(rep(1,length(g.ridge$lambda)), eigenvals)
+%%   dfmat2 <- outer(g.ridge$lambda, rep(1, length(eigenvals)))
+%%   aic <- nrow(statedata)*log.rss + 2*rowSums(dfmat1/(dfmat1 + dfmat2))
+%%   @
+%% \end{frame}
+
+%% \begin{frame}[fragile]
+%%   <<ridge-example5b, dependson = 'ridge-example5', tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=6, fig.height = 6, fig.align='center',out.width='.5\\linewidth'>>=
+%%   plot(g.ridge$lambda, aic, type = "l", ylab = "AIC", xlab = "lambda")
+%%   g.ridge$lambda[which(aic == min(aic))] ## Find the ``best'' eta w.r.t AIC
+%%   @
+%% \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Ridge Regression Example 2}
+<<ridge-example2a, dependson = 'ridge-example1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+library(faraway)
+data(meatspec)
+meatspec <- tibble::as_tibble(meatspec) ## Pretty printing
+dplyr::select(meatspec, fat, dplyr::everything())
+@
+The \textrm{meatspec} dataset from \textbf{faraway} package. The
+dataset contains meat spetroscopy measurements of finely chopped pure
+meat. For each sample, the fat content of the sample was measured
+along with 100 channel spectrum of absorbances collected
+using near infrared transmission.
+\end{frame}
+
+\begin{frame}[fragile]
+<<ridge-example2, dependson = 'ridge-example1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+library("MASS")
+train.idx <- c(1:172)
+yc <- meatspec$fat[train.idx] - mean(meatspec$fat[train.idx])
+mm <- apply(meatspec[train.idx,-101],2,mean)
+trainx <- as.matrix(sweep(meatspec[train.idx,-101],2,mm))
+g.ridge <- lm.ridge(yc ~ trainx, lambda =
+seq(0, 5e-8, 1e-9))
+matplot(log(g.ridge$lambda,10), t(g.ridge$coef), type = "l", lty = 1, xlab = paste("log", expression(lambda)), ylab = expression(hat(beta)))
+@
+We split the data into training and testing, and perform ridge-regression on the
+training data. Note the explicit centering of the training data.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Beware the implicit scaling in lm.ridge!}
+<<ridge-example3b, dependson='ridge-example2', size='tiny'>>=
+(cv.min <- which.min(g.ridge$GCV))
+fitted.train1 <- trainx %*% g.ridge$coef[,cv.min]
+fitted.train2 <- trainx %*% g.ridge$coef[,cv.min] + mean(meatspec$fat[train.idx])
+fitted.train3 <- scale(trainx, center = FALSE, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] + 
+           mean(meatspec$fat[train.idx])
+sum((fitted.train1 - meatspec$fat[train.idx])^2)
+sum((fitted.train2 - meatspec$fat[train.idx])^2)
+sum((fitted.train3 - meatspec$fat[train.idx])^2)
+@ 
+\end{frame}
+
+\begin{frame}[fragile,allowframebreaks]
+<<ridge-example3c, dependson='ridge-example2', size='tiny'>>=
+test.idx <- -train.idx
+testx <- as.matrix(meatspec[test.idx,-101])
+fitted.test1a <- testx %*% g.ridge$coef[,cv.min]
+fitted.test1b <- testx %*% g.ridge$coef[,cv.min] + mean(meatspec$fat[train.idx])
+sum((fitted.test1a - meatspec$fat[test.idx])^2)
+sum((fitted.test1b - meatspec$fat[test.idx])^2)
+
+fitted.test2a <- scale(testx, center = FALSE, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] 
+fitted.test2b <- scale(testx, center = FALSE, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] + 
+           mean(meatspec$fat[train.idx])
+sum((fitted.test2a - meatspec$fat[test.idx])^2)
+sum((fitted.test2b - meatspec$fat[test.idx])^2)
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+<<ridge-example3d, dependson='ridge-example2', size='tiny'>>=
+fitted.test3a <- scale(testx, center = TRUE, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min]  
+fitted.test3b <- scale(testx, center = TRUE, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] + 
+           mean(meatspec$fat[train.idx])
+sum((fitted.test3a - meatspec$fat[test.idx])^2)
+sum((fitted.test3b - meatspec$fat[test.idx])^2)
+
+fitted.test4a <- scale(testx, center = g.ridge$xm, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] 
+fitted.test4b <- scale(testx, center = g.ridge$xm, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] + 
+           mean(meatspec$fat[train.idx])
+sum((fitted.test4a - meatspec$fat[test.idx])^2)
+sum((fitted.test4b - meatspec$fat[test.idx])^2)
+@ 
+\end{frame}
+
+\begin{frame}[fragile]
+<<ridge-example3e, dependson='ridge-example2', size='tiny'>>=
+fitted.test5a <- scale(testx, center = mm, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min]  
+fitted.test5b <- scale(testx, center = mm, scale = g.ridge$scale) %*% g.ridge$coef[,cv.min] + 
+           mean(meatspec$fat[train.idx])
+sum((fitted.test5a - meatspec$fat[test.idx])^2)
+sum((fitted.test5b - meatspec$fat[test.idx])^2)
+@ 
+Maybe it is easier to just use \texttt{glmnet} ?
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Penalized Spline Regression}
+  We revisit the problem of spline regression. Let $(X_1, Y_1),\dots,
+  (X_n, Y_n)$ be $n$ data points and assume that $X_i \in
+  \mathbb{R}$. 
+  Instead of doing a spline regression by choosing the knots, we could use a very large
+  number of knots, but then {\em constrain} their influence. 
+  
+  That is to say, let $c_1, c_2, \dots, c_m$ be a {\em large} number
+  of knots. We want to find $\beta_0, \beta_1, \gamma_1,\dots,
+  \gamma_m$ to minimize
+  $$\sum_{i=1}^{n} \Bigl(Y_i - \beta_0 - \beta_1 X_i - \sum_{k=1}^{m} \gamma_k \ast (X_i -
+  c_k)_{+}\Bigr)^2 + \lambda \sum_{k=1}^{m} \gamma_k^2$$ 
+\end{frame}
+
+\begin{frame}
+  Let $\mathbf{X}$ be the $n \times (m + 2)$ matrix of the form
+  $$\mathbf{X} = \begin{bmatrix} 1 & X_1 & (X_1 - c_1)_{+} & (X_1 -
+    c_2)_{+} & \cdots & (X_1 - c_m)_{+} \\
+ 1 & X_2 & (X_2 - c_1)_{+} & (X_2 -
+    c_2)_{+} & \cdots & (X_2 - c_m)_{+} \\
+    \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+    1 & X_n & (X_n - c_1)_{+} & (X_n - c_2)_{+} & \cdots & (X_n -
+    c_m)_{+} \end{bmatrix} $$
+  and let $\mathbf{D}$ be the block diagonal matrix of the form
+  $$\mathbf{D} = \begin{bmatrix} \bm{0}_{2 \times 2} & \bm{0}_{2
+      \times m} \\ \bm{0}_{m \times 2} & \mathbf{I}_{m} \end{bmatrix} $$
+ 
+\end{frame}
+\begin{frame}
+    With (a slight) abuse of notation, the previous optimization problem can
+    be formulated as the optimization problem
+    \begin{equation}
+      \label{eq:ridge2}
+      \tag{$\star \star$}
+      \min_{\bm{\beta}}\|\bm{y} - \mathbf{X} \bm{\beta} \|_{2}^{2} +
+      \lambda \, \bm{\beta}^{\top} \mathbf{D} \bm{\beta}. 
+ \end{equation}
+ 
+ For a given $\lambda \geq 0$, the solution of Eq.~\eqref{eq:ridge2}
+ is $$\hat{\bm{\beta}}^{(\lambda)} = (\mathbf{X}^{\top}
+ \mathbf{X} + \lambda \mathbf{D})^{-1} \mathbf{X}^{\top} \bm{y}$$
+ 
+ The formulation given by Eq.~\eqref{eq:ridge2} is
+ known as the penalized spline regression problem. The above solution
+ indicates that Eq.~\eqref{eq:ridge2} reduces to a ridge regression problem.
+\end{frame}
+
+\begin{frame}
+  For a given $\lambda$, the fitted value is
+  $$\hat{\bm{y}}^{(\lambda)} = \mathbf{X} \hat{\bm{\beta}}^{(\lambda)} =
+  \mathbf{X} (\mathbf{X}^{\top}
+ \mathbf{X} + \lambda \mathbf{D})^{-1} \mathbf{X}^{\top} \bm{y} =
+ \mathbf{S}_{\lambda} \bm{y}$$
+ where $\mathbf{S}_{\lambda} = \mathbf{X} (\mathbf{X}^{\top}
+ \mathbf{X} + \lambda \mathbf{D})^{-1} \mathbf{X}^{\top}$ is known as
+ the \alert{smoother matrix}. Compare and contrast this penalized regression spline
+ matrix $\mathbf{S}_{\lambda}$ with the classical ordinary least square
+ matrix $\mathbf{H} = \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1}
+ \mathbf{X}^{\top}$. 
+ 
+ For a given $\lambda$, the ``number of parameters'' or ``degree of
+ freedoms for the fit'' using $\mathbf{S}_{\lambda}$ is
+ $$ \mathrm{df}_{\mathrm{fit}} = \mathrm{tr}(\mathbf{S}_{\lambda})$$
+ where $\mathrm{tr}(\cdot)$ is the trace of a matrix, i.e., the sum of its
+ diagonal elements.
+\end{frame}
+
+\begin{frame}
+  Thus, instead of choosing the knots location, penalized spline
+  regression is concerned with choosing the coefficient $\lambda$ for
+  the optimization problem Eq.~\eqref{eq:ridge2}. This can be done
+  for example using cross-validation or generalized cross-validation.
+
+  The generalized cross validation score for a given value of
+  $\lambda$ is 
+  $$\mathrm{GCV}_{\lambda} = \sum_{i=1}^{n} \Bigl(\frac{Y_i -
+    \hat{Y}_i^{(\lambda)}}{1 - \mathrm{tr}(\mathbf{S}_{\lambda})/n}\Bigr)^2$$
+  and one way to select $\lambda$ is by choosing $\lambda$ to minimize $\mathrm{GCV}_{\lambda}$.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-psr-example1, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.5\\textwidth', fig.align = 'center'>>=
+  
+  basis.design <- function(x,knots){
+    Xmat <- cbind(rep(1, length(x)), x)
+    for(i in 1:length(knots)){
+      Xmat <- cbind(Xmat, ifelse(x < knots[i], 0, x - knots[i]))
+    }
+    return( Xmat)
+  }
+ 
+  psr <- function(y,x,knots,lambda){
+    X <- basis.design(x, knots)
+    D <- diag(c(0,0, rep(1,length(knots))))
+    S <- X %*% solve(t(X) %*% X + lambda*D) %*% t(X)
+    yhat <- S %*% y
+    df_fit <- sum(diag(S)) ## degrees of freedom for the fit
+    return(yhat)
+ }
+ @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-psr-example2, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.45\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  knots <- seq(from = 400, to = 700, by = 12.5)
+  lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 1) ## lambda = 1
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) +
+  geom_line(aes(x = range, y = logratio.smoothed), colour = "blue") +
+  theme_bw() + ggtitle("lambda = 1")
+  lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 100) ## lambda = 10^2
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) +
+  geom_line(aes(x = range, y = logratio.smoothed), colour = "blue") +
+  theme_bw() + ggtitle("lambda = 100")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-lidar-psr-example2b, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.45\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  knots <- seq(from = 400, to = 700, by = 12.5)
+  lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 900) ## lambda = 30^2
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) +
+  geom_line(aes(x = range, y = logratio.smoothed), colour = "blue") + 
+  theme_bw() + ggtitle("lambda = 900")
+  lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 10000) ## lambda = 100^2
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) +
+  geom_line(aes(x = range, y = logratio.smoothed), colour = "blue") + 
+  theme_bw() + ggtitle("lambda = 10000")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  Instead of piecewise linear functions $\sum_{k} \gamma_k \ast (x - c_k)_{+}$, we can also
+  use the ``smoother'' piecewise quadratic functions $$\sum_{k}
+  \gamma_k^{(1)} \ast (x - c_k)_{+} + \sum_{k} \gamma_{k}^{(2)} \ast (x -
+  c_k)_{+}^{2}$$ or the piecewise cubic functions $$\sum_{k}
+  \gamma_k^{(1)} \ast (x - c_k)_{+} + \sum_{k} \gamma_{k}^{(2)} \ast (x -
+  c_k)_{+}^{2} + \sum_{k} \gamma_{k}^{(3)} \ast (x - c_k)_{+}^{3}$$ where
+  $(x - c)_{+}^{2} = ((x - c)_{+})^{2}$ and similarly for $(x -
+  c)_{+}^{3}$. 
+ \end{frame}
+ 
+ \begin{frame}[fragile]
+  <<lecture1-lidar-psr-example3, echo = FALSE, tidy = FALSE, size = 'tiny', out.width='.40\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  cubic.penalized.spline.augmented.matrix <- function(x,knots,lambda){
+    Xmat <- cbind(rep(1, length(x)), x, x^2, x^3)
+    for(i in 1:length(knots)){
+      Xmat <- cbind(Xmat, ifelse(x < knots[i], 0, (x - knots[i])), ifelse(x < knots[i], 0, (x - knots[i])^2), 
+                          ifelse(x < knots[i], 0, (x - knots[i])^3))
+    }
+    D <- diag(c(0,0,0,0, rep(1,3*length(knots))))
+    Xmat <- rbind(Xmat, lambda*D)
+    return( Xmat)
+  }
+  knots <- seq(from = 400, to = 700, by = 12.5)
+  lidar$logratio.linear.smoothed <- psr(lidar$logratio, lidar$range, knots, 900) ## linear spline, lambda = 30^2
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) +
+  geom_line(aes(x = range, y = logratio.linear.smoothed), colour = "blue") + 
+  theme_bw() + ggtitle("linear spline, lambda = 900")
+  g1 <- lm(c(lidar$logratio, rep(0, 4 + 3*length(knots))) ~ cubic.penalized.spline.augmented.matrix(lidar$range, knots,900))
+  lidar$logratio.smoothed.cubic <- fitted(g1)[1:length(lidar$range)]
+  ggplot(lidar) + geom_point(aes(x = range, y = logratio)) + 
+  geom_line(aes(x = range, y = logratio.smoothed.cubic), colour = "blue") + 
+  theme_bw() + ggtitle("cubic spline, lambda = 900")
+  @
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Additive Models}
+  <<lecture1-temperature-example1, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.6\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  library("SemiPar")
+  data(ustemp)
+  ggplot(ustemp, aes(x = -longitude, y = latitude, colour = min.temp)) + geom_point() + 
+  ggtitle("Average minimum temperature in January for some US cities") + theme_bw() + 
+  scale_colour_gradient(low = "blue", high = "red")
+  @
+\end{frame}
+
+\begin{frame}
+  We now want to ``predict'' the minimum average temperature of the US
+  cities as a function of their latitude and longitude. Assume that we
+  have almost no domain knowledge of the problem. Then a possible
+  starting point is to fit a {\em nonparametric} model of the form
+  $$ \texttt{min.temp}_i = \beta_0 + f(\texttt{latitude}_i) +
+  g(\texttt{longitude}_i) + \epsilon_i $$
+  where $f$ and $g$ are some unspecified smooth functions. 
+\end{frame}
+
+\begin{frame}
+  Penalized splines are easily adapted to this problem, e.g., 
+  letting $Y$ denote the variable \texttt{min.temp} and $X$ and $Z$
+  denote the variables $\texttt{latitude}$ and $\texttt{longitude}$. 
+  we can fit the model
+  $$ Y_i= \beta_0 + \beta_1 X_i +
+  \beta_2 Z_i + \sum_{k=1}^{m_1} \gamma_{k}^{(1)} \ast
+  (X_i - c_k)_{+} + \sum_{\ell=1}^{m_2}
+  \gamma_{k}^{(2)} \ast (Z_i - d_k)_{+} $$
+  for some knots $c_1 < c_2 < \dots < c_{m_1}$ of the latitude
+  variable and some knots $d_1 < d_2 < \dots < d_{m_2}$ of the
+  longitude variable. 
+\end{frame}
+  
+\begin{frame}[fragile]  
+  We can once again solve the optimization problem
+  $$ \min_{\bm{\beta}}\|\bm{y} - \mathbf{X} \bm{\beta} \|_{2}^{2} +
+ \bm{\beta}^{\top} \mathbf{D} \bm{\beta} $$
+ where $\mathbf{X}$ and $\mathbf{D}$ is now given by
+ \begin{gather*} \mathbf{X} = \left[ \begin{smallmatrix} 1 & X_1 & Z_1 & (X_1 -
+     c_1)_{+} & \cdots & (X_1 -
+   c_{m_1})_{+} & (Z_1 - d_1)_{+} & \cdots & (Z_1 - d_{m_2})_{+}  \\
+ 1 & X_2 & Z_2 & (X_2 - c_1)_{+} & \cdots & (X_2 -
+   c_{m_1})_{+} & (Z_2 - d_1)_{+} & \cdots & (Z_2 - d_{m_2})_{+}  \\ 
+   \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \ddots &
+   \vdots \\
+   1 & X_n & Z_n & (X_n - c_1)_{+} & \cdots & (X_n -
+   c_{m_1})_{+} & (Z_n - d_1)_{+} & \cdots & (Z_n - d_{m_2})_{+}  \\
+  \end{smallmatrix} \right]; \\
+   \mathbf{D} = \begin{bmatrix} \bm{0} & \bm{0} & \bm{0} \\ \bm{0} &
+   \lambda_1 \mathbf{I}_{m_1} & \bm{0} \\
+   \bm{0} & \bm{0} & \lambda_2 \mathbf{I}_{m_2} \end{bmatrix}.
+ \end{gather*}
+\end{frame}
+\begin{frame}
+ The estimated coefficients are once again given 
+ by $$\hat{\bm{\beta}}^{(\bm{\lambda})} = (\mathbf{X}^{\top}
+ \mathbf{X} + \mathbf{D})^{-1} \mathbf{X}^{\top} \bm{y}$$
+ where $\bm{\lambda} = (\lambda_1, \lambda_2)$ and $\bm{\lambda}$ can
+ be selected using generalized cross validation.
+ 
+ Q1. What about interactions between latitude and longitude ?
+\end{frame}
+
+\begin{frame}[fragile]
+ The details are outside the scope of this class. All we have time
+  for is a quick illustration on how easy it is to fit an additive
+  model in R.
+
+   <<lecture1-temperature-example1b, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.6\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  g2 <- spm(ustemp$min.temp ~ f(ustemp$latitude, basis = "trunc.poly") +
+                      f(ustemp$longitude, basis = "trunc.poly"))
+  summary(g2)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<lecture1-temperature-example1c, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='.4\\textwidth', fig.show = 'hold', fig.align = 'center'>>=
+  plot(g2)
+  @
+\end{frame}
+\end{document}
+
+\begin{frame}
+   \frametitle{Variability bands in scatterplot smoothing}
+   Let $\{(X_1, Y_1)]\}_{i=1}^{n}$ be $n$ given bivariate data points
+   and suppose we consider the nonparametric regression model
+   $$ Y_i = f(X_i) + \epsilon_i, \quad \mathbb{E}[\epsilon_i] = 0,
+  \mathrm{Var}[\epsilon_i] = \sigma_{\epsilon}^2 $$
+  for the relationship between the $\{X_i\}$ and the $\{Y_i\}$. 
+  
+  Given $X_*$, suppose use $\hat{f}(X_*) = \bm{x}_*^{\top}
+  (\mathbf{X}^{\top} \mathbf{X} + \lambda^{2} \mathbf{D})^{-1}
+  \mathbf{X}^{\top} \bm{y}$ as a {\em point estimate} for $f(X)$. Here 
+  $\mathbf{X}$ is some spline design
+  matrix and $\bm{x}_{*}^{\top}$ is the (augmented) predictor
+  variables, e.g., for a linear spline
+  $$\bm{x}_* = [1, X_*, (X_* - c_1)_{+}, \dots, (X_* - c_{m})_{+}].$$
+  
+  It is then natural to inquire about the variability of $\hat{f}(X_*)$. 
+  \end{frame}
+  \begin{frame}
+    Suppose for the moment that $\mathrm{Var}[\bm{\epsilon}] =
+  \sigma_{\epsilon}^{2} \mathbf{I}$ and the smoothing parameter $\lambda$ is
+  fixed {\em a priori}. Then  
+  \begin{equation*} \begin{split}\mathrm{Var}[\hat{f}(X_*)] & = \bm{x}_*^{\top}
+  (\mathbf{X}^{\top} \mathbf{X} + \lambda^{2} \mathbf{D})^{-1}
+  \mathbf{X}^{\top} \mathrm{Var}[\bm{y}] \mathbf{X} (\mathbf{X}^{\top}
+  \mathbf{X} + \lambda^{2} \mathbf{D})^{-1} \bm{x}_{*} \\ &=
+  \sigma_{\epsilon}^{2} \bm{x}_{*}^{\top}   (\mathbf{X}^{\top} \mathbf{X} + \lambda^{2} \mathbf{D})^{-1}
+  \mathbf{X}^{\top} \mathbf{X} (\mathbf{X}^{\top}
+  \mathbf{X} + \lambda^{2} \mathbf{D})^{-1} \bm{x}_{*}
+  \end{split}
+  \end{equation*}
+
+ Thus, a reasonable notion for the variability of $\hat{f}(X_*)$ is
+  $$ \widehat{\mathrm{st.dev}}(\hat{f}(X_*)) = \hat{\sigma}_{\epsilon}
+  \|\mathbf{X} (\mathbf{X}^{\top}
+  \mathbf{X} + \lambda^{2} \mathbf{D})^{-1} \bm{x}_{*}\|; \,\, \hat{\sigma}_{\epsilon}^{2} = \frac{\|\bm{y} -
+  \mathbf{S}_{\lambda} \bm{y}\|^2}{
+  \mathrm{df}_{\mathrm{res}}(\lambda)}.
+$$
+Using the above expression for
+$\widehat{\mathrm{st.dev}}(\hat{f}(X_*))$, we can then define the $(1
+- \alpha) \times 100\%$ confidence interval for ${\color{blue} \mathbb{E}[\hat{f}(X_*)]}$ via
+\begin{gather*} \hat{f}(X_*) \pm \mathrm{qnorm}(1 - \alpha/2) \ast
+  \widehat{\mathrm{st.dev}}(\hat{f}(X_*)) 
+  %\quad \text{for large $n$} \\
+%\hat{f}(X_*) \pm \mathrm{qt}(1 - \alpha/2; \mathrm{df} = 
+  %\mathrm{df}_{\mathrm{res}}(\lambda)) \ast \widehat{\mathrm{st.dev}}(\hat{f}(X_*)) \quad \text{for small $n$}
+\end{gather*}  
+\end{frame}
+\begin{frame}
+  However, adjustments to the above confidence interval is potentially necessary
+  to account for 
+  \begin{itemize}
+    \item $\hat{\sigma}_{\epsilon}^{2}$ as an estimate for the unknown
+      $\sigma_{\epsilon}^{2}$.
+    \item Bias in $\hat{f}$ as an estimate for $f$ and curvature in the function $f$. 
+    \item Estimation of the smoothing parameter $\lambda$ (this is ``hard''!)
+  \end{itemize}
+   To address $\hat{\sigma}_{\epsilon}^{2}$ as an estimate for the unknown
+      $\sigma_{\epsilon}^{2}$, we replace the previous confidence
+      interval with that of
+      \begin{gather*} \hat{f}(X_*) \pm \mathrm{qnorm}(1 - \alpha/2) \ast
+        \widehat{\mathrm{st.dev}}(\hat{f}(X_*)) 
+        \quad \text{for large $n$} \\
+        \hat{f}(X_*) \pm \mathrm{qt}(1 - \alpha/2; \mathrm{df}_{\mathrm{res}}(\lambda)) \ast \widehat{\mathrm{st.dev}}(\hat{f}(X_*)) \quad \text{for small $n$}
+      \end{gather*}
+\end{frame}
+\end{document}
+
+\begin{frame}[fragile]
+  \frametitle{Simple semiparametric models}
+  We now present a few simple examples of penalized spline
+  regression for fitting semiparametric regression models.
+  <<onion-example1, echo = TRUE, fig.align = 'center', fig.show = 'hold', out.width = '0.45\\textwidth'>>=
+  data(onions)
+  onions$location <- as.factor(onions$location)
+  levels(onions$location) <- c("Purnong Landing", "Virginia")
+  g1 <- lm(log(yield) ~ location + dens, onions)
+  onions$fitted.log.yield <- fitted(g1)
+  ggplot(onions, aes(x = dens, y = log(yield), color = location)) + geom_point() + 
+  geom_line(aes(x = dens, y = fitted.log.yield, color = location),
+  linetype = 2 ) + theme(aspect.ratio = 1)
+  @
+\end{frame}
+
+\begin{frame}
+  The previous plot contains data on yields of white Spanish onions. The
+  dashed lines in the plots correspond to fitting the linear model
+  \begin{equation*}
+    \begin{split} \texttt{log(yield)}_{i} = \beta_0 &+ \beta_1
+  \bm{1}\{\texttt{location}_i = \text{``Virginia"}\} \\ & + \beta_2
+  \texttt{density}_i + \epsilon_i
+  \end{split}
+  \end{equation*}
+  The fitted linear model has $\hat{\beta}_1 = \Sexpr{coef(g1)[2]}$
+  with estimated standard deviation $s\{\hat{\beta}_1\} =
+  \Sexpr{summary(g1)$coefficients[2,2]}$. 
+  The data exhibits some curvature that is not captured by the linear
+  model. We next consider the model
+  \begin{equation*} \begin{split} \texttt{log(yield)}_{i}  
+    = \beta_0 & + \beta_1 \bm{1}\{\texttt{location}_i =
+  \text{``Virginia''}\} \\ & + f(\texttt{density}_i) + \epsilon_i \end{split} 
+  \end{equation*}
+  for some smooth but unknown function $f$. 
+  \end{frame}
+  
+  \begin{frame}
+    This model is equivalent to the penalized spline regression model
+  \begin{equation*}
+    \begin{split}
+    \texttt{log(yield)}_i = \beta_0 & + \beta_1 \bm{1}\{\texttt{location}_i =
+  \text{``Virginia''}\} + \beta_2 \texttt{density}_i \\ &+
+  \sum_{k=1}^{m} u_k (\texttt{density}_i - c_k)_{+} + \epsilon_i
+  \end{split}
+  \end{equation*}
+  With mixed effects formulation of penalized spline regression,
+  we assume $u_k \overset{\mathrm{i.i.d}}{\sim} N(0, \sigma_u^2)$ and
+  $\epsilon_i \overset{\mathrm{i.i.d}}{\sim} N(0, \sigma_\epsilon^2)$.
+\end{frame}
+
+\begin{frame}[allowframebreaks,fragile]
+  <<onions-example2, echo = TRUE, fig.show = 'hold', fig.align = 'center', out.width = '.5\\textwidth'>>=
+  library(RLRsim)
+  knots <- seq(from = 20, to = 170, by = 15)
+  g2 <- spm(log(onions$yield) ~ onions$location + 
+                                f(onions$dens, basis = "trunc.poly", knots = knots),
+                                spar.method = "ML") 
+  g3 <- lm(log(onions$yield) ~ onions$location)
+  onions$fitted.log.yield.spm <- g2$fit$fitted
+  ## Test the hypothesis of H_0 \colon beta2 = sigma.u^2 = 0 against the 
+  ## alternative that beta.2 is non-zero or sigma.u^2 > 0
+  exactLRT(g2, g3)   
+  g2.REML <- spm(log(onions$yield) ~ onions$location + 
+  f(onions$dens, basis = "trunc.poly", knots = knots), spar.method = "REML") 
+  ## Test the hypothesis of H_0 \colon sigma.u^2 = 0 against 
+  ## the alternative that sigma.u^2 > 0
+  exactRLRT(g2.REML)   
+  ggplot(onions, aes(x = dens, y = log(yield), color = location)) + geom_point() + 
+  geom_line(aes(x = dens, y = fitted.log.yield.spm, color = location),linetype = 2) + 
+  geom_line(aes(x = dens, y = fitted.log.yield, color = location), linetype = 3) + 
+  theme(aspect.ratio = 1) + theme(legend.position = "none")
+  @
+  The coefficient $\beta_1$ is now estimated to be $\hat{\beta}_1 =
+  \Sexpr{(g2$fit$coefficients$fixed)[2]}$ with estimated standard deviation $\Sexpr{sqrt(g2$fit$varFix[2,2])}$. 
+\end{frame}
+
+\begin{frame}[fragile]
+  <<onions-example3, echo = 1:3, fig.show = 'hold', fig.align = 'center', out.width = '.45\\textwidth'>>=
+  knots <- seq(from = 20, to = 170, by = 15)
+  g2 <- spm(log(onions$yield) ~ onions$location + 
+                                f(onions$dens, basis = "trunc.poly", knots = knots)) 
+  plot(g2, xlab = c("location", "density"))
+  @
+  The above plot is a display of the effect of each additive
+  components. For example, the plot of the \texttt{density} variable
+  depict the predicted change in the response variable
+  \texttt{log(yield)} as the \texttt{density} variable varies.
+\end{frame}
+
+\begin{frame}[fragile]
+  As another example of a simple semiparametric regression model,
+  consider the following data on ragweed pollen level.
+  
+  <<ragweed-example1, echo = FALSE, results='asis'>>=
+  library(xtable)
+  data(ragweed)
+  ragweed <- ragweed[,-2]
+  colnames(ragweed) <- c("ragweed", "day.in.season", "temperature", "rain", "wind.speed")
+  print(xtable(head(ragweed)), include.rownames = FALSE)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<ragweed-example2, echo = TRUE, fig.show = 'hold', fig.align = 'center', out.width = '.45\\textwidth'>>=
+  hist(ragweed$ragweed, xlab = "ragweed", main = "Histogram of ragweed")
+  plot(ragweed$day.in.season, sqrt(ragweed$ragweed), xlab = "day in
+  season", ylab = "sqrt(ragweed)") 
+  @
+\end{frame}
+
+\begin{frame}
+  The histogram of the response variable \texttt{ragweed} is quite
+  skewed, suggesting that we should consider the square root
+  transformation to \texttt{ragweed}. In addition, the plot of
+  $\sqrt{\texttt{ragweed}}$ against \texttt{days.in.season} has a pronounced
+  nonlinear relationship. We are thus led to consider the following
+  semiparametric regression model
+  \begin{equation*} 
+    \begin{split}
+    \sqrt{\texttt{ragweed}_i} = \beta_0 & + \beta_1
+  \bm{1}\{\texttt{rain}_i = 1\} + \beta_2 \texttt{temp}_i + \beta_3
+  \texttt{wind}_i \\ & + f(\texttt{day.in.season}_i) + \epsilon_i
+  \end{split}
+  \end{equation*}
+  for some smooth function $f$. 
+\end{frame}
+  
+\begin{frame} The above model can once again be
+  formulated as a linear spline model
+  \begin{equation*}
+    \begin{split} \sqrt{\texttt{ragweed}_i} = \beta_0 &+ \beta_1
+  \bm{1}\{\texttt{rain}_i = 1\} + \beta_2 \texttt{temp}_i + \beta_3
+  \texttt{wind}_i \\ & + \sum_{k=1}^{m} u_k(\texttt{day.in.season}_i
+  - c_k)_{+} + \epsilon_i
+  \end{split}
+  \end{equation*}
+   where $c_1, c_2, \dots, c_m$ are the knots location for
+   the \texttt{day.in.season} variable, $\bm{u} = (u_1, u_2, \dots, u_m) \sim \mathrm{MVN}(\bm{0},
+   \sigma_u^2 \mathbf{I})$ and $\bm{\epsilon} \sim
+   \mathrm{MVN}(\bm{0}, \sigma_\epsilon^2 \mathbf{I})$. 
+\end{frame}
+
+\begin{frame}[allowframebreaks,fragile]
+  <<ragweed-example3, echo = TRUE, fig.show = 'hold', fig.align = 'center', out.width = '.6\\textwidth'>>=
+  ragweed.mod <- spm(sqrt(ragweed$ragweed) ~ ragweed$rain + ragweed$temperature + 
+                                             ragweed$wind.speed + 
+                                             f(ragweed$day.in.season, basis = "trunc.poly"), 
+                                             spar.method = "ML")
+  summary(ragweed.mod)
+  par(mfrow = c(2,2))
+  plot(ragweed.mod, xlab = c("rain", "temperature", "wind speed", "day in season"))
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Additive Models}
+  <<calif.air.poll, echo = FALSE, results = 'asis'>>=
+  library("xtable")
+  data(calif.air.poll)
+  colnames(calif.air.poll) <- c("ozone", "pressure", "inversion height", "inversion temperature") 
+  print(xtable(head(calif.air.poll)), include.rownames = FALSE)
+  @
+  The above is a snippet of a dataset containing $345$ observations on
+  the ozone concentration (in ppm) and other meteorological variables in Upland,
+  California in 1976. 
+\end{frame}
+
+\begin{frame}
+  We are interested in predicting the ozone
+  concentration level based on the remaining variables. Assuming no
+  prior domain knowledge, a reasonable first model is the
+  additive model
+  $$ \texttt{ozone}_i = \beta_0 + f_1(\texttt{pressure}_i) +
+  f_2(\texttt{height}_i) + f_3(\texttt{temperature}_i) + \epsilon_i $$
+  where $f_1$, $f_2$, and $f_3$ are unknown smooth functions. 
+\end{frame}
+
+\begin{frame}
+  Once again penalized regression spline is easily adapted to fit the
+  above model, i.e., we consider the model
+  \begin{equation*} 
+    \begin{split}
+    \texttt{ozone}_i = \beta_0  &+ \sum_{k=1}^{m_1}
+    u_k^{(1)}(\texttt{pressure}_i - c_k^{(1)})_{+} \\ &+
+  \sum_{k=1}^{m_2} u_k^{(2)}(\texttt{height}_i - c_k^{(2)})_{+} \\ &+   
+  \sum_{k=1}^{m_3} u_k^{(3)} (\texttt{temperature}_i - c_k^{(3)})_{+}
+  + \epsilon_i
+  \end{split}
+  \end{equation*}
+  Here $\{c_k^{(1)}\}$, $\{c_k^{(2)}\}$ and $\{c_k^{(3)}\}$ are the
+  knots for the \texttt{pressure}, \texttt{height} and
+  \texttt{temperature} variable, respectively. 
+\end{frame}
+
+\begin{frame}[fragile,allowframebreaks]
+  <<calif.air.poll-example2, echo = TRUE, fig.show = 'hold', fig.align = 'center', out.width = '.3\\textwidth'>>=
+  data(calif.air.poll)
+  colnames(calif.air.poll) <- c("ozone", "pressure", "height", "temperature") 
+
+  calif.spm <- spm(calif.air.poll$ozone ~ f(calif.air.poll$pressure, basis = "trunc.poly") + 
+                                          f(calif.air.poll$height, basis = "trunc.poly") + 
+                                          f(calif.air.poll$temperature, basis = "trunc.poly"))
+  summary(calif.spm)                           
+  plot(calif.spm, xlab = c("pressure", "height", "temperature"))
+  @
+\end{frame}
+
