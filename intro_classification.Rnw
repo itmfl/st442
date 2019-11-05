@@ -34,6 +34,7 @@ Sans Light}
 \setbeamercolor{question title}{bg = red}
 \setbeamercolor{block body question}{bg=blue!60}
 \DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 <<setup, include=FALSE>>=
@@ -329,12 +330,75 @@ A. ERROR!! That was not in the training data.
   \mu_1) \\ &> \log \mathrm{det}(\Sigma_1) - \log
   \mathrm{det}(\Sigma_0) + 2 (\log \pi_0 - \log \pi_1)\end{split}
 \end{equation*}
-  Thus, given $\mathcal{D}_n$, we can construct the quadratic
+  Thus, given $\mathcal{D}_n$, we construct the quadratic
   discriminant rule by estimating the unknown quantities via
-  \begin{gather*}\hat{\mu}_i = \tfrac{1}{n_i} \sum_{j \colon Y_j = i} X_j; \quad
-  \hat{\Sigma}_i = \tfrac{1}{n_i} \sum_{j \colon Y_j = i} (X_j -
+  \begin{gather*}\hat{\mu}_i = \tfrac{1}{n_i} \sum_{j} \mathbb{I}(Y_j = i) X_j; \quad
+  \hat{\Sigma}_i = \tfrac{1}{n_i} \sum_{j} \mathbb{I}(Y_j = i) (X_j -
   \hat{\mu}_i) (X_j - \hat{\mu}_i)^{\top} \\ n_i = \sum_{j}
   \mathbb{I}(Y_j = i); \quad \hat{\pi}_i = n_i/n \end{gather*}
+\end{frame}
+
+\begin{frame}
+  The linear discriminant for multivariate normal is given by
+ $$x^{\top} \Sigma^{-1} (\mu_1 - \mu_0) + \frac{1}{2} \mu_0^{\top} \Sigma^{-1}
+  \mu_0 - \frac{1}{2} \mu_1^{\top} \Sigma^{-1} \mu_1 > \log \pi_0 - \log \pi_1$$
+
+  Thus, given $\mathcal{D}_n$, we construct the linear
+  discriminant rule by estimating the unknown quantities via
+   \begin{gather*}\hat{\mu}_i = \tfrac{1}{n_i} \sum_{j} \mathbb{I}(Y_j
+     = i) X_j; \quad
+  \hat{\Sigma} = \frac{1}{n} \sum_{i} \sum_{j} \mathbb{I}(Y_j = i) (X_j -
+  \hat{\mu}_i) (X_j - \hat{\mu}_i)^{\top} \\ n_i = \sum_{j}
+  \mathbb{I}(Y_j = i); \quad \hat{\pi}_i = n_i/n \end{gather*}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{LDA and QDA in R}
+  <<breastcancer-example, echo = TRUE, fig.cap = "From Hastie et al. (1996)", size = 'tiny', out.width = "0.8\\linewidth">>=
+  library(mlbench) ## R package for machine learning benchmark problems
+  data(PimaIndiansDiabetes)
+  pima <- PimaIndiansDiabetes
+  tibble::as_tibble(dplyr::select(pima, diabetes, dplyr::everything())) ## Pretty printing
+  @
+  Dataset on diabets status of the Pima Indians in Arizon. 
+\end{frame}
+
+\begin{frame}[fragile]
+  <<breastcancer-example2, echo = TRUE, size = 'tiny', out.lines = c(16,6)>>=
+  ## Split data into 75% training and 25% testing
+  train.idx <- sample(1:nrow(pima), 0.75*nrow(pima))
+  test.idx <- -train.idx
+  
+  ## LDA
+  library(MASS) ## Modern applied statistics with R and S plus.
+  lda.fit = lda(diabetes ~ ., data = pima[train.idx,])
+  lda.fit
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<breastcancer-example3, echo = TRUE, size = 'tiny'>>=
+  ## Do some prediction; remember Yogi Berra warning
+  ## prediction is difficult, especially of the future
+  lda.pred = predict(lda.fit, pima[test.idx,]) 
+  table(lda.pred$class, pima$diabetes[test.idx])
+  conf.mat <- table(lda.pred$class, pima$diabetes[test.idx])
+  err.rate <- (conf.mat[1,2] + conf.mat[2,1])/sum(conf.mat)
+  err.rate
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<breastcancer-example4, echo = TRUE, size = 'tiny'>>=
+  ## Now for QDA
+  qda.fit = qda(diabetes ~ ., data = pima[train.idx,])
+  qda.fit
+  qda.pred = predict(qda.fit, pima[test.idx,]) 
+  table(qda.pred$class, pima$diabetes[test.idx])
+  conf.mat <- table(qda.pred$class, pima$diabetes[test.idx])
+  err.rate <- (conf.mat[1,2] + conf.mat[2,1])/sum(conf.mat)
+  err.rate
+  @
 \end{frame}
 
 \begin{frame}
@@ -505,20 +569,21 @@ that there exists \alert{simple} and yet universally consistent classification r
 
 \begin{frame}[fragile]
   \frametitle{$k$-NN in R}
-    <<knn-example1, echo = TRUE, size = 'tiny', fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
-  library(ISLR)
-  data(Smarket)
-  tibble::as_tibble(Smarket)
-  @
+    <<knn-example1, echo = TRUE, size = 'tiny', out.width = "0.8\\linewidth">>=
+    ## R package accompaning the book Introduction to Statistical Learning with R
+    library(ISLR)
+    data(Smarket)
+    tibble::as_tibble(Smarket)
+    @
 \end{frame}
 
 \begin{frame}[fragile]
-    <<knn-example2, echo = TRUE, size = 'tiny', fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
+  <<knn-example2, echo = TRUE, size = 'tiny', fig.cap = "From Hastie et al. (1996)", out.width = "0.8\\linewidth">>=
   ## Set aside 60 percent of the data as training
   library(class)
   train.idx <- sample(1:nrow(Smarket), round(0.6*nrow(Smarket)))   
-  train.X <- cbind(Smarket$Lag1, Smarket$Lag2)[train.idx,] 
-  test.X <- cbind(Smarket$Lag1, Smarket$Lag2)[-train.idx,] 
+  train.X <- dplyr::select(Smarket, -Year, -Today, - Direction)[train.idx,]
+  test.X <- dplyr::select(Smarket, -Year, -Today, - Direction)[-train.idx,]
   train.Y <- Smarket$Direction[train.idx]
   test.Y <- Smarket$Direct[-train.idx]
   knn.pred <- knn(train.X, test.X, train.Y, k = 1)
@@ -657,7 +722,105 @@ that there exists \alert{simple} and yet universally consistent classification r
 \end{frame}
 
 \begin{frame}
-  \frametitle{Choosing a classifier (part 1): Empirical risk mininimization}
+  \frametitle{Selecting a classifier (part 1): Empirical risk mininimization}
+  Let $\mathcal{C}$ be some collection of classifiers. One strategy for
+  selecting a classifier $\hat{g}$ is to solve
+  $$\arginf_{g \in \mathcal{C}} L(g) = \arginf_{g \in \mathcal{C}}
+  \mathrm{pr}(g(X) \not = Y)$$
+  As we rarely, if ever, know the distribution of $(X, Y)$, $L(g)$ is
+  unknown and need to be estimated. 
+  
+  Thus, given prior data $\mathcal{D}_n = \{(X_i, Y_i)\}_{i=1}^{n}$, we might consider estimating
+  $L(g)$ for any $g \in \mathcal{C}$ via
+  $$\hat{L}_n(g) = \frac{1}{n} \sum_{i=1}^{n} \mathbb{I}(g(X_i) \not = Y)$$
+  and then selecting $g_n = \hat{g}$ via solving
+  $$\arginf_{g \in \mathcal{C}} \hat{L}_n(g)$$
 \end{frame}
 
+\begin{frame}
+  The above strategy is known as empirical risk
+  minimization. Ignoring, for now, the question of computational
+  feasibility in finding $g_n$, we are interested in bounding either of
+  \begin{gather*} L(g_n) - \inf_{g \in \mathcal{C}} L(g) = \mathrm{pr}(g_n(X)
+  \not = Y \mid \mathcal{D}_n) - \inf_{g \in \mathcal{C}}
+  \mathrm{pr}(g(X) \not = Y) \\
+  \mathbb{E}[L(g_n)] - \inf_{g \in \mathcal{C}} L(g) 
+  \end{gather*}
+  
+  However, recalling our previous discussion on arbitrary slow rate
+  of convergence, if we restrict neither $\mathcal{C}$ nor $F_{XY}$,
+  then there is no meaningful (non-trivial) bound for the above quantities.
+\end{frame}
+
+\begin{frame}
+  Since $\mathcal{F}_{XY}$ is generally outside our control, we
+  will thus need to restrict $\mathcal{C}$. 
+  
+  Some possible restrictions are
+  \begin{enumerate}
+    \item linear classifiers: $$\mathcal{C} = \{g(x) = \mathrm{sign}(x^{\top} w + b) \colon
+      w \in \mathbb{R}^{d}, b \in \mathbb{R}\}$$ 
+    \item quadratic classifiers: $$\mathcal{C} = \{g(x) = \mathrm{sign}(x^{\top} M
+      x + x^{\top} w + b) \quad \colon M \in \mathbb{R}^{d \times d}, w \in
+      \mathbb{R}^{d}, b \in \mathbb{R}\}$$
+    \item $\sin$-functions: $$\mathcal{C} = \{g(x) =
+      \mathrm{sign}(w^{\top} x) \colon w \in \mathbb{R}^{d}\}$$
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  For the class of linear classifiers, we have the following result.
+  \begin{theorem}
+    Let $\mathcal{C}$ be the class of linear classifiers. Let
+    $g_n$ be found by empirical risk minimization. Then for all
+    possible distributions of $(X, Y)$ and for all $\epsilon > 0$
+    $$\mathrm{pr}\Bigl(L(g_n) > \inf_{g \in \mathcal{C}} L(g) +
+    \epsilon\Bigr) \leq 8n^{d+1} \exp(-n \epsilon^2/128).$$
+    Furthermore
+    $$\mathbb{E}[L(g_n)] - \inf_{g \in \mathcal{C}} L(g) \leq 32 
+    \sqrt{\frac{(d+1) \log n}{n}}$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  Similarly, for the class of quadratic classifiers, we have
+   \begin{theorem}[Theorem 13.2 of Devroye, Gyorfi and Lugosi (1996)]
+    Let $\mathcal{C}$ be the class of quadratic classifiers. Let
+    $g_n$ be found by empirical risk minimization. Then for all
+    possible distributions of $(X, Y)$ and for all $\epsilon > 0$
+    $$\mathrm{pr}\Bigl(L(g_n) > \inf_{g \in \mathcal{C}} L(g) +
+    \epsilon\Bigr) \leq 8n^{d(d+1)/2 + d+1} \exp(-n \epsilon^2/128).$$
+    Furthermore
+    $$\mathbb{E}[L(g_n)] - \inf_{g \in \mathcal{C}} L(g) \leq 32 
+    \sqrt{\frac{(d(d+1)/2 + d + 1) \log n}{n}}$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  In contrasts, for the $\sin$-functions, we have
+  \begin{theorem}[Theorem 14.3 of Devroye, Gyorfi and Lugosi (1996)]
+    Let $\mathcal{C}$ be the class of $\sin$ classifiers. Then for
+    every $n > 0$, $\epsilon > 0$, and classification rule $\{g_n \colon
+    n \geq 1\}$ (for example empirical risk minimization), 
+    there exists possible distributions of $(X, Y)$ with $\inf_{g \in
+      \mathcal{C}} L(g) = 0$ such that
+    $$\mathbb{E}[L(g_n)] > \frac{1}{2e} - \epsilon$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  The theory behind the previous results are outside of the
+  scope of this class. The theory is, however, exceptionally elegant,
+  and (hyperbole) nothing is more beneficial to a budding data
+  scientist than \alert{full and complete mastery} of this
+  theory. Sadly, it must also be said, nothing will reduce the lifetime earning potential of
+  that budding data scientist than mastery of this theory. See this
+  \href{http://www.econ.upf.edu/~lugosi/mlss_slt.pdf}{survey article}
+  by Bousquet et al. and the following books (for a start)
+  \begin{itemize}
+    \item Neural network learning: theoretical founations by Anthony and Bartlett (1999)
+    \item A probabilistic theory of pattern recogntion by Devroye,
+      Gyorfi and Lugosi (1996)
+  \end{itemize}
+\end{frame}
 \end{document}
