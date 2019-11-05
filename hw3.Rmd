@@ -1,0 +1,139 @@
+---
+title: "HW 3"
+output: 
+  pdf_document:
+    df_print: tibble
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+## Instruction
+This assignment consists of $3$ problems. The assignment is due on 
+**Wednesday, October 22** at 11:59pm EDT. Please submit your assignment electronically through the moodle webpage. You are encouraged (but not required) to use RMarkdown to write up your homework solution. To start using Rmarkdown read
+
+* Section 40.2 of  [Introduction to Data Science](https://rafalab.github.io/dsbook/reproducible-projects-with-rstudio-and-r-markdown.html)
+* the [RStudio tutorial](https://rmarkdown.rstudio.com/lesson-1.html) 
+* the [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
+
+## Problem 1 (20pts)
+This problem uses the data set \texttt{MWwords} from the \texttt{alr4}
+library. The data give the frequencies of $165$ common words in works from four
+different sources: the political writings of eighteenth century
+American political figures Alexander Hamilton, James Madison, and
+John Jay, and the book ``Ulysses'' by twentieth century Irish writer
+James Joyce. For this problem, we will be concerned with the variables
+\texttt{Hamilton} (the rate per $1000$ words at which the word
+appears) and \texttt{HamiltonRank} (the rank of the word; more
+frequent words having smaller ranks). The linguist George Zipf
+suggests that the relationship between the frequency $f_i$ of a word
+and its rank $r_i$ is approximately of the form $f_i = \alpha r_i^{-\gamma}$
+where $\alpha$ and $\gamma$ are constants, with $\gamma \approx 1$. A snippet of the data is given below
+```{r message = FALSE}
+## install.packages("alr4")
+library(alr4)
+data(MWwords)
+MWwords
+```
+
+
+  (a) Using only the $50$ most frequent words in Hamilton's
+    work, fit a simple linear regression model with
+    $\log(\texttt{Hamilton})$ as the response variable.
+  (b) Test the null hypothesis that $\gamma = 1$ against a
+    two-sided alternative and summarize the result.
+   (c) Repeat part (a) and (b), first for the $75$ most
+     frequent words in Hamilton's work and then for the $100$ most
+     frequent words in Hamilton work's. Is the relationship posited by
+     Zipf still reasonable in these cases ?
+  (d) Now investigate Zipf law for the [Simpson Frequency Dictionary](https://pastebin.com/raw/anKcMdvk) dataset. You will need to do some preprocessing/cleaning of the raw data.
+  
+## Problem 2 (20pts)
+For this problem, do simulation to illustrate the difference between marginal confidence intervals and the joint confidence regions in linear models.
+
+More specifically, consider the following setup
+```{r}
+set.seed(123)
+n <- 50
+X <- seq(from = 0, to = 1, length.out = n)
+W <- X^2
+Z <- sqrt(X)
+```
+Now assume that the response variable $Y$ follows a linear model of the form
+$$Y_i = 0.5 + X_i + 2 W_i + 3 Z_i + \epsilon_i = 0.5 + X_i + 2 X_i^2 + 3 \sqrt{X_i} + \epsilon_i$$
+where the error $\epsilon_i$ are i.i.d. $N(0, 0.04)$.
+
+Using the above data generation mechanis for $X, W$ and $Z$, generate the response observations $Y$, and then compute the $95\%$ **marginal** confidence intervals for $\beta_X, \beta_W$ and $\beta_Z$ and the $95\%$ **joint** confidence region for $(\beta_X, \beta_W, \beta_Z)$. Repeat this procedure $B = 500$ times. Count 
+
+  (a) How often $\beta_X$ lies in the $95\%$ marginal confidence interval for $\beta_X$.
+  (b) How often $\beta_X$ lies in the $95\%$ marginal confidence interval for $\beta_X$ **and** $\beta_W$ lies in the $95\%$ marginal confidence interval for $\beta_W$ **and** $\beta_Z$ lies in the $95\%$ marginal confidence interval for $\beta_Z$
+  (c) How often $(\beta_X, \beta_W, \beta_Z)$ lies in the $95\%$ joint confidence region for      $(\beta_X, \beta_W, \beta_Z)$.
+  
+NB: Please include, in your submission, 
+both the code and the resulting output for this problem.
+
+## Problem 3 (20pts)
+This problem uses the following Kelley Blue Book dataset on the selling price of used GM cars. The data is available online [here](https://www.rforexcelusers.com/wp-content/uploads/2016/07/car_values_kuiper.csv).
+
+You can read in the data using the following code chunk
+```{r}
+kbb <- read.csv("https://bit.ly/2nTbGe0", header = T, sep = ",")
+kbb
+```
+
+Using this data, what is the "best" (linear) model you can find for 
+predicting the sell price ? Note that this is an open-ended problem. The "best" model I was able to find has a residual standard error of roughly $520\$$ (the sample standard deviation for the selling price is roughly $9880\$$.)
+
+## Bonus problem: (0pts but not pointless)
+For your final project, you are tasked with analyzing a dataset and submit a short report detailing your analysis. To prepare for this project, and to make sure that we are all on the same page, please write up a short project proposal (say 2 pages or less)
+
+In particular, the proposal should adress the following points
+
++ Whether you are working alone or in a group. If you are working in a group, please list your group members. A group should have at most 3 people.
+
++ The (tentative) dataset that you will be analyzing, if any. And what kind of analysis will you be doing ? e.g., exploratory data analysis or regression modeling or classification or
+
++ What interests you about the data ? For example, what kind of questions are you hoping to answer, if any and/or why are these questions important. 
+
+I aim to read these project proposal and ask for clarifications, if necessary.
+
+Some important points to note
+
++ The dataset that you aim to analyze does not have to be (extremely) large. But something along the line of say tens of thousand observations with 10 or more variables might suffice. The main criteria is that the data needs to be "rich" enough so that we can do more interesting analysis than just simply say plotting a figure and then doing a single linear regression and then calling it a day.
+
++ Note that if your data is in a "raw" format and needs quite a bit of preprocessing, then this preprocessing effort is also considered essential/valuable work. In other words, if your data needs quite a bit more preprocessing before it can be analyzed, then you will not be penalized if you only did some careful but not "extensive/exhaustive" analysis.
+
++ You will be graded mainly on 2 criteria. The first one is "polish", e.g., we expect that the figures, if any, have clear and legible axes and/or captions/description, that the exposition/discussion are clear and concise. The second one is "sophistication", e.g., we expect that the preprocessing and/or the analysis should be non-trivial.
+
++ A reasonable guideline for the report/manuscript is roughly 8-10 (single space) pages for the main body. Any code should be included in the appendix (and shouldn't count toward the 8-10 pages). You can include **relevant** figures in the manuscript.
+
+set.seed(123)
+n <- 50
+X <- seq(from = 0, to = 1, length.out = n)
+W <- X^2
+Z <- sqrt(X)
+
+count_j<-0
+  C <- matrix(0,3,4)
+  C[1,] <- c(0,1,0,0)
+  C[2,] <- c(0,0,1,0)
+  C[3,] <- c(0,0,0,1)
+  q<-nrow(C)
+  n<-nrow(df)
+  gamma<-matrix(0,3,1)
+  gamma[1,]<- 1
+  gamma[2,]<- 2
+  gamma[3,]<- 3
+  for (B in 1:500) {
+    df<-df%>%mutate(Y=with(df,0.5+X+2*W+3*Z+rnorm(50,0,0.04))) 
+    k<-lm(Y~X+W+Z,data=df)
+    Xmat <- model.matrix(k)
+    ci<- t(C %*% coef(k)-gamma) %*% solve(C%*% solve(t(Xmat)%*%Xmat) %*% t(C)) %*% (C %*% coef(k)-gamma)
+    if(ci <= q*summary(k)$sigma^2*qf(0.95,q,n-5)){
+      count_j<-count_j+1
+    }
+  }
+print(count_j)
