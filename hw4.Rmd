@@ -1,0 +1,255 @@
+---
+title: "HW 4"
+output: 
+  pdf_document:
+    df_print: tibble
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3, knitr.table.format = "html",tibble.print_min=6)
+```
+
+## Instruction
+This assignment consists of $3$ problems. The assignment is due on 
+**Wednesday, November 6** at 11:59pm EDT. Please submit your assignment electronically through the moodle webpage. You are encouraged (but not required) to use RMarkdown to write up your homework solution. To start using Rmarkdown read
+
+* Section 40.2 of  [Introduction to Data Science](https://rafalab.github.io/dsbook/reproducible-projects-with-rstudio-and-r-markdown.html)
+* the [RStudio tutorial](https://rmarkdown.rstudio.com/lesson-1.html) 
+* the [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
+
+## Problem 1 (25pts)
+For this problem, we shall use the following dataset on the repair times for Verizon. A description of the data is as follows
+
+> Verizon is the primary local telephone company (incubment local exchange carrier, ILEC) 
+> for a large area of the eastern United States. As such it is responsible for 
+> providing repair  service for customers of other telephone companies known as 
+> competing local exchange carrier  (CLECs) in this region. 
+> Verizon is subject to fines if the repair time (the time it takes to fix a problem) 
+> for CLEC customers are substationally worse than those for Verizon customers.
+
+The data we will be using is given below.
+```{r}
+verizon <- readr::read_csv("https://tinyurl.com/y4rqhzxp")
+verizon
+```
+The data set **verizon**contains a random sample of repair times for 1664 ILEC and 23 CLEC customers. The mean repair time for ILEC customers is 8.4 hours, while that for CLEC customers is 16.5 hrs. We are interested in determining whether a difference this large can be 
+explained by chance, since if the difference is unlikely due to chance, then this indicate that Verizon could be liable to fines.
+
+Using this dataset, answer the following question.
+
+(a) Do a two-sample $t$-test to test the null hypothesis that $\mu_{\mathrm{ILEC}} = \mu_{\mathrm{CLEC}}$. Carefully note the underlying assumptions behind this test, i.e., what do you assume about the observations ? For example, are you assuming that the observations for the ILEC customers are i.i.d. sample from some particular population ?
+```{r}
+ilec.idx <- which(verizon$Group == "ILEC")
+t.test(verizon$Time[ilec.idx], verizon$Time[-ilec.idx], var.equal = FALSE)
+```
+(b) Are the assumptions underlying the two-sample $t$-test 
+in step (a) tenable ? Why or why not ?
+```{r message = FALSE}
+library(ggplot2)
+ggplot(verizon, aes(x = Time)) + geom_histogram() + facet_wrap(~Group, scales = "free_y")
+```
+The above plots indicate that the normally distributed assumption behind the $t$-test is quite problematic (as the histogram plot is quite skewed to the right) Furthermore, the sample sizes between the **ILEC** and **CLEC** customers are very different.
+
+
+(c) Do a two-sample test, this time via bootstrapping. The idea behind the bootstrapping test is as follows. Let $X_1, X_2, \dots, X_{23}$ be the repair time for the CLEC customers and $Y_1, Y_2, \dots, Y_{1664}$ be the repair time for the ILEC customers. Now let $Z_i = X_i$ if $i \leq 23$ and $Z_{i} = Y_{i-23}$ for $i > 23$. Then if the repair times for the ILEC and CLEC customers are from the same population, i.e., has the same probability distribution, then the joint distribution of $(Z_1, Z_2, \dots, Z_{1687})$ is identically distributed to that of $(Z_{\sigma(1)}, Z_{\sigma(2)}, \dots, Z_{\sigma(1687)})$ where $\sigma$ is **any** permutation of the elements of $\{1,2,\dots, 1687\}$. The bootstrap tests thus proceed as follows. 
+
+(1) compute a test-statistic on the original data. 
+(2) permute the ordering of the $Z$ and compute a test-statistic on the permuted data. 
+(3) repeat step (2) $B=10000$ times. 
+(4) compute the $p$-value as the fraction of time the test-statistic on the original data is more "extreme" than that of the permuted data.
+
+The boootstrap test is
+```{r cache = TRUE}
+ilec.idx <- which(verizon$Group == "ILEC")
+ilec.time <- verizon$Time[ilec.idx]
+clec.time <- verizon$Time[-ilec.idx]
+t.obs <- t.test(ilec.time, clec.time, var.equal = FALSE)$statistic
+B <- 10000
+t.bootstrap <- numeric(B)
+z <- c(ilec.time, clec.time)
+for(b in 1:B){
+  zb <- z[sample(1:length(z), replace = FALSE)] ## Permute the indices of z
+  t.bootstrap[b] <- t.test(zb[1:length(ilec.time)],
+                           zb[-c(1:length(ilec.time))], var.equal = FALSE)$statistic
+}
+
+## Plot the bootstrap samples
+df.boot <- data.frame(t = t.bootstrap)
+ggplot(data = df.boot, aes(x = t)) + geom_histogram() + 
+  geom_vline(xintercept = t.obs, color = "blue")
+```
+The permutation test $p$-value is then
+```{r}
+2*sum(t.bootstrap <= t.obs)/B
+```
+
+## Problem 2 (20pts)
+Thhis problem uses the following data on the density versus **Janka** hardness of a sample of Australian timber. Janka hardness is a structural property of timber, but it is hard to
+measure, and so finding a regression model linking hardness
+to density is desirable. The data is available [here](http://stat.rutgers.edu/home/mxie/stat586/homework/hw2_junka_data.txt)
+
+A plot of the data together with two regression line/curve is given below.
+```{r echo = FALSE, message = FALSE, warning = FALSE, fig.align = 'center'}
+library(SemiPar)
+library(ggplot2)
+df <- readr::read_table("http://stat.rutgers.edu/home/mxie/stat586/homework/hw2_junka_data.txt")
+knots <- seq(from = 25, to = 70, by = 4)
+fit <- spm(log(df$Hard) ~ f(df$Dens, basis = "trunc.poly", knots = knots))
+df$fitted <- fit$fit$fitted
+ggplot(data = df, aes(x = Dens, y = log(Hard))) + geom_point() +
+stat_smooth(method = "lm", formula = y ~ x, se = FALSE) +
+geom_line(aes(x = Dens, y = fitted), color = "blue", linetype = "dashed")
+```
+The regression line and curve in the above plot correspond to 
+the least square regression line and the nonparametric
+regression line. The nonparametric regression line is fitted via **penalized** spline regression of the form
+$$\log(\mathtt{hardness}_i) = \beta_0 + \beta_1 \mathtt{dens}_i + \sum_{k=1}^{12} \gamma_k (\mathtt{dens}_i - c_k)_{+}
+$$ where $c_{1} = 25$, $c_{k} - c_{k-1} = 4$, and $c_{12} = 69$ and the penalty term is $\lambda \|\boldsymbol{\gamma}\|^2 = \lambda \times \sum_{k} c_k^2$.
+
+(a) Write code to fit the above nonparametric regression line via **penalized** spline regression, e.g., estimate the coefficients $\gamma_k$ by formulating the penalized spline regression problem as a ridge regression problem and choosing the smoothing parameter somehow. For this problem, please submit your code along with a plot of the nonparametric regression line when fitted to this data.
+
+For this problem, see slides 74 and 75 of your lecture notes. In particular
+```{r cache = TRUE}
+  basis.design <- function(x,knots){
+    Xmat <- cbind(rep(1, length(x)), x)
+    for(i in 1:length(knots)){
+      Xmat <- cbind(Xmat, ifelse(x < knots[i], 0, x - knots[i]))
+    }
+    return( Xmat)
+  }
+ 
+  psr <- function(y,x,knots,lambda){
+    X <- basis.design(x, knots)
+    D <- diag(c(0,0, rep(1,length(knots))))
+    S <- X %*% solve(t(X) %*% X + lambda*D) %*% t(X)
+    yhat <- S %*% y
+    df_fit <- sum(diag(S)) ## degrees of freedom for the fit
+    n <- nrow(X)
+    gcv <- sum((y - yhat)^2)/(1 - df_fit/n)^2 ## Generalized cross-validation score
+    return(list(yhat = yhat, gcv = gcv)) ## Return the fitted value and the gcv score
+  }
+
+## The previous two functions are use to setup the X design matrix and to solve the
+## penalized spline regression problem. See slide 72 through 75 of your lecture notes.
+  
+## The next code chunk tries to minimize the generalized cross validation score 
+## for a bunch of lambda values.
+lambda.seq <- 2^seq(from = -5, to = 10, by = 0.1)
+gcv <- numeric(length(lambda.seq))
+knots <- seq(from = 25, to = 69, by = 4)
+df <- readr::read_table("http://stat.rutgers.edu/home/mxie/stat586/homework/hw2_junka_data.txt")
+df ##
+for(i in 1:length(lambda.seq)){
+  gcv[i] <- psr(log(df$Hard), df$Dens, knots, lambda.seq[i])$gcv
+}
+
+## Find the "optimal" lambda 
+lambda.seq[which.min(gcv)] 
+
+## Now extract the fitted value corresponding to this choice of lambda
+df$fitted <- psr(log(df$Hard), df$Dens, knots, lambda.seq[which.min(gcv)])$yhat
+
+## Next plot the result to illustrate that we did indeed recover the penalized spline
+## regression line.
+ggplot(data = df, aes(x = Dens, y = log(Hard))) + geom_point() +
+stat_smooth(method = "lm", formula = y ~ x, se = FALSE) +
+geom_line(aes(x = Dens, y = fitted), color = "blue", linetype = "dashed")
+```
+
+
+(b) (**bonus**: 20pts) The above regression line and curve suggests that there is a difference between the simple linear model and the nonparametric
+model, but is the difference large enough to prefer the (possibly) more
+complex nonparametric model to the simpler linear model ?
+Roughly speaking, we are interested in deciding between the
+following null hypothesis
+$$\mathbb{H}_0 \colon \mathbb{E}[\log(\mathtt{hardness}) \mid \mathtt{density}] = \beta_0 + \beta_1 \mathtt{density}$$
+against the following alternative hypothesis
+$$\mathbb{H}_1 \colon \mathbb{E}[\log(\mathtt{hardness}) \mid \mathtt{density}]
+= f(\mathtt{density}) \quad \text{for some smooth function $f$}$$
+One naive test statistic for this problem is 
+$$T = \frac{\mathrm{SSE}_0 - \mathrm{SSE}_1}{\mathrm{SSE}_1}$$
+where $\mathrm{SSE}_0$ and $\mathrm{SSE}_1$ are the sum of square error for the simple linear regression model and the nonparametric regression model, respectively. 
+Using bootstrapping ideas, compute a plausible $p$-value for the test statistic on this observed data. More specifically, proceed as follows.
+
+(1) Fit a simple linear regression and a non-parametric regression on the data. Compute the test statistic.
+(2) Generate new data by bootstrapping the residuals of the simple linear regression model.
+(3) Fit a simple linear regression and a non-parametric regression on the bootstrapped data. Compute the test statistic for the bootstrapped data.
+(4) Repeat step (2) and (3) B = 1000 times.
+(5) Output the $p$-value as the fraction of time the test-statistic on the original data is more "extreme" than that for the bootstrapped data.
+
+The bootstrapping code template for this problem is as follows.
+```{r cache = TRUE}
+## First compute the test statistic for the observed data
+lm.mod <- lm(log(Hard) ~ Dens, data = df)
+psr.mod <- psr(log(df$Hard), df$Dens, knots, lambda.seq[which.min(gcv)]) 
+rss0 <- sum((log(df$Hard) - lm.mod$fitted.values)^2)
+rss1 <- sum((log(df$Hard) - psr.mod$yhat)^2)
+t.obs <- (rss0 - rss1)/rss1
+
+## Now do the bootstrap
+B <- 1000
+t.bootstrap <- numeric(B)
+n <- nrow(df) ## Number of data points
+knots <- seq(from = 25, to = 69, by = 4)
+
+for(b in 1:B){
+  ## Generate new y observations by bootstrapping the residuals
+  yb <- lm.mod$fitted.values + lm.mod$residuals[sample(1:n, n, replace = TRUE)]
+  lm.modb <- lm(yb ~ df$Dens) ## Compute a new lm fit
+  
+  ## Now to compute the penalized spline regression fit, we need to estimate lambda again
+  lambda.seq <- 2^seq(from = -5, to = 10, by = 0.1)
+  gcv <- numeric(length(lambda.seq))
+  for(i in 1:length(lambda.seq)){
+    gcv[i] <- psr(log(df$Hard), df$Dens, knots, lambda.seq[i])$gcv
+  }
+  lambda.seq[which.min(gcv)] 
+
+  ## Now extract the fitted value corresponding to this choice of lambda
+  psr.mod <- psr(log(df$Hard), df$Dens, knots, lambda.seq[which.min(gcv)])
+  rss0 <- sum((yb - lm.modb$fitted.values)^2)
+  rss1 <- sum((yb - psr.mod$yhat)^2)
+  t.bootstrap[b] <- (rss0 - rss1)/rss1
+}
+
+## Now visualize the bootstrap results
+df.boot <- data.frame(t = t.bootstrap)
+ggplot(data = df.boot, aes(x = t)) + geom_histogram() + 
+  geom_vline(xintercept = t.obs, color = "blue")
+```
+We see that, for this dataset, there is strong evidence that the parametric model is sub-optimal compared to the nonparametric model.
+
+## Problem 3 (25pts)
+The next problem use the \textrm{prostate} dataset. The data is available [here](http://statweb.stanford.edu/~tibs/ElemStatLearn/datasets/prostate.data) and records measurements from $97$ male who has prostate cancer. 
+The data can be read into **R** via the following code
+```{r}
+prostate = read.table("https://tinyurl.com/y4h8vawf")
+prostate
+```
+The data contains a bunch of variables. See [here](https://rafalab.github.io/pages/649/prostate.html) for a description of the variables.
+
+Using $\mathtt{lpsa}$ as the response variable, try out ridge regression with the above dataset. Split your dataset into two parts, namely training data and testing data as specified by the levels of the $\mathtt{train}$ variable in the dataset. Use the training data to estimate the coefficients using ridge
+regression. Compute the fitted values for $\mathtt{lpsa}$ on the testing data and evaluate the mean square error for the testing data. How did you select the amount of shrinkage for the ridge regression ?
+
+For this problem, you can choose to either use the **lm.ridge** function from the **MASS** package or the **glmnet** function from the **glmnet** package. Both implements ridge regression, but the **glmnet** function might be more user friendly as it keeps track of the necessary transformation of the testing data that parallels the training data. 
+
+```{r}
+library(glmnet)
+xtrain <- prostate[prostate$train,-c(9,10)] ## Remove last two columns
+xtrain <- as.matrix(xtrain) ## glmnet only understand matrices
+ytrain <- prostate$lpsa[prostate$train]
+fit <- glmnet(xtrain, ytrain, alpha = 0) ## For ridge regression
+plot(fit) ## Trace regression plot
+cv.fit <- cv.glmnet(xtrain, ytrain, alpha = 0) ## Cross validation for ridge regression
+plot(cv.fit) ## Plot the cross-validated MSE vs lambda
+cv.fit$lambda.min ## The lambda associated with the minimum cross-validation
+xtest <-  as.matrix(prostate[!prostate$train, -c(9,10)])
+yhat <- predict(cv.fit, xtest, s = "lambda.min")
+ytest <- prostate$lpsa[!prostate$train]
+mse <- mean((yhat - ytest)^2)
+mse
+```
+
+
