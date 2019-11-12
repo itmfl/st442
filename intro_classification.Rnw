@@ -699,8 +699,28 @@ that there exists \alert{simple} and yet universally consistent classification r
   \mathbb{I}(\eta(x) > 1/2)$ where $\eta(x) \mathrm{pr}(Y = 1 \mid X =
   x)$. We could thus try to estimate $\eta(x)$ via some function
   $\eta_n(x)$ (as done for example in $k$-NN) and then use the
-  plugin classifier $g_n(x) = \mathbb{I}(\eta_n(x) > 1/2)$. The
-  following result indicate that this will generally lead to wasted
+  plugin classifier $g_n(x) = \mathbb{I}(\eta_n(x) > 1/2)$. 
+  
+  Recalling our previous derivation for $\delta := L(g_n) - L(g^{*})$, we have
+  \begin{equation*}
+    \begin{split} \delta &= \mathbb{E}[|2(\eta_(X) - 1/2)
+  \mathbb{I}(g^{*}(X) \not = g_n(X))|] \\
+  & \leq \mathbb{E}[2(\eta(X) - \eta_n(X)) \mathbb{I}(\eta(X) \not =
+  1/2)   \mathbb{I}(g^{*}(X) \not = g_n(X))] \\ & \leq
+  2 \sqrt{\mathbb{E}[(\eta(X) - \eta_n(X))^2] \mathbb{E}[(\mathbb{I}(\eta(X) \not =
+  1/2)   \mathbb{I}(g^{*}(X) \not = g_n(X)))^2]} \\
+& \leq 2 \sqrt{\mathbb{E}[(\eta(X) - \eta_n(X))^2]}
+  \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Therefore, consistent estimation of $\eta(X)$ will lead to Bayes
+  consistent classification. In other words, if we can solve the
+  regression problem (estimating $\eta(X)$), then we can also solve
+  the classification problem (finding $g^{*}(X))$. 
+  
+  However, the following result indicate that this will generally lead to wasted
   effort. 
 \end{frame}
 
@@ -823,4 +843,880 @@ that there exists \alert{simple} and yet universally consistent classification r
       Gyorfi and Lugosi (1996)
   \end{itemize}
 \end{frame}
+
+\begin{frame}[fragile]
+  <<figure-devroye121, echo = FALSE, fig.align = 'center', out.width='.8\\textwidth', fig.cap = 'Various errors in empirical risk minimization'>>=
+  knitr::include_graphics("figures/devroye_121.png")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Universally consistent linear classifiers}
+  The previous result for linear classifiers can be extended to yield
+  a decision rule that is universally consistent. More specifically,
+  let $X \in \mathbb{R}^{d}$ and define $X^{(m)}$ to contains all
+  polynomials in the terms of $X$ of degree at most $m$. For example, if $X = (X_1,
+  X_2, X_3)$, then
+  \begin{equation*} \begin{split} 
+      X^{(3)} = (&1, X_1, X_2, X_3, X_1^2, X_1 X_2, X_1 X_3, X_2 X_3,
+      \\ & X_2^2, X_3^2, X_1^3, X_1 X_2^2, X_1 X_3^2, X_1 X_2 X_3,
+      X_2^3, \\ & X_2^2 X_1, X_2^2 X_3, X_3^3, X_3 X_1^2, X_3 X_2^2)\end{split} \end{equation*}
+  
+  The dimension of $X^{(m)}$ is then $\tbinom{d+m}{m}$. 
+ \end{frame}
+ 
+ \begin{frame}
+  This can be
+  seen as follows. Write dowm $d+m$ $\ast$ symbol
+  $$ \underbrace{\ast \dots \ast}_{d+m}$$
+  Now select $d$ of these $\ast$ symbol and change them to $X_1,
+  X_2, \dots, X_d$, sequentially. For example, changing the first,
+  fourth, and sixth $\ast$ to $X_1, X_2$, and $X_3$ yield
+  $$X_1 \ast \ast X_2 \ast X_3$$
+  Count how many $\ast$ follows each $X_i$. This is the degree of the
+  $X_i$ term. For the above example, this is $X_1^2 X_2^{1} X_3^{0} =
+  X_1^2 X_2$ 
+\end{frame}
+
+\begin{frame}
+  Further examples include
+  \begin{gather*}\ast \ast \ast X_1 X_2 X_3 \rightarrow X_1^{0}
+ X_2^{0} X_3^{0} = 1 \\
+  \ast X_1 \ast X_2 \ast X_3 \rightarrow X_1^{1} X_2^{1} X_3^{0} = X_1
+  X_2 \\
+  X_1 \ast X_2 \ast X_3 \ast \rightarrow X_1^{1} X_2^{1} X_3^{1} = X_1
+  X_2 X_3
+  \end{gather*}
+  Each polynomial term of degree $3$ thus corresponds to one of these
+  sequence. Each sequence is obtained by choosing $d$ locations in a
+  string of $d+m$ $\ast$ symbols (and changing these $\ast$ to $X_1,
+  X_2, X_3$). Thus there are $C_{d,m} = \tbinom{d+m}{d} \leq (m+d)^{d}$ terms in $X^{(m)}$.
+\end{frame}
+
+\begin{frame}
+  Let $g_n$ be the classifier obtained by minimizing $\hat{L}_n$ over
+  $$\mathcal{C}^{(m)} = \{g(x) = \mathrm{sign}((x^{(m)})^{\top} w + b) \colon
+      w \in \mathbb{R}^{C_{d,m}}, b \in \mathbb{R}\}.$$
+  
+   The previous theory indicate that
+   $$\mathbb{E}[L(g_n)] - \inf_{g \in \mathcal{C}} L(g) \leq 32 
+    \sqrt{\frac{C_{d,m} \log n}{n}}$$
+    which goes to zero as long as $m = O(n^{1/d - \epsilon})$ for
+    some $\epsilon > 0$. 
+    
+  Now, as $m \rightarrow \infty$, the class of polynomials defined by
+  $X^{(m)}$ is sufficient to approximate any {\em measurable}
+  functions on $\mathbb{R}^{d}$, i.e.,
+  $$\lim_{m \rightarrow \infty} \inf_{g \in \mathcal{C}^{(m)}} L(g) = L^{*}$$
+\end{frame}
+
+\begin{frame}
+  \frametitle{Structural Risk Minimization}
+  We therefore have the following \alert{penalized} or
+  \alert{structural} risk minimization approach to classification.
+  
+  \begin{theorem}
+  Let $\mathcal{C}^{(1)}, \mathcal{C}^{(2)}, \dots$ be defined as
+  above.  Let $g_{n,1}, g_{n,2}, \dots$ be classifiers minimizing $\hat{L}_n$ over the class $\mathcal{C}^{(1)}$, $\mathcal{C}^{(2)}, \dots$
+
+  Define, for any $k \geq 1$, the complexity-penalized error estimate
+  $$\tilde{L}_n(g_{n,k}) = \hat{L}_n(g_{n,k}) + 32 
+    \sqrt{\frac{C_{d,k} \log n}{n}}$$
+  Select $g_n = \argmin_{k \geq 1} \tilde{L}_{n}(g_{n,k})$. Then as $n
+  \rightarrow \infty$, for any distribution of the $(X, Y)$,
+  $$L(g_n) \rightarrow L^{*}$$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why not empirical/structural risk minimization}
+  We saw that structural risk minimization allows us to construct
+  classification rules that are theoretically elegant in that they
+  \begin{itemize}
+    \item Generalize well (i.e., estimated error on the training data/testing data is close to the true error)
+    \item Are (or can be made) universally consistent.
+  \end{itemize}
+  
+  However, empirical/structural risk minimization is rarely, if ever, used
+  as the minimization problem is, in general, computationally
+  intractable (may require exponential time)
+  
+  Nevertheless, the core ideas behind empirical/structural risk
+  minimization (find the best penalized classifier) paves the way
+  toward development of many other powerful/beautiful techniques such
+  as boosting and support vector machines.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Surrogate to $0-1$ loss: Prelude to
+    logistic regression}
+  Let us revisit empirical risk minimization over some function class
+  $\mathcal{C}$, i.e., given $\mathcal{D}_n = \{(X_i, Y_i)\}_{i=1}^{n}$ we find $g_n$ satisfying
+  $$\hat{L}_n(g_n) = \sum_{i=1}^{n} \mathbb{I}(g_n(X_i) \not = Y_i) =
+  \argmin_{g \in \mathcal{C}} \sum_{i=1}^{n} \mathbb{I}(g_n(X_i) \not = Y_i)
+  $$
+  The main difficulty behind the above optimization problem is that
+  $\mathbb{I}$ is a binary function and discontinuous at $0$. 
+ 
+  Assuming $Y_i \in \{0,1\}$, define $\tilde{Y}_i = (2Y_i - 1) \in
+  \{-1,1\}$. Furthermore, if $g \colon \mathbb{R}^{d} \mapsto \{0,1\}$ then
+  $\tilde{g} = (2 g - 1) \mapsto \{-1,1\}$. We then have
+  $$g_n(X_i) \not = Y_i \Longleftrightarrow \tilde{Y}_i \tilde{g}_n(X_i) < 0$$
+\end{frame}
+
+\begin{frame}
+  Suppose now $g = \mathrm{sign}(f)$ where $f \colon \mathbb{R}^{d}
+  \mapsto \mathbb{R}$, e.g., for the class of linear classifiers
+  $$\mathcal{C} = \{g(x) = \mathrm{sign}(x^{\top} w + b) \colon
+      w \in \mathbb{R}^{d}, b \in \mathbb{R}\}$$ 
+  we have $g_n(X_i) \not = Y_i \Longleftrightarrow \tilde{Y}_i f(X_i)
+  < 0$. 
+  
+  Thus, assume without loss of generality that $Y_i \in \{-1,1\}$ and
+  $\mathcal{C} \subset \{g \colon \mathbb{R}^{d} \mapsto
+  \mathbb{R}\}$, empirical risk minimization reduces to
+  $$\argmin_{g \in \mathcal{C}} \sum_{i=1}^{n} \mathbb{I}(Y_i g(X_i) < 0)$$
+\end{frame}
+
+\begin{frame}
+  We still have the pesky $0-1$ loss which we replaces by
+  $$\argmin_{g \in \mathcal{C}} \frac{1}{\log 2} \sum_{i=1}^{n} \log(1 + \exp(-Y_i g(X_i)))$$
+  Note that
+  $$\frac{1}{\log 2} \log(1 + \exp(-z)) \geq \mathbb{I}(z < 0) \quad
+  \text{for all $z$}$$
+  
+  In the case of linear classifiers (and removing the $\log 2$)
+  scaling, the above minimization problem reduces to
+  $$\argmin_{w, b} \sum_{i=1}^{n} \log \Bigl(1 + \exp(-Y_i (w^{\top} X_i +
+  b)) \Bigr)$$
+  which is easily solvable by standard optimization techniques.
+\end{frame}
+
+\begin{frame}
+  <<logistic-loss-fig, echo = FALSE, fig.align = 'center', out.width='0.6\\textwidth', fig.cap = 'Surrogate loss functions'>>=
+  knitr::include_graphics("figures/loss_functions.png")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Connection to binary/binomial likelihood}
+  We take a further look at $\log \Bigl(1 + \exp(-Y_i
+  f(X_i))$. For $Y_i = 1$
+  \begin{equation*}
+    \begin{split} \log \Bigl(1 + \exp(-Y_i f(X_i) \Bigr) & = \log \Bigl(1 +
+  \exp(-f(X_i)) \Bigr) \\ & = \log \Bigl( \frac{\exp(f(X_i)) +
+    1}{\exp(f(X_i))} \Bigr) \\ &= - \log
+  \Bigl(\frac{\exp(f(X_i))}{\exp(f(X_i)) + 1} \Bigr) \end{split}
+\end{equation*}
+  Similarly, for $Y_i = -1$
+  \begin{equation*}
+    \begin{split} \log \Bigl(1 + \exp(-Y_i f(X_i) \Bigr) & = \log \Bigl(1 +
+  \exp(f(X_i)) \Bigr) \\ &= - \log
+  \Bigl(\frac{1}{1 + \exp(f(X_i))} \Bigr)
+  \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  Defining $$p(X_i) = \frac{\exp(f(X_i))}{\exp(f(X_i)) + 1} \in [0,1]
+  \Longrightarrow (1 - p(X_i)) = \frac{1}{\exp(f(X_i)) + 1}$$
+  we have
+  \begin{equation*} \begin{split} \Bigl(1 + \exp(-Y_i f(X_i) \Bigr) & = - (Y_i \log p(X_i) + \frac{(1 -
+    Y_i)}{2} \log (1 - p(X_i))) \\ &= - \tilde{Y}_i \log p(X_i) + (1 -
+  \tilde{Y}_i) \log ( 1- p(X_i)) \end{split} \end{equation*}
+  where now $\tilde{Y}_i \in \{0,1\}$.
+\end{frame}
+
+\begin{frame}
+  Interpreting $p(X_i)$ as a probability, we have
+  \begin{equation*} \begin{split} & \argmin_{g \in \mathcal{C}} \sum_{i=1}^{n} \log(1 + \exp(-Y_i
+  g(X_i))) \\ & = \argmax_{g \in \mathcal{C}} \sum_{i=1}^{n} \tilde{Y}_i \log
+  p(X_i) + (1 - \tilde{Y}_i) \log (1 - p(X_i)) \\ & = \argmax_{g \in \mathcal{C}}
+  \prod_{i=1}^{n} p(X_i)^{\tilde{Y}_i} (1 - p(X_i))^{1 -
+    \tilde{Y}_i} \end{split} \end{equation*}
+  which is simply the MLE for a collection of
+  Bernoulli random variables with $\mathrm{pr}[\tilde{Y}_i = 1] = p(X_i)$
+  
+  The above optimization problem is known collectively as logistic regression.
+\end{frame}
+
+\begin{frame}
+  In summary, logistic regression can be thought of as either
+  \begin{itemize}
+    \item Empirical risk minimization where we replace $0-1$ loss $\mathbb{I}(g(X_i) \not = Y_i)$ 
+      with logistic loss $\log(1 + \exp(-Y_i f(X_i)))$
+    \item Classification where we model $\eta(x) = \mathrm{P}[Y_i = 1
+      \mid X = x] = \exp(f(x))/(1 + \exp(f(x))$
+    \item Maximum likelihood estimation for a collection of
+      independent Bernoulli random variables $Y_i$ with
+      $\mathrm{pr}[Y_i = 1] = \exp(f(X_i))/(1 + \exp(f(X_i))$
+  \end{itemize}
+  These perspectives give us different ways to think about
+  logistic regression in that we can do both classification as well as
+  predicting the probability that some events happen. For example
+\end{frame}
+
+\begin{frame}
+  \frametitle{Minimizing logistic loss also minimizes $0-1$ loss}
+  Recall the logistic loss function and its empirical counterpart
+  \begin{gather*} L_{\phi}(f) = \mathbb{E}[\log (1 + \exp(-Y f(X)))] \\
+  \hat{L}_{\phi}(f) = \sum_{i=1}^{n} \log(1 + \exp(-Y_i f(X_i)))\end{gather*}
+  
+  We now provide a heuristic argument that minimizing $L_{\phi}(f)$
+  also leads to a Bayes-optimal classifier. Recall the notation
+  $\eta(X) = \mathrm{pr}(Y = 1 \mid X)$ where $Y \in \{-1,1\}$. We
+  then have
+  
+  \begin{equation*}
+    \begin{split} L_{\phi}(f) & = \mathbb{E}[\log (1 + \exp(-Y f(X)))] \\
+      &= \mathbb{E}[\eta(X) \log(1 + \exp(-f(X))) + (1 - \eta(X))
+      \log(1 + \exp(f(X)))]
+      \end{split}
+      \end{equation*}
+\end{frame}
+
+\begin{frame}
+  We are interested in finding
+  $$\min_{f} \mathbb{E}[\eta(X) \log(1 + \exp(-f(X))) + (1 - \eta(X))
+  \log(1 + \exp(f(X)))]$$
+  over all function $f$. 
+  
+  For a given $\eta \in [0,1]$, note that
+  \begin{equation*} \begin{split} \eta \log(1 + e^{-t}) + (1 - \eta)
+      \log(1 + e^{t}) &= \eta \log \Bigl(\tfrac{v+1}{v}\Bigr) + (1 - \eta) \log(1 + v)
+  \end{split}
+  \end{equation*}
+  where $v = \exp(t)$. 
+  
+  Taking derivative of the above
+  expression with respect to $v$ and setting the result to $0$, we see
+  that the previous expression is minimized (for any $\eta \in [0,1]$), when
+  $$v = \frac{\eta}{1 - \eta} \Longrightarrow t = \log \frac{\eta}{1 - \eta}$$
+  
+  Thus, $f^{*}(X) = \log \frac{\eta(X)}{1 - \eta(X)}$ minimizes
+  $L_{\phi}(f)$ over all $f$ (however, $f^{*}$ needs not be the unique minimizer!)
+\end{frame}
+
+\begin{frame}
+  Finally, note that for this choice of $f^{*}(X)$, we have
+  $$\mathrm{sign}(f^{*}(x)) = \begin{cases} 1 & \text{if
+      $\tfrac{\eta(x)}{1 - \eta(x)} > 1$} \\
+     0 & \text{otherwise} \end{cases}$$
+  
+  But this is nothing more than
+  $$\mathrm{sign}(f^{*}(x)) = \begin{cases} 1 & \text{if $\eta(x) > 1/2$} \\
+     0 & \text{otherwise} \end{cases}$$
+  and hence $\mathrm{sign}(f^{*}(x))$ is the Bayes classifier.
+  
+  In summary, we show that the Bayes classifier also minimize the logistic
+  loss. But what we didn't show is that \alert{all} minimizer of the
+  logistic loss will lead to minimizing the $0-1$ loss. This is much
+  harder and is outside the scope of this class.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Challenger Shuttle}
+  In January of 1986 the space shuttle Challenger exploded shortly
+  after launch. Investigation of the incident suggest that
+  the cause of the crash maybe related to the rubber O-ring seals used
+  in the rocket booster. O-rings are more brittle at lower
+  temperatures and the temperature at the time of the launch was 31
+  degrees Farenheit.
+
+  Can one predict the failure of the O-rings in advance ? There is
+  data regarding the failure rate of O-rings for 23 previous shuttle
+  missions. There is 6 O-rings used for each shuttle mission, and the
+  number of O-rings damaged for each mission was recorded. The dataset is
+  available from \textrm{faraway} package.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<logistic-l9-example1, cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth', warnings=FALSE, message = FALSE>>=
+  library("faraway")
+  data(orings)
+  plot(damage/6 ~ temp, orings, xlim = c(25,85), ylim = c(0,1), xlab = "Temperature",
+  ylab = "Prob. of damage")
+  x <- seq(25, 85,1)
+  logitmod <- glm(cbind(damage, 6 - damage) ~ temp, family =
+  binomial, orings)
+  lines(x,ilogit(coef(logitmod)[1] + coef(logitmod)[2]*x), col = 2)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+   <<logistic-l9-example2, cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth', warnings=FALSE, message = FALSE>>=
+   summary(logitmod)
+   @
+ \end{frame}
+ 
+ \begin{frame}
+  We see that there is no labeled examples for crash (prior to the
+  launch), and so there is no way to classify, solely on the basis of prior
+  data, whether or not the Challenger launch will be a crash or a
+  success. In contrast, logistic regression, which makes an assumption
+  on the form of $\eta(x)$ allow us to predict a plausible probability
+  that the launch will be a crash.
+  
+  The model we assume in this case is that $p_i$, the probability of
+  failure of an $O$-ring is of the form
+  $$p_i = \frac{\exp(\beta_0 + \beta_1 \mathtt{temp}_i)}{1 +
+    \exp(\beta_0 + \beta_1 \mathtt{temp}_i)} \Longleftrightarrow \log
+  \frac{p_i}{1 - p_i} = \beta_0 + \beta_1 \mathtt{temp}_i$$
+  On the day of the launch, the temperature was $30$ degrees
+  Farenheit. This translate to an \alert{estimated} failure
+  probability of
+  $$\frac{\exp(\Sexpr{logitmod$coef[1]} + (\Sexpr{logitmod$coef[2]})
+    \times 30)}{1 + \exp(\Sexpr{logitmod$coef[1]} +
+    (\Sexpr{logitmod$coef[2]}) \times 30)} = \Sexpr{predict(logitmod,
+    data.frame(temp = 30), type = "response")}$$
+  \end{frame}
+
+\begin{frame}
+  \frametitle{Fitting of logistic regression: IRWLS}
+  We now suppose that $p(\bm{x}_i)$ is of the form
+  $$\log \frac{p(\bm{x}_i)}{1 - p(\bm{x}_i)} = \bm{x}_i^{\top} \bm{\beta}$$
+  where $\bm{x}_i$ is the feature vector for the $i$-th data point.
+  
+  Finding $\bm{\beta}$ via maximum likelihood estimation reduces to
+  maximizing (here $Y_i \in \{0,1\}$)
+  \begin{equation*}
+    \begin{split} \ell(\bm{\beta})& = \sum_{i} Y_i \log p(\bm{x}_i) +
+      (1 - Y_i) \log (1 - p(\bm{x}_i)) \\ &=
+  \sum_{i} Y_i \bm{x}_i^{\top} \bm{\beta} + \log(1 +
+  \exp(\bm{x}_i^{\top} \bm{\beta})
+  \end{split}
+  \end{equation*}
+  \end{frame}
+  
+  \begin{frame}
+  Taking partial derivatives with respect to $\bm{\beta}$ and setting
+  the equation to $0$ yield
+  $$\frac{\partial \ell(\bm{\beta})}{\bm{\beta}}|_{\bm{\beta} =
+  \hat{\bm{\beta}}} = \sum_{i} \bm{x}_i \Bigl(Y_i -
+\frac{\exp(\bm{x}_i^{\top} \hat{\bm{\beta}})}{1 + \exp(\bm{x}_i^{\top}
+  \hat{\bm{\beta}})}\Bigr) = \mathbf{X}^{\top}(\bm{y} -
+\bm{p}(\hat{\bm{\beta}})) = \bm{0}$$
+
+  Now suppose that $\tilde{\bm{\beta}}$ is some point close to
+  $\hat{\bm{\beta}}$. We then have
+  $$\bm{0} = \frac{\partial \ell(\bm{\beta})}{\bm{\beta}}|_{\bm{\beta}
+    = \hat{\bm{\beta}}}
+    \approx \frac{\partial \ell(\bm{\beta})}{\bm{\beta}}|_{\bm{\beta} =
+      \tilde{\bm{\beta}}} + \frac{\partial \ell(\bm{\beta})}{\partial
+      \bm{\beta} \partial \bm{\beta}^{\top}}|_{\bm{\beta} = \tilde{\bm{\beta}}}  (\hat{\bm{\beta}} - \tilde{\bm{\beta}})$$
+  \end{frame}
+  
+\begin{frame}
+  Defining 
+  \begin{equation*}
+  \begin{split} \mathcal{J}(\tilde{\bm{\beta}}) &= \frac{\partial \ell(\bm{\beta})}{\partial
+      \bm{\beta} \partial \bm{\beta}^{\top}}|_{\bm{\beta} = \tilde{\bm{\beta}}} \\ &=
+    - \sum_{i=1}^{n} \bm{x}_i \bm{x}_i^{\top} p(\bm{x}_i; \tilde{\bm{\beta}}) (1
+    - p(\bm{x}_i; \tilde{\bm{\beta}})) = - \mathbf{X}^{\top}
+    \mathbf{W}(\tilde{\bm{\beta}}) \mathbf{X} 
+    \end{split}
+    \end{equation*}
+    where $\mathbf{W}(\tilde{\bm{\beta}})$ is the $n \times n$
+    diagonal matrix whose diagonal elements are 
+    $$p(\bm{x}_i; \tilde{\bm{\beta}}) (1
+    - p(\bm{x}_i; \tilde{\bm{\beta}})$$ 
+ 
+  We then have
+  \begin{equation*}
+    \begin{split} \hat{\bm{\beta}} & \approx 
+  \tilde{\bm{\beta}} -
+  \mathcal{J}(\tilde{\bm{\beta}})^{-1} \mathbf{X}^{\top} (\bm{y} -
+  \bm{p}(\tilde{\bm{\beta}})) \\
+  & \approx (\mathbf{X}^{\top}
+    \mathbf{W}(\tilde{\bm{\beta}}) \mathbf{X})^{-1} \mathbf{X}^{\top}
+    \mathbf{W}(\tilde{\bm{\beta}}) (\mathbf{X} \tilde{\bm{\beta}} +
+    \mathbf{W}(\tilde{\bm{\beta}})^{-1} (\bm{y} - \bm{p}(\tilde{\bm{\beta}}))
+  \end{split}
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+We see that $\hat{\bm{\beta}}$ is approximately the solution of the weighted
+least square problem
+$$\hat{\bm{\beta}} = \argmin_{\bm{\beta}} (\bm{z}(\tilde{\bm{\beta}})
+- \mathbf{X} \bm{\beta})^{\top} \mathbf{W}(\tilde{\bm{\beta}}) (\bm{z}(\tilde{\bm{\beta}})
+- \mathbf{X} \bm{\beta})$$
+where $(\bm{z}(\tilde{\bm{\beta}}) = (\mathbf{X} \tilde{\bm{\beta}} +
+    \mathbf{W}(\tilde{\bm{\beta}})^{-1} (\bm{y} -
+    \bm{p}(\tilde{\bm{\beta}}))$. 
+ 
+  %% = and hence
+  %% $$\frac{\partial \ell(\bm{\beta})}{\partial
+  %%     \bm{\beta} \partial \bm{\beta}^{\top}} |_{\bm{\beta} =
+  %%     \tilde{\bm{\beta}}} \hat{\bm{\beta}} = \frac{\partial \ell(\bm{\beta})}{\partial
+  %%     \bm{\beta} \partial \bm{\beta}^{\top}} |_{\bm{\beta} =
+  %%     \tilde{\bm{\beta}}} \tilde{\bm{\beta}} +  
+  
+  %% \hat{\bm{\beta}} \approx \tilde{\bm{\beta}} + 
+ We obtain an iterative reweighted least squares procedure.
+\end{frame}
+
+\begin{frame}
+    \begin{enumerate}
+  \item Obtain initial estimates $\bm{\beta}^{(0)}$
+  \item For each iteration $m+1$, form the linearized dependent
+    variable $\bm{z}^{(m+1)}$ whose elements are given by
+    \begin{equation*}
+     z_{i}^{(m)} = \mathbf{X} \bm{\beta}^{(m)} + \frac{Y_i -
+       p(\bm{x}_i; \bm{\beta}^{(m)})}{p(\bm{x}_i; \bm{\beta}^{(m)})(1
+       - p(\bm{x}_i; \bm{\beta}^{(m)}))}
+   \end{equation*}
+  \item Form the weights $w_{ii}^{(m)} = p(\bm{x}_i; \bm{\beta}^{(m)})(1
+       - p(\bm{x}_i; \bm{\beta}^{(m)}))$
+  \item Obtain $\bm{\beta}^{(m+1)}$ by solving  \begin{equation*}
+      (\mathbf{X}^{T} \mathbf{W}^{(m)} \mathbf{X}) \bm{\beta}^{(m+1)} =
+      \mathbf{X}^{T} \mathbf{W}^{(m)} \bm{z}^{(m)}
+    \end{equation*}
+  \item Repeat steps 2 to 4 above until convergence.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Logistic regression: a ``complete'' example}
+  <<logistic-l9-wells1, cache = FALSE, tidy = TRUE, results = 'asis', size = 'tiny',echo=FALSE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+  library("xtable")
+  wells <- read.table("~/Work/classes/jhu/550.413/lectures/wells.dat")
+  wells$dist <- wells$dist/100
+  print(xtable(head(wells, 6)), size = '\\tiny')
+  @
+  The \texttt{Wells} dataset from the book ``Data Analysis using
+  regression and multilevel hierarchical models'' by Gelman and
+  Hill. The dataset summarized the arsenic contents of drinking wells
+  in Bangladesh. The variables are \texttt{switch} (whether that
+  household switched wells) \texttt{arsenic} (arsenic content
+  in current well), \texttt{dist} (distance in units of 100 meters to nearest safe well),
+  \texttt{assoc} (whether household is active in community
+  organization), and \texttt{educ} (education level of head of
+  household). 
+\end{frame}
+
+\begin{frame}
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/wells.png}
+  \end{figure}
+  Graphical depiction of the wells in an area of Araihazar upazila, Bangladesh.
+  Blue and green dots represent safest wells. Other colors represent
+  wells with high arsenic contents; the red and black wells have the
+  highest arsenic contents. We want to model the decisions of
+  households in Bangladesh about whether to change their source of
+  drinking water.
+\end{frame}
+
+\begin{frame}[fragile]
+   <<logistic-l9-wells2, dependson='logistic-l9-wells1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+   fit1 <- glm(switch ~ dist, family = binomial(link = "logit"), data
+   = wells)
+   summary(fit1)
+   @
+\end{frame}
+
+\begin{frame}[fragile]
+  We now try to visualize the decision to switch versus the fitted
+  probability of switching.
+   <<logistic-l9-wells3, dependson='logistic-l9-wells1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+   jitter.binary <- function(a, jitt = 0.05){
+     ifelse (a == 0, runif(length(a), 0, jitt), runif(length(a), 1 -
+     jitt, 1))
+   }
+   invlogit <- function(a){
+     exp(a)/(1 + exp(a))
+   }
+   switch.jitter <- jitter.binary(wells$switch)
+   plot(wells$dist, switch.jitter, ylab = "switch", xlab = "distance")
+   curve(invlogit(coef(fit1)[1] + coef(fit1)[2]*x), add = TRUE)
+   @
+\end{frame}
+
+
+\begin{frame}[fragile]
+   <<logistic-l9-wells4, dependson='logistic-l9-wells1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+   fit2 <- glm(switch ~ dist + arsenic, family = binomial(link =
+   "logit"), data = wells)
+   summary(fit2)
+   @
+\end{frame}
+
+\begin{frame}[fragile]
+   <<logistic-l9-wells5, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
+   wells$dist.c <- wells$dist - mean(wells$dist)
+   wells$arsenic.c <- wells$arsenic - mean(wells$arsenic)
+   fit3 <- glm(switch ~ dist.c + arsenic.c + dist.c:arsenic.c + assoc + educ, 
+               family = binomial(link = "logit"), data = wells)
+   summary(fit3)
+   @
+\end{frame}
+
+\begin{frame}[fragile]
+  We now evaluate our classifier {\em predictive} accuracy.
+    <<logistic-l9-wells7, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, results='asis', size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.8\\linewidth'>>=
+   ## fitted give us the probability of switching
+   wells$fitted <- fit3$fitted.values
+   ## eta give us the logit, i.e., 
+   ## \eta = \log p_i/(1 - p_i) = x_i^{\top} \beta
+   wells$eta <- logit(fit3$fitted.values)
+   print(xtable(head(wells, 6)), size = '\\tiny')
+   @
+   
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{ROC Curve}
+   Suppose we now classify a household as switching if the (fitted)
+   probability of switching is more than $0.5$. 
+   
+   <<roc-curve-example, echo = TRUE>>=
+   pred <- (wells$fitted >= 0.5) + 0
+   table(pred, wells$switch, deparse.level = 2)
+   @
+ \end{frame}
+ 
+ \begin{frame}
+   From the above confusion matrix, we can describe the following quantities
+  \begin{enumerate}
+   \item  {\em true positive} are the observations that switched and was
+   correctly classified as switching. 
+   \item {\em false positive} are the observations that did
+   not switched and was falsely classified as switching. 
+   \item {\em true negative} are the observations that did not switched and was
+   correctly classified as not switching. 
+ \item {\em false negative} are the observations that switched and was falsely classified as
+   not switching. 
+   \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item The true positive rate (\texttt{tpr}) is the ratio of true positive
+   to the total number of positive examples. 
+   
+   \item The false positive rate \texttt{fpr} is the
+   ratio of false positive to the total number of negative examples.
+   
+   \item \texttt{tpr} is also termed the sensitivity and is ``an estimate
+   of the empirical probability'' $\mathrm{pr}(\hat{Y} = 1 | Y = 1)$ where $Y$ is the true label and $\hat{Y}$ is the
+   ``estimated'' label. 
+   
+   \item \texttt{fpr} is $\mathrm{pr}(\hat{Y} = 1 \mid Y = 0) = 1 -
+   \mathrm{pr}(\hat{Y} = 0 \mid Y = 0)$, or $1$ minus the specificity.   
+   
+   \item The sum of true positive and false negative is the total number of
+   observations that switched. 
+   
+   \item The sum of false positive and true
+   negative is the number of observations that did not switched.
+   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  A decision rule has high \alert{sensitivity} if it has a high true
+  positive rate, e.g., people having a disease is correctly diagnosed as having the disease.
+  
+  A decision rule has high \alert{specificity} if it has a low false
+  positive rate  e.g., people not having a disease is not likely
+  to be diagnosed as having the disease.
+  
+  There are other measures related to $\mathtt{tpr}$ and
+  $\mathtt{fpr}$, e.g., precision, false discovery rate, miss
+  rate. See
+  \href{https://en.wikipedia.org/wiki/Sensitivity_and_specificity}{Wikipedia}
+  for the gory details.
+\end{frame}
+
+\begin{frame}[fragile]
+   <<logistic-l9-wells8, dependson='logistic-l9-wells1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.8\\linewidth'>>=
+  
+   (true.positive <- sum((wells$fitted > 0.5) * wells$switch))
+   (false.positive <- sum((wells$fitted > 0.5)* (1 - wells$switch)))
+   (true.negative <- sum((wells$fitted <= 0.5) * (1 - wells$switch)))
+   (false.negative <- sum((wells$fitted <= 0.5) * wells$switch))
+   
+   (TPR <- true.positive/(true.positive + false.negative))
+   (FPR <- false.positive/(true.negative + false.positive))
+   @
+   
+\end{frame}
+
+\begin{frame}[fragile]
+   Suppose we now classify a household as switching if the (fitted)
+   probability of switching is more than $s$ where $s$ ranges from $0$
+   to $1$. 
+
+   <<logistic-l9-wells9, dependson='logistic-l9-wells1', cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.8\\linewidth'>>=
+ 
+   tpr.vec <- numeric(101)
+   fpr.vec <- numeric(101)
+   score.vec <- seq(0, 1, by = 0.01)
+   for(i in 1:101){
+     s <- score.vec[i]
+     true.positive <- sum((wells$fitted > s) * wells$switch)
+     false.positive <- sum((wells$fitted > s)* (1 - wells$switch))
+     true.negative <- sum((wells$fitted <= s) * (1 - wells$switch))
+     false.negative <- sum((wells$fitted <= s) * wells$switch)
+   
+     tpr.vec[i] <- true.positive/(true.positive + false.negative)
+     fpr.vec[i] <- false.positive/(true.negative + false.positive)
+   }
+   @
+\end{frame}
+
+\begin{frame}
+   <<logistic-l9-wells10, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+   plot(fpr.vec, tpr.vec, type = "l", col = "red", xlab = "fpr", ylab = "tpr")
+   abline(0,1)
+   @
+   The resulting curve is known as the receiver operating
+   characteristic (ROC) curve. The idea behind a ROC curve is that as
+   $\mathtt{tpr}$ increases, $\mathtt{fpr}$ generally also
+   increases. A reasonable cut-off is one for which $\mathtt{tpr}$ is large
+   while $\mathtt{fpr}$ is small.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<logistic-l9-wells11, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  ## Equivalently,
+  library(ROCR) ## use the ROCR package for drawing ROC curves
+  pred1 <- prediction(wells$fitted, wells$switch)
+  pred2 <- prediction(fit2$fitted, wells$switch)
+  roc_curve1 <- performance(pred1, measure = "tpr", x.measure = "fpr")
+  roc_curve2 <- performance(pred2, measure = "tpr", x.measure = "fpr")
+  plot(roc_curve1, col = "red")
+  lines(roc_curve2@x.values[[1]], roc_curve2@y.values[[1]], col = "blue")
+  abline(a = 0, b = 1)
+  @ 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{AUC: Area under curve}
+Another measure of classifier performance is the area under the ROC
+curve. For the previous problem, we have
+  <<logistic-l9-wells12, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.5\\linewidth'>>=
+  auc.perf1 = performance(pred1, measure = "auc")
+  auc.perf2 = performance(pred2, measure = "auc")
+
+  auc.perf1@y.values
+  auc.perf2@y.values
+  @
+ AUC is widely-used in practice for comparing 
+ different classifiers, with the idea being that the larger the AUC values, the ``better'' the classification
+ performance. This interpretation is, however, quite problematic. See
+ David Hand's \href{https://link.springer.com/article/10.1007/s10994-009-5119-5}{article}
+ for some compelling evidence against using AUC this way.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Hyperplanes and margins: Prelude to SVMs}
+  <<svm-illustration, echo = FALSE, out.width='.5\\linewidth', fig.cap = "From James et al. Introduction to Statistical Learning with R">>=
+  knitr::include_graphics("figures/hyperplanes_classifier.png")
+  @
+\end{frame}
+
+\begin{frame}
+  Once again, we have $\mathcal{D}_n = \{(X_i,Y_i)\}_{i=1}^{n}$, with
+  $X_i \in \mathbb{R}^{d}$, and we
+  want to learn a linear classifier of the form $$g(x) =
+  \mathrm{sign}(w^{\top} x + b) = \begin{cases} 1 & \text{if $w^{\top}
+      x + b > 0$} \\ 0 & \text{if $w^{\top} x + b \leq 0$} \end{cases}$$ 
+  Suppose there exists (an infinite
+  choice of) $(\hat{w},\hat{b})$ such that
+  $\mathrm{sign}(\hat{w}^{\top} X_i + \hat{b}_i) = Y_i$ for all $i =
+  1,2,\dots, n$. (zero error on the given data).
+  
+  How should we find/choose the ``optimal'' $(\hat{w}, \hat{b})$ ? We
+  could try to find $\hat{w}$ and $\hat{b}$ to maximize the distance
+  from any data point $X_i$ to the hyperplane $w^{\top} x + b = 0$. 
+\end{frame}
+
+\begin{frame}
+   <<svm-illustration2, echo = FALSE, out.width='.7\\linewidth', fig.cap = "From James et al. Introduction to Statistical Learning with R">>=
+  knitr::include_graphics("figures/maximum_margin.png")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Distance from a point to a hyperplane}
+  Let $x_0 \in \mathbb{R}^{d}$, and let $w \in \mathbb{R}^{d}$ and $b$
+  be given. Then what is the distance from $x_0$ to the hyperplane
+  $\mathcal{H} = \{x \colon w^{\top} x + b = 0\}$ ?
+  
+  This corresponds to the minimization problem
+  $$\argmin_{x \in \mathcal{H}} \|x - x_0\|$$
+
+  Assume without loss of generality that $w \not = 0$ (otherwise the
+  problem is trivial). Then $\mathcal{H}$ is equivalent to
+  $$\mathcal{H} = \{x \colon w^{\top} (x + \tfrac{b w
+    }{w^{\top} w}) = 0 \} = \{x - \tfrac{b w}{w^{\top} w}
+     \colon w^{\top} x = 0\}$$ 
+     
+  We therefore have
+  $$\argmin_{x \in \mathcal{H}} \|x - x_0\| = \argmin_{x \colon
+    w^{\top} x = 0} \|x - \tfrac{bw}{w^{\top} w} - x_0\|$$
+\end{frame}
+
+\begin{frame}
+  Now note that
+  $$w^{\top} x = 0 \Longleftrightarrow x - w \tfrac{w^{\top}
+    x}{w^{\top} w} = x \Longleftrightarrow (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x = x$$  
+  where $I$ is the $d \times d$ identity matrix. 
+  
+  The (constrained) minimization problem thus reduces to the
+  (unconstrained) minimization problem
+   $$\argmin_{x \colon
+    w^{\top} x = 0} \|x - \tfrac{bw}{w^{\top} w} - x_0\| =
+  \argmin_{x} \|(I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x - \tfrac{bw}{w^{\top} w} - x_0\|$$
+  which is a \alert{least square regression} problem with $x$ as the
+  unknown coefficients, $\tfrac{bw}{w^{\top} w} + x_0$ as the
+  response,  and $(I - \tfrac{w
+    w^{\top}}{w^{\top} w})$ as the design matrix.
+\end{frame}
+
+\begin{frame}
+  Since $(I - \tfrac{w w^{\top}}{w^{\top} w})$ is symmetric and
+  idempotent, the normal equation for the least square regression
+  reduces to
+  \begin{equation*}
+    \begin{split} & (I - \tfrac{w w^{\top}}{w^{\top} w}) (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x = (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) (x_0 + \tfrac{bw}{w^{\top} w}) \\ & \Longleftrightarrow (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x = (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x_0 \end{split}
+\end{equation*}
+  and so $x = (I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x_0$ satisfies the normal equation.
+  
+  We therefore have
+  \begin{equation*}
+    \begin{split} \min_{x \in \mathcal{H}} \|x - x_0\| & = \|(I - \tfrac{w
+    w^{\top}}{w^{\top} w}) x_0 - \tfrac{bw}{w^{\top} w} - x_0\| \\ &= \frac{\|w
+  w^{\top} x_0 + b w\|}{w^{\top} w} = \frac{|w^{\top} x_0 + b|}{\|w\|}. \end{split}
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Maximum margin hyperplanes}
+  Thus, assuming $\mathcal{D}_n$ is linearly separable, the maximum
+  margin classifier correspond to
+  $$\argmax_{w,b} \min_{i} \frac{|w^{\top} X_i + b|}{\|w\|}$$
+  Taking the \alert{convenient albeit arbitrary} choice that, for a
+  given $w$, $\min_{i} |w^{\top} X_i + b| = 1$, we obtain
+  \begin{equation*}
+    \begin{split} & \argmax_{w,b} \min_{i} \frac{|w^{\top} X_i +
+        b|}{\|w\|} \Longleftrightarrow \\ &
+  \argmax_{w,b} \frac{1}{\|w\|} \quad \text{subject to $Y_i(w^{\top} X_i
+    + b) \geq 1$} \Longleftrightarrow \\ & \argmin_{w,b} \|w\|^2 \quad
+  \text{subject to $Y_i(w^{\top} X_i
+    + b) \geq 1$}
+  \end{split}
+  \end{equation*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Support vector classifiers}
+  What happens when $\mathcal{D}_n$ is not linearly separable ?
+  
+  Then we can try to find a maximum margin hyperplanes that does not
+  mis-classify too many points. Consider a hyperplane $\mathcal{H}$
+  defined by $w^{\top} x + b$. Then $X_i$ is
+  mis-classified by $\mathcal{H}$ if $$Y_i(w^{\top} X_i + b) = 1 -
+  \xi_i \quad \text{for some $\xi_i \geq 1$.}$$ 
+  
+  We thus consider the following optimization problem
+  \begin{gather*} \argmin_{w,b,\{\xi\}} \|w\|^2  \quad \text{subject
+        to} \\
+      Y_i(w^{\top} X_i + b) \geq 1 - \xi_i \\
+      \xi_i \geq 0 \quad \text{for all $i$}, \quad \sum_{i} \xi_i \leq C
+  \end{gather*}
+  Here $C$ is a tuning parameter that specifies an \alert{upper bound} on the 
+  number of mis-classified points.
+\end{frame}
+
+\begin{frame}
+  <<svm-illustration3a, echo = FALSE, out.width='.7\\linewidth', fig.cap = "From Hastie et al. Elements of Statistical Learning">>=
+  knitr::include_graphics("figures/svc_illustrated.png")
+  @
+\end{frame}
+
+\begin{frame}
+  <<svm-illustration3, echo = FALSE, out.width='.7\\linewidth', fig.cap = "From James et al. Introduction to Statistical Learning with R">>=
+  knitr::include_graphics("figures/support_vector_tuning.png")
+  @
+\end{frame}
+
+\begin{frame}
+  \frametitle{Here comes the hinge}
+  The previous optimization problem yield a classifier known as the
+  soft-margin classifier (Vapnik and Chervonenkis, 1963; Cortes and
+  Vapnik, 1993). 
+
+  Rewrite the constraints
+  \begin{gather*} Y_i(w^{\top} X_i + b) \geq 1 - \xi_i \quad \text{and} \quad \xi_i
+  \geq 0 \quad \Longleftrightarrow \\
+  \xi_i \geq 1 - Y_i(w^{\top} X_i + b) \quad \text{and} \quad \xi_i
+  \geq 0 \\ \Longleftrightarrow \xi_i \geq [1 - Y_i (w^{\top} X_i +
+  b)]_{+} \end{gather*}
+\end{frame}
+
+\begin{frame}
+  Noting that $\sum_{i} \xi_i$ behaves like a ``loss'' function,
+  we see that a related formulation of the soft-margin classifier is
+  as the solution of the following (unconstrained) optimization problem
+  $$\argmin_{w,b} \sum_{i=1}^{n} [1 - Y_i (w^{\top} X_i + b)]_{+} +
+  \lambda \|w\|^2$$
+  for some tuning parameter $\lambda$. Here $[\cdot]_{+}$ is known as
+  the hinge-loss function.
+  
+  The above optimization problems are written in the standard form of a loss + penalty optimization
+  problem. The penalty on $\|w\|^2$ hinge-loss limits the complexity of the hyperplane.
+\end{frame}
+
+\begin{frame}
+  Another equivalent form is
+  $$\argmin_{w,b} C \sum_{i=1}^{n} [1 - Y_i (w^{\top} X_i + b)]_{+} +
+  \frac{1}{2} \|w\|^2$$
+
+  A similar argument to that done for the logistic loss-function also
+  implies that the Bayes classifier also minimizes the hinge-loss; a
+  stronger result is also true, namely that any minimizer of the
+  hinge-loss (over all classifiers) is Bayes optimal.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Example: support vector classifiers and gene expression}
+  <<khan-example, echo = TRUE, size = 'tiny'>>=
+  library(ISLR)
+  ## Dataset consisting of tissue samples for four types of blue cell tumors
+  data(Khan) 
+  names(Khan)
+  tibble::as_tibble(Khan$xtrain) ## pretty printing
+  length(Khan$ytrain)
+  length(Khan$ytest)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<khan-example2, size = 'tiny', echo = TRUE>>=
+  library(e1071) ## One package for implementing svm, there are others.
+  df <- data.frame(x = Khan$xtrain, y = as.factor(Khan$ytrain))
+  ## Here cost is the tuning parameter C on slide 109
+  out = svm(y ~ ., data = df, kernel = "linear", cost = 10)   
+  summary(out)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<khan-example3, size = 'tiny', echo = TRUE>>=
+  table(out$fitted, df$y, deparse.level = 2) ## Confusion matrix for training data
+  df.test =data.frame(x=Khan$xtest , y=as.factor(Khan$ytest ))
+  pred.test =predict (out , newdata =df.test)
+  table(pred.test, df.test$y, deparse.level = 2) ## Confusion matrix for test data
+  @
+\end{frame}
+
 \end{document}
