@@ -1,0 +1,279 @@
+---
+title: 'Sample questions: midterm 2'
+output:
+  pdf_document: 
+    df_print: tibble
+  html_document: default
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3)
+```
+
+**Study guide**
+
++ You are allowed to bring one page of note/formulas/facts, double sided, letter/A4 
++ The exam will be conceptual in nature. There will be a few multiple choices (around five), a few true false question (at most 10), and 2-3 written/essays questions.
++ A calculator is allowed but not necessary.
++ We will cover the following broad topics
+     - linear models, least square estimation and its generalization such as 
+       generalized least square and iteratively reweighted least squares.
+    - ridge regression and regression splines
+    - bootstrapping.
+     - Bayes optimal classifier, universally consistent classifier
+     - k-NN and its limitations, logistic regression.
+     - general conceptual results about limits of classification such as 
+       arbitrary slow rate  of convergence, classification is easier than regression.
+       
++ We aim to not require you to remember many formulas. Nevertheless, we expect that you know the expression for the estimates $\hat{\boldsymbol{\beta}}$ and the fitted value $\hat{\boldsymbol{y}}$ in least square, weighted/generalized least squares, ridge regression, and regression spline. We might give you other expression and formulas and ask you to extend/adapt them to other settings.
+
++ The following sample questions are meant for **illustrative** purposes only, just to give you a sense of the format and outline of how the problems are structured. We will try our best to be consistent so that the sample questions here are representative of the length and difficulty of the exam. There might be too much notations/ in the sample questions, but we try to err on the side of over-specifying things to reduce, as much as possible, any possible mis-understandings in the stated questions.
+
+\newpage
+**Part I: Sample true/false question**
+For all questions related to classification, assume, unless specified otherwise, that the loss function under consideration is the $0$-$1$ loss, i.e., $Y \in \{0,1\}$ and for $g \colon \mathbb{R}^{d} \mapsto \{0,1\}$, $L(g) = \mathrm{pr}(g(X) \not = Y)$. 
+
+Each true/false question will be worth $2$ points.
+
+1. Let $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ be a linear model where $\boldsymbol{\beta} \in \mathbb{R}^{p}$ and $\mathrm{Var}[\boldsymbol{\epsilon}] = \sigma^2 \mathbf{V}$ for some positive definite matrix $\mathbf{V} \not = \mathbf{I}$. Let $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ and $\hat{\boldsymbol{\beta}}_{\mathrm{GLS}}$ be the ordinary least square and generalized least square estimate of $\boldsymbol{\beta}$. Then for any $\boldsymbol{a} \in \mathbb{R}^{p}$, $$\mathrm{Var}[\boldsymbol{a}^{\top} \hat{\boldsymbol{\beta}}_{\mathrm{OLS}}] < \mathrm{Var}[\boldsymbol{a}^{\top} \hat{\boldsymbol{\beta}}_{\mathrm{GLS}}].$$
+
+Answer: FALSE. recall the Gauss-Markov theorem.
+
+2. Let $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ be a linear model where $\boldsymbol{\beta} \in \mathbb{R}^{p}$ and $\mathrm{Var}[\boldsymbol{\epsilon}] = \sigma^2 \mathbf{V}$ for some positive definite matrix $\mathbf{V} \not = \mathbf{I}$. Let $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ and $\hat{\boldsymbol{\beta}}_{\mathrm{GLS}}$ be the ordinary least square and generalized least square estimate of $\boldsymbol{\beta}$. Let $\hat{\boldsymbol{y}}_{\mathrm{OLS}} = \mathbf{X}\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ and
+$\hat{\boldsymbol{y}}_{\mathrm{GLS}} = \mathbf{X}\hat{\boldsymbol{\beta}}_{\mathrm{GLS}}$. Then
+$$\|\boldsymbol{y} - \hat{\boldsymbol{y}}_{\mathrm{OLS}}\|^2 > \|\boldsymbol{y} - \hat{\boldsymbol{y}}_{\mathrm{GLS}}\|^2.$$
+
+Answer: FALSE. $\hat{\beta}_{\mathrm{OLS}}$ is the least square solution, i.e., minimizes the sum of square criterion.
+
+3. Let $(X,Y)$ be a random vector with (joint) distribution $F_{XY}$ such that $X \in \mathbb{R}^{d}$ and $Y \in \{0,1\}$ is a deterministic function of $X$. Let $\epsilon > 0$ be arbitrary. Then there exists a classification rule $\{g_n \colon n \geq 1\}$ such that for all $n \geq 1$, 
+$$\mathbb{E}[L(g_n)] \leq \epsilon.$$ 
+
+Answer: TRUE. Since $Y$ is a deterministic function of $X$, $L^{*} = 0$. Let $g_n$ be the Bayes rule. Then $L(g_n) = L^{*} = 0$ (which is just the definition of the Bayes rule)
+
+
+4. There exists a decision rule $\{g_n \colon n \geq 1\}$ such that we can choose some **fixed** $n$ sufficiently large so that, for any $\epsilon > 0$ and **for all** $F_{XY}$ such that $X \in \mathbb{R}^{d}$ and $Y \in \{0,1\}$ is a deterministic function of $X$, then
+$$\mathbb{E}[L(g_n)] \leq \epsilon.$$ 
+
+Answer: FALSE. Read the slides about arbitrary slow rate of convergence. In essence, there are universally consistent rule, but the rate of convergence to $L^{*}$ is arbitrarily slow. That is to say, there are classification rules that, in the limit, will achieve Bayes optimal. But you cannot guarantee the rate of convergence to Bayes optimal, thus you cannot guarantee that, for an arbitary $\epsilon$, there exists a fixed/finite sample size $n$, that $L(g_n) - L^{*} \leq \epsilon$ for all distributions $F_{XY}$.
+
+5. Let $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ be a linear model. Let $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ be the ordinary least square estimate of $\boldsymbol{\beta}$. Let $\lambda > 0$ be given and let $\hat{\boldsymbol{\beta}}^{(\lambda)}$ be the ridge regression estimate $(\mathbf{X}^{\top} \mathbf{X} + \lambda \mathbf{I})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$ of $\boldsymbol{\beta}$. Then
+$$\|\hat{\boldsymbol{\beta}}\| < \|\hat{\boldsymbol{\beta}}^{(\lambda)}\|.$$
+
+Answer: FALSE. $\hat{\boldsymbol{\beta}}^{(\lambda)}$ is obtained via shrinkage (which basically means we shrink the coefficient toward zero). See the motivation behind ridge regression in your lecture slides. More specifically, $\lambda = 0$ yield OLS, $\lambda \rightarrow \infty$ yield $\hat{\boldsymbol{\beta}}^{(\lambda)} \rightarrow 0$. Intermediate values of $\lambda$ shrink $\|\hat{\boldsymbol{\beta}}^{(\lambda)}\|$ to some value between $\|\hat{\boldsymbol{\beta}}\|$ and $0$. A formal proof is certainly possible, but not necessary.  
+
+6. There exists a **fixed** $k$ such that the $k$-NN classifier rule is universally consistent as $n \rightarrow \infty$.
+
+Answer: FALSE. Read the slides on the condition for universal consistency of $k$-NN. We requite $k/n \rightarrow 0$, $k \rightarrow \infty$.
+
+7. For any distribution $F_{XY}$, the Bayes classifier rule $g^{*}$ has classification error
+$$L(g^{*}) = \mathbb{E}[\max\{\eta(X), 1 - \eta(X)\}]$$
+where $\eta(x) = \mathrm{pr}(Y = 1 \mid X = x)$.
+
+Answer: FALSE. Read the slides on the definition of Bayes classifier. In particular
+$$L(g^{(*)}) = \mathbb{E}[\min\{\eta(X), 1 - \eta(X)\}]$$
+
+\newpage
+**Part II: Essays questions**
+Each essay questions will be worth $10$ points.
+
+***Question 1***
+Let $F_{XY}$ be any distribution on $(X, Y)$ with $X \in \mathbb{R}^{d}$ and $Y \in \{0,1\}$. Let $g \colon \mathbb{R}^{d} \mapsto \{0,1\}$ be any classifier. Suppose the cost of classifying/predicting $g(X) = 1$ when $Y = 0$ has cost $c_0$ while the cost of classifying/predicting $g(X) = 0$ when $Y = 1$ has cost $c_1$, with $c_0$ possibly different from $c_1$. Assume $c_0$ and $c_1$ known, 
+
+  (a) (5pts) Show that the Bayes optimal classification rule for this loss function is
+      $$g^{*}(x) = \begin{cases} 1 & \text{if $c_1 \eta(x) > c_0 (1 - \eta(x))$} \\
+                               0 & \text{otherwise} \end{cases}$$
+      where $\eta(x) = \mathrm{pr}(Y = 1 \mid X = x)$. Hint: for any classification rule $g$,       the error cost for the prediction $g(X)$ when $X = x$ is
+      $$\begin{split} & c_1 \mathrm{pr}(g(X) = 0, Y = 1 \mid X = x) + c_0 \mathrm{pr}(g(X) = 1, Y = 0 \mid X = x) \\ &= c_1 \mathrm{pr}(Y = 1 \mid X = x) \times \mathbb{I}(g(x) = 0) + c_0 \mathrm{pr}(Y = 0 \mid X = x) \times \mathbb{I}(g(x) = 1) \end{split}.$$
+**Answer**: Given the above form for the error loss, we see that if the indicator $\mathbb{I}(g(x) = 0) = 1$ (that is, $g(x) = 0$), then, necessarily, $g(x) \not = 1$ and hence $\mathbb{I}(g(x) = 1) = 0$. Thus
+$$c_1 \mathrm{pr}(Y = 1 \mid X = x) \times \mathbb{I}(g(x) = 0) + c_0 \mathrm{pr}(Y = 0 \mid X = x) \times \mathbb{I}(g(x) = 1) \geq \min\{c_1 \eta(x), 1 - c_0 \eta(x)\}$$
+and hence the Bayes optimal classifier should always choose the minimum of either $c_1 \eta(x)$ or $c_0 (1 - \eta(x))$, which is exactly what we claimed above.
+  
+  (b) (5pts) Propose a universally consistent classification rule for this loss function. More specifically, suppose $\mathcal{D}_n = \{(X_i, Y_i)\}_{i=1}^{n}$ is $n$ i.i.d. data points with distribution $F_{XY}$. Using $\mathcal{D}_n$, how will you construct a classification rule $\{g_n \colon n \geq 1\}$ for which, for all $F_{XY}$,
+  $$L(g_n) \rightarrow L^{*}$$
+  as $n \rightarrow \infty$ ? Hint: Think $k$-NN.
+
+**Answer** For part (b),  how will you try to approximate $\eta(x) = \mathrm{pr}(Y = 1 \mid X = x)$ ? The $k$-NN universally consistency is (see slide 23) based on the fact that as $n \rightarrow \infty$ and $k/n \rightarrow 0$, the quantity
+  $$\frac{1}{k} \sum_{i} w_{ni} \mathbb{I}(Y_i = 1)$$ is a consistent estimate of $\eta(x)$. Indeed, if $k/n \rightarrow 0$, slide $20$ say that the $k$-nearest neighbor of $x$ converges to $x$. Then averaging the proportion of time $Y_i = 1$ 
+  (for which the $X_i$ are among the $k$-NN of $x$) is similar to estimating $\mathrm{pr}(Y = 1 \mid X = x)$. The universally consistent classification rule is then
+  $$g_n(x) = \begin{cases} 1 & \text{if} \,\, c_1 \sum_{i} w_{ni} \mathbb{I}(Y_i = 1) > c_0 \sum_{i} w_{ni} \mathbb{I}(Y_i = 0) \\
+  0 & \text{otherwise} \end{cases}$$
+  
+
+\newpage
+***Question 2***
+Consider the following dataset.
+```{r}
+library(boot)
+data(darwin)
+darwin
+```
+  
+The darwin data frame contains $15$ observations from an experiment by Charles Darwin to examine the superiority of cross-fertilized plants over self-fertilized plants. Each observation consisted of one cross-fertilized plant and one self-fertilized plant which germinated at the same time and grew in the same pot. The plants were measured at a fixed time after planting and the difference in heights between the cross- and self-fertilized plants are recorded in eighths of an inch, i.e., the value for the $i$-th observation is $Y_i = X_i - Z_i$ where $X_i$ and $Z_i$ are the height of the cross-fertilized plant and self-fertilized plant in the $i$th experiment. Note that we observe neither $X_i$ nor $Z_i$.
+
+We are interested in testing the null hypothesis of no treatment difference between cross-fertilized plants over self-fertilized plants. Vieweing the $Y_i$ as i.i.d. $F$ for some **symmetric** distribution $F$, i.e., $\mathrm{pr}(Y_i \leq 0) = \mathrm{pr}(Y_i \geq 0) = 0.5$, this can be formulated as testing the null hypothesis $\mathbb{H}_0 \colon \mu_F = 0$ against the alternative hypothesis that $\mathbb{H}_1 \colon \mu_F > 0$ where $\mu = \mathbb{E}[Y_i]$. We emphasize that no parametric assumption is made regarding $F$, other than that it is symmetric around $0$.
+
+For this problem, $\bar{Y} = `r mean(darwin$y)`$. Write down, steps by steps, as detailed as you can, how you will use bootstrapping to obtain a plausible $p$-value for deciding, based on $\bar{Y}$, whether to reject or fail to reject the null hypothesis $\mathbb{H}_0 \colon \mu_F = 0$. Note that you do not need to write **R** code to get full credit for this problem, but you should provide sufficient details so that any one can implement the procedure in their favourite language of choice.
+
+**Answer**: If $Y_i = X_i - Z_i$ has distribution that is symmetric around $0$, then $\mathrm{pr}(Y_i \geq 0) = \mathrm{pr}(Y_i \leq 0) = 0.5$. That is to say, $Y_i$ and $-Y_i$ has the same distribution (because if $Y_i \geq 0$ then $-Y_i \leq 0$ and vice versa).
+
+The bootstrapping procedure is then
+
++ Step 1. Compute $T = \bar{Y}$
++ Step 2. For each $i = 1,2,\dots, 15$, sample $\tilde{Y}_i$ as $\mathrm{pr}(\tilde{Y}_i = Y_i) = 0.5$ and $\mathrm{pr}(\tilde{Y}_i = - Y_i) = 0.5$ where the $\tilde{Y}_i$ are independent of one another.
++ Step 3. Compute $T_b$ as the sample mean of the $\{\tilde{Y}_i\}$
++ Step 4. Repeat step $2$ and $3$ a total of $B = 1000$ times.
++ Step 5. Count the proportion of time the bootstrapped $T_b > T$ (call this value $p_1$) and the proportion of time the bootstrapped $T_b < T$ call this value $p_2$. Return the empirical $p$-value as $2 \min \{p_1, p_2\}$. 
+
+\newpage
+***Question 3***
+
+The $\mathtt{pima}$ dataset contains data coming from a study of
+diabetes among the adult female Pima Indians living near Phoenix,
+Arizona. There are 768 observations, with 268 tested to be diabetic.
+The variables are
+  
+  - $\mathtt{pregnant}$:  Number of times pregnant
+  - $\mathtt{glucose}$:  Plasma glucose concentration at 2 hours in an oral
+          glucose tolerance test
+  - $\mathtt{bmi}$ Body mass index 
+  - $\mathtt{test}$ test whether the patient shows signs of diabetes (coded 0
+          if negative, 1 if positive)
+
+Consider the following output
+```{r echo = -c(1:4), message = FALSE, warning = FALSE}
+library("faraway")
+library(dplyr)
+data(pima)
+pima <- pima %>% select(-diabetes,-triceps,-diastolic, -age, -insulin)
+pima
+mm <- glm(test ~., data = pima, family = binomial)
+summary(mm)
+## Classify a woman as diabetic if the fitted probability is 0.5 or higher
+pred <- (mm$fitted > 0.5) + 0 
+table(pred, pima$test, deparse.level = 2)
+```
+
+From the above output, answer the following question
+  
+  (a) [3pts] What is the estimated value for $\mathrm{pr}(Y = 1 \mid X = x_{*})$ where $x_{*} = (\mathtt{pregnant}_*, \mathtt{glucose}_*, \mathtt{bmi}_*) = (0, 130, 30)$ ?
+  
+  (b) [2pts] The quantity $p(x) = \mathrm{pr}(Y = 1 \mid X = x)$ is the probability, given $X = x$, that $Y = 1$. The ratio $p(x)/(1 - p(x))$ is known as the odds; observation with higher odds are more likely to be class $1$ then class $0$ and observations with lower odds are more likely to be class $0$ than class $1$. For the classifier $\mathtt{mm}$, how does the estimated odd of being diabetic (or diagnosed as being diabetic) for a woman with $\mathtt{bmi} = 30$ compares with the estimated odd of being diabetic (or diagnosed as being diabetic) for a woman with $\mathtt{bmi} = 25$ ?
+  (c) [2pts] Suppose we classify a woman as diabetic if the fitted probability is $0.5$ or higher. From the above output, what is the accuracy of the classifier on the training data ?
+  (d) [3pts] Continuing from part (c), what is the true positive rate and false positive rate
+  associated with the threshold $0.5$ ?
+
+**Answer**: for part (a), we have
+$$\mathrm{pr}(Y = 1 \mid X = x_*) = \frac{\exp(\beta_0 + \beta_1 \mathtt{pregnant}_* + \beta_2 \mathtt{glucose}_* + \beta_3 \mathtt{bmi}_*)}{1 + \exp(\beta_0 + \beta_1 \mathtt{pregnant}_* + \beta_2 \mathtt{glucose}_* + \beta_3 \mathtt{bmi}_*)}$$
+Replace the coefficients $\beta_0$, $\beta_1$, $\beta_2$, and $\beta_3$ with their estimates given in the above output to obtain the estimated value for $\mathrm{pr}(Y = 1 \mid X = x_*)$
+
+For part (b), recall that, for $x = (x_1, x_2, x_3)$
+$$\frac{p(x)}{1 - p(x)} = \exp(\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3)$$
+We therfore have, with $\mathtt{odd}(x) = p(x)/(1 - p(x))$ that
+$$\frac{\mathtt{odd}(x)}{\mathtt{odd}(z)} = \frac{\exp(\beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3)}{\exp(\beta_0 + \beta_1 z_1 + \beta_2 z_2 + \beta_3 z_3)} = \exp(\beta_1 (x_1 - z_1) + \beta_2 (x_2 - z_2) + \beta_3 (x_3 - z_3))$$
+and hence, increasing the $\mathtt{bmi}$ by $5$ units (while keeping the remaining quantities fixed), is associated with increasing the odds by $\exp(5 \times `r mm$coef[4]`)$.
+
+For part (c), the accuracy is $(116 + 63)/(116 + 63 + 437 + 152)$.
+
+For part (d), the number of true positive is $152$. The true positive rate is the number of true positive divided by the total number of positive labeled examples, so it is $152/(116+152)$. The number of false positive is $63$. The false positive rate is the number of false positive divided by the toal number of negative labeled examples, so it is $63/(437 + 63)$. 
+
+\newpage
+**Part III: Multiple choice questions**
+Each multiple choice questions is worth $3$ points.
+
++ Q1. Let $F_XY$ be such that $Y \in \{0,1\}$ and that, conditional on $Y = i \in \{0,1\}$, $X$ is multivariate normal with mean $\mu_i$ and covariance matrix $\Sigma_i$. Suppose $\Sigma_0 = \Sigma_1$. Let $g_{\mathrm{LDA}}$ and $g_{\mathrm{QDA}}$ be the linear and quadratic discriminant rule (assuming $\mu_i$, $\Sigma_i$, and $\pi_i = \mathrm{pr}(Y = i)$ are **known**). Which of the following statements is true ?
+    
+    (a) $L(g_{\mathrm{LDA}}) > L(g_{\mathrm{QDA}})$
+    (b) $L(g_{\mathrm{LDA}}) < L(g_{\mathrm{QDA}})$
+    (c) $g_{\mathrm{LDA}}(x) = g_{\mathrm{QDA}}(x)$ for all $x$.
+    (d) The decision boundary associated with $g_{\mathrm{QDA}}$ is non-linear.
+
+Answer: (c). Read the lecture slides on LDA and QDA. In particular, when $\Sigma_1 = \Sigma_2$, QDA reduces to LDA whose decision boundary is linear (hence the name linear discriminat)
+
++ Q2. Let $g_{1}$ be the $1$-NN classifier rule. Which of the following statements are true ?
+   
+   (a) $L(g_1)$ is a random variable and $L(g_1) \leq 2 L^{*}$ 
+         for all distributions $F_{XY}$
+   (b) $L(g_1)$ is a random variable satisfying $\mathbb{E}[L(g_1)] \leq 2 L^{*}$ for all            distribution $F_{XY}$
+   (c) The time to compute $g_1$ (on new data), given $n$ training data points 
+   $\mathcal{D}_n = \{(X_i, Y_i)\}$ does not depend on $n$.
+   (d) The time to compute $g_1$ (on new data), given $n$ training data points        $\mathcal{D}_n = \{(X_i, Y_i)\}$, is at least quadratic in $n$.
+   
+Answer: (b). Read slide 19 of your lecture note. What is $g_1$ ? The nearest neighbor classifier requires existing training data $\mathcal{D}_n = \{(X_i, Y_i)\}_{i=1}^{n}$ to classify a given data point as
+
+$$g_1(x) = \begin{cases} 1 & \text{if} \,\, X_{j*}, \,\, \text{the nearest neighbor of} \,\, x \,\, \text{among the} \{X_i\} \,\, \text{has label} \,\, Y_{j*} = 1 \\ 
+0 & \text{if} \,\, X_{j*}, \,\, \text{the nearest neighbor of} \,\, x\,\, \text{among the} \{X_i\} \,\, \text{has label} \,\, Y_{j*} = 0 \end{cases}$$
+
+as such $g_1$ depends on the training data which is a **random sample** from $F_{XY}$ (otherwise there is no way to say anything about the accuracy of any classifier, other than the empirical accuracy) and so $L(g_1)$ is a random variable. Slide 19 say that this random variable converges to something that is less than $2L^{*}$ and so option (a) is false. As for option (c) and (d), you need to be able to compute the nearest neighbor of a given $x$ from among all the $\{X_i\}_{i=1}^{n}$. This requires at least linear time in $n$ (finding the minimum among $n$ numbers), and requires at most $n \log n$ time (sorting the $n$ numbers.) (see slide 26) Of course you can preprocess the data so that computing the nearest neighbor (say via hashing table) can take logarithmic time in $n$ in some settings, but really, we are not trying to trick you. 
+
++ Q3. Let $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$ be a linear model. Let $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ be the ordinary least square estimate of $\boldsymbol{\beta}$. Let $\lambda > 0$ be given and let $\hat{\boldsymbol{\beta}}^{(\lambda)}$ denote the ridge regression estimate of $\boldsymbol{\beta}$ associated with $\lambda$. Assuming that ridge regression is done with no centering and scaling, which of the following statements are true ?
+   (a) To compute $\hat{\boldsymbol{\beta}}^{(\lambda)}$, it is necessary and sufficient to known $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$ and $\lambda$.
+   (b) To compute $\hat{\boldsymbol{\beta}}^{(\lambda)}$, it is necessary and sufficient to know $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$, $\lambda$ and $\mathbf{X}$
+   (c) To compute $\hat{\boldsymbol{\beta}}^{(\lambda)}$, it is necessary and sufficient to know $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$, $\lambda$ and $\boldsymbol{y}$.
+   (d) To compute $\hat{\boldsymbol{\beta}}^{(\lambda)}$, it is necessary and sufficient to know $\hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$, $\lambda$, $\mathbf{X}$ and $\boldsymbol{y}$.
+
+Answer: (b) Look at the formulas
+$$\hat{\boldsymbol{\beta}}_{\mathrm{OLS}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}; \quad \hat{\boldsymbol{\beta}}^{(\lambda)} = (\mathbf{X}^{\top} \mathbf{X} + \lambda \mathbf{I})^{-1} \mathbf{X}^{\top} \boldsymbol{y} = (\mathbf{X}^{\top} \mathbf{X} + \lambda \mathbf{I})^{-1} \mathbf{X}^{\top} \mathbf{X} \hat{\boldsymbol{\beta}}_{\mathrm{OLS}}$$.
+
+
++ Q4. Which of the following models or optimization problem can be estimated or solved using weighted leasts squares or iteratively reweighted least squares ? Circle all the correct choices.
+
+   (a) Robust regression
+   (b) Generalized least square with $\mathbf{V}$ arbitrary.
+   (c) Local polynomial smoothing e.g., $\mathtt{geom\_smooth(method = "loess")}$ in **ggplot2**
+   (d) logistic regression
+   
+Answer: (a), (c), and (d). Read your lecture slides on extensions of linear models as well as the slide on classification. In particular we say that robust regression and logistic regression can both be implemented via IRWLS (iteratively reweighted least squares), while local polynomial smoothing is implemented via doing weighted least squares around a local neighborhood of a point.
+
++ Q5. Let $f(x) = b_0 + b_1 x + b_2 x^2 + b_3 x^3 + \sum_{k=1}^{m}\gamma_k (x - c_k)_{+}^{2}$ for $x \in [a,b]$ where $c_1 < c_2 < \dots < c_m$ are knots locations. Circle all of the correct statements in the list below.
+
+  (a) $f(x)$ is continuous on $[a,b]$
+  (b) $f(x)$ is differentiable and $f'(x)$ is continous on $[a,b]$
+  (c) $f'(x)$ is differentiable and $f''(x)$ is continuous on $[a,b]$
+  (d) $f(x)$ is a cubic function on the interval $[c_{k-1}, c_k]$ for $k = 2,3,\dots,m$.
+  
+Answer: (a), (b), and (d). Everytime you add a new knot, you introduce a new quadratic function. However, $f(x)$ also include a cubic term, so $f(x)$ is a cubic function. The quadratic function $\gamma_k (x - c_k)_{+}^{2}$ has second derivative $\gamma_k$, so at the common end point $c_k$, the second derivative will not be continuous.
+
+\newpage
++ Q6: Consider the following data with a scatterplot smoothing added (the scatterplot smoothing is generated using penalized regression spline).
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+basis.design <- function(x,knots){
+    Xmat <- cbind(rep(1, length(x)), x)
+    for(i in 1:length(knots)){
+      Xmat <- cbind(Xmat, ifelse(x < knots[i], 0, x - knots[i]))
+    }
+    return( Xmat)
+  }
+ 
+  psr <- function(y,x,knots,lambda){
+    X <- basis.design(x, knots)
+    D <- diag(c(0,0, rep(1,length(knots))))
+    S <- X %*% solve(t(X) %*% X + lambda^2*D) %*% t(X)
+    yhat <- S %*% y
+    return(list(yhat = yhat, df.fit = sum(diag(S)), df.res = length(y) - 2*sum(diag(S)) + sum(S^2)))
+ }
+ 
+ library("SemiPar")
+ library("gridExtra")
+ library("ggplot2")
+ data(lidar)
+ knots <- seq(from = 400, to = 700, by = 12.5)
+ lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 1)$yhat ## lambda = 1
+ p1 <- ggplot(lidar) + geom_point(aes(x = range, y = logratio), alpha = 0.5) +
+ geom_line(aes(x = range, y = logratio.smoothed), colour = "blue")
+ lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 32)$yhat ## lambda = 32
+ p2 <- ggplot(lidar) + geom_point(aes(x = range, y = logratio), alpha = 0.5) +
+ geom_line(aes(x = range, y = logratio.smoothed), colour = "blue")
+ lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 100)$yhat ## lambda = 48
+ p3 <- ggplot(lidar) + geom_point(aes(x = range, y = logratio), alpha = 0.5) +
+ geom_line(aes(x = range, y = logratio.smoothed), colour = "blue")
+ lidar$logratio.smoothed <- psr(lidar$logratio, lidar$range, knots, 1000)$yhat ## lambda = 48
+ p4 <- ggplot(lidar) + geom_point(aes(x = range, y = logratio), alpha = 0.5) +
+ geom_line(aes(x = range, y = logratio.smoothed), colour = "blue")
+ grid.arrange(p3,p1,p2, ncol = 2)
+```
+Each scatterplot smooth uses some value of the tuning parameter $\lambda \in \{1,32,100\}$. Match the value of the tuning parameter $\lambda$ to the appropriate plot.
+
+Answer: The first plot has $\lambda = 100$ as it is the "smoothest". The second plot has $\lambda = 1$ as it is the least smooth (the bigger the lambda, the smoother the curve). The third plot has $\lambda = 32$.
