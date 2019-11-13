@@ -1147,7 +1147,7 @@ that there exists \alert{simple} and yet universally consistent classification r
    <<logistic-l9-example2, cache = FALSE, tidy = TRUE, size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth', warnings=FALSE, message = FALSE>>=
    summary(logitmod)
    @
- \end{frame}
+\end{frame}
  
  \begin{frame}
   We see that there is no labeled examples for crash (prior to the
@@ -1280,7 +1280,7 @@ where $(\bm{z}(\tilde{\bm{\beta}}) = (\mathbf{X} \tilde{\bm{\beta}} +
   \frametitle{Logistic regression: a ``complete'' example}
   <<logistic-l9-wells1, cache = FALSE, tidy = TRUE, results = 'asis', size = 'tiny',echo=FALSE,fig.width=8, fig.height = 8, fig.align='center',out.width='.4\\linewidth'>>=
   library("xtable")
-  wells <- read.table("~/Work/classes/jhu/550.413/lectures/wells.dat")
+  wells <- read.table("wells.dat")
   wells$dist <- wells$dist/100
   print(xtable(head(wells, 6)), size = '\\tiny')
   @
@@ -1355,14 +1355,13 @@ where $(\bm{z}(\tilde{\bm{\beta}}) = (\mathbf{X} \tilde{\bm{\beta}} +
 \begin{frame}[fragile]
   We now evaluate our classifier {\em predictive} accuracy.
     <<logistic-l9-wells7, dependson='logistic-l9-wells1', cache = FALSE, tidy = FALSE, results='asis', size = 'tiny',echo=TRUE,fig.width=8, fig.height = 8, fig.align='center',out.width='.8\\linewidth'>>=
-   ## fitted give us the probability of switching
+   ## fitted is the probability of switching
    wells$fitted <- fit3$fitted.values
    ## eta give us the logit, i.e., 
    ## \eta = \log p_i/(1 - p_i) = x_i^{\top} \beta
    wells$eta <- logit(fit3$fitted.values)
    print(xtable(head(wells, 6)), size = '\\tiny')
    @
-   
 \end{frame}
 
 \begin{frame}[fragile]
@@ -1374,7 +1373,7 @@ where $(\bm{z}(\tilde{\bm{\beta}}) = (\mathbf{X} \tilde{\bm{\beta}} +
    pred <- (wells$fitted >= 0.5) + 0
    table(pred, wells$switch, deparse.level = 2)
    @
- \end{frame}
+\end{frame}
  
  \begin{frame}
    From the above confusion matrix, we can describe the following quantities
@@ -1718,5 +1717,392 @@ curve. For the previous problem, we have
   table(pred.test, df.test$y, deparse.level = 2) ## Confusion matrix for test data
   @
 \end{frame}
+
+\begin{frame}
+  \frametitle{Enter the kernel}
+   Let us revisit the support vector classifiers formulation as
+   \begin{gather*} \min_{w,b} \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} [1
+     - Y_i (w^{\top} X_i + b)]_{+}
+   \end{gather*}
+   where the $X_i \in \mathbb{R}^{d}$. 
+
+   Assume furthermore that $\mathrm{span}(X_1, X_2, \dots, X_n) =
+   \mathbb{R}^{d}$. Then there exists $c_1, c_2, \dots, c_n$ such that
+   $w = \sum_{i} c_i X_i$. 
+   
+   This implies, 
+   $$\|w\|^2 =
+   \Bigl(\sum_{i} c_i X_i \Bigr)^{\top} \Bigl(\sum_{i} c_i X_i \Bigr)
+   = \sum_{i} \sum_{j} c_i c_j X_i^{\top} X_j = \bm{c}^{\top} \mathbf{K} \bm{c}$$
+   where $\bm{c} = (c_1, c_2, \dots, c_n)$ and $\mathbf{K} = (k_{ij})$ is a $n
+   \times n$ matrix with $k_{ij} = X_i^{\top} X_j$. 
+
+%%   Let $\bm{\alpha} = (\alpha_1, \alpha_2, \dots, \alpha_n)$ and
+%%   $\bm{\nu} = (\nu_1, \nu_2, \dots, \nu_n)$. 
+  
+%%   {\bf Claim:} The above optimization problem (minimizing over $w$ and
+%%   $b$) is equivalent to the maximin problem
+  
+%%   $$\max_{\bm{\alpha \geq 0, \bm{\nu} \geq 0}} \min_{w,b,\{\xi_i\}}
+%%   \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i - \sum_{i=1}^{n} \nu_i
+%%   \xi_i - \sum_{i=1}^{n} \alpha_i (Y_i (w^{\top} X_i + b) - (1 - \xi_i))$$ 
+\end{frame}
+
+\begin{frame}
+  The support vector classifiers can thus be rewritten as
+   \begin{gather*} \min_{\bm{c},b} \frac{1}{2} \bm{c}^{\top}
+     \mathbf{K} \bm{c} + C \sum_{i=1}^{n} [1
+     - Y_i ((\mathbf{K} \bm{c})_{i} + b)]_{+}
+   \end{gather*}
+   where $(\mathbf{K} \bm{c})_{i}$ is the $i$-th element of the vector
+   $\mathbf{K} \bm{c}$.
+   
+   We emphasize that the above problem depends only on the $n \times n$ matrix
+   $\mathbf{K}$. There is no longer any explicit dependency on the $\{X_i\}$.
+   
+   The resulting classifier is known as the \alert{support vector
+     machine} or SVM.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Kernels: contrived example}
+ <<kernels-contrived, echo = FALSE, out.width = '.45\\textwidth', fig.show = 'hold'>>=
+ knitr::include_graphics("figures/circle_svm.png")
+ knitr::include_graphics("figures/3d_kernel.png")
+ @
+ Kernels introduce non-linearity: the original feature vectors $X_i =
+ (V_i, W_i) \in \mathbb{R}^2$. We augment $X_i$ with another dimension $Z_i =
+ V_i^2 + W_i^2$. The $ij$th entry of the kernel matrix $\mathbf{K}$ is
+ then $V_i V_j + W_i W_j + Z_i Z_j = \tilde{X}_i^{\top} \tilde{X}_j$ where $\tilde{X}_i = (V_i, W_i, Z_i)$. 
+\end{frame}
+
+\begin{frame}
+  \frametitle{Kernel functions: a brief overview}
+  {\bf Definition}: Let $\mathcal{X}$ be some input space (not necessarily Euclidean). 
+  A kernel $\kappa \colon \mathcal{X} \times \mathcal{X} \mapsto \mathbb{R}$ 
+  is a symmetric function such that, for any $n \geq 1$ and for all 
+  $x_1, x_2, \dots, x_n \in \mathcal{X}$, the matrix
+  $$\mathbf{K} = (k_{ij}) = (\kappa(x_i, x_j))_{i,j=1}^{n}$$
+  is \alert{positive semidefinite}.
+  
+  Recall that a $n \times n$ matrix $\mathbf{K}$ is positive semidefinite if, 
+  for all $\bm{v} \in \mathbb{R}^{n}$
+  $$\bm{v}^{\top} \mathbf{K} \bm{v} = \sum_{i} \sum_{j} v_i v_j k_{ij} \geq 0$$
+  
+  Recall also that $\mathbf{K}$ is positive semidefinite if there
+  exists a matrix $\mathbf{C}$ such that $\mathbf{K} = \mathbf{C}
+  \mathbf{C}^{\top}$.  Furthermore, by the spectral decomposition
+  theorem, we can take $\mathbf{C}$ to be symmetric and positive
+  semidefinite.
+\end{frame}
+
+\begin{frame}
+ Let $\mathcal{X} = \mathbb{R}^{d}$. 
+ Several popular choices for the kernel function $\kappa$ in the SVM
+ literature are
+ 
+ \begin{itemize}
+   \item Polynomial kernel: Define, for $d \geq 1$, 
+     $$\kappa(x, z) = (1 + x^{\top} z)^{d}$$
+   \item Gaussian kernel: Define, for $\gamma > 0$,
+     $$\kappa(x,z) = \exp(-\gamma \|x - z\|^2) = \exp(-\gamma
+     (x^{\top} x - 2 x^{\top} z + z^{\top} z))$$
+   \item sigmoid kernel: Define, for $\gamma \in \mathbb{R}$ and $r
+     \in \mathbb{R}$,
+     $$\kappa(x,z) = \mathrm{tanh}(\gamma x^{\top} z + r)$$
+     Note: The sigmoid kernel might not result in a positive
+     semidefinite matrix $\mathbf{K}$ for all choice of $\gamma$ and
+     $r$. See the
+     \href{https://www.csie.ntu.edu.tw/~cjlin/papers/tanh.pdf}{article}
+     for more information. 
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}
+  Kernels can also be defined on non-Euclidean domains or for data that are
+  not Euclidean data points. In particular
+  
+  \begin{itemize}
+    \item String kernels: used in text classification and
+      bioinformatics analysis of gene or DNA sequence. See
+      \href{http://www.jmlr.org/papers/volume2/lodhi02a/lodhi02a.pdf}{this article}.
+    \item Graph kernels: kernels between graphs/networks on
+      possibly different vertex set. See
+      \href{http://www.jmlr.org/papers/volume11/vishwanathan10a/vishwanathan10a.pdf}{this article}
+    \item Images kernels using SIFT features: used in image
+      classification/visual recognition. See
+      \href{https://people.eecs.berkeley.edu/~malik/cs294/lowe-ijcv04.pdf}{this article}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Properties of kernels functions}
+  It is not obvious that the polynomial kernel and the Gaussian kernel
+  yield positive semidefinite matrices $\mathbf{K}$. To show this, we
+  need to list two important properties of kernels.
+  
+  {\bf Property 1} If $\kappa_1$ and $\kappa_2$ are kernel functions
+  on the same input space $\mathcal{X}$, then
+  $$\kappa(x,z) = \kappa_1(x,z) + \kappa_2(x,z)$$
+  is also a kernel function. 
+  
+  {\bf Property 2} If $\kappa_1$ and $\kappa_2$ are kernel functions
+  on the same input space $\mathcal{X}$ then
+  $$\kappa(x,z) = \kappa_1(x,z) \times \kappa_2(x,z)$$
+  is also a kernel function.
+\end{frame}
+
+\begin{frame}
+  
+  {\bf Property 2.5} If $\kappa_1$ and $\kappa_2$ are kernel functions
+  on input spaces $\mathcal{X}$ and $\mathcal{Z}$, respectively, then
+  $$\kappa((x,x'),(z,z')) = \kappa_1(x,x') \kappa_2(z,z')$$
+  is also a kernel function.
+  Property 1 follows directly from the fact that if $\mathbf{K}_1$ and
+  $\mathbf{K}_2$ are positive semidefinite then $\mathbf{K}_1 +
+  \mathbf{K}_2$ is positive semidefinite.
+  
+  Property 2 is a bit harder to verify. Nevertheless, suppose
+  $\mathbf{M}$ and $\mathbf{N}$ are positive semidefinite
+  matrices. Define $\circ$ as the element wise/Hadamard product, e.g.,
+  $\mathbf{M} \circ \mathbf{N}$ has elements $m_{ij} n_{ij}$
+\end{frame}
+\begin{frame}
+  
+  Then, for all vector $\bm{v}$
+  \begin{equation*}
+    \begin{split} \bm{v}^{\top} (\mathbf{M} \circ \mathbf{N}) \bm{v} &
+      = \mathrm{tr} \,\,
+   \mathbf{M} \mathrm{diag}(\bm{v}) \mathbf{N} \mathrm{diag}(\bm{v})
+   \\ &=
+  \mathrm{tr} \,\, \mathbf{M}^{1/2} \mathbf{M}^{1/2} \mathrm{diag}(\bm{v})
+  \mathbf{N}^{1/2} \mathbf{N}^{1/2} \mathrm{diag}(\bm{v}) \\ &=
+  \mathrm{tr} \,\, \mathbf{M}^{1/2} \mathrm{diag}(\bm{v}) \mathbf{N}^{1/2}
+  \mathbf{N}^{1/2} \mathrm{diag}(\bm{v}) \mathbf{M}^{1/2} \geq 0
+  \end{split}
+  \end{equation*}
+  where we used the fact that for any matrix $\mathbf{C}$,
+  $$\mathrm{tr} \mathbf{C} \mathbf{C}^{\top} = \sum_{i} \sum_{j}
+  c_{ij}^2 \geq 0$$. 
+  
+  Thus, $\mathbf{M} \circ \mathbf{N}$ is positive semidefinite
+  whenever both $\mathbf{M}$ and $\mathbf{N}$ are positive semidefinite.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{SVM Example: MNIST data}
+  <<mnist-example1, cache = TRUE, size = 'tiny', echo = TRUE>>=
+  mnist_train <- read.csv("mnist_train.csv", stringsAsFactors = F, header = F)
+  mnist_test <- read.csv("mnist_test.csv", stringsAsFactors = F, header = F)
+  names(mnist_train)[1] <- "label"
+  names(mnist_test)[1] <- "label"
+  tibble::as_tibble(mnist_train)
+  @
+  These csv data file are available from this
+  \href{https://pjreddie.com/projects/mnist-in-csv/} webpage. There
+  are $60,000$ training examples on $784$ dimensions (28 pixels by 28
+  pixels) and $10000$ testing examples.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<mnist-example2, cache = TRUE, size = 'tiny', echo = TRUE>>=
+  mnist_train$label <- factor(mnist_train$label)
+  summary(mnist_train$label)
+
+  mnist_test$label <- factor(mnist_test$label)
+  summary(mnist_test$label)
+
+  # Sampling training dataset
+
+  dim(mnist_train) # computation time would be unnaceptable for such a large dataset
+
+  set.seed(100)
+  sample_indices <- sample(1: nrow(mnist_train), 5000) 
+  # extracting subset of 5000 samples for modelling
+  train <- mnist_train[sample_indices, ]
+
+  # Scaling data 
+
+  max(train[ ,2:ncol(train)]) # max pixel value is 255, lets use this to scale data
+  train[ , 2:ncol(train)] <- train[ , 2:ncol(train)]/255
+
+  test <- cbind(label = mnist_test[ ,1], mnist_test[ , 2:ncol(mnist_test)]/255)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<mnist-example3, cache = TRUE, tidy = FALSE, size = 'tiny', echo = TRUE>>=
+  library(kernlab) ## Another library for support vector machines
+  model1_rbf <- ksvm(label ~ ., data = train, scaled = FALSE, 
+                     kernel = "rbfdot", C = 1, kpar = "automatic")
+  print(model1_rbf) 
+
+  eval1_rbf <- predict(model1_rbf, newdata = test, type = "response")
+  table(eval1_rbf, test$label,deparse.level=2) 
+  @
+\end{frame}
+
+
+
+
+
+ %% \begin{frame}
+%%    \frametitle{Too much info: Lagrangian and duality}
+%%    Consider the following optimization problem for support vector classifiers.
+%%    \begin{gather*} \min_{w,b,\{\xi\}} \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i
+%%    \\ \text{subject to} \quad \xi_i \geq 0,
+%%    \quad Y_i(w^{\top} X_i + b) \geq 1 - \xi_i \quad \text{for all $i$}  \end{gather*}
+ 
+%%    Denote $\bm{\gamma} = (w,b,\xi_1, \xi_2, \dots, \xi_n$ and define
+%%    $$\mathcal{F} = \{\bm{\gamma} \colon \xi_i \geq 0,
+%%    \quad Y_i(w^{\top} X_i + b) \geq 1 - \xi_i \quad \text{for all
+%%      $i$}$$ as the \alert{feasible} set. The above optimization
+%%    problem is then
+%%    $$\min_{\bm{\gamma} \in \mathcal{F}} \frac{1}{2}\|w\|^2 + C \sum_{i} \xi_i$$
+%% \end{frame}
+
+%% \begin{frame}
+%%    Let $\bm{\alpha} = (\alpha_1, \alpha_2, \dots, \alpha_n) \geq 0$ and
+%%    $\bm{\nu} = (\nu_1, \nu_2, \dots, \nu_n) \geq 0$ be given and consider
+   
+%%    $$\mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma}) = 
+%%    \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i - \sum_{i=1}^{n} \nu_i
+%%    \xi_i - \sum_{i=1}^{n} \alpha_i (Y_i (w^{\top} X_i + b) - (1 - \xi_i))
+%%    $$
+
+%% %%   {\bf Claim:} The above optimization problem (minimizing over $w$ and
+%% %%   $b$) is equivalent to the maximin problem
+  
+%% %%   $$\max_{\bm{\alpha \geq 0, \bm{\nu} \geq 0}} \min_{w,b,\{\xi_i\}}
+%% %%   \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i - \sum_{i=1}^{n} \nu_i
+%% %%   \xi_i - \sum_{i=1}^{n} \alpha_i (Y_i (w^{\top} X_i + b) - (1 - \xi_i))$$ 
+  
+
+%%   {\bf Observation: 1} If $\bm{\gamma} \in \mathcal{F}$ then, \alert{for all}
+%%   $\bm{\alpha} \geq 0$ and $\bm{\nu} \geq 0$
+%%   $$\mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma}) \leq
+%%   \frac{1}{2}\|w\|^2 + C \sum_{i} \xi_i$$
+  
+%%   {\bf Observation: 2} If $\bm{\gamma} \not \in \mathcal{F}$, then one
+%%   can take the components of $\bm{\alpha}$ and $\bm{\nu}$ sufficiently
+%%   large such that
+%%   $$\max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0} L(\bm{\alpha},
+%%   \bm{\nu}, \bm{\gamma}) \rightarrow \infty$$
+%% \end{frame}
+
+%% \begin{frame}
+%%   We therefore have
+%%   \begin{equation*}
+%%     \begin{split} & \min_{\bm{\gamma} \in \mathcal{F}}
+%%       \frac{1}{2}\|w\|^2 + C \sum_{i} \xi_i \\ &=
+%%       \min_{\bm{\gamma}} \max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0}
+%%       L(\bm{\alpha}, \bm{\nu}, \bm{\gamma})
+%%       \end{split}
+%%     \end{equation*}
+%%    which is now an \alert{unconstrained} optimization problem (albeit
+%%    a possibly more complicated one).
+%% \end{frame}
+
+%% \begin{frame}
+
+%%   {\bf Observation 3:} Let $\bar{\bm{\gamma}}, \bar{\bm{\alpha}} \geq
+%%   0$ and $\bar{\bm{\nu}} \geq 0$ be given but \alert{arbitrary}.
+
+%%   $$\min_{\bm{\gamma}} \mathcal{L}(\bar{\bm{\alpha}}, \bar{\bm{\nu}},
+%%    \bm{\gamma}) \leq \mathcal{L}(\bar{\bm{\alpha}},
+%%    \bar{\bm{\nu}}, \bar{\bm{\gamma}}) \leq \max_{\bm{\alpha} \geq 0,
+%%      \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bar{\bm{\gamma}})$$
+
+  
+%%   {\bf Observation 4:} Since observation $3$ holds for all
+%%   $\bar{\bm{\gamma}}$, we have
+%%    $$\min_{\bm{\gamma}} \mathcal{L}(\bar{\bm{\alpha}}, \bar{\bm{\nu}},
+%%    \bm{\gamma}) \leq \min_{\bar{\bm{\gamma}}} \max_{\bm{\alpha} \geq 0,
+%%      \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bar{\bm{\gamma}})$$
+%%    as the LHS in Observation $3$ does not depend on
+%%    $\bar{\bm{\gamma}}$. 
+   
+%%    {\bf Observation 5:} Since observation $4$ holds for all
+%%    $\bar{\bm{\alpha}}$ and $\bar{\bm{\nu}}$
+%%  $$\max_{\bar{\bm{\alpha}} \geq 0, \bar{\bm{\nu}} \geq 0} \min_{\bm{\gamma}} \mathcal{L}(\bar{\bm{\alpha}}, \bar{\bm{\nu}},
+%%    \bm{\gamma}) \leq \min_{\bar{\bm{\gamma}}} \max_{\bm{\alpha} \geq 0,
+%%      \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bar{\bm{\gamma}})$$
+%%    as the RHS in Observation $4$ does not depend on
+%%    $\bar{\bm{\alpha}}$ and $\bar{\bm{\nu}}$.
+%% \end{frame}
+
+%% \begin{frame}
+  
+%%   {\bf Observation 6:} However,
+%%   \begin{gather*}
+%% \max_{\bar{\bm{\alpha}} \geq 0, \bar{\bm{\nu}} \geq 0} \min_{\bm{\gamma}} \mathcal{L}(\bar{\bm{\alpha}}, \bar{\bm{\nu}},
+%%    \bm{\gamma}) = \max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0}
+%%    \min_{\bm{\gamma}} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma}) \\
+%%    \min_{\bar{\bm{\gamma}}} \max_{\bm{\alpha} \geq 0,
+%%      \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu},
+%%    \bar{\bm{\gamma}}) = \min_{\bm{\gamma}} \max_{\bm{\alpha} \geq 0,
+%%      \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma})
+%%   \end{gather*}
+%%   and thus we obtain the \alert{weak duality} result
+%%   $$\max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0}
+%%    \min_{\bm{\gamma}} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma})
+%%    \leq \min_{\bm{\gamma}} \max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma})$$
+   
+%% {\bf Important:} It is outside the scope of our class, but it turns
+%% out that a stronger result holds, namely \alert{strong duality}
+%% $$\max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0}
+%%    \min_{\bm{\gamma}} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma})
+%%    = \min_{\bm{\gamma}} \max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0} \mathcal{L}(\bm{\alpha}, \bm{\nu}, \bm{\gamma})$$
+%% \end{frame}
+
+%% \begin{frame}
+%%   \frametitle{SVM: Dual optimization problem}
+%%   From the previous claim of strong duality, the support vector
+%%   classifiers is equivalent to the optimization problem
+%%   $$\max_{\bm{\alpha} \geq 0, \bm{\nu} \geq 0} \min_{\bm{\gamma}}
+%%   \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i - \sum_{i} \nu_i
+%%   \xi_i - \sum_{i} \alpha_i (Y_i (w^{\top} X_i + b) - (1 - \xi_i))$$
+%%   where $\bm{\gamma} = (w, b, \{\xi_i\})$.
+  
+%%   Now, for a fixed $\bm{\alpha}$ and $\bm{\nu}$, the inner
+%%   minimization with respect to $\bm{\gamma}$ is
+%%   ``straightforward''. In particular, taking the partial derivatives
+%%   with respect to $w \in \mathbb{R}^{d}$, $b \in \mathbb{R}$, and
+%%   $\xi_1, \xi_2, \dots, \xi_n$ and setting the result to $0$, we obtain
+%%   \begin{gather*} w - \sum_{i} \alpha_i Y_i X_i = 0; \quad
+%%     \sum_{i} \alpha_i Y_i = 0 \\
+%%     C - \nu_i + \alpha_i = 0 \quad \text{for all $i$}
+%%     \end{gather*}
+%% \end{frame}
+
+%% \begin{frame}
+%%   Substituting these relationships for $w$, $\alpha_i$ and $\nu_i$
+%%   into the objective function yield
+  
+%%   \begin{gather*} C \sum_{i} \xi_i - \sum_{i} \nu_i \xi_ - \sum_{i} \alpha_i \xi_i
+%%   = 0; \\ 
+%%   \sum_{i} \alpha_i Y_i b = 0 \\
+%%   \sum_{i} \alpha_i Y_i w^{\top} X_i = \sum_{i} \sum_{j} \alpha_i
+%%   \alpha_j Y_i Y_j X_i^{\top} X_j \\
+%%   \|w\|^2 = \|\sum_{i} \alpha_i Y_i X_i\|^2 = \sum_{i} \sum_{j}
+%%   \alpha_i \alpha_j Y_i Y_j X_i^{\top} X_j
+%%   \end{gather*}
+%%   and hence, for a given $\bm{\alpha} \geq 0, \bm{\nu} \geq 0$
+%%   $$\min_{\bm{\gamma}}
+%%   \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n} \xi_i - \sum_{i} \nu_i
+%%   \xi_i - \sum_{i} \alpha_i (Y_i (w^{\top} X_i + b) - (1 - \xi_i)) =
+%%   \sum_{i} \alpha_i - \sum_{i} \sum_{j} \alpha_i \alpha_j Y_i Y_j
+%%   X_i^{\top} X_j $$
+%% \end{frame}
+
+
+%% \begin{frame}
+%%   Indeed, for any given $\bm{\alpha} \geq 0$ and $\bm{\nu} \geq 0$, if
+%%   $w,b,\{\xi_i\}$ either the constraint $\xi_i \geq 0$ or the constraint
+%%   $Y_i(w^{\top} X_i + b) \geq 1 - \xi_i$ is not satisfied. Then, by
+%%   taking $\nu_i
+%% \end{frame}
+  
 
 \end{document}
