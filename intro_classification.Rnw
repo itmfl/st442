@@ -1913,16 +1913,17 @@ curve. For the previous problem, we have
   mnist_test$label <- factor(mnist_test$label)
   summary(mnist_test$label)
 
-  # Sampling training dataset
+  # Sub-sample training dataset as training time is 
+  # quite prohibitive for 50000 training samples
 
-  dim(mnist_train) # computation time would be unnaceptable for such a large dataset
+  dim(mnist_train)
 
   set.seed(100)
   sample_indices <- sample(1: nrow(mnist_train), 5000) 
   # extracting subset of 5000 samples for modelling
   train <- mnist_train[sample_indices, ]
 
-  # Scaling data 
+  # Scale the data
 
   max(train[ ,2:ncol(train)]) # max pixel value is 255, lets use this to scale data
   train[ , 2:ncol(train)] <- train[ , 2:ncol(train)]/255
@@ -1942,10 +1943,6 @@ curve. For the previous problem, we have
   table(eval1_rbf, test$label,deparse.level=2) 
   @
 \end{frame}
-
-
-
-
 
  %% \begin{frame}
 %%    \frametitle{Too much info: Lagrangian and duality}
@@ -2103,6 +2100,109 @@ curve. For the previous problem, we have
 %%   $Y_i(w^{\top} X_i + b) \geq 1 - \xi_i$ is not satisfied. Then, by
 %%   taking $\nu_i
 %% \end{frame}
-  
+
+\begin{frame}
+  \frametitle{Do we need all these classifiers?}
+  <<too-many-classifiers, echo = FALSE>>=
+  knitr::include_graphics("figures/do_we_need.png")
+  @
+\end{frame}
+
+\begin{frame}
+   \frametitle{Illusion of progress ?}
+  <<illusion, echo = FALSE>>=
+  knitr::include_graphics("figures/illusion.png")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{CART: Classification and Regression Trees}
+  <<cart-example1, echo = -5, size = 'tiny'>>=
+  ## R library for data file and functions accompany the book
+  ## Introduction to Data Science @ https://rafalab.github.io/dsbook/ 
+  library(dslabs)
+  data(olive)
+  olive <- dplyr::select(olive, -area)
+  tibble::as_tibble(olive)
+  @
+  Suppose we want predict/classify the region where the olive oil
+  came from using the fatty acid composition values as predictor variables.
+\end{frame}
+
+\begin{frame}[fragile]
+  A simple attempt at using $k$-NN yield
+  <<knn-olive-oil, echo = TRUE, tidy = FALSE, size = 'tiny', fig.align = 'center', out.width='0.6\\textwidth'>>=
+  ## We use the caret library to streamline the process of evaluating k-nn
+  library(caret)
+  ## k-nn with 10-fold cross validation
+  fit <- train(region ~ .,  method = "knn", 
+             tuneGrid = data.frame(k = seq(1, 15, 2)), 
+             trControl = trainControl(method = "cv", number = 10), ##
+             data = olive)
+  ggplot(fit)
+  @
+  indicating that we can classify the region very accurately.
+\end{frame}
+
+\begin{frame}[fragile]
+  <<olive-oil2, echo = TRUE, tidy = FALSE, size = 'tiny', fig.align = 'center', out.width='0.7\\textwidth'>>=
+  library(dplyr)
+  library(tidyr)
+  olive %>% gather(fatty_acid, percentage, -region) %>%
+    ggplot(aes(region, percentage, fill = region)) +
+    geom_boxplot() +
+    facet_wrap(~fatty_acid, scales = "free", ncol = 4) +
+    theme(axis.text.x = element_blank(), legend.position="bottom")
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  <<olive-oil3, echo = TRUE, tidy = FALSE, size = 'tiny', fig.align = 'center', out.width='0.6\\textwidth'>>=
+  olive %>% 
+  ggplot(aes(eicosenoic, linoleic, color = region)) + 
+  geom_point() +
+  geom_vline(xintercept = 0.065, lty = 2) + 
+  geom_segment(x = -0.2, y = 10.54, xend = 0.065, yend = 10.54, 
+               color = "black", lty = 2)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A simple decision tree}
+  <<olive-oil4, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='0.7\\textwidth'>>=
+  olive.tree = train(region ~ ., data=olive, 
+                  method="rpart", trControl = trainControl(method = "cv"))
+
+  plot(olive.tree$finalModel, uniform = TRUE)
+  text(olive.tree$finalModel, cex=.8)
+  @
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Another simple decision tree}
+   <<iris1, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='0.7\\textwidth'>>=
+   data(iris)
+   tibble::as_tibble(iris)
+   @
+   The Fisher iris dataset.
+\end{frame}
+
+\begin{frame}[fragile]
+   <<iris1b, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='0.7\\textwidth'>>=
+   iris.tree = train(Species ~ ., data=iris, 
+                  method="rpart", trControl = trainControl(method = "cv"))
+   plot(iris.tree$finalModel, uniform = TRUE)
+   text(iris.tree$finalModel, cex=.8)
+   @
+\end{frame}
+
+\begin{frame}[fragile]
+   <<iris2, echo = TRUE, tidy = FALSE, size = 'tiny', out.width='0.7\\textwidth'>>=
+   ggplot(iris, aes(x = Petal.Width, y = Petal.Length, color = Species)) + 
+          geom_point(position = "jitter") + geom_vline(xintercept = 1.75, lty = 2) +
+          geom_hline(yintercept = 2.45, lty = 2)
+   @
+\end{frame}
+
 
 \end{document}
