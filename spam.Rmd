@@ -1,0 +1,127 @@
+---
+title: "Spam detection with CART"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message = FALSE}
+library(rpart) #To construct CART models
+library(rpart.plot) 
+library(rattle) #For visualization
+library(dplyr)
+
+spam <- readr::read_delim("https://web.stanford.edu/~hastie/ElemStatLearn/datasets/spam.data", 
+                          delim = " ", col_names = FALSE)
+spam
+```
+
+```{r message = FALSE}
+## Now we need to assign names to these columns.
+spam_names <- readr::read_delim("ftp://ftp.ics.uci.edu/pub/machine-learning-databases/spambase/spambase.names", 
+                                delim = ":", col_names = FALSE, skip = 33)
+spam_names
+tail(spam_names)
+library(magrittr)
+spam_names <- spam_names %>% tidyr::separate(X1, c("type","freq","word")) %>% 
+  select(-freq, X2) %>% 
+  filter(type == "word") %>% 
+  select(word) %>% dplyr::pull()
+spam_names
+spam_names <- c(spam_names, "semicolon", "parenthesis","bracket","exclamation","dollar","pound","length_avg", 
+                "length_longest","length_total","spam_status")
+names(spam) <- spam_names
+spam %>% select(spam_status, everything())
+```
+
+We now build the tree
+```{r message = FALSE}
+library(rpart)
+spam_tree <- rpart(factor(spam_status) ~ ., data = spam)
+fancyRpartPlot(spam_tree, sub = "")
+```
+
+We next try pruning the tree. We note that the tree cannot be pruned further.
+```{r}
+plotcp(spam_tree)
+bestcp <- spam_tree$cptable[which.min(spam_tree$cptable[,"xerror"]),"CP"]
+pruned_tree <- prune(spam_tree, cp = bestcp)
+fancyRpartPlot(pruned_tree, sub = "")
+```
+
+We next evaluate the confusion matrices
+```{r}
+conf.matrix <- table(spam$spam_status, predict(pruned_tree,type="class"))
+rownames(conf.matrix) <- paste("Actual", rownames(conf.matrix), sep = ":")
+colnames(conf.matrix) <- paste("Pred", colnames(conf.matrix), sep = ":")
+conf.matrix
+accuracy <- (conf.matrix[2,1] + conf.matrix[1,2])/sum(conf.matrix)
+accuracy
+```
+
+## Hitters
+```{r}
+library(ISLR)
+data(Hitters)
+tibble::as_tibble(Hitters)
+
+Hitters <- na.omit(Hitters) ## Remove observations with missing values
+set.seed(123)
+idx1 <- sample(nrow(Hitters), 132)
+hitters.tree1 <- rpart(Salary ~ ., data = Hitters[idx1,])
+                      
+fancyRpartPlot(hitters.tree1, sub = "")
+
+idx2 <- sample(nrow(Hitters), 132)
+hitters.tree2 <- rpart(Salary ~ ., data = Hitters[idx2,])
+fancyRpartPlot(hitters.tree2, sub = "")
+```
+
+We see that the two regression trees are quite a bit different.
+Let us now prune the above two trees
+```{r}
+plotcp(hitters.tree1)
+bestcp <- hitters.tree1$cptable[which.min(hitters.tree1$cptable[,"xerror"]),"CP"]
+bestcp
+pruned.tree1 <- prune(hitters.tree1, cp = bestcp)
+fancyRpartPlot(pruned.tree1, sub = "")
+
+plotcp(hitters.tree2)
+bestcp <- hitters.tree2$cptable[which.min(hitters.tree2$cptable[,"xerror"]),"CP"]
+bestcp
+pruned.tree2 <- prune(hitters.tree2, cp = bestcp)
+fancyRpartPlot(pruned.tree2, sub = "")
+```
+
+We now evaluate the performance of these two trees on the testing data.
+```{r}
+pred.tree1 <- predict(pruned.tree1, Hitters[-idx1,])
+mse1 <- mean((Hitters$Salary[-idx1] - pred.tree1)^2)
+pred.tree2 <- predict(pruned.tree1, Hitters[-idx2,])
+mse2 <- mean((Hitters$Salary[-idx2] - pred.tree1)^2)
+sqrt(mse1)
+sqrt(mse2)
+```
+
+## Heart dataset
+```{r message = FALSE}
+heart <- readr::read_csv("https://raw.githubusercontent.com/JWarmenhoven/ISLR-python/master/Notebooks/Data/Heart.csv")
+heart
+heart.tree <- rpart(AHD ~ ., data = heart)
+fancyRpartPlot(heart.tree, sub = "")
+plotcp(heart.tree)
+bestcp <- heart.tree$cptable[which.min(heart.tree$cptable[,"xerror"]),"CP"]
+bestcp
+pruned.tree <- prune(heart.tree, cp = bestcp)
+fancyRpartPlot(pruned.tree, sub = "")
+conf.matrix <- table(heart$AHD, predict(pruned.tree,type="class"))
+rownames(conf.matrix) <- paste("Actual", rownames(conf.matrix), sep = ":")
+colnames(conf.matrix) <- paste("Pred", colnames(conf.matrix), sep = ":")
+conf.matrix
+accuracy <- (conf.matrix[2,1] + conf.matrix[1,2])/sum(conf.matrix)
+accuracy
+
+
+```
