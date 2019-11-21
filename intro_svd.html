@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Singular Value Decomposition and Principal Component Analysis</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="CSC/ST 442" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Singular Value Decomposition and Principal Component Analysis
+### CSC/ST 442
+### Fall 2019
+
+---
+
+
+
+# Singular Value Decomposition
+The *singular value decomposition* is the **crown jewel** and single, most important operation in numerical linear algebra and hence data science.
+
+**Theorem** Let `\(\mathbf{X}\)` be a `\(n \times m\)` matrix with `\(n \geq m\)`. Then there exists `\(n \times n\)` orthogonal matrix `\(\mathbf{U}\)` and `\(m \times m\)` orthogonal matrix `\(\mathbf{V}\)` such that
+`$$\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} \\ \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$$`
+where `\(\boldsymbol{\Sigma}\)` is a `\(m \times m\)` diagonal matrix with diagonal elements `\(\sigma_1 \leq \sigma_2 \leq \dots \leq \sigma_{m}\)`. Furthermore,
+`$$\mathbf{X} \mathbf{X}^{\top} = \mathbf{U} \begin{bmatrix} \Sigma^2 &amp; \boldsymbol{0} \\ \boldsymbol{0} &amp; \boldsymbol{0} \end{bmatrix} \mathbf{U}^{\top}; \quad \mathbf{X}^{\top} \mathbf{X} = \mathbf{V} \boldsymbol{\Sigma}^2 \mathbf{V}^{\top}$$`
+are the eigendecompositions (recall spectral theorem) of `\(\mathbf{X}\mathbf{X}^{\top}\)` and `\(\mathbf{X}^{\top} \mathbf{X}\)`. The diagonal elements `\(\sigma_1, \dots, \sigma_m\)` of `\(\boldsymbol{\Sigma}\)` are known as the **singular values**.
+
+**Note**: In the case of `\(n \leq m\)`, `\(\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} &amp; \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}\)` where `\(\boldsymbol{\Sigma}\)` is a `\(n \times n\)` diagonal matrix.
+
+---
+# SVD and low-rank approximation
+
+**Theorem** (Eckart-Young-Mirsky (1936)) Let `\(\mathbf{X}\)` be a `\(n \times m\)` matrix with `\(n \geq m\)`. Let `\(k \leq m\)`. Then the **best** rank `\(k\)` approximation (with respect to sum of square error) to `\(\mathbf{X}\)` is the matrix
+`$$\mathbf{X}_{k} = \mathbf{U}_{k} \Sigma_{k} \mathbf{V}_{k}^{\top}$$`
+where 
+
++ `\(\mathbf{U}_{k}\)` is the `\(n \times k\)` matrix containing the **first** `\(k\)` **columns** of `\(\mathbf{U}\)`
++ `\(\mathbf{V}_{k}^{\top}\)` is the `\(k \times m\)` matrix containing the **first** `\(k\)` **rows** of `\(\mathbf{V}^{\top}\)`
++ `\(\boldsymbol{\Sigma}_{k}\)` is the `\(k \times k\)` diagonal matrix containing the first `\(k\)` diagonal elements of `\(\boldsymbol{\Sigma}\)`. 
+
+That is to say, for all `\(n \times m\)` matrix `\(\mathbf{Z}\)` with `\(\mathrm{rank}(\mathbf{Z}) = k\)`, we have
+`$$\sum_{\ell = k+1}^{m} \sigma_{\ell}^2 = \sum_{i} \sum_{j} (x_{ij} - x_{(k),ij})^2 \leq \sum_{i} \sum_{j} (x_{ij} - z_{ij})^2$$`
+
+---
+class: clear
+The matrix `\(\mathbf{X}_{k}\)` is known as the **truncated** rank `\(k\)` SVD of `\(\mathbf{X}\)`. In the case when `\(k \ll m\)`, e.g., `\(m = 1000\)` and `\(k = 5\)` say, `\(\mathbf{X}_{k}\)` yield a representation of `\(\mathbf{X}\)` as a `\(n \times k\)` matrix of the form
+`$$\mathbf{Z}_{k} = \mathbf{U}_{k} \boldsymbol{\Sigma}_{k} = \mathbf{U}_{k} \boldsymbol{\Sigma}_{k} \mathbf{V}_{k}^{\top} \mathbf{V}_{k} = \mathbf{X}_{k} \mathbf{V}_{k} = \mathbf{X} \mathbf{V}_{k}$$`
+That is to say, the rows of `\(\mathbf{Z}_k\)` is the **best** representation, in `\(k\)` dimension, of the rows of `\(\mathbf{X}\)` (which are in `\(m\)` dimension). 
+
+Furthermore, `\(\mathbf{Z}_k\)` is obtained via a linear combination of the columns of `\(\mathbf{X}\)`; the coefficients in these linear combinations are given by the entries of the `\(m \times k\)` matrix `\(\mathbf{V}_k\)`.
+
+---
+# SVD computation in R
+
+
+```r
+## Generate a matrix X of size 500 rows and 200 columns
+X &lt;- matrix(rnorm(10000), nrow = 500, ncol = 200)
+X_svd &lt;- svd(X)
+str(X_svd)
+```
+
+```
+## List of 3
+##  $ d: num [1:200] 80.7 79.8 77.7 77 74.5 ...
+##  $ u: num [1:500, 1:200] 0.03212 -0.00575 0.02903 0.00264 0.01573 ...
+##  $ v: num [1:200, 1:200] -0.0262 0.0331 0.1174 0.1284 0.0599 ...
+```
+
+```r
+dim(X_svd$u)
+```
+
+```
+## [1] 500 200
+```
+
+```r
+length(X_svd$d)
+```
+
+```
+## [1] 200
+```
+
+```r
+dim(X_svd$v)
+```
+
+```
+## [1] 200 200
+```
+
+---
+class: clear
+
+```r
+## Let us try reconstructing X
+X_reconstruct &lt;- X_svd$u %*% diag(X_svd$d) %*% t(X_svd$v)
+## Compute the sum of square error
+## We see that X_reconstruct is really X, up to numerical accuracy.
+sum((X - X_reconstruct)^2) 
+```
+
+```
+## [1] 8.17e-25
+```
+
+```r
+## Let us now find the rank 3 approximation of X.
+r &lt;- 3
+X_rk3 &lt;- X_svd$u[,1:r] %*% diag(X_svd$d[1:r]) %*% t(X_svd$v[,1:r])
+sum((X - X_rk3)^2)/sum(X^2) ## Relative error in approximation.
+```
+
+```
+## [1] 0.806
+```
+
+```r
+## What about rank 10 approximation ?
+r &lt;- 10
+X_rk10 &lt;- X_svd$u[,1:r] %*% diag(X_svd$d[1:r]) %*% t(X_svd$v[,1:r])
+sum((X - X_rk10)^2)/sum(X^2) ## Relative error in approximation.
+```
+
+```
+## [1] 0.425
+```
+
+---
+class: clear
+
+Let us now see how the accuracy of the rank `\(k\)` approximation changes as we increase `\(k\)`.
+
+```r
+head(X_svd$d)
+```
+
+```
+## [1] 80.7 79.8 77.7 77.0 74.5 73.4
+```
+
+```r
+t &lt;- cumsum(X_svd$d)
+head(t)
+```
+
+```
+## [1]  80.7 160.5 238.2 315.2 389.6 463.0
+```
+
+```r
+plot(1:length(t), t/max(t), 
+     xlab = "Number of dimensions", ylab = "Approximation accuracy")
+```
+
+&lt;img src="intro_svd_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+# Fast computation of SVD in R
+Suppose we are given a big `\(n \times m\)` matrix and we want to find its rank `\(k\)` approximation for some `\(k \ll m\)`, e.g., 
+`\(m = 4000\)` and `\(k = 5\)`.
+
+```r
+X &lt;- matrix(rnorm(4000000), nrow = 10000, ncol = 4000)
+r &lt;- 5
+ptm &lt;- proc.time()
+X_svd &lt;- svd(X, nu = r, nv = r)
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##  57.878   0.315  58.433
+```
+The **irlba** library implements a method for finding a few approximate singular values and singular vectors of matrix.
+It is a fast and memory-efficient way to compute a truncated (partial) SVD.
+---
+class: clear
+
+```r
+library(irlba)
+```
+
+```
+## Loading required package: Matrix
+```
+
+```r
+r &lt;- 5
+ptm &lt;- proc.time()
+X_irlba &lt;- irlba(X, nu = r, nv = r)
+proc.time() - ptm
+```
+
+```
+##    user  system elapsed 
+##   5.636   0.351   6.022
+```
+The irlba has a speed up of roughly `\(12\)` times. This speed up is even more pronounced for larger matrices. The error between the two methods is minimal.
+
+```r
+X_approx1 &lt;- X_svd$u %*% diag(X_svd$d[1:r]) %*% t(X_svd$v)
+X_approx2 &lt;- X_irlba$u %*% diag(X_irlba$d[1:r]) %*% t(X_irlba$v)
+sum((X_approx1 - X_approx2)^2)
+```
+
+```
+## [1] 0.00335
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

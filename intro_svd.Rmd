@@ -1,0 +1,169 @@
+---
+title: "Singular Value Decomposition and Principal Component Analysis"
+author: "CSC/ST 442"
+date: "Fall 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, metropolis, metropolis-fonts]
+    nature:
+      highlightStyle: zenburn
+      highlightLines: true
+      countIncrementalSlides: false
+    df_print: tibble
+   
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines)==1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+hook_output = knit_hooks$get('message')
+knit_hooks$set(message = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+hook_output = knit_hooks$get('error')
+knit_hooks$set(error = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
+# Singular Value Decomposition
+The *singular value decomposition* is the **crown jewel** and single, most important operation in numerical linear algebra and hence data science.
+
+**Theorem** Let $\mathbf{X}$ be a $n \times m$ matrix with $n \geq m$. Then there exists $n \times n$ orthogonal matrix $\mathbf{U}$ and $m \times m$ orthogonal matrix $\mathbf{V}$ such that
+$$\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} \\ \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$$
+where $\boldsymbol{\Sigma}$ is a $m \times m$ diagonal matrix with diagonal elements $\sigma_1 \leq \sigma_2 \leq \dots \leq \sigma_{m}$. Furthermore,
+$$\mathbf{X} \mathbf{X}^{\top} = \mathbf{U} \begin{bmatrix} \Sigma^2 & \boldsymbol{0} \\ \boldsymbol{0} & \boldsymbol{0} \end{bmatrix} \mathbf{U}^{\top}; \quad \mathbf{X}^{\top} \mathbf{X} = \mathbf{V} \boldsymbol{\Sigma}^2 \mathbf{V}^{\top}$$
+are the eigendecompositions (recall spectral theorem) of $\mathbf{X}\mathbf{X}^{\top}$ and $\mathbf{X}^{\top} \mathbf{X}$. The diagonal elements $\sigma_1, \dots, \sigma_m$ of $\boldsymbol{\Sigma}$ are known as the **singular values**.
+
+**Note**: In the case of $n \leq m$, $\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} & \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$ where $\boldsymbol{\Sigma}$ is a $n \times n$ diagonal matrix.
+
+---
+# SVD and low-rank approximation
+
+**Theorem** (Eckart-Young-Mirsky (1936)) Let $\mathbf{X}$ be a $n \times m$ matrix with $n \geq m$. Let $k \leq m$. Then the **best** rank $k$ approximation (with respect to sum of square error) to $\mathbf{X}$ is the matrix
+$$\mathbf{X}_{k} = \mathbf{U}_{k} \Sigma_{k} \mathbf{V}_{k}^{\top}$$
+where 
+
++ $\mathbf{U}_{k}$ is the $n \times k$ matrix containing the **first** $k$ **columns** of $\mathbf{U}$
++ $\mathbf{V}_{k}^{\top}$ is the $k \times m$ matrix containing the **first** $k$ **rows** of $\mathbf{V}^{\top}$
++ $\boldsymbol{\Sigma}_{k}$ is the $k \times k$ diagonal matrix containing the first $k$ diagonal elements of $\boldsymbol{\Sigma}$. 
+
+That is to say, for all $n \times m$ matrix $\mathbf{Z}$ with $\mathrm{rank}(\mathbf{Z}) = k$, we have
+$$\sum_{\ell = k+1}^{m} \sigma_{\ell}^2 = \sum_{i} \sum_{j} (x_{ij} - x_{(k),ij})^2 \leq \sum_{i} \sum_{j} (x_{ij} - z_{ij})^2$$
+
+---
+class: clear
+The matrix $\mathbf{X}_{k}$ is known as the **truncated** rank $k$ SVD of $\mathbf{X}$. In the case when $k \ll m$, e.g., $m = 1000$ and $k = 5$ say, $\mathbf{X}_{k}$ yield a representation of $\mathbf{X}$ as a $n \times k$ matrix of the form
+$$\mathbf{Z}_{k} = \mathbf{U}_{k} \boldsymbol{\Sigma}_{k} = \mathbf{U}_{k} \boldsymbol{\Sigma}_{k} \mathbf{V}_{k}^{\top} \mathbf{V}_{k} = \mathbf{X}_{k} \mathbf{V}_{k} = \mathbf{X} \mathbf{V}_{k}$$
+That is to say, the rows of $\mathbf{Z}_k$ is the **best** representation, in $k$ dimension, of the rows of $\mathbf{X}$ (which are in $m$ dimension). 
+
+Furthermore, $\mathbf{Z}_k$ is obtained via a linear combination of the columns of $\mathbf{X}$; the coefficients in these linear combinations are given by the entries of the $m \times k$ matrix $\mathbf{V}_k$.
+
+---
+# SVD computation in R
+
+```{r echo = TRUE}
+## Generate a matrix X of size 500 rows and 200 columns
+X <- matrix(rnorm(10000), nrow = 500, ncol = 200)
+X_svd <- svd(X)
+str(X_svd)
+dim(X_svd$u)
+length(X_svd$d)
+dim(X_svd$v)
+```
+
+---
+class: clear
+```{r}
+## Let us try reconstructing X
+X_reconstruct <- X_svd$u %*% diag(X_svd$d) %*% t(X_svd$v)
+## Compute the sum of square error
+## We see that X_reconstruct is really X, up to numerical accuracy.
+sum((X - X_reconstruct)^2) 
+
+## Let us now find the rank 3 approximation of X.
+r <- 3
+X_rk3 <- X_svd$u[,1:r] %*% diag(X_svd$d[1:r]) %*% t(X_svd$v[,1:r])
+sum((X - X_rk3)^2)/sum(X^2) ## Relative error in approximation.
+
+## What about rank 10 approximation ?
+r <- 10
+X_rk10 <- X_svd$u[,1:r] %*% diag(X_svd$d[1:r]) %*% t(X_svd$v[,1:r])
+sum((X - X_rk10)^2)/sum(X^2) ## Relative error in approximation.
+```
+
+---
+class: clear
+
+Let us now see how the accuracy of the rank $k$ approximation changes as we increase $k$.
+```{r, size = 'tiny', out.width = "60%"}
+head(X_svd$d)
+t <- cumsum(X_svd$d)
+head(t)
+plot(1:length(t), t/max(t), 
+     xlab = "Number of dimensions", ylab = "Approximation accuracy")
+```
+
+---
+# Fast computation of SVD in R
+Suppose we are given a big $n \times m$ matrix and we want to find its rank $k$ approximation for some $k \ll m$, e.g., 
+$m = 4000$ and $k = 5$.
+```{r cache = TRUE}
+X <- matrix(rnorm(4000000), nrow = 10000, ncol = 4000)
+r <- 5
+ptm <- proc.time()
+X_svd <- svd(X, nu = r, nv = r)
+proc.time() - ptm
+```
+The **irlba** library implements a method for finding a few approximate singular values and singular vectors of matrix.
+It is a fast and memory-efficient way to compute a truncated (partial) SVD.
+---
+class: clear
+```{r cache = TRUE}
+library(irlba)
+r <- 5
+ptm <- proc.time()
+X_irlba <- irlba(X, nu = r, nv = r)
+proc.time() - ptm
+```
+The irlba has a speed up of roughly $12$ times. This speed up is even more pronounced for larger matrices. The error between the two methods is minimal.
+```{r}
+X_approx1 <- X_svd$u %*% diag(X_svd$d[1:r]) %*% t(X_svd$v)
+X_approx2 <- X_irlba$u %*% diag(X_irlba$d[1:r]) %*% t(X_irlba$v)
+sum((X_approx1 - X_approx2)^2)
+```
