@@ -167,3 +167,30 @@ X_approx1 <- X_svd$u %*% diag(X_svd$d[1:r]) %*% t(X_svd$v)
 X_approx2 <- X_irlba$u %*% diag(X_irlba$d[1:r]) %*% t(X_irlba$v)
 sum((X_approx1 - X_approx2)^2)
 ```
+
+---
+# Low rank approximation of Gaussian kernel
+Let $\mathbf{K}$ be a $n \times n$ matrix whose $ij$-th entries are of the form
+$$\exp(-\gamma \|X_i - X_j\|^2)$$
+for some $X_1, X_2, \dots, X_n$. Consider approximating $\mathbf{K}$ by a low rank matrix.
+
+```{r cache = TRUE}
+## Create 2000 points in R^2
+X <- matrix(rnorm(4000), ncol = 2)
+gamma <- 0.2
+K <- exp(-gamma*as.matrix(dist(X)^2))
+K_svd <- irlba(K, nu = 5, nv = 5)
+K_approx <- K_svd$u %*% diag(K_svd$d) %*% t(K_svd$v)
+sum((K - K_approx)^2)/sum(K^2) ## Relative error of estimation
+```
+---
+class: clear
+```{r}
+K_svd <- irlba(K, nu = 10, nv = 10)
+K_approx <- K_svd$u %*% diag(K_svd$d) %*% t(K_svd$v)
+sum((K - K_approx)^2)/sum(K^2) ## Relative error of estimation
+```
+We see that a rank $5$ approximation is resonably accurate for approximating $\mathbf{K}$.
+This indicate that, e.g., support vector machine classification with this Gaussian kernel matrix $\mathbf{K}$ is 
+**approximately equivalent** to a
+support vector classifiers where the data points are now in $\mathbb{R}^{5}$ dimension (lifted up from the original data in $2$ dimensions).
