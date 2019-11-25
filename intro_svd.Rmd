@@ -14,7 +14,7 @@ output:
    
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%")
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", message = FALSE, warning = FALSE)
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
 library(knitr)
 hook_output <- knit_hooks$get("output")
@@ -176,6 +176,7 @@ for some $X_1, X_2, \dots, X_n$. Consider approximating $\mathbf{K}$ by a low ra
 
 ```{r cache = TRUE}
 ## Create 2000 points in R^2
+library(irlba)
 X <- matrix(rnorm(4000), ncol = 2)
 gamma <- 0.2
 K <- exp(-gamma*as.matrix(dist(X)^2))
@@ -185,12 +186,130 @@ sum((K - K_approx)^2)/sum(K^2) ## Relative error of estimation
 ```
 ---
 class: clear
-```{r}
+```{r cache = TRUE}
+library(irlba)
 K_svd <- irlba(K, nu = 10, nv = 10)
 K_approx <- K_svd$u %*% diag(K_svd$d) %*% t(K_svd$v)
 sum((K - K_approx)^2)/sum(K^2) ## Relative error of estimation
+mean((K - K_approx)^2) ## Mean square error of estimation
+mean(abs(K - K_approx)) ## Mean absolute error of estimation
 ```
-We see that a rank $5$ approximation is resonably accurate for approximating $\mathbf{K}$.
+We see that a rank $10$ approximation is resonably accurate for approximating $\mathbf{K}$.
 This indicate that, e.g., support vector machine classification with this Gaussian kernel matrix $\mathbf{K}$ is 
 **approximately equivalent** to a
-support vector classifiers where the data points are now in $\mathbb{R}^{5}$ dimension (lifted up from the original data in $2$ dimensions).
+support vector classifiers where the data points are now in $\mathbb{R}^{10}$ dimension (lifted up from the original data in $2$ dimensions).
+
+---
+# MNIST dataset revisited
+
+```{r cache = TRUE}
+mnist_train <- read.csv("data/mnist_train.csv", stringsAsFactors = F, header = F)
+names(mnist_train)[1] <- "label"
+mnist_train$label <- factor(mnist_train$label)
+
+set.seed(100)
+sample_indices <- sample(1: nrow(mnist_train), 5000)
+# extracting subset of 5000 samples for modelling
+train <- mnist_train[sample_indices, ]
+
+# max pixel value is 255, lets use this to scale data
+train[ , 2:ncol(train)] <- train[ , 2:ncol(train)]/255
+```
+
+---
+class: clear
+```{r cache = TRUE}
+library(kernlab) ## Another library for support vector machines
+model1_rbf <- ksvm(label ~ ., data = train, scaled = FALSE,
+                     kernel = "rbfdot", C = 1, kpar = "automatic")
+print(model1_rbf)
+```
+Let us now use a low-rank approximation of the Gaussian kernel matrix
+to construct a different representation of the data and then train a support vector classifier, i.e., a support vector machine using the inner product kernel $\kappa(x,z) = x^{\top} z$ on this representation.
+
+---
+class: clear
+```{r cache = TRUE, message = FALSE, warning = FALSE}
+## Construct kernel matrix
+gamma <- 0.0106
+K <- exp(-gamma*as.matrix(dist(train[,-1])^2)) ## The Gaussian kernel matrix
+library(irlba)
+## Construct a representation of the data in 20 dimensions
+K_irlba <- irlba(K, nu = 20, nv = 20)
+X_lift <- K_irlba$u %*% diag(sqrt(K_irlba$d)) 
+tibble::as_tibble(X_lift)
+```
+
+---
+class: clear
+```{r}
+library(kernlab)
+XY_lift <- tibble::as_tibble(cbind(train$label, X_lift))
+names(XY_lift)[1] <- "label"
+ksvm(factor(label) ~ ., data = XY_lift, kernel = "vanilladot", scaled = TRUE, C = 10)
+```
+We see that the performance of the $20$ dimensional low-rank approximation of the Gaussian kernel is decent
+but somewhat sub-optimal.
+
+---
+class: clear
+```{r cache = TRUE, message = FALSE, warning = FALSE}
+## Construct a representation of the data in 40 dimensions
+K_irlba <- irlba(K, nu = 40, nv = 40)
+X_lift <- K_irlba$u %*% diag(sqrt(K_irlba$d)) 
+XY_lift <- tibble::as_tibble(cbind(train$label, X_lift))
+names(XY_lift)[1] <- "label"
+ksvm(factor(label) ~ ., data = XY_lift, kernel = "vanilladot", scaled = TRUE, C = 10)
+```
+The performance of the $40$ dimensional low-rank approximation is almost identical to that of the original Gaussian kernel 
+(which in this case has rank $5000$).
+
+---
+# Principal component analysis
+
+---
+# Classical multidimensional scaling
+```{r cache = TRUE}
+library(dplyr)
+library(mdsr)
+BigCities <- WorldCities %>% arrange(desc(population)) %>% head(4000) %>% 
+  select(longitude, latitude)
+D <- as.matrix(dist(BigCities)^2)
+D.occluded <- D
+## Set 50% of the entries to missing
+D.occluded[sample(1:length(D),length(D)/2)] <- NA 
+diag(D.occluded) <- 0
+```
+
+---
+class: clear
+```{r cache = TRUE, message = FALSE}
+library(softImpute)
+D.impute <- softImpute(D.occluded, rank.max = 5)
+D.reconstruct <- D.impute$u %*% diag(D.impute$d) %*% t(D.impute$v)
+## Mean square error of estimation
+norm(D - D.reconstruct, type = "F")^2/length(D) 
+## Ratio of estimation error vs norm of quantities to be estimated
+mean(abs(D - D.reconstruct)) 
+## Ratio of estimation error vs norm of quantities to be estimated
+norm(D - D.reconstruct, type = "F")^2/norm(D, type = "F")^2 
+D.reconstruct[D.reconstruct < 0] <- 0
+```
+
+---
+class: clear
+```{r cache = TRUE, message = FALSE}
+## Classical multidimensional scaling
+Xhat <- cmdscale(sqrt(D.reconstruct), 2)
+plot(Xhat)
+```
+---
+class: clear
+```{r}
+## Solve the procrustes problem
+zz <- vegan::procrustes(BigCities, Xhat)
+plot(zz$Yrot)
+```
+
+---
+# Kmeans clustering
