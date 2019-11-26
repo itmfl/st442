@@ -323,7 +323,7 @@ class: clear
 corresponds to the sample **correlation** matrices between the columns of $\mathbf{X}$. 
 
 + Given a new observation $X_*$ in $\mathbb{R}^{p}$, we map $X_*$ into $Z_* \in \mathbb{R}^{d}$ (the PCA space) via
-$$Z_* = \mathbf{V}_d^{\top} (X_* - \boldsymbol{x})$$
+$$Z_* = \mathbf{V}_d^{\top} (X_* - \bar{\boldsymbol{x}})$$
 
 ---
 # PCA in R
