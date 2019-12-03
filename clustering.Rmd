@@ -88,9 +88,9 @@ on the fuel economy rating of cars from the US Department of Energy. We follow t
 ```{r fuel, cache = TRUE, message = FALSE}
 library(dplyr)
 library(readxl)
-filename <- fs::dir_ls("16data", regexp = "public\\.xlsx") %>% head(1)
-library(janitor)
+library(janitor) ## library for simple tools for cleaning data.
 library(tibble)
+filename <- "data/2016_feguide.xlsx"
 cars <- read_excel(filename) %>% 
   janitor::clean_names() %>%
   rename(make = mfr_name, model = carline, displacement = eng_displ,
@@ -163,11 +163,13 @@ plot(cars_hclust, cex = 0.6, hang = -1, xlab = "", sub = "",
 ```
 
 --
-Good luck reading these.
+Good luck reading these labels.
 
 ---
 # Challenges in hierarchical clustering
-There are two important issues in using hierarchical clustering. 
+There are several important issues in using hierarchical clustering. 
+
++ Choice of dissimilarity/distance metrices used in the hierarchical clustering. Even for the normal Euclidean distance, a small but possibly important question is whether or not to scale the variables in the data (to have sample variance 1). For data with discrete/nominal variables, might want to consider the [Gower distance](https://www.jstor.org/stable/2528823); see also the **R** package [cluster](https://www.rdocumentation.org/packages/cluster/versions/2.1.0) and the [daisy function](https://www.rdocumentation.org/packages/cluster/versions/2.1.0/topics/daisy)
 
 + Different linkage method will generally yield (substantially) different clustering. Unless there is additional or specific knowledge (e.g., domain knowledge), there is no way to determine which clustering is preferable.
 
@@ -215,7 +217,7 @@ head(fit$cluster)
 ---
 class: clear
 
-We now how scaling the data could impact the clustering.
+We see how scaling the data could impact the clustering.
 ```{r}
 fit2 <- kmeans(scale(USArrests), centers = 5, iter.max = 50, nstart = 20)
 library(mclust)
@@ -250,7 +252,7 @@ Votes %>%
 
 ---
 class: clear
-Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do PCA, and then clustering the data via e.g., $K$-means.
+Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do SVD, and then clustering the data via e.g., $K$-means.
 
 ```{r}
 Votes_wide <- Votes %>%
@@ -264,12 +266,14 @@ str(vote_svd)
 
 ---
 class: clear
-```{r fig.align = 'center', out.width="80%"}
+```{r fig.align = 'center', out.width="60%"}
 ## Scree plot
-plot(vote_svd$d)
-k <- 5
+plot(vote_svd$d^2/sum(vote_svd$d^2), 
+     xlab = "dimension", 
+     ylab = "proportion of variability explained")
+k <- 3
 voters <- as.data.frame(vote_svd$u[,1:k] %*% diag(vote_svd$d[1:k]))
-clusters <- kmeans(voters, centers = 6, nstart = 50,iter.max = 50)
+clusters <- kmeans(voters, centers = 7, nstart = 50,iter.max = 50)
 ```
 ---
 class: clear
@@ -299,14 +303,119 @@ adjustedRandIndex(voters$cluster, voters$party)
 ---
 # Alternatives to $K$-means clustering
 
-Two important alternatives to $K$-means clustering are
+Three important alternatives to $K$-means clustering are
 
 + $K$-medoids clustering. Given $n$ data points $\{X_i\}_{i=1}^{n}$ and a positive integer $K$, find $m_1, m_2, \dots, m_K \subset \{X_i\}$ to minimize
 $$\sum_{i=1}^{n} \min_{k} d(X_i, m_k)$$
 for some notion of distance $d$.
-The restriction that the **medoids** $m_k \in \{X_i\}_{i=1}^{n}$, i.e., that the medoids are among the observed data points, allow for the $k$-medoids algorithm to converge even when $d$ is not necessarily the Euclidean distance. Furthermore, since $m_k \in \{X_i\}$, this avoids the issue of averaging say categorical variables and thus the $k$-medoids algorithm can be more easily applied to handle categorical/discrete data. See the package **pam** in **R**.
+The restriction that the **medoids** $m_k \in \{X_i\}_{i=1}^{n}$, i.e., that the medoids are among the observed data points, allow for the $k$-medoids algorithm to converge even when $d$ is not necessarily the Euclidean distance. Furthermore, since $m_k \in \{X_i\}$, this avoids the issue of averaging say categorical variables and thus the $k$-medoids algorithm can be more easily applied to handle categorical/discrete data. See the package [pam](https://www.rdocumentation.org/packages/cluster/versions/2.1.0/topics/pam) in **R**.
 
 ---
 class: clear
 
-+ Gaussian mixture modeling. Assume that the $X_i$ can be modeled as a mixture of multivariate Gaussian. $K$-means can be viewed as a special case of Gaussian mixture modeling wherein all the multivariate Gaussians have covariance matrices identical to $\sigma^2 \mathbf{I}$ for some $\sigma^2 > 0$. There are two benefits to assuming Gaussian mixtures (1) allow for soft clustering of the data points and (2) can choose $K$, the number of clusters, via an information criterion such as BIC. See the package **mclust** in **R**.
++ Gaussian mixture modeling. Assume that the $X_i$ can be modeled as a mixture of multivariate Gaussian. $K$-means can be viewed as a special case of Gaussian mixture modeling wherein all the multivariate Gaussians have covariance matrices identical to $\sigma^2 \mathbf{I}$ for some $\sigma^2 > 0$. There are two benefits to assuming Gaussian mixtures (1) allow for soft clustering of the data points and (2) can choose $K$, the number of clusters, via an information criterion such as BIC. See the package [mclust](https://www.rdocumentation.org/packages/mclust/versions/5.4.2/topics/Mclust) in **R**.
+
++ Spectral clusering: Combination of (non-linear) PCA and K-means. Given a matrix $\mathbf{X}$ of $n$ data points, compute a $n \times n$ affinity/kernel matrix $\mathbf{K}$. Do truncated PCA/SVD on $\mathbf{K}$ to yield a $n \times d$ matrix $\mathbf{Z}$ representing $n$ points in $\mathbb{R}^{d}$. Then run $K$-means (or some other clustering algorithm) on the rows of $\mathbf{Z}$. Simple enough that it should be implemented by hand, but see [specc](https://www.rdocumentation.org/packages/kernlab/versions/0.9-29/topics/specc) for an implementation.
+
+---
+#Example: Spectral clustering
+```{r fig.asp = 1, fig.retina = 3, out.width = "45%"}
+## libary for Machine learning benchmark problems
+library(mlbench) 
+set.seed(123)
+obj <- mlbench.spirals(100,1,0.025)
+df <-  4 * obj$x
+plot(df, xlab = "", ylab = "")
+```
+
+---
+class: clear
+```{r fig.asp =1, out.width = "50%"}
+library(kernlab)
+cluster <- specc(df, centers = 2)
+head(cluster)
+plot(df, col = cluster, xlab = "", ylab = "")
+```
+
+---
+#Example: Community detection
+We now discuss how the idea of dimension reduction and clustering can be used to analyze and detect communities in networks. We will use the data from [Adamic \& Glance](https://dl.acm.org/citation.cfm?id=1134277)
+```{r fig.cap = "Political blogs visualization from Adamic and Glance", out.width="70%", echo = FALSE}
+knitr::include_graphics("figures/adamic_blogs.png")
+```
+
+---
+class: clear
+The raw data is available [here](https://raw.githubusercontent.com/jdwilson4/Network-Analysis-I/master/Data/polblogs.txt) as a list of edges. We will use the [igraph package](https://igraph.org/r/) to read in the data.
+```{r cache = FALSE}
+library(igraph)
+blog_graph <- read_graph("https://raw.githubusercontent.com/jdwilson4/Network-Analysis-I/master/Data/polblogs.txt")
+blog_graph
+```
+
+---
+class: clear
+```{r cache = TRUE, fig.asp = 1.2, out.width="60%"}
+V(blog_graph)$color <- c(rep("red", 758), rep("blue", 732))
+#color the labels according to political party
+plot(blog_graph, main = "Political Blog Network", usearrows = TRUE)
+```
+
+---
+class: clear
+Well, the above visualization looks **terrible**. Sadly, proper visualization of this graph data is highly non-trivial. Let us try a different approach.
+```{r cache = FALSE, out.width = "80%"}
+blog_adj <- blog_graph[] ## Get adjacency matrix
+dim(blog_adj)
+image(blog_adj)
+```
+
+---
+class: clear
+If you squint enough hopefully you will see the black dots denoting the presence of an edge between two blogs in the previous figure.
+Let us try doing a truncated SVD to find a representation for these blogs.
+```{r cache = FALSE, echo = FALSE}
+library(dplyr)
+library(magrittr)
+largest_strong_component <- function(graph) {
+   co <- components(graph, mode = "strong")
+   which.max(co$csize) %>%
+   equals(co$membership) %>%
+   induced_subgraph(graph = graph)
+}
+blog_graph <- largest_strong_component(blog_graph)
+```
+
+```{r out.width="80%"}
+blog_adj <- blog_graph[] ## Get adjacency matrix
+blog_svd <- svd(blog_adj)
+## Scree plot
+plot(blog_svd$d^2/sum(blog_svd$d^2), 
+     ylab = "proportion of variability explained", xlab = "dimension")
+```
+
+---
+class: clear
+Let us now plot the truncated SVD representation in $\mathbb{R}^2$ for these blogs. The points are colored according to the ground truth (the political leaning of the blogs)
+```{r fig.asp = 0.9,out.width="70%"}
+plot(blog_svd$u[,1:2], col = V(blog_graph)$color, 
+     xlab = "Dimension 1", ylab = "Dimension 2")
+```
+
+---
+class: clear
+Let us now see how well $K$-means clustering recover the ground truth. We first transform the data by "projecting onto the sphere".
+```{r}
+X <- blog_svd$u[,1:2]
+X_norm <- sqrt(rowSums(X^2))
+X_norm[X_norm == 0] <- 1
+X_sphere <- X/X_norm ## normalize each row to have norm 1.
+clusters <- kmeans(X_sphere, centers = 2, nstart = 50)
+table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 5%
+```
+
+Note that if we do not transform the embedding prior to $K$-means then we get
+```{r}
+clusters <- kmeans(X, centers = 2, nstart = 50)
+table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 31%
+```

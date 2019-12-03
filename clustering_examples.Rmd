@@ -1,15 +1,15 @@
 ---
-title: "Clustering exaples"
+title: "Clustering examples"
 output: html_document
 ---
 
-# Example 1: Hierarchial clustering of Toyota cars
+# Example: Hierarchical clustering of Toyota cars
 
 We first read in the data.
 ```{r cache = TRUE, message = FALSE, warning = FALSE}
 library(dplyr)
 library(readxl)
-filename <- fs::dir_ls("16data", regexp = "public\\.xlsx") %>% head(1)
+filename <- "data/2016_feguide.xlsx"
 library(janitor)
 library(tibble)
 cars <- read_excel(filename) %>% 
@@ -67,4 +67,22 @@ cars_hclust <- hclust(toyota_dist, method = "complete") ## Complete linkage
 memb <- cutree(cars_hclust, k = 5)
 head(memb)
 table(memb)
+```
+
+# Example: Page rank
+
+See this [tutorial](https://www.stat.cmu.edu/~ryantibs/datamining/lectures/03-pr.pdf) and this [article](https://www.rose-hulman.edu/~bryan/googleFinalVersionFixed.pdf). This example uses the Facebook page-page network data from the [SNAP database](https://snap.stanford.edu/data/facebook-large-page-page-network.html).
+
+```{r message = FALSE, warning = FALSE}
+library(igraph)
+g <- read_graph("~/Downloads/facebook_large/musae_facebook_edges.csv")
+g
+pg <- page_rank(g) ## From the igraph package
+str(pg)
+summary(pg$vector)
+nodes_info <- readr::read_csv("~/Downloads/facebook_large/musae_facebook_target.csv")
+nodes_info
+nodes_info <- dplyr::mutate(nodes_info, page_rank = pg$vector)
+options(tibble.print_min = 20)
+dplyr::arrange(nodes_info, desc(page_rank))
 ```

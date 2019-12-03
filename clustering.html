@@ -47,9 +47,9 @@ on the fuel economy rating of cars from the US Department of Energy. We follow t
 ```r
 library(dplyr)
 library(readxl)
-filename &lt;- fs::dir_ls("16data", regexp = "public\\.xlsx") %&gt;% head(1)
-library(janitor)
+library(janitor) ## library for simple tools for cleaning data.
 library(tibble)
+filename &lt;- "data/2016_feguide.xlsx"
 cars &lt;- read_excel(filename) %&gt;% 
   janitor::clean_names() %&gt;%
   rename(make = mfr_name, model = carline, displacement = eng_displ,
@@ -161,11 +161,13 @@ plot(cars_hclust, cex = 0.6, hang = -1, xlab = "", sub = "",
 &lt;img src="clustering_files/figure-html/unnamed-chunk-5-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 
 --
-Good luck reading these.
+Good luck reading these labels.
 
 ---
 # Challenges in hierarchical clustering
-There are two important issues in using hierarchical clustering. 
+There are several important issues in using hierarchical clustering. 
+
++ Choice of dissimilarity/distance metrices used in the hierarchical clustering. Even for the normal Euclidean distance, a small but possibly important question is whether or not to scale the variables in the data (to have sample variance 1). For data with discrete/nominal variables, might want to consider the [Gower distance](https://www.jstor.org/stable/2528823); see also the **R** package [cluster](https://www.rdocumentation.org/packages/cluster/versions/2.1.0) and the [daisy function](https://www.rdocumentation.org/packages/cluster/versions/2.1.0/topics/daisy)
 
 + Different linkage method will generally yield (substantially) different clustering. Unless there is additional or specific knowledge (e.g., domain knowledge), there is no way to determine which clustering is preferable.
 
@@ -227,17 +229,17 @@ str(fit)
 
 ```
 ## List of 9
-##  $ cluster     : Named int [1:50] 4 4 2 5 4 5 1 4 2 5 ...
+##  $ cluster     : Named int [1:50] 5 5 4 3 5 3 2 5 4 3 ...
 ##   ..- attr(*, "names")= chr [1:50] "Alabama" "Alaska" "Arizona" "Arkansas" ...
-##  $ centers     : num [1:5, 1:4] 5.59 11.95 2.95 11.77 8.21 ...
+##  $ centers     : num [1:5, 1:4] 2.95 5.59 8.21 11.95 11.77 ...
 ##   ..- attr(*, "dimnames")=List of 2
 ##   .. ..$ : chr [1:5] "1" "2" "3" "4" ...
 ##   .. ..$ : chr [1:4] "Murder" "Assault" "UrbanPop" "Rape"
 ##  $ totss       : num 355808
-##  $ withinss    : num [1:5] 1480 2546 4548 6706 9137
+##  $ withinss    : num [1:5] 4548 1480 9137 2546 6706
 ##  $ tot.withinss: num 24417
 ##  $ betweenss   : num 331391
-##  $ size        : int [1:5] 10 4 10 12 14
+##  $ size        : int [1:5] 10 10 14 4 12
 ##  $ iter        : int 3
 ##  $ ifault      : int 0
 ##  - attr(*, "class")= chr "kmeans"
@@ -249,12 +251,12 @@ head(fit$cluster)
 
 ```
 ##    Alabama     Alaska    Arizona   Arkansas California   Colorado 
-##          4          4          2          5          4          5
+##          5          5          4          3          5          3
 ```
 ---
 class: clear
 
-We now how scaling the data could impact the clustering.
+We see how scaling the data could impact the clustering.
 
 ```r
 fit2 &lt;- kmeans(scale(USArrests), centers = 5, iter.max = 50, nstart = 20)
@@ -265,11 +267,11 @@ table(fit$cluster, fit2$cluster)
 ```
 ##    
 ##     1 2 3 4 5
-##   1 0 4 0 1 5
-##   2 1 0 3 0 0
-##   3 0 1 0 9 0
-##   4 4 1 7 0 0
-##   5 2 4 2 0 6
+##   1 0 9 1 0 0
+##   2 0 1 4 0 5
+##   3 2 0 4 2 6
+##   4 3 0 0 1 0
+##   5 7 0 1 4 0
 ```
 
 ```r
@@ -331,7 +333,7 @@ Votes %&gt;%
 
 ---
 class: clear
-Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do PCA, and then clustering the data via e.g., `\(K\)`-means.
+Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do SVD, and then clustering the data via e.g., `\(K\)`-means.
 
 
 ```r
@@ -404,15 +406,17 @@ class: clear
 
 ```r
 ## Scree plot
-plot(vote_svd$d)
+plot(vote_svd$d^2/sum(vote_svd$d^2), 
+     xlab = "dimension", 
+     ylab = "proportion of variability explained")
 ```
 
-&lt;img src="clustering_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="clustering_files/figure-html/unnamed-chunk-12-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 ```r
-k &lt;- 5
+k &lt;- 3
 voters &lt;- as.data.frame(vote_svd$u[,1:k] %*% diag(vote_svd$d[1:k]))
-clusters &lt;- kmeans(voters, centers = 6, nstart = 50,iter.max = 50)
+clusters &lt;- kmeans(voters, centers = 7, nstart = 50,iter.max = 50)
 ```
 ---
 class: clear
@@ -450,15 +454,15 @@ voters
 ```
 
 ```
-## # A tibble: 134 x 8
-##       V1     V2     V3     V4     V5 cluster name        party             
-##    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;       &lt;chr&gt;             
-## 1 -11.7   16.2   -7.81  0.835 -1.12  6       Adam, Brian Scottish National…
-## 2  -7.22 -14.8  -18.2  -0.134  0.193 2       Aitken, Bi… Scottish Conserva…
-## 3  21.2    2.29  -1.35  2.70  -1.20  1       Alexander,… Scottish Labour   
-## 4  25.0    2.92  -3.35  1.46   0.750 1       Baillie, J… Scottish Labour   
-## 5  26.5    2.87  -3.17  1.54   0.773 1       Barrie, Sc… Scottish Labour   
-## 6  25.1    2.38  -3.14  0.893  0.434 1       Boyack, Sa… Scottish Labour   
+## # A tibble: 134 x 6
+##       V1     V2     V3 cluster name            party                       
+##    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;           &lt;chr&gt;                       
+## 1 -11.7   16.2   -7.81 7       Adam, Brian     Scottish National Party     
+## 2  -7.22 -14.8  -18.2  1       Aitken, Bill    Scottish Conservative and U…
+## 3  21.2    2.29  -1.35 2       Alexander, Ms … Scottish Labour             
+## 4  25.0    2.92  -3.35 3       Baillie, Jackie Scottish Labour             
+## 5  26.5    2.87  -3.17 3       Barrie, Scott   Scottish Labour             
+## 6  25.1    2.38  -3.14 3       Boyack, Sarah   Scottish Labour             
 ## # … with 128 more rows
 ```
 
@@ -472,14 +476,14 @@ table(voters$party, voters$cluster)
 
 ```
 ##                                           
-##                                             1  2  3  4  5  6
-##   Member for Falkirk West                   0  0  0  0  1  0
-##   Scottish Conservative and Unionist Party  0 18  0  2  0  0
-##   Scottish Green Party                      0  0  0  0  1  0
-##   Scottish Labour                          51  0  4  3  0  0
-##   Scottish Liberal Democrats                0  0 16  1  0  0
-##   Scottish National Party                   0  0  0  0  1 35
-##   Scottish Socialist Party                  0  0  0  0  1  0
+##                                             1  2  3  4  5  6  7
+##   Member for Falkirk West                   0  0  0  0  0  1  0
+##   Scottish Conservative and Unionist Party 18  0  0  2  0  0  0
+##   Scottish Green Party                      0  0  0  0  0  1  0
+##   Scottish Labour                           0  9 46  0  3  0  0
+##   Scottish Liberal Democrats                0  9  7  0  1  0  0
+##   Scottish National Party                   0  0  0  0  0  5 31
+##   Scottish Socialist Party                  0  0  0  0  0  1  0
 ```
 
 ```r
@@ -487,23 +491,183 @@ adjustedRandIndex(voters$cluster, voters$party)
 ```
 
 ```
-## [1] 0.848
+## [1] 0.638
 ```
 
 ---
 # Alternatives to `\(K\)`-means clustering
 
-Two important alternatives to `\(K\)`-means clustering are
+Three important alternatives to `\(K\)`-means clustering are
 
 + `\(K\)`-medoids clustering. Given `\(n\)` data points `\(\{X_i\}_{i=1}^{n}\)` and a positive integer `\(K\)`, find `\(m_1, m_2, \dots, m_K \subset \{X_i\}\)` to minimize
 `$$\sum_{i=1}^{n} \min_{k} d(X_i, m_k)$$`
 for some notion of distance `\(d\)`.
-The restriction that the **medoids** `\(m_k \in \{X_i\}_{i=1}^{n}\)`, i.e., that the medoids are among the observed data points, allow for the `\(k\)`-medoids algorithm to converge even when `\(d\)` is not necessarily the Euclidean distance. Furthermore, since `\(m_k \in \{X_i\}\)`, this avoids the issue of averaging say categorical variables and thus the `\(k\)`-medoids algorithm can be more easily applied to handle categorical/discrete data. See the package **pam** in **R**.
+The restriction that the **medoids** `\(m_k \in \{X_i\}_{i=1}^{n}\)`, i.e., that the medoids are among the observed data points, allow for the `\(k\)`-medoids algorithm to converge even when `\(d\)` is not necessarily the Euclidean distance. Furthermore, since `\(m_k \in \{X_i\}\)`, this avoids the issue of averaging say categorical variables and thus the `\(k\)`-medoids algorithm can be more easily applied to handle categorical/discrete data. See the package [pam](https://www.rdocumentation.org/packages/cluster/versions/2.1.0/topics/pam) in **R**.
 
 ---
 class: clear
 
-+ Gaussian mixture modeling. Assume that the `\(X_i\)` can be modeled as a mixture of multivariate Gaussian. `\(K\)`-means can be viewed as a special case of Gaussian mixture modeling wherein all the multivariate Gaussians have covariance matrices identical to `\(\sigma^2 \mathbf{I}\)` for some `\(\sigma^2 &gt; 0\)`. There are two benefits to assuming Gaussian mixtures (1) allow for soft clustering of the data points and (2) can choose `\(K\)`, the number of clusters, via an information criterion such as BIC. See the package **mclust** in **R**.
++ Gaussian mixture modeling. Assume that the `\(X_i\)` can be modeled as a mixture of multivariate Gaussian. `\(K\)`-means can be viewed as a special case of Gaussian mixture modeling wherein all the multivariate Gaussians have covariance matrices identical to `\(\sigma^2 \mathbf{I}\)` for some `\(\sigma^2 &gt; 0\)`. There are two benefits to assuming Gaussian mixtures (1) allow for soft clustering of the data points and (2) can choose `\(K\)`, the number of clusters, via an information criterion such as BIC. See the package [mclust](https://www.rdocumentation.org/packages/mclust/versions/5.4.2/topics/Mclust) in **R**.
+
++ Spectral clusering: Combination of (non-linear) PCA and K-means. Given a matrix `\(\mathbf{X}\)` of `\(n\)` data points, compute a `\(n \times n\)` affinity/kernel matrix `\(\mathbf{K}\)`. Do truncated PCA/SVD on `\(\mathbf{K}\)` to yield a `\(n \times d\)` matrix `\(\mathbf{Z}\)` representing `\(n\)` points in `\(\mathbb{R}^{d}\)`. Then run `\(K\)`-means (or some other clustering algorithm) on the rows of `\(\mathbf{Z}\)`. Simple enough that it should be implemented by hand, but see [specc](https://www.rdocumentation.org/packages/kernlab/versions/0.9-29/topics/specc) for an implementation.
+
+---
+#Example: Spectral clustering
+
+```r
+## libary for Machine learning benchmark problems
+library(mlbench) 
+set.seed(123)
+obj &lt;- mlbench.spirals(100,1,0.025)
+df &lt;-  4 * obj$x
+plot(df, xlab = "", ylab = "")
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-16-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+
+```r
+library(kernlab)
+cluster &lt;- specc(df, centers = 2)
+head(cluster)
+```
+
+```
+## [1] 1 1 1 1 2 1
+```
+
+```r
+plot(df, col = cluster, xlab = "", ylab = "")
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-17-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+#Example: Community detection
+We now discuss how the idea of dimension reduction and clustering can be used to analyze and detect communities in networks. We will use the data from [Adamic \&amp; Glance](https://dl.acm.org/citation.cfm?id=1134277)
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/adamic_blogs.png" alt="Political blogs visualization from Adamic and Glance" width="70%" /&gt;
+&lt;p class="caption"&gt;Political blogs visualization from Adamic and Glance&lt;/p&gt;
+&lt;/div&gt;
+
+---
+class: clear
+The raw data is available [here](https://raw.githubusercontent.com/jdwilson4/Network-Analysis-I/master/Data/polblogs.txt) as a list of edges. We will use the [igraph package](https://igraph.org/r/) to read in the data.
+
+```r
+library(igraph)
+blog_graph &lt;- read_graph("https://raw.githubusercontent.com/jdwilson4/Network-Analysis-I/master/Data/polblogs.txt")
+blog_graph
+```
+
+```
+## IGRAPH 1f6788e D--- 1490 19090 -- 
+## + edges from 1f6788e:
+##  [1] 1-&gt;  23 1-&gt;  55 1-&gt;  85 1-&gt; 155 1-&gt; 323 1-&gt; 367 1-&gt; 434 1-&gt; 483
+##  [9] 1-&gt; 575 1-&gt; 641 1-&gt; 642 1-&gt; 644 1-&gt; 664 1-&gt;1245 1-&gt;1435 2-&gt;   1
+## [17] 2-&gt;  18 2-&gt;  24 2-&gt;  29 2-&gt;  52 2-&gt;  55 2-&gt;  99 2-&gt; 144 2-&gt; 154
+## [25] 2-&gt; 155 2-&gt; 159 2-&gt; 172 2-&gt; 180 2-&gt; 204 2-&gt; 238 2-&gt; 248 2-&gt; 323
+## [33] 2-&gt; 332 2-&gt; 363 2-&gt; 389 2-&gt; 391 2-&gt; 431 2-&gt; 446 2-&gt; 477 2-&gt; 483
+## [41] 2-&gt; 495 2-&gt; 544 2-&gt; 547 2-&gt; 561 2-&gt; 563 2-&gt; 564 2-&gt; 566 2-&gt; 572
+## [49] 2-&gt; 623 2-&gt; 641 2-&gt; 642 2-&gt; 644 2-&gt; 650 2-&gt; 664 2-&gt; 669 2-&gt; 687
+## [57] 2-&gt; 754 2-&gt; 756 5-&gt; 514 5-&gt; 720 5-&gt;1437 6-&gt; 737 8-&gt;  40 8-&gt;  55
+## [65] 8-&gt; 180 8-&gt; 241 8-&gt; 264 8-&gt; 267 8-&gt; 278 8-&gt; 387 8-&gt; 393 8-&gt; 512
+## + ... omitted several edges
+```
+
+---
+class: clear
+
+```r
+V(blog_graph)$color &lt;- c(rep("red", 758), rep("blue", 732))
+#color the labels according to political party
+plot(blog_graph, main = "Political Blog Network", usearrows = TRUE)
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-20-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+Well, the above visualization looks **terrible**. Sadly, proper visualization of this graph data is highly non-trivial. Let us try a different approach.
+
+```r
+blog_adj &lt;- blog_graph[] ## Get adjacency matrix
+dim(blog_adj)
+```
+
+```
+## [1] 1490 1490
+```
+
+```r
+image(blog_adj)
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+If you squint enough hopefully you will see the black dots denoting the presence of an edge between two blogs in the previous figure.
+Let us try doing a truncated SVD to find a representation for these blogs.
+
+
+
+```r
+blog_adj &lt;- blog_graph[] ## Get adjacency matrix
+blog_svd &lt;- svd(blog_adj)
+## Scree plot
+plot(blog_svd$d^2/sum(blog_svd$d^2), 
+     ylab = "proportion of variability explained", xlab = "dimension")
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-23-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+Let us now plot the truncated SVD representation in `\(\mathbb{R}^2\)` for these blogs. The points are colored according to the ground truth (the political leaning of the blogs)
+
+```r
+plot(blog_svd$u[,1:2], col = V(blog_graph)$color, 
+     xlab = "Dimension 1", ylab = "Dimension 2")
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-24-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+Let us now see how well `\(K\)`-means clustering recover the ground truth. We first transform the data by "projecting onto the sphere".
+
+```r
+X &lt;- blog_svd$u[,1:2]
+X_norm &lt;- sqrt(rowSums(X^2))
+X_norm[X_norm == 0] &lt;- 1
+X_sphere &lt;- X/X_norm ## normalize each row to have norm 1.
+clusters &lt;- kmeans(X_sphere, centers = 2, nstart = 50)
+table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 5%
+```
+
+```
+##    
+##     blue red
+##   1  433  27
+##   2    9 324
+```
+
+Note that if we do not transform the embedding prior to `\(K\)`-means then we get
+
+```r
+clusters &lt;- kmeans(X, centers = 2, nstart = 50)
+table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 31%
+```
+
+```
+##    
+##     blue red
+##   1  441 219
+##   2    1 132
+```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
