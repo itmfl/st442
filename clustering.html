@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>K-means and hierarchical clustering</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="CSC/ST 442" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# K-means and hierarchical clustering
+### CSC/ST 442
+### Fall 2019
+
+---
+
+
+
+# Unsupervised learning
+
+The problem of regression and classification are known as **supervised learning** in that we are given a collection of `\(n\)` **labeled** data points `\(\{(X_i, Y_i)\}\)` and we wish to infer, given the `\(X_i\)`, the values or labels of the `\(Y_i\)` (here `\(Y_i \in \mathbb{R}\)` for a regression problem and `\(Y_i \in \{1,2,\dots,K\}\)` for a classification problem.)
+
+In contrast, in the problem of **unsupervised** learning, we are simply given `\(n\)` **unlabeled** data points `\(\{X_i\}\)`. The aim then is to infer or find **previously unknown** patterns among these `\(X_i\)`. 
+
+The two main techniques for unsupervised learning are 
+
++ dimension reduction: e.g., PCA, low-rank matrix recovery, classical multidimensional scaling as seen in the previous lecture
++ **clustering**:  topic of this lecture. The typical application of clustering assumes that the `\(X_i\)` are all numeric/real-valued vectors.
+
+---
+# Hierarchical clustering
+
+The aim of hierarchical clustering is to build a tree or **dendogram** that organizes the relationships between observations. For example, consider the following [evolutionary tree of mammals](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3204295/).
+
+&lt;img src="https://beanumber.github.io/mdsr2e/gfx/evolutionary-tree.jpeg" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+To illustrate hierarchical clustering in **R**, we will use the following [dataset](https://www.fueleconomy.gov/feg/epadata/16data.zip)
+on the fuel economy rating of cars from the US Department of Energy. We follow the exposition in Chapter 9 of Baumer et al. [Modern Data Science with R](https://beanumber.github.io/mdsr2e/ch-learningII.html#clustering)
+
+
+```r
+library(dplyr)
+library(readxl)
+filename &lt;- fs::dir_ls("16data", regexp = "public\\.xlsx") %&gt;% head(1)
+library(janitor)
+library(tibble)
+cars &lt;- read_excel(filename) %&gt;% 
+  janitor::clean_names() %&gt;%
+  rename(make = mfr_name, model = carline, displacement = eng_displ,
+    city_mpg = city_fe_guide_conventional_fuel,
+    hwy_mpg = hwy_fe_guide_conventional_fuel) %&gt;%
+  select(make, model, displacement, number_cyl, number_gears, city_mpg, hwy_mpg) %&gt;%
+  distinct(model, .keep_all = TRUE) %&gt;% 
+  filter(make == "Toyota") %&gt;%
+  column_to_rownames(var = "model")
+```
+
+---
+class: clear
+
+```r
+head(cars)
+```
+
+```
+## # A tibble: 6 x 6
+##   make   displacement number_cyl number_gears city_mpg hwy_mpg
+##   &lt;chr&gt;         &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Toyota          2            4            6       25      34
+## 2 Toyota          2            4            8       22      32
+## 3 Toyota          3.5          6            6       19      26
+## 4 Toyota          3.5          6            8       19      28
+## 5 Toyota          3.5          6            6       19      26
+## 6 Toyota          5            8            8       16      25
+```
+
+Toyota has a diverse lineup of cars, trucks, SUV, and hybrid vehicles. Can we build a dendogram to cluster or categorize this vehicle lineup in a coherent manner ? 
+
+---
+class: clear
+
+Given `\(n\)` data points `\(\{X_i\}_{i=1}^{n}\)` a reasonable approach to hierarichal clustering proceeds as follows.
+
++ Compute a notion of distance/dissimilarity between any two data points.
++ Starting from the bottom level, where each data point is a cluster, build up a 
+tree by merging two clusters. At each step of the algorithm, the two clusters that are **most similar** are combined into a new or bigger cluster. 
++ The procedure is iterated until all points are member of one single cluster (the root).
+
+---
+class: clear
+
+The choice of which cluster to merge is defined by the type of linkage methods. Some of the most popular ones are (given two clusters `\(\mathcal{C}_i\)` and `\(\mathcal{C}_j\)`)
+
+- Single (or minimum) linkage: similarity defined by the **minimum** (pairwise) distance between the elements in `\(\mathcal{C}_i\)` and the elements in `\(\mathcal{C}_j\)`. Tends to produce "long" clusters.
+
+- Complete (or maximum) linkage: similarity defined by the **maximum** (pairwise) distance between the elements in `\(\mathcal{C}_i\)` and the elements in `\(\mathcal{C}_j\)`. Tends to produce "short" (or compact clusters)
+
+- Mean/average linkage: similarity defined by the **average** (pairwise) distance between the elements in `\(\mathcal{C}_i\)` and the elements in `\(\mathcal{C}_j\)`.
+
+- Centroid linkage: similarity defined by the distance between the **centroid** of cluster `\(\mathcal{C}_i\)` and the centroid of cluster `\(\mathcal{C}_j\)`.
+
+- Ward's linkage: The similarity is defined by
+`$$\Delta(\mathcal{C}_i, \mathcal{C}_j) = \sum_{x \in \mathcal{C}_i \cup \mathcal{C}_j} d(x, m_{ij})^2 - \sum_{x \in \mathcal{C}_i} d(x, m_i)^2 - \sum_{x \in \mathcal{C}_j} d(x, m_j)^2$$`
+where `\(m_i\)`, `\(m_j\)`, and `\(m_{ij}\)` are the centroid for `\(\mathcal{C}_i\)`, `\(\mathcal{C}_j\)`, and `\(\mathcal{C}_i \cup \mathcal{C}_j\)`.
+
+---
+class: clear
+
+Hierarchical clustering in **R** can be done via [hclust](https://www.rdocumentation.org/packages/stats/versions/3.6.1/topics/hclust). **hclust** takes as input a distance/dissimmilarity matrix.
+
+
+```r
+## Scale all variables to have the same "unit"
+cars_scaled &lt;- scale(dplyr::select(cars, -make), center = TRUE, scale = TRUE)
+toyota_dist &lt;- dist(cars_scaled) 
+as.matrix(toyota_dist)[1:5,1:5] ## Distance between the first five cars
+```
+
+```
+##            FR-S RC 200t RC 300 AWD RC 350 RC 350 AWD
+## FR-S       0.00    1.08       2.12   2.24       2.12
+## RC 200t    1.08    0.00       2.18   1.85       2.18
+## RC 300 AWD 2.12    2.18       0.00   1.04       0.00
+## RC 350     2.24    1.85       1.04   0.00       1.04
+## RC 350 AWD 2.12    2.18       0.00   1.04       0.00
+```
+
+---
+class: clear
+
+```r
+cars_hclust &lt;- hclust(toyota_dist, method = "complete") ## Complete linkage
+str(cars_hclust)
+```
+
+```
+## List of 7
+##  $ merge      : int [1:74, 1:2] -3 -11 -13 -22 -4 -23 -10 -17 -18 -25 ...
+##  $ height     : num [1:74] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ order      : int [1:75] 15 38 39 37 8 40 34 35 22 13 ...
+##  $ labels     : chr [1:75] "FR-S" "RC 200t" "RC 300 AWD" "RC 350" ...
+##  $ method     : chr "complete"
+##  $ call       : language hclust(d = toyota_dist, method = "complete")
+##  $ dist.method: chr "euclidean"
+##  - attr(*, "class")= chr "hclust"
+```
+---
+class: clear
+
+```r
+plot(cars_hclust, cex = 0.6, hang = -1, xlab = "", sub = "", 
+     main = "Hierarchical clustering of Toyota cars (complete linkage)")
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-5-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+--
+Good luck reading these.
+
+---
+# Challenges in hierarchical clustering
+There are two important issues in using hierarchical clustering. 
+
++ Different linkage method will generally yield (substantially) different clustering. Unless there is additional or specific knowledge (e.g., domain knowledge), there is no way to determine which clustering is preferable.
+
++ Hierarchical clustering do not yield, a priori, a (hard) clustering of the data points into a fixed number of clusters. One heuristics is to truncate the dendogram at a fixed level and then using the clustering at that given level.
+
+---
+# K-means clustering
+
+Another clustering technique is `\(K\)`-means clustering, which assign each data point `\(X_i\)` to one of several distinct clusters, with the aim of minimizing the sum of square distance between each data point and its assigned cluster centroid. More specifically, given a positive integer `\(K \geq 1\)` representing the number of clusters, `\(K\)`-means aim to solve the minimization problem
+
+`$$\min_{\mathcal{C}_1, \dots, \mathcal{C}_k} \sum_{k=1}^{K} \sum_{X_i \in \mathcal{C}_k} \|X_i - \hat{\mu}_k\|^2$$`
+where `\(\hat{\mu}_k = \frac{1}{|\mathcal{C}_k|} \sum_{X_i \in \mathcal{C}_k} X_i\)` is the centroid of the `\(k\)`-th cluster. 
+
+---
+class: clear
+When the data points `\(X_i \in \mathbb{R}^{d}\)` for `\(d \geq 2\)`, the **globally** optimal solution to the `\(K\)`-means problem is, in general, computationally intractable. There are multiple algorithms for doing `\(K\)`-means, with the simplest algorithms being a variant of the following procedure.
+
+1. Initialize `\(K\)` random cluster centroids locations `\(\hat{\mu}_1, \hat{\mu}_2, \dots, \hat{\mu}_K\)`.
+2. Assign each data point `\(X_i\)` to the closest cluster centroid `\(\hat{\mu}_k\)` for some `\(k\)` (with ties broken arbitrarily)
+3. Recompute `\(\hat{\mu}_k = \frac{1}{|\mathcal{C}_k|} \sum_{X_i \in \mathcal{C}_k} X_i\)`
+4. Repeat steps `\(2\)` and `\(3\)` until convergence.
+
+See [here](http://tech.nitoyon.com/en/blog/2013/11/07/k-means/) for a visualization of `\(K\)`-means.
+
++ The main decision in `\(K\)`-means is choosing `\(K\)`, the number of clusters. Once again, unless there is additional knowledge, there are almost no good way of choosing `\(K\)`.
+
++ The `\(K\)`-means algorithm in general will only find a local minimum (which depends on the initial random cluster centroids). There are several heuristics, such as random restarts, to remove this limitation
+
++ Given two values of `\(K\)`, say `\(K_1\)` and `\(K_2\)`, we can compute a similarity index such as the [adjusted Rand Index](https://en.wikipedia.org/wiki/Rand_index) (from the **clues** or **mclust** package) between the two clusterings.
+
+---
+# K-means example 
+
+```r
+data(USArrests)
+USArrests
+```
+
+```
+## # A tibble: 50 x 4
+##   Murder Assault UrbanPop  Rape
+##    &lt;dbl&gt;   &lt;int&gt;    &lt;int&gt; &lt;dbl&gt;
+## 1   13.2     236       58  21.2
+## 2   10       263       48  44.5
+## 3    8.1     294       80  31  
+## 4    8.8     190       50  19.5
+## 5    9       276       91  40.6
+## 6    7.9     204       78  38.7
+## # … with 44 more rows
+```
+
+---
+class: clear
+
+```r
+fit &lt;- kmeans(USArrests, centers = 5, iter.max = 50, nstart = 20)
+str(fit)
+```
+
+```
+## List of 9
+##  $ cluster     : Named int [1:50] 4 4 2 5 4 5 1 4 2 5 ...
+##   ..- attr(*, "names")= chr [1:50] "Alabama" "Alaska" "Arizona" "Arkansas" ...
+##  $ centers     : num [1:5, 1:4] 5.59 11.95 2.95 11.77 8.21 ...
+##   ..- attr(*, "dimnames")=List of 2
+##   .. ..$ : chr [1:5] "1" "2" "3" "4" ...
+##   .. ..$ : chr [1:4] "Murder" "Assault" "UrbanPop" "Rape"
+##  $ totss       : num 355808
+##  $ withinss    : num [1:5] 1480 2546 4548 6706 9137
+##  $ tot.withinss: num 24417
+##  $ betweenss   : num 331391
+##  $ size        : int [1:5] 10 4 10 12 14
+##  $ iter        : int 3
+##  $ ifault      : int 0
+##  - attr(*, "class")= chr "kmeans"
+```
+
+```r
+head(fit$cluster)
+```
+
+```
+##    Alabama     Alaska    Arizona   Arkansas California   Colorado 
+##          4          4          2          5          4          5
+```
+---
+class: clear
+
+We now how scaling the data could impact the clustering.
+
+```r
+fit2 &lt;- kmeans(scale(USArrests), centers = 5, iter.max = 50, nstart = 20)
+library(mclust)
+table(fit$cluster, fit2$cluster)
+```
+
+```
+##    
+##     1 2 3 4 5
+##   1 0 4 0 1 5
+##   2 1 0 3 0 0
+##   3 0 1 0 9 0
+##   4 4 1 7 0 0
+##   5 2 4 2 0 6
+```
+
+```r
+adjustedRandIndex(fit$cluster, fit2$cluster)
+```
+
+```
+## [1] 0.293
+```
+
+```r
+fit3 &lt;- kmeans(USArrests, centers = 4, iter.max = 50, nstart = 20)
+adjustedRandIndex(fit$cluster, fit3$cluster)
+```
+
+```
+## [1] 0.888
+```
+
+---
+# Example: PCA/SVD and clustering
+
+```r
+## Voting records from the Scottish Parliement
+## The data is part of the mdsr package accompanying the book
+## Modern data science with R.
+library(mdsr)
+data(Votes) 
+Votes
+```
+
+```
+## # A tibble: 103,582 x 3
+##   bill    name             vote
+##   &lt;fct&gt;   &lt;chr&gt;           &lt;int&gt;
+## 1 S1M-1   Canavan, Dennis     1
+## 2 S1M-4.1 Canavan, Dennis     1
+## 3 S1M-4.3 Canavan, Dennis     1
+## 4 S1M-4   Canavan, Dennis    -1
+## 5 S1M-5   Canavan, Dennis    -1
+## 6 S1M-17  Canavan, Dennis    -1
+## # … with 1.036e+05 more rows
+```
+---
+class: clear
+A visualization of this voting records is as follows. We follow the presentation in Chapter 10 of Baumer et al. [Modern Data Science with R](https://beanumber.github.io/mdsr2e/ch-learningII.html#clustering)
+
+```r
+Votes %&gt;% 
+  mutate(Vote = factor(vote, labels = c("Nay","Abstain","Aye"))) %&gt;%
+  ggplot(aes(x = bill, y = name, fill = Vote)) +
+    geom_tile() + xlab("Ballot") + ylab("Member of Parliament") +
+    scale_fill_manual(values = c("darkgray", "white", "goldenrod")) + 
+    scale_x_discrete(breaks = NULL, labels = NULL) + 
+    scale_y_discrete(breaks = NULL, labels = NULL)
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-10-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: clear
+Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do PCA, and then clustering the data via e.g., `\(K\)`-means.
+
+
+```r
+Votes_wide &lt;- Votes %&gt;%
+  tidyr::spread(key = bill, value = vote)
+Votes_wide
+```
+
+```
+## # A tibble: 134 x 774
+##   name  `S1M-1` `S1M-1007.1` `S1M-1007.2` `S1M-1008` `S1M-1008.1`
+##   &lt;chr&gt;   &lt;int&gt;        &lt;int&gt;        &lt;int&gt;      &lt;int&gt;        &lt;int&gt;
+## 1 Adam…       1            1           -1          0            0
+## 2 Aitk…       1            1            1         -1           -1
+## 3 Alex…       1           -1           -1          1            1
+## 4 Bail…       1           -1           -1          1            1
+## 5 Barr…      -1           -1           -1          1            1
+## 6 Boya…       0           -1           -1          1            1
+## # … with 128 more rows, and 768 more variables: `S1M-1026` &lt;int&gt;,
+## #   `S1M-1026.2` &lt;int&gt;, `S1M-1027` &lt;int&gt;, `S1M-1027.1` &lt;int&gt;,
+## #   `S1M-1036` &lt;int&gt;, `S1M-105.1` &lt;int&gt;, `S1M-1051.1` &lt;int&gt;,
+## #   `S1M-1051.2` &lt;int&gt;, `S1M-1065` &lt;int&gt;, `S1M-1072` &lt;int&gt;,
+## #   `S1M-1077` &lt;int&gt;, `S1M-1091` &lt;int&gt;, `S1M-1091.1` &lt;int&gt;,
+## #   `S1M-1091.2` &lt;int&gt;, `S1M-1092` &lt;int&gt;, `S1M-1147` &lt;int&gt;,
+## #   `S1M-1147.1` &lt;int&gt;, `S1M-1147.2` &lt;int&gt;, `S1M-1185` &lt;int&gt;,
+## #   `S1M-1196.1` &lt;int&gt;, `S1M-1213` &lt;int&gt;, `S1M-1213.2` &lt;int&gt;,
+## #   `S1M-1215` &lt;int&gt;, `S1M-1215.1` &lt;int&gt;, `S1M-1216` &lt;int&gt;,
+## #   `S1M-1216.2` &lt;int&gt;, `S1M-1217` &lt;int&gt;, `S1M-1238` &lt;int&gt;,
+## #   `S1M-1238.1` &lt;int&gt;, `S1M-1238.2` &lt;int&gt;, `S1M-1239` &lt;int&gt;,
+## #   `S1M-1239.2` &lt;int&gt;, `S1M-127` &lt;int&gt;, `S1M-127.1` &lt;int&gt;,
+## #   `S1M-1271.1` &lt;int&gt;, `S1M-1271.2` &lt;int&gt;, `S1M-1275` &lt;int&gt;,
+## #   `S1M-1275.1` &lt;int&gt;, `S1M-1277` &lt;int&gt;, `S1M-1277.1` &lt;int&gt;,
+## #   `S1M-1297.1` &lt;int&gt;, `S1M-1299` &lt;int&gt;, `S1M-1299.1` &lt;int&gt;,
+## #   `S1M-1299.2` &lt;int&gt;, `S1M-1301` &lt;int&gt;, `S1M-1301.1` &lt;int&gt;,
+## #   `S1M-1303` &lt;int&gt;, `S1M-1303.2` &lt;int&gt;, `S1M-1305` &lt;int&gt;,
+## #   `S1M-1305.1` &lt;int&gt;, `S1M-1305.2` &lt;int&gt;, `S1M-131` &lt;int&gt;,
+## #   `S1M-131.1` &lt;int&gt;, `S1M-1320` &lt;int&gt;, `S1M-1320.1` &lt;int&gt;,
+## #   `S1M-1320.2` &lt;int&gt;, `S1M-1324.2` &lt;int&gt;, `S1M-1325.2` &lt;int&gt;,
+## #   `S1M-1345` &lt;int&gt;, `S1M-1345.1` &lt;int&gt;, `S1M-1345.3` &lt;int&gt;,
+## #   `S1M-1354` &lt;int&gt;, `S1M-1355` &lt;int&gt;, `S1M-1355.3` &lt;int&gt;,
+## #   `S1M-1356` &lt;int&gt;, `S1M-1356.1` &lt;int&gt;, `S1M-1356.2` &lt;int&gt;,
+## #   `S1M-1357` &lt;int&gt;, `S1M-1357.1` &lt;int&gt;, `S1M-137` &lt;int&gt;,
+## #   `S1M-1373` &lt;int&gt;, `S1M-1373.1` &lt;int&gt;, `S1M-1373.2` &lt;int&gt;,
+## #   `S1M-1400.1` &lt;int&gt;, `S1M-1404` &lt;int&gt;, `S1M-1404.1` &lt;int&gt;,
+## #   `S1M-1404.2` &lt;int&gt;, `S1M-1405.2` &lt;int&gt;, `S1M-1406` &lt;int&gt;,
+## #   `S1M-1406.2` &lt;int&gt;, `S1M-1425.1` &lt;int&gt;, `S1M-1428` &lt;int&gt;,
+## #   `S1M-1433.1` &lt;int&gt;, `S1M-1434.1` &lt;int&gt;, `S1M-1448` &lt;int&gt;,
+## #   `S1M-1453` &lt;int&gt;, `S1M-1453.1` &lt;int&gt;, `S1M-1453.2` &lt;int&gt;,
+## #   `S1M-1457` &lt;int&gt;, `S1M-1457.1` &lt;int&gt;, `S1M-1458` &lt;int&gt;,
+## #   `S1M-1461` &lt;int&gt;, `S1M-1461.2` &lt;int&gt;, `S1M-1462` &lt;int&gt;,
+## #   `S1M-1502` &lt;int&gt;, `S1M-1502.1` &lt;int&gt;, `S1M-151.2` &lt;int&gt;,
+## #   `S1M-1515.2` &lt;int&gt;, `S1M-151Mr` &lt;int&gt;, `S1M-1523.1` &lt;int&gt;, …
+```
+
+```r
+vote_svd &lt;- Votes_wide %&gt;% 
+  select(-name) %&gt;% svd()
+str(vote_svd)
+```
+
+```
+## List of 3
+##  $ d: num [1:134] 212 110 85.8 27.1 26.2 ...
+##  $ u: num [1:134, 1:134] -0.0552 -0.0341 0.0999 0.1178 0.1251 ...
+##  $ v: num [1:773, 1:134] -0.00391 -0.04332 -0.02837 0.03599 0.03546 ...
+```
+
+---
+class: clear
+
+```r
+## Scree plot
+plot(vote_svd$d)
+```
+
+&lt;img src="clustering_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+```r
+k &lt;- 5
+voters &lt;- as.data.frame(vote_svd$u[,1:k] %*% diag(vote_svd$d[1:k]))
+clusters &lt;- kmeans(voters, centers = 6, nstart = 50,iter.max = 50)
+```
+---
+class: clear
+We now add the clustering information to the voters data along with the parties 
+name of each parliement members.
+
+```r
+data(Parties)
+Parties
+```
+
+```
+## # A tibble: 134 x 2
+##   party                                    name                        
+##   &lt;chr&gt;                                    &lt;chr&gt;                       
+## 1 Member for Falkirk West                  Canavan, Dennis             
+## 2 Scottish Conservative and Unionist Party Aitken, Bill                
+## 3 Scottish Conservative and Unionist Party Davidson, Mr David          
+## 4 Scottish Conservative and Unionist Party Douglas Hamilton, Lord James
+## 5 Scottish Conservative and Unionist Party Fergusson, Alex             
+## 6 Scottish Conservative and Unionist Party Fraser, Murdo               
+## # … with 128 more rows
+```
+
+```r
+voters &lt;- voters %&gt;% mutate(cluster = as.factor(clusters$cluster)) %&gt;%
+  mutate(name = Votes_wide$name) %&gt;%
+  left_join(Parties, by = c("name" = "name"))
+```
+---
+class: clear
+
+```r
+voters
+```
+
+```
+## # A tibble: 134 x 8
+##       V1     V2     V3     V4     V5 cluster name        party             
+##    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;       &lt;chr&gt;             
+## 1 -11.7   16.2   -7.81  0.835 -1.12  6       Adam, Brian Scottish National…
+## 2  -7.22 -14.8  -18.2  -0.134  0.193 2       Aitken, Bi… Scottish Conserva…
+## 3  21.2    2.29  -1.35  2.70  -1.20  1       Alexander,… Scottish Labour   
+## 4  25.0    2.92  -3.35  1.46   0.750 1       Baillie, J… Scottish Labour   
+## 5  26.5    2.87  -3.17  1.54   0.773 1       Barrie, Sc… Scottish Labour   
+## 6  25.1    2.38  -3.14  0.893  0.434 1       Boyack, Sa… Scottish Labour   
+## # … with 128 more rows
+```
+
+---
+class: clear
+We now compare our clustering against the party membership.
+
+```r
+table(voters$party, voters$cluster)
+```
+
+```
+##                                           
+##                                             1  2  3  4  5  6
+##   Member for Falkirk West                   0  0  0  0  1  0
+##   Scottish Conservative and Unionist Party  0 18  0  2  0  0
+##   Scottish Green Party                      0  0  0  0  1  0
+##   Scottish Labour                          51  0  4  3  0  0
+##   Scottish Liberal Democrats                0  0 16  1  0  0
+##   Scottish National Party                   0  0  0  0  1 35
+##   Scottish Socialist Party                  0  0  0  0  1  0
+```
+
+```r
+adjustedRandIndex(voters$cluster, voters$party)
+```
+
+```
+## [1] 0.848
+```
+
+---
+# Alternatives to `\(K\)`-means clustering
+
+Two important alternatives to `\(K\)`-means clustering are
+
++ `\(K\)`-medoids clustering. Given `\(n\)` data points `\(\{X_i\}_{i=1}^{n}\)` and a positive integer `\(K\)`, find `\(m_1, m_2, \dots, m_K \subset \{X_i\}\)` to minimize
+`$$\sum_{i=1}^{n} \min_{k} d(X_i, m_k)$$`
+for some notion of distance `\(d\)`.
+The restriction that the **medoids** `\(m_k \in \{X_i\}_{i=1}^{n}\)`, i.e., that the medoids are among the observed data points, allow for the `\(k\)`-medoids algorithm to converge even when `\(d\)` is not necessarily the Euclidean distance. Furthermore, since `\(m_k \in \{X_i\}\)`, this avoids the issue of averaging say categorical variables and thus the `\(k\)`-medoids algorithm can be more easily applied to handle categorical/discrete data. See the package **pam** in **R**.
+
+---
+class: clear
+
++ Gaussian mixture modeling. Assume that the `\(X_i\)` can be modeled as a mixture of multivariate Gaussian. `\(K\)`-means can be viewed as a special case of Gaussian mixture modeling wherein all the multivariate Gaussians have covariance matrices identical to `\(\sigma^2 \mathbf{I}\)` for some `\(\sigma^2 &gt; 0\)`. There are two benefits to assuming Gaussian mixtures (1) allow for soft clustering of the data points and (2) can choose `\(K\)`, the number of clusters, via an information criterion such as BIC. See the package **mclust** in **R**.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "zenburn",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

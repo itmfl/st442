@@ -1,0 +1,70 @@
+---
+title: "Clustering exaples"
+output: html_document
+---
+
+# Example 1: Hierarchial clustering of Toyota cars
+
+We first read in the data.
+```{r cache = TRUE, message = FALSE, warning = FALSE}
+library(dplyr)
+library(readxl)
+filename <- fs::dir_ls("16data", regexp = "public\\.xlsx") %>% head(1)
+library(janitor)
+library(tibble)
+cars <- read_excel(filename) %>% 
+  janitor::clean_names() %>%
+  rename(make = mfr_name, model = carline, displacement = eng_displ,
+    city_mpg = city_fe_guide_conventional_fuel,
+    hwy_mpg = hwy_fe_guide_conventional_fuel) %>%
+  select(make, model, displacement, number_cyl, number_gears, city_mpg, hwy_mpg) %>%
+  distinct(model, .keep_all = TRUE) %>% 
+  filter(make == "Toyota") %>%
+  column_to_rownames(var = "model")
+```
+
+There are in total `r nrow(cars)` Toyotal cars. A snippet of the data is as follows.
+```{r}
+head(cars)
+```
+
+We next compute a dissimilarity/distance between the cars.
+```{r}
+cars_scaled <- scale(dplyr::select(cars, -make), center = TRUE, scale = TRUE)
+toyota_dist <- dist(cars_scaled) 
+as.matrix(toyota_dist)[1:5,1:5] ## Distance between the first five cars
+```
+
+```{r fig.retina = 3, fig.asp = 0.8, out.width="120%"}
+cars_hclust <- hclust(toyota_dist, method = "complete") ## Complete linkage
+plot(cars_hclust, cex = 0.5, hang = -1, xlab = "", sub = "", 
+     main = "Hierarchical clustering of Toyota cars (complete linkage)")
+```
+
+It is hard to see the labels of the previous hierarchical clustering as they are rotated.
+A better way to visualize this dendogram is to draw the tree horizontally. We can do this via the **ape** package for analyzing phylogenetic trees.
+
+```{r fig.retina = 3, fig.asp = 1.2,out.width="120%"}
+library(ape)
+cars_hclust <- as.phylo(cars_hclust)
+plot(cars_hclust, cex = 0.5, label.offset = 0.2, main = "Complete Linkage")
+```
+
+We now compare the complete linkage hierarchical clustering with the single linkage and the average linkage clustering.
+
+```{r fig.retina = 3, fig.asp = 1.2, out.width = "120%"}
+cars_hclust_single <- as.phylo(hclust(toyota_dist, method = "single")) ## Single linkage
+cars_hclust_avg <- as.phylo(hclust(toyota_dist, method = "average")) ## Average linkage
+plot(cars_hclust_single, cex = 0.5, label.offset = 0.2, main = "Single Linkage")
+plot(cars_hclust_avg, cex = 0.5, label.offset = 0.2, main = "Average Linkage")
+```
+
+We see that the clusterings differ substantially. In particular, the single linkage clustering has much longer paths from the root to the leaf node.
+
+We now try to cut the complete linkage tree into five clusters.
+```{r}
+cars_hclust <- hclust(toyota_dist, method = "complete") ## Complete linkage
+memb <- cutree(cars_hclust, k = 5)
+head(memb)
+table(memb)
+```
