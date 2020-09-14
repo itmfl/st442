@@ -1,8 +1,8 @@
 ---
 title: "Visualizing Data"
 subtitle: "An introduction to ggplot2"
-author: "CSC/ST 442"
-date: "Fall 2019"
+author: "Minh Tang"
+date: "Fall 2020"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -79,7 +79,7 @@ grid::grid.draw(p)
 Close, but no cigar ? In any case, the above plot is nice in that a total of six variables are mapped to six *aesthetics*; $x$ and $y$ axis mapped to the location of the army, the size of the army is mapped to the size of the line, the direction of movement is mapped to color, date of points along retreat path is mapped to the text below plot, and the temperature during the retreat is mapped to the line below the plot.
 ---
 #ggplot2 basic
-We start with a very simple plot. Consider the following dataset about fuel efficieny for cars.
+We start with a very simple plot. Consider the following dataset about fuel efficiency for cars.
 
 ```{r echo = -2, fig.align = 'center', out.width = "50%"}
 library(ggplot2)
