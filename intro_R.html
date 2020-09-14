@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Introduction to Data Science</title>
+    <title>Introduction to R</title>
     <meta charset="utf-8" />
-    <meta name="author" content="CSC/ST 442" />
+    <meta name="author" content="Minh Tang" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
@@ -13,9 +13,9 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Introduction to Data Science
-## Introduction to R (a used-car salesman perspective)
-### CSC/ST 442
+# Introduction to R
+## A used-car salesman perspective
+### Minh Tang
 ### Fall 2020
 
 ---
@@ -74,7 +74,7 @@ class: clear
 are available through the CRAN family of Internet sites.
 
 ---
-# Resources for learning R (and data science)
+# Resources for learning R
 
 + R-project [An Introduction to R](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
 
@@ -93,13 +93,10 @@ are available through the CRAN family of Internet sites.
 + Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R](https://beanumber.github.io/mdsr2e/)
 
 --
-
 + `?` in **R**
 &lt;br&gt;
 
 --
-
-&lt;br&gt;
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
 
 
@@ -1067,7 +1064,7 @@ output
 ```
 
 ```
-## [1]  0.1466 -0.1680 -0.1568  0.0428
+## [1]  0.0674  0.0567 -0.0867 -0.0508
 ```
 
 ```r
@@ -1076,7 +1073,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-##  0.1466 -0.1680 -0.1568  0.0428
+##  0.0674  0.0567 -0.0867 -0.0508
 ```
 ]
 
@@ -1088,16 +1085,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.147
+## [1] 0.0674
 ## 
 ## $b
-## [1] -0.168
+## [1] 0.0567
 ## 
 ## $c
-## [1] -0.157
+## [1] -0.0867
 ## 
 ## $d
-## [1] 0.0428
+## [1] -0.0508
 ```
 
 ```r
@@ -1106,7 +1103,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-##  0.1466 -0.1680 -0.1568  0.0428
+##  0.0674  0.0567 -0.0867 -0.0508
 ```
 ]
 ---
@@ -1127,10 +1124,10 @@ output2
 ```
 
 ```
-##        [,1]   [,2]   [,3]    [,4]
-## [1,] -0.627 -0.684 -0.639 -0.5802
-## [2,]  0.147 -0.168 -0.157  0.0428
-## [3,]  0.707  0.435  0.433  0.6663
+##         [,1]    [,2]    [,3]    [,4]
+## [1,] -0.7986 -0.7836 -0.7315 -0.6930
+## [2,]  0.0674  0.0567 -0.0867 -0.0508
+## [3,]  0.5985  0.7351  0.5822  0.5870
 ```
 ]
 
@@ -1141,10 +1138,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##          a      b      c       d
-## 25% -0.627 -0.684 -0.639 -0.5802
-## 50%  0.147 -0.168 -0.157  0.0428
-## 75%  0.707  0.435  0.433  0.6663
+##           a       b       c       d
+## 25% -0.7986 -0.7836 -0.7315 -0.6930
+## 50%  0.0674  0.0567 -0.0867 -0.0508
+## 75%  0.5985  0.7351  0.5822  0.5870
 ```
 
 ```r
@@ -1152,10 +1149,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##          a      b      c       d
-## 25% -0.627 -0.684 -0.639 -0.5802
-## 50%  0.147 -0.168 -0.157  0.0428
-## 75%  0.707  0.435  0.433  0.6663
+##           a       b       c       d
+## 25% -0.7986 -0.7836 -0.7315 -0.6930
+## 50%  0.0674  0.0567 -0.0867 -0.0508
+## 75%  0.5985  0.7351  0.5822  0.5870
 ```
 ]
 ---

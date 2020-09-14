@@ -90,7 +90,7 @@ class: clear
 are available through the CRAN family of Internet sites.
 
 ---
-# Resources for learning R (and data science)
+# Resources for learning R
 
 + R-project [An Introduction to R](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
 
@@ -109,13 +109,10 @@ are available through the CRAN family of Internet sites.
 + Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R](https://beanumber.github.io/mdsr2e/)
 
 --
-
 + `?` in **R**
 <br>
 
 --
-
-<br>
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
 
 
