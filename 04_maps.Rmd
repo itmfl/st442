@@ -1,0 +1,846 @@
+---
+title: "Introduction to Data Science"
+subtitle: "ggplot, maps, and other tidbits"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    #css: ["default","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+    df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.width = 8, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE,fig.showtext=TRUE)
+library(ggplot2)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
+library(knitr)
+hook_output = knit_hooks$get('message')
+knit_hooks$set(message = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+library(ggplot2)
+theme_set(theme_xaringan())
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+#style_solarized_light()
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+#style_mono_accent(base_color = "#43418A",
+  #title_slide_background_color = "#FFFFFF",
+  #title_slide_text_color = "#006747",
+  text_font_size = 10,
+  text_font_google = google_font("Crete Round", "300", "300i"),
+  code_font_size = "0.8rem",
+  link_color = "#0011FF",
+  header_font_google = google_font("Josefin Sans"),
+  title_slide_background_image = "CC.FallSunrise.9796.jpg",
+  #title_slide_background_size = "600px",
+  #title_slide_background_position = "bottom",
+ # text_font_google   = google_font("Montserrat", "300", "300i"),
+  code_font_family = "Fira Code",
+  #header_background_auto = TRUE,
+  code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+```
+
+# The importance of grouping
+```{r}
+library(dplyr)
+library(gapminder) ## install.packages(gapminder)
+gapminder
+```
+---
+class: normal
+```{r out.width="70%"}
+library(ggplot2)
+gapminder_small <- gapminder %>% 
+  filter(country %in% c("Japan", "China", "Cuba"))
+p <- ggplot(data = gapminder_small, aes(x = year, y = gdpPercap)) 
+p + geom_line(size=2)
+```
+---
+class: normal
+```{r out.width="70%"}
+p + geom_path()
+```
+
+From the help page
+
+> geom_path() connects the observations in the order in which they appear in the data. 
+> geom_line() connects them in order of the variable on the x axis. 
+> geom_step() creates a stairstep plot, highlighting exactly when changes occur. 
+> The group aesthetic determines which cases are connected together.
+
+---
+class: clear, middle
+.pull-left[
+```{r}
+p + geom_line(aes(group = country))
+```
+]
+.pull-right[
+```{r}
+p + geom_path(aes(group = country))
+```
+]
+
+
+---
+
+#The madness of groupings
+**ggplot2** can subset data into groups and give each group its own appearance and transformation. There are many cases where **ggplot2** created default groups, and this can lead to unexpected results. In particular, the **ggplot2** [reference](https://ggplot2.tidyverse.org/reference/aes_group_order.html) states
+
+> By default, the group is set to the interaction of all discrete variables in the
+> plot. This often partitions the data correctly, but when it does not, or when
+> no discrete variable is used in the plot, you will need to explicitly define the
+> grouping structure, by mapping group to a variable that has a different value
+> for each group.
+
+This [implies](https://www.gl-li.com/2017/08/13/ggplot2-group-overrides-default-grouping/).
+
++  When the $x$ and $y$ aesthetics are mapped to categorical variables then the rows with the same level form a group. 
+
++ If aesthetic mapping, such as color, shape, and fill, map to categorical variables, they subset the data into groups. Furthermore, the default grouping also apply to statistic transformation such as boxplot and smooth.
+
+---
+class: clear
+
+Consider the following examples of $x$ or $y$ aesthetics being mapped to categorical variables.
+
+.pull-left[
+```{r df_example1}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A"))
+df
+```
+]
+
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y)) + 
+  geom_line()
+```
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the $x$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+
+.pull-left[
+```{r}
+df
+```
+]
+
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = z, y = y)) + 
+  geom_line()
+```
+The grouping here is **implicit** and is formed
+by observations with the same level 
+for the $z$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df
+```
+]
+
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  group = z)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+is formed by observations with the same level 
+for the $z$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df
+```
+]
+
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = z, y = y, 
+              group = x)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+is formed by observations with the same level 
+for the $x$ variable of $\mathrm{df}$.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df
+```
+]
+
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                 group = 1)) + 
+  geom_line()
+```
+The grouping here is **explicit** and 
+all observations got assigned to the same group.
+]
+---
+class: clear
+The implicit grouping due to categorical variables being mapped to $x$ or $y$ can be quite confusing. For example,
+.pull-left[
+```{r echo = -1}
+BOD <- as_tibble(BOD)
+BOD
+```
+]
+
+.pull-right[
+```{r}
+BOD %>% ggplot(aes(x = Time, 
+                   y = demand)) + 
+  geom_line()
+```
+]
+
+---
+class: clear
+
+.pull-left[
+```{r message = TRUE,out.width="70%"}
+BOD$Time <-  as.factor(BOD$Time)
+BOD
+```
+]
+.pull-right[
+```{r message = TRUE, linewidth = 45, out.width = "90%"}
+BOD %>% ggplot( aes(x = Time, 
+                    y = demand)) + 
+  geom_line()
+```
+]
+
+---
+class: clear
+
+.pull-left[
+```{r message = TRUE,out.width="70%"}
+BOD$Time <-  as.factor(BOD$Time)
+BOD
+```
+]
+
+.pull-right[
+```{r message = TRUE, linewidth=45}
+BOD %>% ggplot(aes(x = Time, 
+                   y = demand,
+                   group=1)) + 
+  geom_line()
+```
+]
+---
+
+# The power of groupings ?
+```{r}
+nlme::Oxboys
+```
+> These data are described in Goldstein (1987) as data on the height of 
+> a selection of 24 boys from Oxford, England versus a standardized age.
+
+---
+class: clear
+
+.pull-left[
+```{r}
+h <- ggplot(nlme::Oxboys,
+            aes(x = age, y = height))
+h + geom_line()
+```
+]
+.pull-right[
+```{r}
+h <- ggplot(nlme::Oxboys,
+            aes(x = age, y = height,
+                group = Subject))
+h + geom_line()
+```
+]
+---
+class: clear
+.pull-left[
+```{r}
+h <- ggplot(nlme::Oxboys,
+            aes(x = age, y = height,
+                group = Subject))
+## One regression line for each boy
+h + geom_line() +
+  geom_smooth(method = "lm", se = F)
+```
+]
+.pull-right[
+```{r}
+h <- ggplot(nlme::Oxboys,
+            aes(x = age, y = height,
+                group = Subject))
+## One regression line for all boys
+h + geom_line() +
+    geom_smooth(aes(group = 1), 
+                method = "lm", 
+                size = 2, se = F)
+```
+]
+---
+class: clear, middle
+```{r}
+h <- ggplot(nlme::Oxboys, aes(x = Occasion, y = height))
+## Nine boxplots, one for each Occasion
+h + geom_boxplot()
+```
+---
+class: clear, middle
+```{r out.width="70%"}
+h <- ggplot(nlme::Oxboys,aes(x = Occasion, y = height))
+## 9 boxplots, one for each Occasion
+## 24 lines, one for each boy
+## One regression line for all boys
+h + geom_boxplot() + geom_line(aes(group = Subject), color = "blue") +
+    geom_smooth(aes(group = 1),  size = 2, color = "red", method = "lm", se = F)
+```
+
+---
+
+# Groupings & interactions
+
+```{r}
+mpg
+```
+
+We recall our previous discussion of grouping
+
+> If aesthetic mapping, such as color, shape, and fill, map to categorical variables, 
+> they subset the data into groups.
+
+> By default, the group is set to the interaction of all discrete variables in the
+> plot.
+
+---
+class: clear
+```{r out.width="60%"}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+## stat_boxplot on the default groups set by drv
+g1 <- ggplot(mpg, aes(drv, hwy)) + geom_jitter() + 
+    stat_boxplot(fill = NA)
+
+## aes(color) further splits data into more groups
+g2 <- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(fill = NA) +
+  theme(legend.position = "bottom")
+
+grid.arrange(g1, g2, nrow = 1)
+```
+---
+class: clear
+To get one box plot for every $\mathrm{drv}$ category, we explicit specify $\mathrm{group} = \mathrm{drv}$. 
+```{r out.width = "80%"}
+g3 <- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
+  geom_jitter() + stat_boxplot(aes(group = drv)) +
+    labs(subtitle = "group explicitly set for boxplot")
+g3
+```
+---
+
+# Groupings & collective geoms
+.pull-left[
+```{r df_example2}
+df <- dplyr::tibble(
+  x = c("a", "a", "a", "a", 
+        "b", "b", "b", "b"),
+  y = c(1,2,3,4,4,3,2,1),
+  z = c("A", "A", "B", "B", 
+        "B", "B", "A", "A"))
+df
+```
+]
+.pull-right[
+```{r}
+df %>% ggplot( aes(x = x, y = y, 
+                   color = z)) + 
+  geom_point(size=3) + 
+  geom_line()
+```
+]
+
+
+---
+class: clear
+
+In the previous plot the **geom_point** and the **geom_line** are each 
+divided into four groups due to interaction between the implicit grouping
+due to $x$ and the explicit grouping due to $\mathrm{color}$ being set to $z$. 
+
+.pull-left[
+```{r}
+df
+```
+]
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = z))
+```
+Here the *geom_point* and the *geom_line*
+are both divided into two groups. 
+]
+---
+class: clear
+.pull-left[
+```{r}
+df
+```
+]
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+Here the *geom_point* has two groups while the *geom_line* has one group.
+However, the *geom_line* now consists of two segments with different colors.
+]
+---
+class: clear
+.pull-left[
+```{r}
+df
+```
+]
+.pull-right[
+```{r}
+
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1),
+                color="black") 
+```
+Here the *geom_point* has two groups while the *geom_line* has one group and only
+one segment.
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different **geom** objects.
+
+.pull-left[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = z))
+```
+]
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = z),
+               fill="gray80")
+```
+]
+---
+class: clear
+
+Finally, compare the following two outputs using different **geom** objects.
+.pull-left[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_line(aes(group = 1))
+```
+]
+.pull-right[
+```{r}
+df %>% ggplot(aes(x = x, y = y, 
+                  color = z)) + 
+  geom_point(size=3) + 
+  geom_polygon(aes(group = 1),
+               fill="gray80")
+```
+]
+---
+
+# Time to move on
+```{r us_states, cache = TRUE, echo = FALSE}
+library(maps)
+library(mosaic)
+library(socviz)
+data(election)
+us_states <- map_data("state")
+election$region <- tolower(election$state)
+us_states_elec <- left_join(us_states, election)
+p <- ggplot(data = subset(us_states_elec, region %nin% "district of columbia"),
+       aes(x = long, y = lat, group = group, fill = d_points))
+p + geom_polygon(color = "gray90", size = 0.1) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  scale_fill_gradient2(low = "red", mid = scales::muted("purple"), high = "blue") + 
+  labs(title = "Election Results 2016", subtitle = "Winning margins", fill = NULL) + 
+  theme_map() + theme(legend.position = "bottom")
+```
+
+---
+
+#Maps data
+See also Chapter 7 of K. Healy's book on [Visualizing data](https://socviz.co/maps.html#map-u.s.-state-level-data)
+```{r}
+library(maps) ## install.packages("maps")
+us_states <- map_data("state")
+us_counties <- map_data("county")
+us_states
+```
+---
+class: clear, middle
+```{r}
+us_counties
+```
+
+---
+class: clear
+```{r cache = TRUE, out.width="70%"}
+
+map("county", 'north carolina', fill = TRUE, col = palette())
+nc <- map_data('county', 'north carolina')
+```
+---
+
+# It's raining men. Hallelujah!!
+```{r cache = TRUE, out.width="70%", eval = FALSE}
+library(ggforce)
+ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) + 
+    coord_map(projection = "albers", lat0 = 35, lat1 = 36) + 
+    geom_ellipse(aes(x0 = -76, y0 = 35, a = 2, b = 3, 
+                     angle = -pi / 3, m1 = 3), size = 3, col = "red") + ...
+```
+```{r cache = TRUE, out.width="70%", echo = FALSE}
+library(ggforce)
+ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) + 
+    coord_map(projection = "albers", lat0 = 35, lat1 = 36) + 
+  geom_ellipse(aes(x0 = -76, y0 = 35, a = 2, b = 3, angle = -pi / 3, m1 = 3), 
+               size = 3, col = "red") + 
+  geom_ellipse(aes(x0 = -76, y0 = 35, a = 1.4, b = 2.1, angle = -pi / 3, m1 = 3), 
+               size = 3, col = "red") + 
+  geom_ellipse(aes(x0 = -76, y0 = 35, a = 1, b = 1.5, angle = -pi / 3, m1 = 3), 
+               size = 3, col = "red") +
+  geom_ellipse(aes(x0 = -76, y0 = 35, a = 0.7, b = 1.1, angle = -pi / 3, m1 = 3), 
+               size = 3, col = "red") + 
+  geom_ellipse(aes(x0 = -76, y0 = 35, a = 0.5, b = 0.8, angle = -pi / 3, m1 = 3), 
+               size = 3, col = "red") +
+  ggtitle('Dorian is coming!!! OMGWTFBBQ11')
+```
+
+---
+
+# Let us get back to class.
+```{r out.width = "70%"}
+p <- us_states %>% ggplot(aes(x = long, y = lat, group = group))
+p + geom_polygon(fill = "white", color = "black")
+```
+Maps are by default plotted using the Mercartor projection which does not look too good if you are 
+drawing only a particular region of the world.
+---
+class: clear, middle
+We switch to [Albers projection](https://en.wikipedia.org/wiki/Albers_projection) as used by the US Census Bureau.
+```{r cache = TRUE, out.width = "70%"}
+p <- us_states %>% ggplot(aes(x = long, y = lat, group = group, fill = region))
+p <- p + geom_polygon(color = "gray90", size = 0.1) +
+         coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+         guides(fill = FALSE)
+p
+```
+---
+class: clear, middle
+```{r us_states_elec, cache = TRUE}
+library(socviz)
+election
+## Create a new column with lower case statename.
+election <- election %>% mutate(region = tolower(state)) 
+us_states_elec <- us_states %>% left_join(election) ## Combine the two table
+```
+---
+class: clear, middle
+We are now ready to plot the election results.
+```{r us_states_elec_plot, dependson="us_states_elec", cache = TRUE, message = TRUE, out.width="70%"}
+# Hex color codes for Dem Blue and Rep Red
+party_colors <- c("#2E74C0", "#CB454A") 
+p <- ggplot(us_states_elec, aes(x = long, y = lat, group = group))
+p <- p + geom_polygon(color = "gray90", size = 0.1,aes(fill = party)) +
+         coord_map(projection = "albers", lat0 = 39, lat1 = 45) + 
+         guides(fill = FALSE)
+p <- p + scale_fill_manual(values = party_colors) +
+         labs(title = "Election Results 2016", fill = NULL)
+p + theme_map()
+```
+---
+class: clear
+Let us now try some other variants of this plot
+```{r dependson="us_states_elec_plot", cache = TRUE}
+p0 <- ggplot(us_states_elec, aes(x = long, y = lat, 
+                                 group = group, fill = pct_trump))
+
+p1 <- p0 + geom_polygon(color = "gray90", size = 0.1) +
+           coord_map(projection = "albers", lat0 = 39, lat1 = 45) + 
+           labs(title = "Trump vote") + theme_map() + labs(fill = "Percent")
+
+```
+.pull-left[
+```{r}
+p1
+```
+]
+.pull-right[
+```{r}
+p1 + 
+  scale_fill_gradient(low = "white", 
+                      high = "#CB454A")
+
+```
+]
+---
+class: clear
+```{r us_states_elec_plot2, cache = TRUE, out.width="70%"}
+p0 <- ggplot(data = us_states_elec,
+             mapping = aes(x = long, y = lat, group = group, fill = -d_points))
+
+p1 <- p0 + geom_polygon(color = "gray90", size = 0.1) +
+    coord_map(projection = "albers", lat0 = 39, lat1 = 45) 
+
+
+
+p2 <- p1 + scale_fill_gradient2(low = scales::muted("blue"),
+                                high = scales::muted("red")) + 
+           labs(title = "Winning margins in 2016") + 
+           theme_map() + labs(fill = "Percent")
+p2
+```
+---
+class: clear, middle
+The winning percentage for Democrats in Washington DC is too high, 
+thereby skewing the color scale on the previous map. We thus subset the data.
+```{r dependson="us_states_elec_plot2", cache = TRUE, out.width="70%", fig.align = "center"}
+p2 %+% subset(us_states_elec, region %nin% "district of columbia") 
+```
+---
+
+# Counties map
+Let us now plot the winning margin, but at the counties level as opposed to the state level.
+Time to get a cup of joe. This could take a while. 
+```{r us_counties_elec, cache = TRUE, out.width="70%", fig.align = "center"}
+us_counties_elec <- us_counties %>% 
+  filter(region %nin% 'district of columbia') %>%
+  left_join(election)
+p2 %+% us_counties_elec #<<
+```
+---
+
+#Maps vs faceted dot plots ?
+```{r}
+p0 <- ggplot(subset(election, !(state %in% "District of Columbia")),
+             aes(x = r_points, y = reorder(state,r_points), color = party))
+p1 <- p0 + geom_vline(xintercept = 0, color = "gray30") + 
+           geom_point(size = 2) + scale_color_manual(values = party_colors)
+p2 <- p1 + scale_x_continuous(breaks = seq(-30, 40, 10),
+                              labels = c("30\n (Clinton)", "20", 
+                                         "10", "0","10", 
+                                         "20", "30", "40\n(Trump)"))
+p3 <- p2 + xlab("Point margin") + ylab("") + theme_minimal()
+```
+---
+class: clear
+```{r}
+p3 + facet_wrap(~ census, nrow = 2) + guides(color = FALSE)
+```
+---
+class: clear
+```{r}
+## Free Y!
+p3 + facet_wrap(~ census, nrow = 2, scales = "free_y") + 
+  guides(color = FALSE)
+```
+---
+
+# USA choropleth
+The United States administrative areas are quite diverse in terms of geographical size and population size.
+County-level maps are aesthetically pleasing but potentially misleading as they can insinuate explanations
+that are simply a function of the geographical or population characteristics. 
+
+For example NH, RI, MA, and CT are smaller in area than any of the ten largest counties in the West; these counties' populations are less than $10^5$.
+
+We illustrate this phenomenon with a few visualizations (see Chapter 7 of [K. Healy's book](https://socviz.co/maps.html#map-u.s.-state-level-data)).
+
+---
+class: clear, middle
+```{r}
+library(socviz)
+county_map
+```
+---
+class: clear
+```{r}
+county_data ## From the US Census Bureau
+```
+---
+class: clear
+```{r county_full, cache = TRUE, out.width="80%"}
+county_full <- left_join(county_map, county_data, by = "id")
+p <- ggplot(county_full, aes(x = long, y = lat, fill = pop_dens, group = group))
+
+p1 <- p + geom_polygon(color = "gray90", size = 0.05) + coord_equal()
+p2 <- p1 + labs(fill = "Population per\nsquare mile") + theme_map() + 
+           guides(fill = guide_legend(nrow = 2)) + 
+           theme(legend.position = "bottom")
+p2
+```
+---
+class: clear, middle
+
+```{r cache = TRUE, out.width="80%"}
+p2 + scale_fill_brewer(palette="Blues",
+                       labels = c("0-10", "10-50", "50-100", "100-500", 
+                                  "500-1,000", "1,000-5,000", ">5,000"))
+```
+---
+class: clear
+Let us create a plot depicting the number of firearm-related suicide rates during $1999$ to $2015$ and compare it against the population map per counties.  
+
+```{r guns_pop, cache = TRUE}
+orange_pal <- RColorBrewer::brewer.pal(n = 6, name = "Oranges")
+orange_rev <- rev(orange_pal)
+gun_p <- ggplot(county_full, 
+                aes(x = long, y = lat, group = group, fill = su_gun6))
+gun_p1 <- gun_p + geom_polygon(color = "gray60", size = 0.05) + coord_equal()
+gun_p2 <- gun_p1 + scale_fill_manual(values = orange_pal)
+gun_p3 <- gun_p2 + labs(title = "Gun-Related Suicides, 1999--2015", 
+                        fill = "Rate per 10^5 pop") +
+                   theme_map() + theme(legend.position = "top")
+pop_p <- ggplot(county_full, aes(x = long, y = lat, 
+                                 fill = pop_dens6, group = group))
+
+pop_p1 <- pop_p + geom_polygon(color = "gray90", size = 0.05) + coord_equal()
+
+pop_p2 <- pop_p1 + scale_fill_manual(values = orange_rev)
+
+pop_p3 <- pop_p2 + labs(title = "Reverse-coded Population Density", 
+                        fill = "People per square mile") +
+                   theme_map() + theme(legend.position = "top")
+```
+---
+class: clear
+```{r out.width="65%", echo = FALSE, fig.show = "hold"}
+gun_p3
+pop_p3
+```
+---
+class: clear, middle
+
++ the visual impact of the two plots are similar e.g.,dark bands in the West, and fading toward the center; also the Northeast.
++ gun-related suicide is expressed as a rate; this standardization has its limits, e.g., when the event of interest is not very common, and there is very wide variation in the base size of the units, then the denominator (population size) became more prominent in the standardized measure.
++ The data is subject to reporting constraints. If there are $\leq 10$ events per year the CDC will not report them at the county level because of privacy reasons. Binning data creates a threshold problem for choropleth maps.
+
+---
+
+# Is your data really spatial ?
+```{r opiates, cache = TRUE}
+opiates %>% select(-crude, -fips, -adjusted_se)
+opiates <- opiates %>% mutate(region = tolower(state))
+opiates_map <- left_join(us_states, opiates)
+
+p0 <- ggplot(subset(opiates_map, year %in% c(2002,2006,2010,2014)),
+             aes(x = long, y = lat, group = group, fill = adjusted))
+
+p1 <- p0 + geom_polygon(color = "gray90", size = 0.05) +
+           coord_map(projection = "albers", lat0 = 39, lat1 = 45) 
+```
+---
+class: clear
+```{r cache = TRUE}
+library(viridis)  ## For the color scheme
+p2 <- p1 + scale_fill_viridis_c(option = "plasma")
+p2 + theme_map() +
+     theme(legend.position = "top", strip.background = element_blank()) +
+     labs(fill = "Death rate per 10^5 population") + 
+     facet_wrap(~ year, ncol = 2)
+```
+---
+class: clear, middle
+Compare the previous figure with 
+
+```{r ref.label = "opiate-plot-2", echo = FALSE}
+```
+---
+class: clear, middle
+The code for the previous figure is given below.
+```{r opiate-plot-2, cache = TRUE, eval = FALSE}
+library(ggrepel)
+p0 <- ggplot(data = filter(opiates, !is.na(division_name)),
+            aes(x = year, y = adjusted))
+            
+p1 <- p0 + geom_line(color = "gray70", aes(group = state)) + 
+           geom_smooth(aes(group = division_name), se = FALSE)
+
+opiates_subset <- filter(opiates, year == max(year), abbr!= "DC") #<<
+p2 <- p1 + geom_text_repel(data = opiates_subset,
+                           aes(x = year, y = adjusted, label = abbr),
+                           size = 1.8, segment.color = NA, nudge_x = 30) +
+           coord_cartesian(c(min(opiates$year), max(opiates$year)))
+p2 + labs(x = "", y = "Rate per 100,000",
+          subtitle = "State-Level Opiate Deaths (1999-2014)") +
+     facet_wrap(~ reorder(division_name, -adjusted, na.rm = T), nrow  = 3) +
+     theme_xaringan(text_font_size=10)
+```

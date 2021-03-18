@@ -1,0 +1,50 @@
+---
+title: "Reticulation: a path between Python and R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First load the **reticulate** library.
+```{r cars}
+library(reticulate)
+## if you prefer a different version of python, do
+## use_python(path_to_python_executable) 
+```
+
+Let us now load a flights dataset in **R**.
+
+```{r pressure, echo=TRUE, message = FALSE}
+library(nycflights13)
+library(dplyr)
+data(flights)
+flights_ORD <- flights %>% filter(dest == "ORD") %>% select(carrier, dep_delay, arr_delay) %>% na.omit()
+flights_ORD %>% head()
+```
+
+Now try running some python code.
+
+```{python error = TRUE}
+import pandas as pd
+## r.x refer to a variable x in the r session.
+flights_py = pd.DataFrame.from_dict(r.flights_ORD)
+flights_py.head()
+import matplotlib.pyplot as plt
+import numpy as np
+t = np.arange(0.0, 2.0, 0.01)
+s = 1 + np.sin(2*np.pi*t)
+plt.plot(t,s)
+plt.xlabel('time (s)')
+plt.ylabel('voltage (mV)')
+plt.grid(True)
+plt.show()
+```
+
+Let us now try accessing python objects in **R**.
+```{r}
+mod <- lm(py$s ~ py$t) ## py$x refer to a variable x in the python session.
+summary(mod)
+```
+

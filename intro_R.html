@@ -5,9 +5,7 @@
     <meta charset="utf-8" />
     <meta name="author" content="Minh Tang" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
-    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
-    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
-    <link rel="stylesheet" href="animate.css" type="text/css" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
   </head>
   <body>
     <textarea id="source">
@@ -1064,7 +1062,7 @@ output
 ```
 
 ```
-## [1]  0.0674  0.0567 -0.0867 -0.0508
+## [1]  0.0442 -0.1212 -0.0989  0.0833
 ```
 
 ```r
@@ -1073,7 +1071,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-##  0.0674  0.0567 -0.0867 -0.0508
+##  0.0442 -0.1212 -0.0989  0.0833
 ```
 ]
 
@@ -1085,16 +1083,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.0674
+## [1] 0.0442
 ## 
 ## $b
-## [1] 0.0567
+## [1] -0.121
 ## 
 ## $c
-## [1] -0.0867
+## [1] -0.0989
 ## 
 ## $d
-## [1] -0.0508
+## [1] 0.0833
 ```
 
 ```r
@@ -1103,7 +1101,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-##  0.0674  0.0567 -0.0867 -0.0508
+##  0.0442 -0.1212 -0.0989  0.0833
 ```
 ]
 ---
@@ -1124,10 +1122,10 @@ output2
 ```
 
 ```
-##         [,1]    [,2]    [,3]    [,4]
-## [1,] -0.7986 -0.7836 -0.7315 -0.6930
-## [2,]  0.0674  0.0567 -0.0867 -0.0508
-## [3,]  0.5985  0.7351  0.5822  0.5870
+##         [,1]   [,2]    [,3]    [,4]
+## [1,] -0.6642 -0.820 -0.5683 -0.5894
+## [2,]  0.0442 -0.121 -0.0989  0.0833
+## [3,]  0.6350  0.575  0.5307  0.7890
 ```
 ]
 
@@ -1138,10 +1136,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##           a       b       c       d
-## 25% -0.7986 -0.7836 -0.7315 -0.6930
-## 50%  0.0674  0.0567 -0.0867 -0.0508
-## 75%  0.5985  0.7351  0.5822  0.5870
+##           a      b       c       d
+## 25% -0.6642 -0.820 -0.5683 -0.5894
+## 50%  0.0442 -0.121 -0.0989  0.0833
+## 75%  0.6350  0.575  0.5307  0.7890
 ```
 
 ```r
@@ -1149,10 +1147,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##           a       b       c       d
-## 25% -0.7986 -0.7836 -0.7315 -0.6930
-## 50%  0.0674  0.0567 -0.0867 -0.0508
-## 75%  0.5985  0.7351  0.5822  0.5870
+##           a      b       c       d
+## 25% -0.6642 -0.820 -0.5683 -0.5894
+## 50%  0.0442 -0.121 -0.0989  0.0833
+## 75%  0.6350  0.575  0.5307  0.7890
 ```
 ]
 ---
@@ -1655,7 +1653,8 @@ delays
 ```
 ---
 class: clear
-# We can then plot how the average delay varies with the distance.
+
+We can then plot how the average delay varies with the distance.
 
 ```r
 library(ggplot2)

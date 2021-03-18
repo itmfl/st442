@@ -6,7 +6,6 @@ date: "Fall 2020"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts,animate.css]
     nature:
       highlightStyle: zenburn
       highlightLines: true
@@ -20,24 +19,7 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 ```{r xaringan-themer, include = FALSE}
-# library(xaringanthemer)
 library(tidyverse)
-# duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
-#   title_slide_background_color = "#FFFFFF",
-#   title_slide_text_color = "#006747",
-#   header_font_google = google_font("Josefin Sans"),
-#   title_slide_background_image = "ncstate.png",
-#   title_slide_background_size = "600px",
-#   title_slide_background_position = "bottom",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-# )
-# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-# )
 ```
 #Brief self-introduction
 + Name: Minh Tang. 
@@ -722,7 +704,8 @@ delays
 ```
 ---
 class: clear
-# We can then plot how the average delay varies with the distance.
+
+We can then plot how the average delay varies with the distance.
 ```{r message = FALSE, fig.align = 'center', out.width='80%'}
 library(ggplot2)
 ggplot(delays, aes(x = dist, y  = avg_delay)) + 
