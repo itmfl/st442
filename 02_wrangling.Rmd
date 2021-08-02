@@ -495,14 +495,19 @@ penguins %>% summarise(across(everything(),~sum(is.na(.))))
 ---
 class: clear
 ```{r}
-## Now replace the missing values by the average value
-## (computed for each species and each island)
-penguins %>%
+## Replace missing values for the numerical variables by the 
+## average value (computed within that specie and island).
+penguins_imputed <- penguins %>%
   group_by(species, island) %>%
-  mutate(across(where(is.numeric), 
+  mutate(imputed = if_any(where(is.numeric), is.na),
+         across(where(is.numeric), 
                 ~if_else(condition = is.na(.), 
                          true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) %>% ungroup()
+                         false = as.numeric(.)))) %>% ungroup() %>% 
+  select(imputed, everything())
+
+penguins_imputed
+penguins_imputed %>% filter(imputed == TRUE)
 ```
 
 ---

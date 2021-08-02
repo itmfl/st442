@@ -1080,14 +1080,14 @@ df
 
 ```
 ## # A tibble: 100 × 3
-##       x      y     z
-##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.958 0.0867 0.511
-## 2 0.532 0.701  0.194
-## 3 0.779 0.282  0.327
-## 4 0.830 0.451  0.414
-## 5 0.118 0.626  0.258
-## 6 0.801 0.641  0.724
+##        x     y      z
+##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 0.0532 0.254 0.697 
+## 2 0.818  0.346 0.0590
+## 3 0.435  0.502 0.348 
+## 4 0.850  0.380 0.862 
+## 5 0.365  0.835 0.0764
+## 6 0.581  0.643 0.113 
 ## # … with 94 more rows
 ```
 ]
@@ -1102,7 +1102,7 @@ df %&gt;% summarize(
 ## # A tibble: 1 × 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.464 0.495 0.483
+## 1 0.399 0.500 0.532
 ```
 
 ```r
@@ -1128,14 +1128,14 @@ df
 
 ```
 ## # A tibble: 100 × 4
-##       x      y     z names
-##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 0.958 0.0867 0.511 a    
-## 2 0.532 0.701  0.194 b    
-## 3 0.779 0.282  0.327 c    
-## 4 0.830 0.451  0.414 d    
-## 5 0.118 0.626  0.258 e    
-## 6 0.801 0.641  0.724 f    
+##        x     y      z names
+##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
+## 1 0.0532 0.254 0.697  a    
+## 2 0.818  0.346 0.0590 b    
+## 3 0.435  0.502 0.348  c    
+## 4 0.850  0.380 0.862  d    
+## 5 0.365  0.835 0.0764 e    
+## 6 0.581  0.643 0.113  f    
 ## # … with 94 more rows
 ```
 
@@ -1148,7 +1148,7 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.464 0.297    107.  0.495 0.250    46.4  0.483 0.281    53.3
+## 1  0.399 0.284    137.  0.500 0.295    188.  0.532 0.294    185.
 ```
 
 ---
@@ -1169,7 +1169,7 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.464 0.297    107.  0.495 0.250    46.4  0.483 0.281    53.3
+## 1  0.399 0.284    137.  0.500 0.295    188.  0.532 0.294    185.
 ```
 
 ```r
@@ -1182,7 +1182,7 @@ df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
 ## # A tibble: 1 × 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.495 0.250    46.4  0.483 0.281    53.3
+## 1  0.500 0.295    188.  0.532 0.294    185.
 ```
 
 ```r
@@ -1249,28 +1249,45 @@ penguins %&gt;% summarise(across(everything(),~sum(is.na(.))))
 class: clear
 
 ```r
-## Now replace the missing values by the average value
-## (computed for each species and each island)
-penguins %&gt;%
+## Replace missing values for the numerical variables by the 
+## average value (computed within that specie and island).
+penguins_imputed &lt;- penguins %&gt;%
   group_by(species, island) %&gt;%
-  mutate(across(where(is.numeric), 
+  mutate(imputed = if_any(where(is.numeric), is.na),
+         across(where(is.numeric), 
                 ~if_else(condition = is.na(.), 
                          true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) %&gt;% ungroup()
+                         false = as.numeric(.)))) %&gt;% ungroup() %&gt;% 
+  select(imputed, everything())
+
+penguins_imputed
 ```
 
 ```
-## # A tibble: 344 × 8
-##   species island    bill_length_mm bill_depth_mm flipper_length_mm
-##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;
-## 1 Adelie  Torgersen           39.1          18.7              181 
-## 2 Adelie  Torgersen           39.5          17.4              186 
-## 3 Adelie  Torgersen           40.3          18                195 
-## 4 Adelie  Torgersen           39.0          18.4              191.
-## 5 Adelie  Torgersen           36.7          19.3              193 
-## 6 Adelie  Torgersen           39.3          20.6              190 
+## # A tibble: 344 × 9
+##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
+##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
+## 1 FALSE   Adelie  Torgersen           39.1          18.7             181 
+## 2 FALSE   Adelie  Torgersen           39.5          17.4             186 
+## 3 FALSE   Adelie  Torgersen           40.3          18               195 
+## 4 TRUE    Adelie  Torgersen           39.0          18.4             191.
+## 5 FALSE   Adelie  Torgersen           36.7          19.3             193 
+## 6 FALSE   Adelie  Torgersen           39.3          20.6             190 
 ## # … with 338 more rows, and 3 more variables: body_mass_g &lt;dbl&gt;,
 ## #   sex &lt;fct&gt;, year &lt;dbl&gt;
+```
+
+```r
+penguins_imputed %&gt;% filter(imputed == TRUE)
+```
+
+```
+## # A tibble: 2 × 9
+##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
+##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
+## 1 TRUE    Adelie  Torgersen           39.0          18.4             191.
+## 2 TRUE    Gentoo  Biscoe              47.5          15.0             217.
+## # … with 3 more variables: body_mass_g &lt;dbl&gt;, sex &lt;fct&gt;, year &lt;dbl&gt;
 ```
 
 ---
