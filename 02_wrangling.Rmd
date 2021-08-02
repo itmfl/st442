@@ -38,7 +38,7 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "_MAH4433.jpg",
+   title_slide_background_image = "hunt_sunrise.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -52,10 +52,12 @@ We introduce the **dplyr** package written by Hadley Wickham, Roman Fran&ccedil;
 
 There are five main important *verbs* associated with dplyr, namely
 
-+ **filter**
-+ **select**
-+ **mutate** and **transmute**
-+ **group_by** and **summarize**
++ [filter](https://dplyr.tidyverse.org/reference/filter.html)
++ [select](https://dplyr.tidyverse.org/reference/select.html)
++ [arrange](https://dplyr.tidyverse.org/reference/arrange.html)
++ [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [rename](https://dplyr.tidyverse.org/reference/rename.html)
++ [group_by](https://dplyr.tidyverse.org/reference/group_by.html) and [summarize](https://dplyr.tidyverse.org/reference/summarise.html)
+
 ---
 class: clear, animated, bounceInDown
 We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 

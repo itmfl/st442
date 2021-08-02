@@ -32,7 +32,7 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "./CC.FallSunrise.9500.jpg",
+   title_slide_background_image = "./hunt_sunrise.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -91,7 +91,7 @@ knitr::include_graphics("figures/sexiest.png")
 ---
 class: header_background
 # The rise of data?
-```{r out.width = "40%", echo = FALSE}
+```{r out.width = "35%", echo = FALSE}
 knitr::include_graphics("figures/data_never_sleeps.jpg")
 ```
 
@@ -146,7 +146,7 @@ knitr::include_graphics("figures/ncsu_dsi.png")
 ```
 ---
 class: header_background
-# Words cloud or crappy visual?
+# A lot of requirements ?
 ```{r out.width = "60%", echo = FALSE, fig.cap = "http://www.kimberlycoffey.com/blog/2016/11/text-analysis"}
 knitr::include_graphics("https://bit.ly/2Mmu7lW")
 ```
@@ -168,6 +168,12 @@ knitr::include_graphics("https://bit.ly/2NbBfBb")
 knitr::include_graphics("https://www.cognilytica.com/wp-content/uploads/2018/06/DATA-SCIENCE-VS-DATA-ENGINEER-CGIG001-v2.png")
 ```
 ]
+
+---
+class: clear
+```{r out.width="70%", echo = FALSE}
+knitr::include_graphics("figures/venn2.png")
+```
 
 ---
 class: header_background
@@ -210,9 +216,13 @@ knitr::include_graphics("figures/tukey3.png")
 ---
 class: header_background
 # 50 Years of Data Science
-```{r out.width="70%", echo = FALSE, fig.cap = "https://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf"}
+```{r out.width="70%", echo = FALSE} 
 knitr::include_graphics("figures/donoho.png")
 ```
+ 
+A pdf of the article is provided [here](https://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf). 
+ 
+
 ---
 class: header_background
 #R ? Aarghhh!

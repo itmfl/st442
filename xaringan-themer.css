@@ -138,7 +138,7 @@ a, a > code {
 }
 .title-slide {
   background-color: var(--title-slide-background-color);
-  background-image: url("./CC.FallSunrise.9500.jpg");
+  background-image: url("hunt_sunrise.jpg");
   background-size: cover;
 }
 .title-slide .remark-slide-number {

@@ -1,7 +1,7 @@
 hotdogs_plot <- function(){
 library(mdsr)
 hd <- readr::read_csv(
-  "http://datasets.flowingdata.com/hot-dog-contest-winners.csv")
+  "./datasets/hot-dog-contest-winners.csv")
 names(hd) <- gsub(" ", "_", names(hd)) %>% tolower()
 
 new_data <- data.frame(

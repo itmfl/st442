@@ -1,18 +1,18 @@
 ---
-title: "Visualizing Data"
-subtitle: "An introduction to ggplot2"
-author: "CSC/ST 442"
-date: "`r Sys.Date()`"
+title: "Introduction to Data Science"
+subtitle: "Visualizing data with ggplot2"
+date: "Fall 2021"
 output:
   xaringan::moon_reader:
     lib_dir: libs
     #css: ["default","metropolis","metropolis-fonts","animate.css"]
-    css: ["xaringan-themer.css","metropolis-fonts","animate.css",animate.min.css]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: solarized-dark
+      highlightStyle: github
       highlightLines: true
       highlightSpans: true
       countIncrementalSlides: false
+      slideNumberFormat: "%current%"
     df_print: tibble
     # css: [default, metropolis, metropolis-fonts]
     # nature:
@@ -21,33 +21,35 @@ output:
     #   countIncrementalSlides: false
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE,fig.showtext = TRUE)
 options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
 ```
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
-#style_solarized_light()
- style_duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
-  title_slide_background_color = "#FFFFFF",
-  title_slide_text_color = "#006747",
-  text_font_size = 10,
-  link_color = "#0011FF",
-  header_font_google = google_font("Josefin Sans"),
-  title_slide_background_image = "ncstate.png",
-  title_slide_background_size = "600px",
-  title_slide_background_position = "bottom",
- # text_font_google   = google_font("Montserrat", "300", "300i"),
-  code_font_family = "Fira Code",
-  code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+theme_set(theme_tufte())
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_clipboard(button_text = "<i class=\"fa fa-clipboard\"></i>")
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_tachyons()
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_image = "./hunt_sunrise.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
 )
-# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-# )
 ```
-
+class: header_background
 #ggplot2
 We introduce the **ggplot2** package which provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
@@ -63,7 +65,7 @@ class: clear
 As an example, the following figure was generated using data from the average daily temperature archive at the [University of Dayton](http://academic.udayton.edu/kissock/http/Weather/).
 
 ```{r echo = FALSE, cache = TRUE, warning = FALSE, message = FALSE, fig.retina = 4, fig.align = 'center', out.width="120%", fig.asp = 0.6}
-source("R_scripts/daytona.R")
+source("R_scripts/dayton.R")
 p <- daytona_plot()
 print(p)
 ```
@@ -87,12 +89,12 @@ grid::grid.draw(p)
 
 Close, but no cigar ? In any case, the above plot is nice in that a total of six variables are mapped to six *aesthetics*; $x$ and $y$ axis mapped to the location of the army, the size of the army is mapped to the size of the line, the direction of movement is mapped to color, date of points along retreat path is mapped to the text below plot, and the temperature during the retreat is mapped to the line below the plot.
 ---
+class: header_background
 #ggplot2 basic
 We start with a very simple plot. Consider the following dataset about fuel efficiency for cars.
 
 ```{r echo = -2, fig.align = 'center', out.width = "50%"}
 library(ggplot2)
-theme_set(theme_classic())
 data(mpg)
 dplyr::select(mpg, -fl, -class)
 ```
@@ -128,6 +130,7 @@ require(gridExtra)
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
+class: header_background
 #aes()
 We see that the plots differ in which aesthetic the variable *class* is mapped to, e.g., color vs size vs alpha translucency.
 
@@ -150,6 +153,7 @@ ggplot(mpg) +
   geom_point(aes(x = displ, y = hwy), color = "blue", shape = 24)
 ```
 ---
+class: header_background
 #facet
 We can also introduce additional (categorical) variables through the use of faceting, i.e., split your data into groups and display different subplots (but using the same *geom_functions*) for each subgroups. 
 ```{r, fig.align = 'center', out.width = "70%", fig.asp = 0.6, fig.retina = 3}
@@ -166,6 +170,7 @@ ggplot(data = mpg) +
   facet_grid(drv ~ cyl)
 ```
 ---
+class: header_background
 #Geometric objects
 Consider the following three plots. Each plot uses the same $x$ and $y$ coordinates, but different *geoms* or geometric objects.
 ```{r, out.width = "100%", fig.show = 'hold', fig.asp = 0.4}
@@ -193,8 +198,9 @@ ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
   geom_smooth(data = dplyr::filter(mpg, class == "subcompact"))
 ```
 ---
+class: header_background
 #Histograms and Bar Plots
-We now present examples of two of the most elementary and widely used plots.
+We now present two of the most elementary and widely used plots.
 ```{r cache = TRUE, fig.asp = 0.5, out.width="80%"}
 library(mdsr) ## from the book Modern Data Science with R
 data(SAT_2010)
@@ -259,7 +265,8 @@ Now compare the following codes.
 ```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
 p <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math), y = math)) +
   xlab("") + geom_col() 
-p1 <- p + scale_y_reverse() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p1 <- p + scale_y_reverse() + 
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
 p2 <- p + scale_y_reverse() + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
@@ -268,9 +275,10 @@ grid.arrange(p1,p2,ncol = 2)
 ## Surely it is time to stop.
 
 ---
+class: header_background
 # Don't call me Shirley.
 
-```{r echo = FALSE, out.width = "40%"}
+```{r echo = FALSE, out.width = "35%"}
 knitr::include_graphics("https://hugelolcdn.com/i/123968.gif")
 ```
 
@@ -284,6 +292,7 @@ p + coord_polar()
 ```
 
 ---
+class: header_background
 #Bar plots vs dot plots ?
 The plot on the right is known as a Cleveland dot plot after [William Cleveland](https://en.wikipedia.org/wiki/William_S._Cleveland). The dot plot is quite a bit less "noisy" compared to the bar plot.
 ```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
@@ -294,6 +303,7 @@ p2 <- p + geom_point(size = 3) + coord_flip() + theme_bw()
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
+class: header_background
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
 ```{r cache = TRUE}
@@ -321,6 +331,7 @@ p + geom_col(colour = "black", size = 0.25) +
   scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
 ```
 ---
+class: header_background
 # Example 1: US Gun Murders
 We now present a few more sophisticated examples of **ggplot2** output. 
 ```{r cache = TRUE, echo = TRUE}
@@ -391,6 +402,7 @@ p <- ggplot(murders, aes(x = population/10^6, y = total)) +
 p
 ```
 ---
+class: header_background
 # Example 2: Baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly $1.6$ million names during the period from $1900$ to $2010$. 
 
@@ -582,7 +594,8 @@ p <- ggplot(data = com_fem,
   coord_flip() ## coord_flip flips the $x$ and $y$ coordinate
 ```
 ---
-# Example 3: Temperatures in Dayton, OH.
+class: header_background
+# Example 3: Weather trends
 ```{r cache = TRUE, echo = FALSE, out.width="80%"}
 source("R_scripts/daytona.R")
 p <- daytona_plot()
@@ -598,7 +611,7 @@ library(tidyverse)
 DAY <- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
 names(DAY) <- c("Month", "Day", "Year", "Temp")
 DAY <- select(DAY, "Year", "Month", "Day", "Temp")
-head(DAY)
+DAY
 ```
 ---
 class: clear
@@ -736,15 +749,20 @@ p <- p +
 
 p <- p +
   annotate("text", x = 126, y = 93,
-           label = "Data represents average daily temperatures. Accessible data dates back to", 
+           label = paste("Data represents average daily",
+                         "temperatures. Accessible data dates",
+                         "back to"),
            size=3, colour="gray30") +
   annotate("text", x = 122, y = 89,
-           label = "January 1, 1995. Data for 2014 is only available through December 16.", 
+           label = paste("January 1, 1995. Data for 2014 is",
+                         "only available through December 16."), 
            size=3, colour="gray30") +
   annotate("text", x = 124, y = 85,
-           label = "Average temperature for the year was 51.9° making 2014 the 9th coldest", 
+           label = paste("Average temperature for the year was",
+                         "51.9° making 2014 the 9th coldest"),
            size=3, colour="gray30") +
-  annotate("text", x = 128, y = 81, label = "year since 1995", size=3, colour="gray30")
+  annotate("text", x = 128, y = 81, label = "year since 1995",
+           size=3, colour="gray30")
 ```
 ---
 class: clear, middle
@@ -773,14 +791,16 @@ class: clear
 p
 ```
 ---
+class: header_background
 # Hotdogs ?
 ```{r echo = FALSE}
 knitr::include_graphics("figures/nathan_hotdog.png")
 ```
 ---
+class: header_background
 # R Hotdogs ?
 ```{r echo = FALSE}
-source("R_scripts/hotdogs.R")
+source("./R_scripts/hotdogs.R")
 p <- hotdogs_plot()
 print(p)
 ```
