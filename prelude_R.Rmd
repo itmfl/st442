@@ -85,7 +85,7 @@ a
 
 + A function in **R** is defined according to the template
 ```{r}
-f <- function(x = NULL, y = 1, z = 2*y, ...){ ## default values are optional
+f <- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
   ## Do something
   x + 2*y + 3*z ## The output of the last statement is also the return value
 }
@@ -243,16 +243,27 @@ typeof(c("1",1))
 ---
 #Vector recycling rules
 + Basic mathematical operations are **vectorized** in **R**. 
+```{r}
+exp(c(2,3,4))
+f <- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
+  x + 2*y + 3*z ## The output of the last statement is also the return value
+}
+f(x = 4, y = 1, z = 2)
+f(x = c(2,3,4), y = c(4,5,6), z = c(7,8,9))
+```
 
+---
+class: middle
 + If the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
 ```{r warning = TRUE}
 1:10 + 1
 1:10 + 1:2
 1:10 + 1:3
 ```
+
 ---
 class: middle
-For explicit recycling/repetition, use $\mathtt{rep()}$, e.g.,
++ For explicit recycling/repetition, use $\mathtt{rep()}$, e.g.,
 ```{r}
 rep(1:2, times = 5)
 rep(1:2, each = 5)

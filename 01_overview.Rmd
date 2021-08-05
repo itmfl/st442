@@ -22,12 +22,18 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
-library(tidyverse)
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
-xaringanExtra::use_clipboard(button_text = "Copy Pasta")
+xaringanExtra::use_search(show_icon = TRUE)
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
 xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
