@@ -1,0 +1,179 @@
+---
+title: "Introduction to Data Science"
+subtitle: "Strings, text processing, and regexp"
+date: "Fall 2021"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
+```
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_image = "belltower2.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+```
+
+# Stringr
+
+Strings processing in **R** can be done using the [stringr](https://stringr.tidyverse.org/) library.
+
+For more documentation on **stringr**, see 
+
++ The [stringr vignette](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+
++ The [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
+
++ Chapter 14 of [R for data science](https://r4ds.had.co.nz/strings.html)
+
++ Chapter 24 of [Introduction to data science](https://rafalab.github.io/dsbook/string-processing.html)
+
+---
+# String basics
+
++ A string in **R** is created using either `'...'` or `"..."`
+```{r}
+a <- 'This is a string'; a
+b <- "This is another string"; b
+c <- 'And he said "Dude, where is my car?"'; c
+```
+
+---
+class: middle
++ A string in **R** is a **character vector**, so it has length $1$.
+```{r}
+a <- "A string"
+length(a)
+b <- "A longer longer longer string"
+length(b)
+```
+
+---
+class: clear
+
++ Use `\` to quote special characters in a string. Use `\\` to get `\` in a string. Use `writeLines()` to get the **raw** string. 
+```{r}
+a <- "This string has a \t (tab)"; a
+writeLines(a)
+b <- "And this string has \n two lines"; b
+writeLines(b)
+c <- "And this string has a \\ (slash)"; c
+writeLines(c)
+```
+
+---
+# Some useful stringr functions
+
++ `str_length` for length of string(s)
+```{r}
+    library(stringr)
+    x <- c("One fish, two fish, red fish, blue fish", 
+           "Green eggs and ham", 
+           "Oh say can you say")
+    str_length(x)
+```
+
+---
+class: middle
+
++ `str_c` for combining strings
+```{r}
+str_c("Alice", "Bob", "Charles")
+str_c("Alice", "Bob", "Charles", sep = ",")
+str_c("Alice", "Bob", "Charles", sep = "\t") %>% writeLines()
+## str_c is vectorized
+str_c(c("One", "Two", "Three"), c("Alice", "Bob", "Charles"), sep = " ") 
+## vectorized with vector recycling 
+str_c("One", c("Alice", "Bob", "Charles"), 
+             c("Oat", "Almond", "Walnut"), sep = " ")
+```
+
+---
+class: middle
+
++ The **collapse** argument for **str_c** is useful to turn a vector of strings into individual arguments.
+```{r}
+str_c(c("Alice","Bob","Charles"),sep=",")
+str_c(c("Alice","Bob","Charles"), collapse = ",")
+```
++ `str_glue` is useful for inserting **R** output into a string.
+```{r}
+f <- function(x){
+  2^x
+}
+x <- c(2,3,4)
+str_glue("The value of two to the power of {x} is {f(x)}")
+```
+---
+class: middle
++ `str_pad` and `str_trunc` for padding and truncating strings.
+```{r}
+x <- as.character(c(5,20, 80, 320, 1280, 27607, 111111))
+x %>% str_trunc(5) %>% str_pad(5, side = "left", pad = "0")
+x %>% str_trunc(5, ellipsis = "") %>% str_pad(5, side = "left", pad = "0")
+```
++ `str_sub` to extract substrings from a string.  
+```{r}
+x <- c("One fish", "Two ship", "Three cats", "Four beeps")
+str_sub(x, 2, 5) ## Extract second to fifth character in each string
+str_sub(x, -5, -2) ## Extract second to fifth character (backwards)
+str_sub(x, 2, 5) <- "Haha" ## Assigning things to a substring
+x
+```
+
+---
+class: middle
+
++ `str_sort` and `str_order` to order/sort the characters in a string.
+```{r}
+x <- c("winner winner", "chicken dinner", 
+       "cherry blossom", "eager beaver") 
+x %>% str_sort()
+x %>% str_sort(locale = "haw") ## Hawaiian's don't speak English!
+```
+
++ To sort the letters in a string, you will have to first split the string using `str_split`
+```{r}
+## Warning. This code chunk is a quick hack. 
+## In practice we will try to write something more elegant.
+sapply(lapply(str_split(x, ""), str_sort), function(z) str_c(z, collapse = ""))
+```

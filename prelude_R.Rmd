@@ -1,0 +1,486 @@
+---
+title: "Introduction to Data Science"
+subtitle: "R Fundamentals"
+date: "Fall 2021"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
+```
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_image = "belltower2.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+```
+
+# Resources for learning R
+
++ **R tutorial** in either [HTML format](https://cran.r-project.org/doc/manuals/r-release/R-intro.html) or [PDF format](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
+
++ Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). 
+
++ Chapter $1$ through $4$ of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
+
++ Long and Teetor [R Cookbook](https://rc2e.com/)
+
++ [JHU Coursera](https://www.coursera.org/learn/r-programming)
+
++ `?` in **R**
+
++ [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
+
++ [Ask Miao Yu, your TA](https://statistics.sciences.ncsu.edu/people/myu12/); Office hours: 12:30--2:30pm, Tuesday.
+
+---
+class: middle
+# Some basic concepts in R
+
++ The assignment operation is `<-`, e.g.,
+```{r}
+a <- 5
+a
+```
+
++ The fundamental data type in **R** is a `vector`
+
++ A function in **R** is defined according to the template
+```{r}
+f <- function(x = NULL, y = 1, z = 2*y, ...){ ## default values are optional
+  ## Do something
+  x + 2*y + 3*z ## The output of the last statement is also the return value
+}
+f(4)
+```
+---
+class: middle
+
++ Functions in **R** are **first class objects**, i.e., they can be passed as arguments to other functions. See [here](https://bookdown.org/rdpeng/rprogdatascience/functions.html) for more info.
+```{r}
+f <- function(x){
+  function(){
+    x + 10
+  }
+}
+f(1)()
+f(2)()
+```
+
+---
+class: middle
+
++ The general copy/assignment behaviour in **R** is **copy-on-modify**. See Section 2.3 [here](https://adv-r.hadley.nz/names-values.html) for more info. 
+
++ Arguments to **R** functions are **passed-by-values** and are **lazily evaluated**
+```{r error = TRUE}
+f <- function(a,b){
+  a
+}
+f(45)
+
+f <- function(a,b){
+  a + 2*b
+}
+f(45)
+```
++ For more gory details on functions in **R**, see [here](https://adv-r.hadley.nz/functions.html).
+
+---
+#The many vectors of R
+
+.pull-left[
+```{r out.width="125%", echo = FALSE, fig.cap = "Hierarchy of R's vector type (https://r4ds.had.co.nz/vectors.html)"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/1d1b4e1cf0dc5f6e80f621b0225354b0addb9578/6ee1c/diagrams/data-structures-overview.png")
+```
+]
+.pull-right[
++ Atomic vectors are homogeneous (all elements are the same type)
++ Lists (or recursive vectors) can be heterogeneous (elements can be of different type)
++ $\mathrm{NULL}$ represents vector of length $0$. 
++ vectors can be created using the function `c()`, e.g.,
+```{r}
+a <- c(1,2,3)
+a
+```
+]
+---
+class: middle
+Every vector in **R** has two key properties.
+
+.pull-left[
++ type: determine via **typeof()**
+```{r}
+typeof(c("A","B","C"))
+typeof(1:10)
+library(nycflights13)
+typeof(flights)
+typeof(NULL)
+```
+]
+.pull-right[ 
++ length: determine via **length()**
+```{r}
+length(letters)
+length(1:10)
+length(flights)
+length(NULL)
+```
+]
+
+---
+#Atomic vectors
+
+Vectors are created in **R** using the function `c()` (short for **combine**)
+
++ Logical: simplest type of vector. Three values ( $\mathtt{TRUE}$, $\mathtt{FALSE}$ and $\mathtt{NA}$).
+```{r}
+c(TRUE, FALSE, FALSE, NA, T, F)
+```
+
++ Numeric: vectors whose elements are integers or doubles. Numbers are doubles by default.
+
+```{r}
+c(typeof(1), typeof(1L), typeof(1.5L))
+```
+---
+class: middle
++ Note that doubles representation are only approximations.
+.pull-left[
+```{r}
+x <- sqrt(2)^2
+x
+x - 2
+```
+]
+.pull-right[
+```{r}
+x == 2
+dplyr::near(x,2)
+```
+]
+
+---
+class: middle
++ Special values (avoid using $==$ to check for special values)
+    + $\mathtt{NA}$: integer and double; check with $\mathtt{is.na}$ 
+    + $\mathtt{Inf}$ and $-\mathtt{Inf}$: double; check with $\mathtt{is.infinite()}$       
+    + $\mathtt{NaN}$: double; check with $\mathtt{is.nan()}$ or $\mathtt{is.na()}$.
+```{r}
+c(-1,0,1)/0
+NA*(c(-1,0,1)/0)
+```
+
++ Characters: each element of a character vector is itself a string. 
+```{r}
+x <- c("A string","A longer string", "Even longer string")
+typeof(x); length(x)
+
+```
+---
+class: middle
+
++ The types are, from least to most general, 
+$$ \mathtt{logical} \rightarrow \underbrace{\mathtt{integer} \rightarrow \mathtt{double}}_{\mathtt{numeric}} \rightarrow  \mathtt{character} $$
++ Explicit coercion is via: $\mathtt{as.logical()}$, $\mathtt{as.numeric()}$, $\mathtt{as.integer()}$, $\mathtt{as.double()}$, $\mathtt{as.character()}$. 
+
++ Implicit coercion: $\mathtt{TRUE}$ and $\mathtt{FALSE}$ are coerced to $1\mathrm{L}$ and $0\mathrm{L}$. On occasions, positive integer is coerced to $\mathtt{TRUE}$ and $0$ is coerced to $\mathtt{FALSE}$
+```{r}
+x <- 3
+if(length(x)){
+  x <- rep(x, 2)
+}
+x
+```
+
+---
+class: middle
+
++ All atomic vectors need to be of the same type, e.g.,
+```{r}
+typeof(c(TRUE, 1L))
+typeof(c(1L,1))
+typeof(c("1",1))
+```
+---
+#Vector recycling rules
++ Basic mathematical operations are **vectorized** in **R**. 
+
++ If the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
+```{r warning = TRUE}
+1:10 + 1
+1:10 + 1:2
+1:10 + 1:3
+```
+---
+class: middle
+For explicit recycling/repetition, use $\mathtt{rep()}$, e.g.,
+```{r}
+rep(1:2, times = 5)
+rep(1:2, each = 5)
+rep(1:3, times = c(2,3,4))
+```
+
+---
+# Naming elements of a vector
+```{r}
+c(x = 1,y = 2, z = 3)
+w <- c(1,2,3)
+names(w) <- c("x", "y", "z")
+w
+```
+
+---
+#Vectors and subsetting
+You can access specific elements (or subset of elements) of a vector using the `[` primitive. There are four type of things that can appear within `[`
++ A numeric vector containing only integers. The integers must either be **all** non-negative or **all** non-positive
+
+.pull-left[
+```{r error = TRUE}
+x <- 1:10
+x[c(3,2,5)]
+x[c(3,3,2,5,5)]
+```
+]
+
+.pull-right[
+```{r error = TRUE, linewidth=50}
+x[0]
+x[c(0,-2,-4)]
+```
+]
+
+```{r error = TRUE}
+x[c(1,-2,-4)]
+```
+---
+class: middle
++ Subsetting with a logical vector $v$ keeps **all** values corresponding to a $\mathtt{TRUE}$ value in $v$ (and add missing values if there are missing values in $v$) e.g.,
+```{r}
+x%%2 == 0
+x[x%%2 == 0]
+x[c(TRUE, FALSE, NA, FALSE, TRUE)]
+```
+---
+class: middle
+
++ We can use $\mathtt{which}$ to determine the indices of a logical vector with $\mathtt{TRUE}$ values, e.g.,
+```{r}
+which(x %% 2 == 0)
+which(c(TRUE, FALSE, NA, FALSE, TRUE))
+```
+
++ If the vector has names then you can subset it with a character vector, e.g.,
+```{r}
+w <- c(x = 1, y = 2, z = 3)
+w[c("x","z","z","x")]
+```
+---
+class: middle
++ Finally, you can extract all the elements with `[]` or a single element with `[[]]`, e.g.,
+```{r error = TRUE}
+x <- 1:10
+x[]
+x[[1]]
+x[[c(1,2)]]
+```
+---
+#Recursive vectors (lists)
+Lists are **non-atomic** vectors whose elements are themselves possibly other lists. Thus, the elements of a list could have different type, e.g.,
+
+.pull-left[
+```{r error = TRUE}
+u <- list(1,2,3)
+u
+v <- list(c(1,2,3))
+v
+```
+]
+.pull-right[
+```{r error = TRUE}
+x <- list(1,2,"NA")
+x
+y <- list(c(1,2,"NA"))
+y
+```
+]
+---
+class: middle
+```{r}
+w <- list(u,v,x,y)
+length(w)
+str(w)
+```
+---
+#Extracting elements from a list
+```{r}
+a <- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
+str(a)
+```
+
+There are three ways to subset a list, namely `[`, `[[` and `$`.
++ `[` will always extract a sub-list and hence returns **another list**.
+.pull-left[
+```{r}
+str(a[1:2])
+```
+]
+.pull-right[
+```{r}
+str(a[4])
+```
+]
+
+---
+class: clear
++ `[[` will always extract a **single element** from a list and 
+hence removes a level of nesting. 
+
+.pull-left[
+```{r error = TRUE}
+str(a[[4]])
+a[[c(4,1)]]
+## Equivalently
+a[[4]][[1]] 
+#Not equivalent
+a[[4]][1] 
+```
+]
+
+.pull-right[
+```{r error = TRUE}
+a[[1:2]] ## Recursive indexing
+a[[1:3]]
+```
+]
+
+---
+class: clear
++ `$` will always extract a **single named element** from a list.
+```{r}
+str(a$d)
+str(a[["d"]])
+str(a["d"])
+```
+
+---
+class: clear
+```{r echo = FALSE, out.width="70%", fig.cap = "Section 20.5 of R4DS"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/2f3f752cae25018554d484464f117e600ff365a2/37627/diagrams/lists-subsetting.png")
+```
+---
+#Vectors and attributes
+Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement several fancy data structures using the base **R** vectors.
+.pull-left[
+```{r}
+x <- c(1L, 2L, 3L)
+x
+typeof(x)
+attributes(x)
+class(x) <- "Date"
+x
+```
+]
+.pull-right[
+```{r}
+typeof(x)
+attributes(x)
+```
+```{r}
+attr(x,"Greetings") <- "Hohoho 442"
+attributes(x)
+```
+]
+
+---
+class: clear
+
+.pull-left[
+```{r}
+y <- 1:6; y
+typeof(y)
+attributes(y)
+names(y) <- c("M","T","W",
+              "Th","F","Sat")
+y
+attributes(y)
+
+```
+]
+.pull-right[
+```{r}
+ ## similar to dim(y) <- c(3,2)
+attr(y, "dim") <- c(3,2)
+y
+y["M"]
+typeof(y)
+attributes(y)
+
+```
+]
+---
+class: middle
+
+The three most important attributes of a vector are
++ **names** for naming the elements
++ **dimensions** or dims to make a vector behave like a matrix or array
++ **class** is for implementing the S3 object-oriented system (see Hadley's Wickham [Advanced R](https://adv-r.hadley.nz/oo.html) for the gory details of **R** numerous objected-oriented systems).
+
+Attributed vectors are used to implement *factors*, dates and times and data frames.
+---
+#Data frames
+A data frame (in base **R**) is then simply a list whose elements are vectors, each of the same length. Consider the following $\mathtt{mtcars}$ data frame.
+
+```{r}
+head(mtcars)
+typeof(mtcars)
+```
+---
+class: clear
+```{r}
+length(mtcars)
+str(mtcars)
+```
+---
+class: clear
+```{r}
+attributes(mtcars)
+```
