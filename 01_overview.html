@@ -32,15 +32,14 @@ class: center, middle, inverse, title-slide
 
 
 
-class: header_background
+
 #Brief self-introduction
-+ Name: **Minh** Tang. 
++ Name: Minh Tang. (Preferred Salutation: **Minh** or Dr. Tang.)
 + Birthplace: Vietnam.
 + Degrees: 
     + BS in Computer Science in Thailand. 
     + MS in Computer Science @ U. Wisconsin Milwaukee.
     + PhD in Computer Science @ Indiana University.
-+ Preferred Salutation: **Minh** or Dr. Tang.
 + Current Affiliation: Department of Statistics @ NCSU.
 + Office: SAS Hall 5236
 + Office Hours: 10am -- 12pm Monday, or by appointment.
@@ -52,7 +51,6 @@ class: header_background
 
 ---
 class: animated, bounceInDown
-class: header_background
 #What it is, data science ?
 
 
@@ -72,12 +70,10 @@ class: clear, middle
   
 &lt;img src="figures/sexiest.png" width="950%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 # The rise of data?
 &lt;img src="figures/data_never_sleeps.jpg" width="35%" style="display: block; margin: auto;" /&gt;
 
 ---
-class: header_background
 # But not all data are useful!
 .pull-left[
 &lt;img src="figures/cheezeburger.jpg" width="55%" style="display: block; margin: auto;" /&gt;&lt;img src="figures/cheezeburger2.jpg" width="55%" style="display: block; margin: auto;" /&gt;
@@ -87,7 +83,6 @@ class: header_background
 &lt;img src="figures/cheezeburger3.jpg" width="55%" style="display: block; margin: auto;" /&gt;&lt;img src="figures/cheezeburger4.jpg" width="55%" style="display: block; margin: auto;" /&gt;
 ]
 ---
-class: header_background
 # Shortage of data scientists
 &lt;div class="figure" style="text-align: center"&gt;
 &lt;img src="figures/linkedin1.png" alt="Linkedin economic report" width="70%" /&gt;
@@ -116,7 +111,6 @@ class: clear, middle
 &lt;/div&gt;
 ---
 class: middle
-class: header_background
 # Data Science is right here.
 
 
@@ -125,7 +119,6 @@ class: header_background
 &lt;p class="caption"&gt;https://research.ncsu.edu/dsi/&lt;/p&gt;
 &lt;/div&gt;
 ---
-class: header_background
 # A lot of requirements ?
 &lt;div class="figure" style="text-align: center"&gt;
 &lt;img src="https://bit.ly/2Mmu7lW" alt="http://www.kimberlycoffey.com/blog/2016/11/text-analysis" width="60%" /&gt;
@@ -133,7 +126,6 @@ class: header_background
 &lt;/div&gt;
 
 ---
-class: header_background
 # Many Venns of data science
 
 .pull-left[
@@ -154,7 +146,6 @@ class: clear
 &lt;img src="figures/venn2.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
-class: header_background
 # DS = Jack of all trades ?
 
 &gt; A human being should be able to change a diaper, plan an invasion, butcher a hog, conn a 
@@ -166,20 +157,6 @@ class: header_background
 &gt;                                         Robert A. Heinlein
 
 ---
-class: header_background
-# A Theorem A Theorem ... 
-
-.bg-washed-blue.b--dark-blue.ba.bw2.br3.shadow-5.ph4.mt5[
-**Theorem** Let `\(A\)` be a positive definite matrix. Then there exists orthogonal matrix `\(U\)` and diagonal matrix `\(D\)` with `\(D\)` having all positive diagonal entries such that
-`$$A = U D U^{\top}$$`
-Furthermore, for any function `\(f \colon \mathbb{R}^{+} \mapsto \mathbb{R}\)`, we have
-`$$f(A) = U f(D) U^{\top}$$`
-]
-
-
-
----
-class: header_background
 # John Tukey's FDA
 &lt;img src="figures/tukey1.png" width="70%" style="display: block; margin: auto;" /&gt;&lt;img src="figures/tukey2.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
@@ -187,15 +164,17 @@ class: middle
 
 &lt;img src="figures/tukey3.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
-# 50 Years of Data Science
+class: clear, middle
 &lt;img src="figures/donoho.png" width="70%" style="display: block; margin: auto;" /&gt;
  
 A pdf of the article is provided [here](https://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf). 
  
 
+
+
+
+
 ---
-class: header_background
 #R ? Aarghhh!
 &gt; R is a language and environment for statistical computing and graphics. 
 &gt; It is a GNU project ...
@@ -212,8 +191,10 @@ class: header_background
 --
 ### A: Why not R?
 
+--
+This class will require the use of **R**. Apologies in advance if you prefer other languages. The main rationale for using **R** is that (1) it is what the course instructor is most familiar with, (2) there is a large enough ecosystem for doing data science in **R** and (3) there is not enough time to discuss more than one languages/ecosystem.
+
 ---
-class: header_background
 # The R environment
 R is an integrated suite of software facilities for data manipulation, calculation and graphical display. It includes
 + an effective data handling and storage facility,
@@ -225,13 +206,28 @@ R is an integrated suite of software facilities for data manipulation, calculati
 The term "environment" is intended to characterize it as a fully planned and coherent system, rather than an incremental accretion of very specific and inflexible tools, as is frequently the case with other data analysis software. R can be extended (easily) via packages. 
 There are about eight packages supplied with the R distribution and many more (&gt;10,000) 
 are available through the CRAN family of Internet sites.
+
 ---
-class: header_background
-# Resources for learning R
+class: middle
 
-+ R-project [An Introduction to R](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
+Don't panic if you had never use **R**. It is very easy to learn (but quite hard to master).
 
-+ Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/)
+First thing first
+
++ Install base [R](https://cran.r-project.org/mirrors.html) and then install [Rstudio](https://www.rstudio.com/products/rstudio/download/#download). See also the instructions in Chapter 36 of [Introduction to Data Science](https://rafalab.github.io/dsbook/)
+
++ Read chapter 1 and 2 of [Introduction to Data Science](https://rafalab.github.io/dsbook/)
+
++ Learn the command [install.packages](https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/install.packages) function.
+
++ Read the **R official tutorial** in either [HTML format](https://cran.r-project.org/doc/manuals/r-release/R-intro.html) or [PDF format](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
+
++ Shut down your computer and go fishing/drinking.
+
+---
+# Other resources for learning R
+
++ Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). In particular see chapters 4, 13 and 14.
 
 + Chapter `\(1\)` through `\(4\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
 
@@ -254,8 +250,8 @@ class: header_background
 + [Least helpful](https://minh-tang.github.io)
 
 ---
-
 class: clear
+
 The previous Venn diagram was generated using the following code taken from a [Stack Exchange discussion](https://datascience.stackexchange.com/questions/2403/data-science-without-knowledge-of-a-specific-topic-is-it-worth-pursuing-as-a-ca).
 
 ```r
@@ -313,7 +309,6 @@ class: clear
 dev.off()
 ```
 ---
-class: header_background
 #Course overview
 &lt;div class="figure" style="text-align: center"&gt;
 &lt;img src="https://bit.ly/2CV35vJ" alt="https://r4ds.had.co.nz" width="70%" /&gt;
@@ -334,7 +329,8 @@ class: clear
 ### Suggested Texts
 + Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.had.co.nz)
 + Gareth James, Daniella Witten, Trevor Hastie, and Rob Tibshirani, [An Introduction to Statistical Learning with R](http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf)
-+ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R](https://beanumber.github.io/mdsr2e/)
++ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://beanumber.github.io/mdsr2e/)
++ Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
 
 ### Course Expectations &amp; Grading
 The grading is broken down into three components
@@ -348,23 +344,17 @@ will be posted on the Moodle page for the course.
 class: clear
 
 ### Homework policy
-The class has, with high probability, 7 homework assignments. 
-Late homework submissions will be penalized. In particular
-+ Less than 24 hours late: 10% penalty towards total points.
-+ Between 24 hours and 48 hours late: 20% penalty towards total points
-+ Between 48 hours and 72 hours late: 40% penalty towards total points
-+ More than 72 hours late: Not graded.	
+The class has, with high probability, 7 -- 8 homework assignments. Every student is allowed a **quota of at most 2 late** homework submissions (they will not be penalized but need to be submitted no later than **48** hours after the deadline). Once the quota is exceeded, no further late submissions will be graded. 
+
 
 ### Term paper
-For the final project, the students will work either individually or in a team of no more than three members. Each individual or group will complete a data analysis and write a short report (10 pages or less) summarizing the work. The report should provide a clear description of the dataset, the scientific questions of interest, the technical approach used to address or answer these questions, and state what conclusions, if any, can be derived from the analysis.
+For the final project, the students will work either individually or in a team of no more than three members. Each individual or group will complete a data analysis and write a short report (roughly 10 pages) summarizing the work. The report should provide a clear description of the dataset, the scientific questions of interest, the technical approach used to address or answer these questions, and state what conclusions, if any, can be derived from the analysis.
 ---
-class: clear
-### Choice of programming language
-This class will require the use of **R**. Apologies in advance if you prefer other languages. The main rationale for using **R** is that (1) it is what the course instructor is most familiar with, (2) there is a large enough ecosystem for doing data science in **R** and (3) there is not enough time to discuss more than one languages/ecosystem.
+
 
 ### Grading disputes
 Your assignment and exams score will be entered and stored on the Moodle page. 
-You are responsible for keeping track of your scores and to notify the course instructor should there be any missing grades or discrepancies. Your exams will be returned to you after they had been graded. Please keep all returned exams. Grading dispute for an assignment will be considered only if the dispute is initiated within one week of the grade being entered. Grading dispute for an exam should be made within 72 hours of the exam being returned. A grading dispute might entail a regrading of the whole submission.
+You are responsible for keeping track of your scores and to notify the course instructor should there be any missing grades or discrepancies. Your exams will be returned to you after they had been graded. Please keep all returned exams. Grading dispute for an assignment will be considered only if the dispute is initiated within one week of the grade being entered. Grading dispute for a take-home exam should be made within 72 hours of the exam being returned. A grading dispute might entail a regrading of the whole submission.
 
 ---
 class: clear
@@ -402,7 +392,7 @@ class: clear
 Reasonable accommodations will be made for students with verifiable disabilities. In order to take advantage of available accommodations, students must register with the Disability Resource Office at Holmes Hall, Suite 304, Campus Box 7509, 919-515-7653. For more information on NC State’s policy on working with students with disabilities, please see the [Academic Accommodations for Students with Disabilities](https://policies.ncsu.edu/regulation/reg-02-20-01/)
 
 ###Ethics
-The strength of the university depends on academic and personal integrity. In this course, you must be honest and truthful. Students are permitted and indeed encouraged to discuss lecture materials and homework problems with one another, but it is expected that the writing up of answers will be done privately. Copying by one student of another student's homework solutions is considered an ethics violation in this course. Specifically, please do not share code or output; please do not access or use solutions from any source  before your homework assignment is submitted.
+The strength of the university depends on academic and personal integrity. In this course, you must be honest and truthful. Students are permitted and indeed encouraged to discuss lecture materials and homework problems with one another, but it is expected that the writing up of answers will be done privately. Copying by one student of another student's homework solutions is considered an ethics violation in this course. Specifically, please **do not share code** or output before your homework assignment is submitted.
 More information about university misconduct policies are available at
 + [Code of student conduct](http://policies.ncsu.edu/policy/pol-11-35-01)
 + [Academic honesty](http://policies.ncsu.edu/policy/pol-11-35-01)
