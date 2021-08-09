@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Data Science</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":true,"autoSearch":true}) })</script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to Data Science
+## Strings, text processing, and regexp
+### Fall 2021
+
+---
+
+
+
+
+
+# Stringr
+
+Strings processing in **R** can be done using the [stringr](https://stringr.tidyverse.org/) library.
+
+For more documentation on **stringr**, see 
+
++ The [stringr vignette](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+
++ The [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
+
++ Chapter 14 of [R for data science](https://r4ds.had.co.nz/strings.html)
+
++ Chapter 24 of [Introduction to data science](https://rafalab.github.io/dsbook/string-processing.html)
+
+---
+class: animated slideinRight fadeOutLeft
+# String basics
++ A string in **R** is created using either `'...'` or `"..."`
+
+```r
+a &lt;- 'This is a string'; a
+```
+
+```
+## [1] "This is a string"
+```
+
+```r
+b &lt;- "This is another string"; b
+```
+
+```
+## [1] "This is another string"
+```
+
+```r
+c &lt;- 'And he said "Dude, where is my car?"'; c
+```
+
+```
+## [1] "And he said \"Dude, where is my car?\""
+```
+
+---
+class: middle
++ A string in **R** is a **character vector**, so it has length `\(1\)`.
+
+```r
+a &lt;- "A string"
+length(a)
+```
+
+```
+## [1] 1
+```
+
+```r
+b &lt;- "A longer longer longer string"
+length(b)
+```
+
+```
+## [1] 1
+```
+
+---
+class: clear
+
++ Use `\` to quote special characters in a string. Use `\\` to get `\` in a string. Use `writeLines()` to get the **raw** string. 
+
+```r
+a &lt;- "This string has a \t (tab)"; a
+```
+
+```
+## [1] "This string has a \t (tab)"
+```
+
+```r
+writeLines(a)
+```
+
+```
+## This string has a 	 (tab)
+```
+
+```r
+b &lt;- "And this string has \n two lines"; b
+```
+
+```
+## [1] "And this string has \n two lines"
+```
+
+```r
+writeLines(b)
+```
+
+```
+## And this string has 
+##  two lines
+```
+
+```r
+c &lt;- "And this string has a \\ (slash)"; c
+```
+
+```
+## [1] "And this string has a \\ (slash)"
+```
+
+```r
+writeLines(c)
+```
+
+```
+## And this string has a \ (slash)
+```
+
+---
+# Some useful stringr functions
+
++ `str_length` for length of string(s)
+
+```r
+    library(stringr)
+    x &lt;- c("One fish, two fish, red fish, blue fish", 
+           "Green eggs and ham", 
+           "Oh say can you say")
+    str_length(x)
+```
+
+```
+## [1] 39 18 18
+```
+
+---
+class: middle
+
++ `str_c` for combining strings
+
+```r
+str_c("Alice", "Bob", "Charles")
+```
+
+```
+## [1] "AliceBobCharles"
+```
+
+```r
+str_c("Alice", "Bob", "Charles", sep = ",")
+```
+
+```
+## [1] "Alice,Bob,Charles"
+```
+
+```r
+str_c("Alice", "Bob", "Charles", sep = "\t") %&gt;% writeLines()
+```
+
+```
+## Alice	Bob	Charles
+```
+
+```r
+## str_c is vectorized
+str_c(c("One", "Two", "Three"), c("Alice", "Bob", "Charles"), sep = " ") 
+```
+
+```
+## [1] "One Alice"     "Two Bob"       "Three Charles"
+```
+
+```r
+## vectorized with vector recycling 
+str_c("One", c("Alice", "Bob", "Charles"), 
+             c("Oat", "Almond", "Walnut"), sep = " ")
+```
+
+```
+## [1] "One Alice Oat"      "One Bob Almond"     "One Charles Walnut"
+```
+
+---
+class: middle
+
++ The **collapse** argument for **str_c** is useful to turn a vector of strings into individual arguments.
+
+```r
+str_c(c("Alice","Bob","Charles"),sep=",")
+```
+
+```
+## [1] "Alice"   "Bob"     "Charles"
+```
+
+```r
+str_c(c("Alice","Bob","Charles"), collapse = ",")
+```
+
+```
+## [1] "Alice,Bob,Charles"
+```
++ `str_glue` is useful for inserting **R** output into a string.
+
+```r
+f &lt;- function(x){
+  2^x
+}
+x &lt;- c(2,3,4)
+str_glue("The value of two to the power of {x} is {f(x)}")
+```
+
+```
+## The value of two to the power of 2 is 4
+## The value of two to the power of 3 is 8
+## The value of two to the power of 4 is 16
+```
+---
+class: middle
++ `str_pad` and `str_trunc` for padding and truncating strings.
+
+```r
+x &lt;- as.character(c(5,20, 80, 320, 1280, 27607, 111111))
+x %&gt;% str_trunc(5) %&gt;% str_pad(5, side = "left", pad = "0")
+```
+
+```
+## [1] "00005" "00020" "00080" "00320" "01280" "27607" "11..."
+```
+
+```r
+x %&gt;% str_trunc(5, ellipsis = "") %&gt;% str_pad(5, side = "left", pad = "0")
+```
+
+```
+## [1] "00005" "00020" "00080" "00320" "01280" "27607" "11111"
+```
++ `str_sub` to extract substrings from a string.  
+
+```r
+x &lt;- c("One fish", "Two ship", "Three cats", "Four beeps")
+str_sub(x, 2, 5) ## Extract second to fifth character in each string
+```
+
+```
+## [1] "ne f" "wo s" "hree" "our "
+```
+
+```r
+str_sub(x, -5, -2) ## Extract second to fifth character (backwards)
+```
+
+```
+## [1] " fis" " shi" " cat" "beep"
+```
+
+```r
+str_sub(x, 2, 5) &lt;- "Haha" ## Assigning things to a substring
+x
+```
+
+```
+## [1] "OHahaish"   "THahahip"   "THaha cats" "FHahabeeps"
+```
+
+---
+class: middle
+
++ `str_sort` and `str_order` to order/sort the characters in a string.
+
+```r
+x &lt;- c("winner winner", "chicken dinner", 
+       "cherry blossom", "eager beaver") 
+x %&gt;% str_sort()
+```
+
+```
+## [1] "cherry blossom" "chicken dinner" "eager beaver"   "winner winner"
+```
+
+```r
+x %&gt;% str_sort(locale = "haw") ## Hawaiian's don't speak English!
+```
+
+```
+## [1] "eager beaver"   "cherry blossom" "chicken dinner" "winner winner"
+```
+
++ To sort the letters in a string, you will have to first split the string using `str_split`
+
+```r
+## Warning. This code chunk is a quick hack. 
+## In practice we will try to write something more elegant.
+sapply(lapply(str_split(x, ""), str_sort), function(z) str_c(z, collapse = ""))
+```
+
+```
+## [1] " eeiinnnnrrww"  " ccdeehiiknnnr" " bcehlmoorrssy" " aabeeeegrrv"
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

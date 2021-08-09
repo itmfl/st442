@@ -14,7 +14,9 @@
     <script src="libs/clipboard/clipboard.min.js"></script>
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
-    <script>window.xaringanExtraClipboard(null, {"button":"Copy Pasta","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
@@ -29,7 +31,6 @@ class: center, middle, inverse, title-slide
 
 ---
 
-class: header_background
 #dplyr
 
 
@@ -46,7 +47,6 @@ There are five main important *verbs* associated with dplyr, namely
 + [group_by](https://dplyr.tidyverse.org/reference/group_by.html) and [summarize](https://dplyr.tidyverse.org/reference/summarise.html)
 
 ---
-class: clear, animated, bounceInDown
 We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 
 
 We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
@@ -76,7 +76,6 @@ flights
 ## #   time_hour &lt;dttm&gt;
 ```
 ---
-class: header_background
 #filter()
 Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and returns a new data frame.
 
@@ -185,7 +184,6 @@ The previous example introduce the use of the `\(\%&gt;\%\)` pipe operator.
 The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
 The pipe operator maps `\(x \%&gt;\% f(y)\)` to `\(f(x,y)\)`. 
 ---
-class: header_background
 #Missing values
 Missing values are represented in **R** as `\(\mathrm{NA}\)`; missing values are "contagious" hence any almost all operations involving one or more `\(\mathrm{NA}\)` will also return a `\(\mathrm{NA}\)`. For example
 
@@ -291,7 +289,6 @@ filter(df, is.na(x) | x &gt; 1)
 ## 2     3
 ```
 ---
-class: header_background
 #arrange()
 The *arrange* verb is similar to the *filter* verb, but instead of selecting rows, it reorder them according to some set of column names (or more complicated expressions). As an example, let us order the flights first by the three letter code for the airport destination, then by the date of flight.
 
@@ -339,7 +336,6 @@ arrange(flights_dest, desc(dest), month, day)
 ## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
-class: header_background
 #select()
 This verb is used to select a subset of columns (of variables). As an example, let us keep only the departure and arrival time of the flights.
 
@@ -428,7 +424,6 @@ select(flights_sml, dep_time, everything())
 ## # … with 336,770 more rows
 ```
 ---
-class: header_background
 # mutate()
 The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. For example
 
@@ -476,7 +471,6 @@ transmute(flights, gain = arr_delay - dep_delay,
 ## # … with 336,770 more rows
 ```
 ---
-class: header_background
 #summarize()
 The *summarize* verb collapses a data frame to a single row. For example
 
@@ -677,7 +671,6 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
 ```
 ---
-class: header_background
 # More examples
 
 ```r
@@ -853,7 +846,6 @@ group_by(not_canceled, dest) %&gt;%
 ## # … with 98 more rows
 ```
 ---
-class: header_background
 #ungroup()
 To remove grouping structure on grouped data, use `\(\mathrm{ungroup()}\)`, e.g.,
 
@@ -887,7 +879,6 @@ daily %&gt;% ungroup() %&gt;% summarize(flights = n())
 ## 1  336776
 ```
 ---
-class: header_background
 #grouped mutate + filter
 We can also do a number of very useful operations by combining `\(\mathrm{group\_by}\)` with either `\(\mathrm{filter}\)` or `\(\mathrm{filter}\)`. For example
 
@@ -913,7 +904,6 @@ flights_sml %&gt;% group_by(year, month, day) %&gt;%
 ## # … with 3,603 more rows
 ```
 ---
-class: clear
 
 ```r
 ## Find all popular destinations and compute
@@ -938,7 +928,6 @@ flights %&gt;% group_by(dest) %&gt;%
 ## # … with 131,100 more rows
 ```
 ---
-class: clear
 Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command `\(\mathrm{vignette("window-functions")}\)`. 
 
 The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from `\(1871\)` through `\(2018\)`. We will consider a sample of batting data for players that have won an award.
@@ -952,7 +941,6 @@ batting &lt;- Lahman::Batting %&gt;% as_tibble() %&gt;%
 players &lt;- batting %&gt;% group_by(playerID)
 ```
 ---
-class: clear
 Using this dataset, let us try a few `\(\mathrm{group\_mutate}\)` and `\(\mathrm{group\_filter}\)` operations. 
 
 ```r
@@ -1066,7 +1054,6 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 ```
 
 ---
-class: header_background
 #across() and multiple columns
 The **dplyr** verbs such as **mutate** and **summarize** we saw previously can also be combined with the [across](https://dplyr.tidyverse.org/reference/across.html) function to allow for doing the same operation on multiple columns. See also this [vignette](https://dplyr.tidyverse.org/articles/colwise.html).
 .pull-left[
@@ -1080,14 +1067,14 @@ df
 
 ```
 ## # A tibble: 100 × 3
-##        x     y      z
-##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 0.0532 0.254 0.697 
-## 2 0.818  0.346 0.0590
-## 3 0.435  0.502 0.348 
-## 4 0.850  0.380 0.862 
-## 5 0.365  0.835 0.0764
-## 6 0.581  0.643 0.113 
+##        x     y     z
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.951  0.510 0.542
+## 2 0.698  0.282 0.123
+## 3 0.239  0.117 0.344
+## 4 0.623  0.827 0.317
+## 5 0.0622 0.820 0.105
+## 6 0.733  0.109 0.724
 ## # … with 94 more rows
 ```
 ]
@@ -1102,7 +1089,7 @@ df %&gt;% summarize(
 ## # A tibble: 1 × 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.399 0.500 0.532
+## 1 0.476 0.488 0.498
 ```
 
 ```r
@@ -1128,14 +1115,14 @@ df
 
 ```
 ## # A tibble: 100 × 4
-##        x     y      z names
-##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
-## 1 0.0532 0.254 0.697  a    
-## 2 0.818  0.346 0.0590 b    
-## 3 0.435  0.502 0.348  c    
-## 4 0.850  0.380 0.862  d    
-## 5 0.365  0.835 0.0764 e    
-## 6 0.581  0.643 0.113  f    
+##        x     y     z names
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 0.951  0.510 0.542 a    
+## 2 0.698  0.282 0.123 b    
+## 3 0.239  0.117 0.344 c    
+## 4 0.623  0.827 0.317 d    
+## 5 0.0622 0.820 0.105 e    
+## 6 0.733  0.109 0.724 f    
 ## # … with 94 more rows
 ```
 
@@ -1148,7 +1135,7 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.399 0.284    137.  0.500 0.295    188.  0.532 0.294    185.
+## 1  0.476 0.294    265.  0.488 0.274    175.  0.498 0.280    23.3
 ```
 
 ---
@@ -1169,7 +1156,7 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.399 0.284    137.  0.500 0.295    188.  0.532 0.294    185.
+## 1  0.476 0.294    265.  0.488 0.274    175.  0.498 0.280    23.3
 ```
 
 ```r
@@ -1182,7 +1169,7 @@ df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
 ## # A tibble: 1 × 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.500 0.295    188.  0.532 0.294    185.
+## 1  0.488 0.274    175.  0.498 0.280    23.3
 ```
 
 ```r
@@ -1346,7 +1333,6 @@ flights %&gt;% filter(if_all(contains("delay"), ~ . &lt; 10))
 ```
 
 ---
-class: header_background
 #dplyr::pull()
 Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
 
@@ -1413,7 +1399,6 @@ flights %&gt;% pull(arr_delay) %&gt;% sd(na.rm = TRUE)
 
 The difference in the above output is due to the fact that `\(\mathrm{sd}\)` expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column `\(\mathrm{arr\_delay}\)` ,we need to use `\(\mathrm{pull}\)`. 
 ---
-class: header_background
 #summarise + rows vs columns
 Continuing the above theme. Suppose we want to find the quantiles for `\(\mathrm{arr\_delay}\)` as grouped by popular destination.
 We first try the following code.
