@@ -31,6 +31,7 @@ xaringanExtra::use_scribble()
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
 xaringanExtra::use_search(show_icon = TRUE)
 xaringanExtra::use_tachyons()
+xaringanExtra::use_animate_css()
 htmltools::tagList(
   xaringanExtra::use_clipboard(
     button_text = "<i class=\"fa fa-clipboard\"></i>",
@@ -69,7 +70,6 @@ For more documentation on **stringr**, see
 
 ---
 # String basics
-
 + A string in **R** is created using either `'...'` or `"..."`
 ```{r}
 a <- 'This is a string'; a

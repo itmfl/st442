@@ -19,7 +19,6 @@ output:
     #   highlightLines: true
     #   countIncrementalSlides: false
 --- 
-class: header_background
 #dplyr
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
@@ -30,7 +29,14 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 library(xaringanthemer)
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
-xaringanExtra::use_clipboard(button_text = "Copy Pasta")
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+#xaringanExtra::use_animate_css()
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
 xaringanExtra::use_tachyons()
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
@@ -58,7 +64,6 @@ There are five main important *verbs* associated with dplyr, namely
 + [group_by](https://dplyr.tidyverse.org/reference/group_by.html) and [summarize](https://dplyr.tidyverse.org/reference/summarise.html)
 
 ---
-class: clear, animated, bounceInDown
 We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 
 
 We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
@@ -70,7 +75,6 @@ data(flights)
 flights
 ```
 ---
-class: header_background
 #filter()
 Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and returns a new data frame.
 ```{r}
@@ -105,7 +109,6 @@ The previous example introduce the use of the $\%>\%$ pipe operator.
 The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
 The pipe operator maps $x \%>\% f(y)$ to $f(x,y)$. 
 ---
-class: header_background
 #Missing values
 Missing values are represented in **R** as $\mathrm{NA}$; missing values are "contagious" hence any almost all operations involving one or more $\mathrm{NA}$ will also return a $\mathrm{NA}$. For example
 ```{r}
@@ -133,7 +136,6 @@ filter(df, x > 1)
 filter(df, is.na(x) | x > 1)
 ```
 ---
-class: header_background
 #arrange()
 The *arrange* verb is similar to the *filter* verb, but instead of selecting rows, it reorder them according to some set of column names (or more complicated expressions). As an example, let us order the flights first by the three letter code for the airport destination, then by the date of flight.
 ```{r}
@@ -147,7 +149,6 @@ We can use **desc** to order a column in descending order, e.g.,
 arrange(flights_dest, desc(dest), month, day)
 ```
 ---
-class: header_background
 #select()
 This verb is used to select a subset of columns (of variables). As an example, let us keep only the departure and arrival time of the flights.
 ```{r}
@@ -182,7 +183,6 @@ A useful helper function for use with select is the **everything()** function, w
 select(flights_sml, dep_time, everything())
 ```
 ---
-class: header_background
 # mutate()
 The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. For example
 ```{r}
@@ -202,7 +202,6 @@ transmute(flights, gain = arr_delay - dep_delay,
                    gain_per_hour = gain/hours)
 ```
 ---
-class: header_background
 #summarize()
 The *summarize* verb collapses a data frame to a single row. For example
 ```{r}
@@ -272,7 +271,6 @@ not_canceled %>% group_by(year, month, day) %>%
   mutate(r = min_rank(desc(dep_time))) %>% filter(r %in% range(r))
 ```
 ---
-class: header_background
 # More examples
 ```{r}
 not_canceled %>% group_by(year, month, day) %>%
@@ -331,7 +329,6 @@ group_by(not_canceled, dest) %>%
   summarize(air_time = median(air_time))
 ```
 ---
-class: header_background
 #ungroup()
 To remove grouping structure on grouped data, use $\mathrm{ungroup()}$, e.g.,
 ```{r}
@@ -340,7 +337,6 @@ summarize(daily, flights = n())
 daily %>% ungroup() %>% summarize(flights = n())
 ```
 ---
-class: header_background
 #grouped mutate + filter
 We can also do a number of very useful operations by combining $\mathrm{group\_by}$ with either $\mathrm{filter}$ or $\mathrm{filter}$. For example
 ```{r message = TRUE}
@@ -351,7 +347,6 @@ flights_sml %>% group_by(year, month, day) %>%
   filter(rank(desc(arr_delay)) <= 10)
 ```
 ---
-class: clear
 ```{r}
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
@@ -361,7 +356,6 @@ flights %>% group_by(dest) %>%
   select(year:day, dest, arr_delay, prop_delay)
 ```
 ---
-class: clear
 Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command $\mathrm{vignette("window-functions")}$. 
 
 The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
@@ -374,7 +368,6 @@ batting <- Lahman::Batting %>% as_tibble() %>%
 players <- batting %>% group_by(playerID)
 ```
 ---
-class: clear
 Using this dataset, let us try a few $\mathrm{group\_mutate}$ and $\mathrm{group\_filter}$ operations. 
 ```{r}
 ## For each player, find the two years with most hits
@@ -413,7 +406,6 @@ batting %>% group_by(teamID,playerID) %>%
 ```
 
 ---
-class: header_background
 #across() and multiple columns
 The **dplyr** verbs such as **mutate** and **summarize** we saw previously can also be combined with the [across](https://dplyr.tidyverse.org/reference/across.html) function to allow for doing the same operation on multiple columns. See also this [vignette](https://dplyr.tidyverse.org/articles/colwise.html).
 .pull-left[
@@ -530,7 +522,6 @@ flights %>% filter(if_all(contains("delay"), ~ . < 10))
 ```
 
 ---
-class: header_background
 #dplyr::pull()
 Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
 ```{r error = TRUE}
@@ -552,7 +543,6 @@ flights %>% pull(arr_delay) %>% sd(na.rm = TRUE)
 
 The difference in the above output is due to the fact that $\mathrm{sd}$ expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column $\mathrm{arr\_delay}$ ,we need to use $\mathrm{pull}$. 
 ---
-class: header_background
 #summarise + rows vs columns
 Continuing the above theme. Suppose we want to find the quantiles for $\mathrm{arr\_delay}$ as grouped by popular destination.
 We first try the following code.
