@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Data Science</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":true,"autoSearch":true}) })</script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to Data Science
+## Strings, text processing, and regexp
+### Fall 2021
+
+---
+
+
+
+
+
+# Stringr
+
+Strings processing in **R** can be done using the [stringr](https://stringr.tidyverse.org/) library.
+
+For more documentation on **stringr**, see 
+
++ The [stringr vignette](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+
++ The [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
+
++ Chapter 14 of [R for data science](https://r4ds.had.co.nz/strings.html)
+
++ Chapter 24 of [Introduction to data science](https://rafalab.github.io/dsbook/string-processing.html)
+
+---
+# String basics
+
++ A string in **R** is created using either `'...'` or `"..."`
+
+```r
+a &lt;- 'This is a string'; a
+```
+
+```
+## [1] "This is a string"
+```
+
+```r
+b &lt;- "This is another string"; b
+```
+
+```
+## [1] "This is another string"
+```
+
+```r
+c &lt;- 'And he said "Dude, where is my car?"'; c
+```
+
+```
+## [1] "And he said \"Dude, where is my car?\""
+```
+
+---
+class: middle
++ A string in **R** is a **character vector**, so it has length `\(1\)`.
+
+```r
+a &lt;- "A string"
+length(a)
+```
+
+```
+## [1] 1
+```
+
+```r
+b &lt;- "A longer longer longer string"
+length(b)
+```
+
+```
+## [1] 1
+```
+
+---
+class: clear
+
++ Use `\` to quote special characters in a string. Use `\\` to get `\` in a string. Use `writeLines()` to get the **raw** string. 
+
+```r
+a &lt;- "This string has a \t (tab)"; a
+```
+
+```
+## [1] "This string has a \t (tab)"
+```
+
+```r
+writeLines(a)
+```
+
+```
+## This string has a 	 (tab)
+```
+
+```r
+b &lt;- "And this string has \n two lines"; b
+```
+
+```
+## [1] "And this string has \n two lines"
+```
+
+```r
+writeLines(b)
+```
+
+```
+## And this string has 
+##  two lines
+```
+
+```r
+c &lt;- "And this string has a \\ (slash)"; c
+```
+
+```
+## [1] "And this string has a \\ (slash)"
+```
+
+```r
+writeLines(c)
+```
+
+```
+## And this string has a \ (slash)
+```
+
+---
+# Basic stringr functions
+
++ `str_length` for length of string(s)
+
+```r
+    library(stringr)
+    x &lt;- c("One fish, two fish, red fish, blue fish", 
+           "Green eggs and ham", 
+           "Oh say can you say")
+    str_length(x)
+```
+
+```
+## [1] 39 18 18
+```
+
++ `str_c` for combining strings
+
+```r
+str_c("Alice", "Bob", "Charles")
+```
+
+```
+## [1] "AliceBobCharles"
+```
+
+```r
+str_c("Alice", "Bob", "Charles", sep = ",")
+```
+
+```
+## [1] "Alice,Bob,Charles"
+```
+
+```r
+str_c("Alice", "Bob", "Charles", sep = "\t") %&gt;% writeLines()
+```
+
+```
+## Alice	Bob	Charles
+```
+---
+class: middle
++ stringr functions are **vectorized** by default.
+
+```r
+str_c(c("One", "Two", "Three"), c("Alice", "Bob", "Charles"), sep = " ") 
+```
+
+```
+## [1] "One Alice"     "Two Bob"       "Three Charles"
+```
+
+```r
+## vectorized with vector recycling 
+str_c("One", c("Alice", "Bob", "Charles"), 
+             c("Oat", "Almond", "Walnut"), sep = " ")
+```
+
+```
+## [1] "One Alice Oat"      "One Bob Almond"     "One Charles Walnut"
+```
+
++ The **collapse** argument for **str_c** is useful to turn a vector of strings into individual arguments.
+
+```r
+str_c(c("Alice","Bob","Charles"),sep=",")
+```
+
+```
+## [1] "Alice"   "Bob"     "Charles"
+```
+
+```r
+str_c(c("Alice","Bob","Charles"), collapse = ",")
+```
+
+```
+## [1] "Alice,Bob,Charles"
+```
+---
+class: middle
++ `str_glue` is useful for inserting **R** output into a string.
+
+```r
+f &lt;- function(x){
+  2^x
+}
+x &lt;- c(2,3,4)
+str_glue("The value of two to the power of {x} is {f(x)}")
+```
+
+```
+## The value of two to the power of 2 is 4
+## The value of two to the power of 3 is 8
+## The value of two to the power of 4 is 16
+```
+
++ `str_pad` and `str_trunc` for padding and truncating strings. 
+`str_trim` for trimming white spaces from start and end of a string.
+
+```r
+x &lt;- as.character(c(5,20, 80, 320, 1280, 27607, 111111))
+x %&gt;% str_trunc(5) %&gt;% str_pad(5, side = "left", pad = "0")
+```
+
+```
+## [1] "00005" "00020" "00080" "00320" "01280" "27607" "11..."
+```
+
+```r
+x %&gt;% str_trunc(5, ellipsis = "") %&gt;% str_pad(5, side = "left", pad = "0")
+```
+
+```
+## [1] "00005" "00020" "00080" "00320" "01280" "27607" "11111"
+```
+---
+class: middle 
++ `str_sub` to extract substrings from a string.  
+
+```r
+x &lt;- c("One fish", "Two ship", "Three cats", "Four beeps")
+str_sub(x, 2, 5) ## Extract second to fifth character in each string
+```
+
+```
+## [1] "ne f" "wo s" "hree" "our "
+```
+
+```r
+str_sub(x, -5, -2) ## Extract second to fifth character (backwards)
+```
+
+```
+## [1] " fis" " shi" " cat" "beep"
+```
+
+```r
+str_sub(x, 2, 5) &lt;- "Haha" ## Assigning things to a substring
+x
+```
+
+```
+## [1] "OHahaish"   "THahahip"   "THaha cats" "FHahabeeps"
+```
+---
+class: middle
++ `str_sort` and `str_order` to order/sort the characters in a string.
+
+```r
+x &lt;- c("winner winner", "chicken dinner", 
+       "cherry blossom", "eager beaver") 
+x %&gt;% str_sort()
+```
+
+```
+## [1] "cherry blossom" "chicken dinner" "eager beaver"   "winner winner"
+```
+
+```r
+x %&gt;% str_sort(locale = "haw") ## Hawaiian's don't speak English!
+```
+
+```
+## [1] "eager beaver"   "cherry blossom" "chicken dinner" "winner winner"
+```
+
++ To sort the letters in a string, you will have to first split the string using `str_split`.
+
+```r
+## This code chunk is just a quick hack. 
+sapply(lapply(str_split(x, ""), str_sort), function(z) str_c(z, collapse = ""))
+```
+
+```
+## [1] " eeiinnnnrrww"  " ccdeehiiknnnr" " bcehlmoorrssy" " aabeeeegrrv"
+```
+---
+# Pattern matching in strings
+
+Most uses of **stringr** is to search for and match patterns in string. Some of the most widely used functions are
+
++ `str_detect`, `str_which` and `str_subset` to detect presence of a pattern in a character vector (collection of strings).
+
+```r
+x &lt;- c("apple", "pear", "banana", "orange")
+str_detect(x, "p")
+```
+
+```
+## [1]  TRUE  TRUE FALSE FALSE
+```
+
+```r
+str_which(x, "p")
+```
+
+```
+## [1] 1 2
+```
+
+```r
+str_subset(x, "an")
+```
+
+```
+## [1] "banana" "orange"
+```
+
+---
+class: clear
+
++ `str_count` for counting the number of matches and `str_locate` for the (starting and ending) location index of the (first) match. See also `str_locate_all`.
+
+
+```r
+x
+```
+
+```
+## [1] "apple"  "pear"   "banana" "orange"
+```
+
+```r
+str_count(x, "p")
+```
+
+```
+## [1] 2 1 0 0
+```
+
+```r
+str_count(x, "ana")
+```
+
+```
+## [1] 0 0 1 0
+```
+
+```r
+str_locate(x, "ana")
+```
+
+```
+##      start end
+## [1,]    NA  NA
+## [2,]    NA  NA
+## [3,]     2   4
+## [4,]    NA  NA
+```
+
+---
+class: clear
+
++ `str_replace` and `str_replace_all` for search and replace.
+
+```r
+fruit %&gt;% head ## A character vector of fruits contained in the stringr package.
+```
+
+```
+## [1] "apple"       "apricot"     "avocado"     "banana"      "bell pepper"
+## [6] "bilberry"
+```
+
+```r
+fruit %&gt;% str_replace("a", "z") %&gt;% head
+```
+
+```
+## [1] "zpple"       "zpricot"     "zvocado"     "bznana"      "bell pepper"
+## [6] "bilberry"
+```
+
+```r
+fruit %&gt;% str_replace_all(c("a" = "z", "b" = "y")) %&gt;% head
+```
+
+```
+## [1] "zpple"       "zpricot"     "zvoczdo"     "yznznz"      "yell pepper"
+## [6] "yilyerry"
+```
+
++ `str_extract` and `str_match` to extract matching patterns from a string. These functions are, however, only useful when used in combination with **regular expressions**.
+
+```r
+fruit %&gt;% str_extract("pp") %&gt;% head
+```
+
+```
+## [1] "pp" NA   NA   NA   "pp" NA
+```
+---
+# Pop Quiz
+
+Q1. What is a regular expression ? 
+
+--
+
+A1. Anything that is recognizable by a finite state automata.
+
+--
+
+Q2. But what is a finite state automata ?
+
+--
+
+A2. Anything whose set of recognizable strings are generated by a regular expression.
+
+---
+# Regular expressions
+
+Regexps provide a powerful tool for describing patterns in strings. 
+
+```r
+## which fruits' names contain at least two consecutive vowels ?
+fruit %&gt;% str_subset("[aeiou]{2,}") %&gt;% head(4)
+```
+
+```
+## [1] "blood orange" "blueberry"    "breadfruit"   "cantaloupe"
+```
+
+```r
+## which fruits' names contain the letter y but is not a berry ?
+fruit %&gt;% str_subset("[^y]$") %&gt;% str_subset("y") %&gt;% head(4)
+```
+
+```
+## [1] "canary melon" "cherimoya"    "honeydew"     "lychee"
+```
+
+```r
+## which fruits' names has the same letter appearing consecutively 
+fruit %&gt;% str_subset("(.)\\1") %&gt;% head(4)
+```
+
+```
+## [1] "apple"       "bell pepper" "bilberry"    "blackberry"
+```
+
+```r
+## which fruits' names has the same two letters appearing consecutively 
+fruit %&gt;% str_subset("(..)\\1") %&gt;% head(4)
+```
+
+```
+## [1] "banana"   "coconut"  "cucumber" "jujube"
+```
+
+---
+class: middle
+We can now see the difference between `str_match` and `str_extract`
+
+```r
+regexp1 &lt;- "(..)\\1"
+fruit %&gt;% str_extract(regexp1) %&gt;% head(4)
+```
+
+```
+## [1] NA     NA     NA     "anan"
+```
+
+```r
+fruit %&gt;% str_match(regexp1) %&gt;% head(4)
+```
+
+```
+##      [,1]   [,2]
+## [1,] NA     NA  
+## [2,] NA     NA  
+## [3,] NA     NA  
+## [4,] "anan" "an"
+```
+
+```r
+bands &lt;- c("ABBA", "Pink Floyd", "Nirvana", "Eagles")
+regexp2 &lt;- "(.)(.)\\2\\1"
+bands %&gt;% str_extract(regexp2)
+```
+
+```
+## [1] "ABBA" NA     NA     NA
+```
+
+```r
+bands %&gt;% str_match(regexp2)
+```
+
+```
+##      [,1]   [,2] [,3]
+## [1,] "ABBA" "A"  "B" 
+## [2,] NA     NA   NA  
+## [3,] NA     NA   NA  
+## [4,] NA     NA   NA
+```
+
+---
+class: clear
+
+For more on regular expressions, see 
+
++ Section 14.3 of [R for Data Science](https://r4ds.had.co.nz/strings.html)
+
++ The regexp [cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
+
+The most important things to remember are
+
++ `^` and `$` to anchor the pattern at the beginning or at the end of the string
+
++ `.` matches any character, `\d` matches any digits, `\s` matches any whitespace character.
+
++ `[abc]` matches `a`, `b` or `c` while `[^abc]` matches **not** `a`, `b` or `c`
+
++ `?` to specify that a pattern is matched `\(0\)` or `\(1\)` time, `+` to specify that a pattern is matched at least `\(1\)` time and `*` to specify that a pattern is matched `\(0\)` or more times.
+
++ `\\1`, `\\2`, for back references
+---
+# Example 1: Macbeth
+We will follow the presentation from Chapter 19 of the book [Modern Data Science with R](https://mdsr-book.github.io/mdsr2e/ch-text.html#regular-expressions-using-macbeth)
+
+
+```r
+library(mdsr)
+library(dplyr)
+data(Macbeth_raw)
+str(Macbeth_raw)
+```
+
+```
+##  chr "﻿This Etext file is presented by Project Gutenberg, in\r\ncooperation with World Library, Inc., from their Libra"| __truncated__
+```
+
+The data is representated as a single string. We first split this string into multiple lines.
+
+```r
+macbeth_split &lt;- Macbeth_raw %&gt;% str_split("\r\n")
+macbeth &lt;- macbeth_split[[1]]
+length(macbeth)
+```
+
+```
+## [1] 3194
+```
+
+---
+class: middle
+
+The data is now in a much simpler format.
+
+```r
+macbeth[300:310]
+```
+
+```
+##  [1] "meeting a bleeding Sergeant."                     
+##  [2] ""                                                 
+##  [3] "  DUNCAN. What bloody man is that? He can report,"
+##  [4] "    As seemeth by his plight, of the revolt"      
+##  [5] "    The newest state."                            
+##  [6] "  MALCOLM. This is the sergeant"                  
+##  [7] "    Who like a good and hardy soldier fought"     
+##  [8] "    'Gainst my captivity. Hail, brave friend!"    
+##  [9] "    Say to the King the knowledge of the broil"   
+## [10] "    As thou didst leave it."                      
+## [11] "  SERGEANT. Doubtful it stood,"
+```
+
+---
+class: middle
+We can now count how many times a particular character speaks.
+
+```r
+thus_spoke_macbeth &lt;- macbeth %&gt;% str_subset("^\\s+MACBETH")
+length(thus_spoke_macbeth)
+```
+
+```
+## [1] 147
+```
+
+```r
+head(thus_spoke_macbeth, 4)
+```
+
+```
+## [1] "  MACBETH, Thane of Glamis and Cawdor, a general in the King's"
+## [2] "  MACBETH. So foul and fair a day I have not seen."            
+## [3] "  MACBETH. Speak, if you can. What are you?"                   
+## [4] "  MACBETH. Stay, you imperfect speakers, tell me more."
+```
+
+```r
+macbeth %&gt;% str_subset("^\\s+MAC(BETH|DUFF)") %&gt;% length()
+```
+
+```
+## [1] 207
+```
+
+---
+class: middle
+
+The four most important characters in *Macbeth* are Macbeth himself, Lady Macbeth (his wife), Banquo (his friend) and Duncan (the king). Let us now plot how frequent these characters speak during the play.
+
+
+```r
+macbeth_chars &lt;- tribble(
+  ~name, ~regexp,
+  "MACBETH", "^\\s+MACBETH",
+  "LADY MACBETH", "^\\s+LADY MACBETH",
+  "BANQUO", "^\\s+BANQUO",
+  "DUNCAN", "^\\s+DUNCAN") %&gt;% 
+  mutate(speaks = purrr::map(regexp, str_detect, string = macbeth)) 
+macbeth_chars ## Oh hey, list columns!!
+```
+
+```
+## # A tibble: 4 x 3
+##   name         regexp              speaks       
+##   &lt;chr&gt;        &lt;chr&gt;               &lt;list&gt;       
+## 1 MACBETH      "^\\s+MACBETH"      &lt;lgl [3,194]&gt;
+## 2 LADY MACBETH "^\\s+LADY MACBETH" &lt;lgl [3,194]&gt;
+## 3 BANQUO       "^\\s+BANQUO"       &lt;lgl [3,194]&gt;
+## 4 DUNCAN       "^\\s+DUNCAN"       &lt;lgl [3,194]&gt;
+```
+
+```r
+str(macbeth_chars$speaks[[1]]) 
+```
+
+```
+##  logi [1:3194] FALSE FALSE FALSE FALSE FALSE FALSE ...
+```
+
+---
+class: middle
+
+Let us now **tidy** up this data by first unnesting the list column.
+
+```r
+library(tidyr)
+macbeth_chars &lt;- macbeth_chars %&gt;% unnest(speaks)
+macbeth_chars
+```
+
+```
+## # A tibble: 12,776 x 3
+##   name    regexp         speaks
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;lgl&gt; 
+## 1 MACBETH "^\\s+MACBETH" FALSE 
+## 2 MACBETH "^\\s+MACBETH" FALSE 
+## 3 MACBETH "^\\s+MACBETH" FALSE 
+## 4 MACBETH "^\\s+MACBETH" FALSE 
+## 5 MACBETH "^\\s+MACBETH" FALSE 
+## 6 MACBETH "^\\s+MACBETH" FALSE 
+## # … with 12,770 more rows
+```
+
+Next, let us add in the line numbers for each sentence and also remove the unimportant header lines.
+
+```r
+macbeth_chars &lt;- macbeth_chars %&gt;% 
+  mutate(lineno = rep(1:length(macbeth),4)) %&gt;% 
+  filter(lineno &gt; 218, lineno &lt; 3172)
+glimpse(macbeth_chars)
+```
+
+```
+## Rows: 11,812
+## Columns: 4
+## $ name   &lt;chr&gt; "MACBETH", "MACBETH", "MACBETH", "MACBETH", "MACBETH…
+## $ regexp &lt;chr&gt; "^\\s+MACBETH", "^\\s+MACBETH", "^\\s+MACBETH", "^\\…
+## $ speaks &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FAL…
+## $ lineno &lt;int&gt; 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 22…
+```
+
+---
+class: middle
+
+We now visualize the frequency at which a character speaks in the play.
+However, since `speaks` only take on the `\(\{0,1\}\)` values, it is not clear how to visualize this information. 
+The following is one, somewhat hackish, approach.
+
+```r
+library(ggplot2)
+p &lt;- macbeth_chars %&gt;% ggplot(aes(x = lineno, y = as.numeric(speaks))) + 
+  geom_smooth(aes(color = name), method = "loess", se = FALSE, span = 0.4) + 
+  xlab("Line number") + ylab("Frequency of speaking") + ylim(c(0,NA))
+p
+```
+
+&lt;img src="05_regexp_files/figure-html/unnamed-chunk-26-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+Finally, we can add some information about which part of the play each line corresponds to.
+
+```r
+acts &lt;- tibble(
+  lineno = str_which(macbeth, "^ACT [I|V]+"), 
+  line_text = str_subset(macbeth, "^ACT [I|V]+"),
+  labels = str_extract(line_text, "^ACT [I|V]+"))
+p &lt;- p + geom_vline( data = acts, aes(xintercept = lineno), 
+                     color = "darkgray", lty = 3) + 
+         geom_text(data = acts, aes(y = 0.085, label = labels), 
+                   hjust = "left", color = "darkgray") 
+p
+```
+
+&lt;img src="05_regexp_files/figure-html/unnamed-chunk-27-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+# Example: Self-reported heights
+Our next example is from Chapter 24.3 of [Introduction to Data Science](https://rafalab.github.io/dsbook/string-processing.html). A total of `\(1095\)` students were asked to report their heights in inches, with quite a few problematic entries.
+
+```r
+library(dslabs)
+data(reported_heights)
+reported_heights &lt;- reported_heights %&gt;%
+  mutate(new_height = as.numeric(height))
+```
+
+```
+## Warning: Problem with `mutate()` input `new_height`.
+## ℹ NAs introduced by coercion
+## ℹ Input `new_height` is `as.numeric(height)`.
+```
+
+```
+## Warning in mask$eval_all_mutate(dots[[i]]): NAs introduced by coercion
+```
+
+```r
+reported_heights %&gt;% filter(is.na(new_height)) %&gt;% summarise(n())
+```
+
+```
+##   n()
+## 1  81
+```
+---
+A random sample of all the problematic entries are
+
+```r
+not_inches &lt;- function(x, smallest = 50, tallest = 84){
+  inches &lt;- suppressWarnings(as.numeric(x))
+  ind &lt;- !is.na(inches) &amp; (inches &gt;= smallest &amp; inches &lt;= tallest) 
+  !ind
+}
+## First remove extraneous spaces
+reported_heights &lt;- reported_heights %&gt;% mutate(height = str_trim(height, side = "both")) 
+reported_heights %&gt;% filter(not_inches(height)) %&gt;% 
+  pull(height) %&gt;% sample(60)
+```
+
+```
+##  [1] "5.51"                   "172"                    "5'11"                  
+##  [4] "5.7"                    "6.7"                    "163"                   
+##  [7] "5.6"                    "5.6"                    "6.3"                   
+## [10] "11111"                  "6"                      "5ft 9 inches"          
+## [13] "6"                      "183"                    "150"                   
+## [16] "5,4"                    "6"                      "6"                     
+## [19] "162"                    "172"                    "5.9"                   
+## [22] "176"                    "5.11"                   "180"                   
+## [25] "6"                      "5 feet and 8.11 inches" "183"                   
+## [28] "6'1\""                  "180"                    "164"                   
+## [31] "168"                    "708,661"                "5.7"                   
+## [34] "5'3"                    "5 feet 6 inches"        "158"                   
+## [37] "190"                    "7"                      "182"                   
+## [40] "165"                    "87"                     "5'2\""                 
+## [43] "5'12"                   "175"                    "184"                   
+## [46] "152"                    "5'7"                    "6"                     
+## [49] "5'3''"                  "5' 10"                  "5.7"                   
+## [52] "5'7"                    "6.1"                    "183"                   
+## [55] "5'7\""                  "157"                    "5'7\""                 
+## [58] "684"                    "5'3\""                  "6"
+```
+
+---
+We first try to do some search and replace to convert the simple issues like `5' 4` or `5' 3"` into inches.
+We start by creating a pattern to search for these issues. 
+
+```r
+problems &lt;- reported_heights %&gt;% 
+  filter(not_inches(height)) %&gt;% pull(height) 
+length(problems) 
+```
+
+```
+## [1] 292
+```
+
+```r
+pattern1 &lt;- "^([4-7])'\\s*(\\d+)\"?" 
+problems %&gt;% str_subset(pattern1)
+```
+
+```
+##  [1] "5' 4\""    "5'7"       "5'7\""     "5'3\""     "5'11"      "5'9''"    
+##  [7] "5'10''"    "5' 10"     "5'5\""     "5'2\""     "5'3"       "5'10''"   
+## [13] "5'3''"     "5'7''"     "5'12"      "5'11"      "5'3\""     "5'6''"    
+## [19] "5'4"       "5'7.5''"   "5'7.5''"   "5'2\""     "5' 7.78\"" "5'5"      
+## [25] "5'8"       "5'6"       "5'4"       "5'8\""     "5'5"       "5'7"      
+## [31] "5'6"       "5'11\""    "5'7\""     "5'7"       "5'8"       "5' 11\""  
+## [37] "6'1\""     "5' 7\""    "5'10''"    "5'10"      "5'10"      "5'2"      
+## [43] "5'11"      "5'11''"    "5'8\""     "5'10''"    "5'8"       "6'3\""    
+## [49] "5'9"       "5'5''"     "5'7\""     "6'4\""     "5'4"       "5'6"      
+## [55] "5'6"
+```
+---
+class: clear
+We then extract the feet and inches from entries matching this pattern.
+
+```r
+problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1) %&gt;% head
+```
+
+```
+##      [,1]     [,2] [,3]
+## [1,] "5' 4\"" "5"  "4" 
+## [2,] "5'7"    "5"  "7" 
+## [3,] "5'7\""  "5"  "7" 
+## [4,] "5'3\""  "5"  "3" 
+## [5,] "5'11"   "5"  "11"
+## [6,] "5'9"    "5"  "9"
+```
+We now fixed these problematic entries.
+
+```r
+first_issue &lt;- problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1)
+first_issue_new_height &lt;- as.character(
+  as.numeric(first_issue[,2])*12 + as.numeric(first_issue[,3]))
+problems[str_which(problems, pattern1)] &lt;- first_issue_new_height
+length(problems[not_inches(problems)])
+```
+
+```
+## [1] 237
+```
+
+---
+We next consider the issue of heights reported in centimeters.
+
+```r
+pattern2 &lt;- "^([12]\\d{2})\\s*(cm)?$"
+second_issue &lt;- problems %&gt;% str_subset(pattern2)
+second_issue
+```
+
+```
+##  [1] "165cm"  "150"    "175"    "177"    "178"    "163"    "175"    "178"   
+##  [9] "165"    "165"    "180"    "169"    "157"    "169"    "214"    "183"   
+## [17] "162"    "178"    "180"    "170"    "178"    "190"    "184"    "184"   
+## [25] "167"    "180"    "180"    "183"    "170"    "172"    "168"    "172"   
+## [33] "176"    "111"    "173"    "174"    "176"    "175"    "183"    "172"   
+## [41] "168"    "170"    "175"    "162"    "165"    "184"    "173"    "172"   
+## [49] "170"    "174"    "170"    "160"    "120"    "120"    "192"    "167"   
+## [57] "150"    "174"    "172"    "180"    "180"    "180"    "167"    "168"   
+## [65] "178"    "182"    "164"    "185"    "172"    "160"    "152"    "180"   
+## [73] "175"    "158"    "173"    "164"    "169"    "185"    "168"    "169"   
+## [81] "174"    "179"    "170"    "172"    "158"    "100"    "159"    "190"   
+## [89] "170"    "158"    "180"    "210"    "162"    "170 cm" "170"    "157"   
+## [97] "186"    "170"    "161"
+```
+
+```r
+## Remove cm and trim white space
+second_issue &lt;- str_replace(second_issue,"cm","") %&gt;% str_trim(side = "right")
+## Convert from cm to inches
+second_issue_new_height &lt;- as.character(round(as.numeric(second_issue)/2.54))
+problems[str_which(problems, pattern2)] &lt;- second_issue_new_height
+length(problems[not_inches(problems)])
+```
+
+```
+## [1] 142
+```
+
+---
+Let us now take a look at a sample of the remaining issues
+
+```r
+problems[not_inches(problems)] %&gt;% sample(60)
+```
+
+```
+##  [1] "11111"                  "6.2"                    "708,661"               
+##  [4] "6"                      "5.5"                    "88"                    
+##  [7] "6"                      "5.8"                    "5.51"                  
+## [10] "86"                     "5.11"                   "5.1"                   
+## [13] "5.5"                    "7"                      "684"                   
+## [16] "5.25"                   "6"                      "6.7"                   
+## [19] "6"                      "5.1"                    "5.7"                   
+## [22] "6"                      "6"                      "5.25"                  
+## [25] "6.1"                    "5.9"                    "5.6"                   
+## [28] "87"                     "5.6"                    "6.3"                   
+## [31] "1.7"                    "47"                     "5.5"                   
+## [34] "0.7"                    "300"                    "5.6"                   
+## [37] "25"                     "5.6"                    "6.5"                   
+## [40] "5.5"                    "5"                      "5 feet 7inches"        
+## [43] "5ft 9 inches"           "2'33"                   "5.9"                   
+## [46] "1,70"                   "5.11"                   "5.75"                  
+## [49] "5 feet and 8.11 inches" "5 .11"                  "5.9"                   
+## [52] "Five foot eight inches" "6"                      "6.5"                   
+## [55] "5.7"                    "0"                      "5.7"                   
+## [58] "5.6"                    "5.8"                    "7,283,465"
+```
+---
+The third issue could be adding `ft` or `feet` or `inches` to the reported heights.
+We can easily fix this by first doing a `str_replace` and then using our `pattern1` above.
+
+```r
+str_subset(problems,"(ft)|(feet)|(inches)|")
+```
+
+```
+##   [1] "6"                      "64"                     "5.3"                   
+##   [4] "65"                     "511"                    "6"                     
+##   [7] "2"                      "67"                     "&gt;9000"                 
+##  [10] "67"                     "63"                     "5 feet and 8.11 inches"
+##  [13] "5.25"                   "71"                     "5.5"                   
+##  [16] "11111"                  "69"                     "6"                     
+##  [19] "6.5"                    "59"                     "70"                    
+##  [22] "103.2"                  "5.8"                    "19"                    
+##  [25] "5"                      "5.6"                    "69"                    
+##  [28] "70"                     "300"                    "5,3"                   
+##  [31] "6'"                     "6"                      "5.9"                   
+##  [34] "6,8"                    "70"                     "5.5"                   
+##  [37] "70"                     "64"                     "6.2"                   
+##  [40] "69"                     "Five foot eight inches" "6.2"                   
+##  [43] "5.8"                    "5.1"                    "70"                    
+##  [46] "65"                     "5.11"                   "65"                    
+##  [49] "65"                     "71"                     "62"                    
+##  [52] "5.75"                   "67"                     "5,4"                   
+##  [55] "7"                      "5.4"                    "62"                    
+##  [58] "6.1"                    "67"                     "63"                    
+##  [61] "5.6"                    "84"                     "72"                    
+##  [64] "5.6"                    "6"                      "64"                    
+##  [67] "70"                     "71"                     "70"                    
+##  [70] "67"                     "63"                     "70"                    
+##  [73] "0.7"                    "75"                     "5.4"                   
+##  [76] "72"                     "67"                     "5.9"                   
+##  [79] "72"                     "5.6"                    "5.6"                   
+##  [82] "72"                     "6"                      "66"                    
+##  [85] "2'33"                   "71"                     "63"                    
+##  [88] "5.5"                    "5.2"                    "71"                    
+##  [91] "5.5"                    "5.5"                    "6.5"                   
+##  [94] "5,8"                    "71"                     "72"                    
+##  [97] "67"                     "66"                     "68"                    
+## [100] "612"                    "5.11"                   "66"                    
+## [103] "64"                     "1,70"                   "68"                    
+## [106] "87"                     "5.5"                    "69"                    
+## [109] "67"                     "67"                     "44"                    
+## [112] "62"                     "68"                     "69"                    
+## [115] "69"                     "69"                     "67"                    
+## [118] "6.7"                    "12"                     "6"                     
+## [121] "5.1"                    "5.6"                    "5.5"                   
+## [124] "yyy"                    "5.2"                    "65"                    
+## [127] "68"                     "66"                     "5 feet 7inches"        
+## [130] "89"                     "5.6"                    "5.7"                   
+## [133] "72"                     "68"                     "34"                    
+## [136] "25"                     "6"                      "5.9"                   
+## [139] "66"                     "6.5"                    "67"                    
+## [142] "69"                     "6"                      "22"                    
+## [145] "5.11"                   "684"                    "6"                     
+## [148] "1"                      "1"                      "6*12"                  
+## [151] "5 .11"                  "87"                     "64"                    
+## [154] "65"                     "72"                     "6"                     
+## [157] "68"                     "1.6"                    "68"                    
+## [160] "67"                     "5.7"                    "5.5"                   
+## [163] "69"                     "67"                     "63"                    
+## [166] "47"                     "47"                     "23"                    
+## [169] "76"                     "5 11"                   "66"                    
+## [172] "59"                     "1.7"                    "69"                    
+## [175] "5.8"                    "6"                      "64"                    
+## [178] "68"                     "65"                     "5.8"                   
+## [181] "5.1"                    "5.11"                   "5.7"                   
+## [184] "67"                     "66"                     "71"                    
+## [187] "67"                     "67"                     "68"                    
+## [190] "68"                     "71"                     "71"                    
+## [193] "5"                      "71"                     "71"                    
+## [196] "73"                     "5.9"                    "5.2"                   
+## [199] "5.5"                    "69\""                   "67"                    
+## [202] "70"                     "5.51"                   "70"                    
+## [205] "70"                     "5ft 9 inches"           "5 ft 9 inches"         
+## [208] "62"                     "71"                     "5.8"                   
+## [211] "5.7"                    "66"                     "66"                    
+## [214] "6"                      "6.1"                    "71"                    
+## [217] "5.69"                   "70"                     "72"                    
+## [220] "65"                     "68"                     "73"                    
+## [223] "6"                      "86"                     "5.7"                   
+## [226] "708,661"                "5.25"                   "5.5"                   
+## [229] "5 feet 6 inches"        "70"                     "68"                    
+## [232] "6"                      "68"                     "63"                    
+## [235] "75"                     "649,606"                "10000"                 
+## [238] "5.1"                    "60"                     "1"                     
+## [241] "71"                     "728,346"                "69"                    
+## [244] "62"                     "68"                     "65"                    
+## [247] "6 04"                   "67"                     "0"                     
+## [250] "73"                     "66"                     "69"                    
+## [253] "67"                     "65"                     "69"                    
+## [256] "6.3"                    "70"                     "67"                    
+## [259] "5.5"                    "6"                      "6"                     
+## [262] "67"                     "6"                      "68"                    
+## [265] "62"                     "39"                     "63"                    
+## [268] "75"                     "5.7"                    "67"                    
+## [271] "62"                     "76"                     "71"                    
+## [274] "5.57"                   "64"                     "83"                    
+## [277] "88"                     "6"                      "64"                    
+## [280] "67"                     "5.7"                    "67"                    
+## [283] "62"                     "73"                     "67"                    
+## [286] "7,283,465"              "5"                      "5"                     
+## [289] "34"                     "63"                     "66"                    
+## [292] "66"
+```
+
+```r
+problems &lt;- str_replace(problems,"(ft)|(feet)|(foot)","'") 
+problems &lt;- str_replace(problems,"(inches)","\"")
+problems &lt;- str_replace_all(problems,"\\s","") ## Also remove spaces
+problems &lt;- str_replace(problems,"and","")
+pattern1 &lt;- "^([4-7])'\\s*([\\d\\.]+)\"?"
+first_issue &lt;- problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1)
+first_issue_new_height &lt;- as.character(
+  round(as.numeric(first_issue[,2])*12 + as.numeric(first_issue[,3])))
+problems[str_which(problems, pattern1)] &lt;- first_issue_new_height
+length(problems[not_inches(problems)])
+```
+
+```
+## [1] 137
+```
+
+---
+The fourth issue could be the use of `.` or `,` to separate between feet and inches.
+This can be fixed using a `str_match`
+
+```r
+pattern3 &lt;- "^([4-7])[\\.,]([\\d\\.]+)"
+fourth_issue &lt;- problems %&gt;% str_subset(pattern3) %&gt;% str_match(pattern3)
+fourth_issue_new_height &lt;- as.character(
+  round(as.numeric(fourth_issue[,2])*12 + as.numeric(fourth_issue[,3])))
+problems[str_which(problems, pattern3)] &lt;- fourth_issue_new_height
+length(problems[not_inches(problems)])
+```
+
+```
+## [1] 75
+```
+
+---
+The fifth issue could be that people who are 5 feet or 6 feet will just write `5` or `6`. 
+This is easy enough to fix.
+
+```r
+pattern4 &lt;- "^[4-7]'?$"
+fifth_issue &lt;- str_subset(problems,pattern4)
+fifth_issue &lt;- str_replace(fifth_issue,"'","")
+problems[str_which(problems,pattern4)] &lt;- 
+  as.character(as.numeric(fifth_issue)*12)
+problems[not_inches(problems)]
+```
+
+```
+##  [1] "511"          "2"            "&gt;9000"        "85"           "11111"       
+##  [6] "103.2"        "19"           "300"          "Five'eight\"" "135"         
+## [11] "0.7"          "2'33"         "612"          "1,70"         "87"          
+## [16] "44"           "12"           "yyy"          "89"           "34"          
+## [21] "25"           "22"           "684"          "1"            "1"           
+## [26] "6*12"         "87"           "1.6"          "47"           "47"          
+## [31] "23"           "511"          "1.7"          "69\""         "111"         
+## [36] "129"          "86"           "708,661"      "85"           "649,606"     
+## [41] "10000"        "1"            "728,346"      "604"          "0"           
+## [46] "39"           "117"          "88"           "367"          "34"
+```
+
+---
+Finally we see that there are a few remaining issues such as (1) using `,` or `.` in centimeters and (2) including `"` in the inches measurement. These are also relatively easy to fix.
+
+```r
+problems &lt;- problems %&gt;% str_replace("\"$","")
+pattern2 &lt;- "^([12])[\\,\\.]?(\\d{1,2})$"
+sixth_issue &lt;- problems %&gt;% str_subset(pattern2) %&gt;% str_match(pattern2)
+## First get the centimeters
+sixth_issue_heights_cm &lt;- as.numeric(sixth_issue[,2])*100 + 
+  as.numeric(str_pad(sixth_issue[,3],width=2,pad="0",side = "right"))
+## Convert from cm to inches
+sixth_issue_new_height &lt;- as.character(round(sixth_issue_heights_cm/2.54))
+problems[str_which(problems, pattern2)] &lt;- sixth_issue_new_height
+problems[not_inches(problems)]
+```
+
+```
+##  [1] "511"        "2"          "&gt;9000"      "85"         "11111"     
+##  [6] "103.2"      "300"        "Five'eight" "0.7"        "2'33"      
+## [11] "612"        "87"         "44"         "47"         "yyy"       
+## [16] "89"         "34"         "98"         "87"         "684"       
+## [21] "1"          "1"          "6*12"       "87"         "47"        
+## [26] "47"         "91"         "511"        "44"         "86"        
+## [31] "708,661"    "85"         "649,606"    "10000"      "1"         
+## [36] "728,346"    "604"        "0"          "39"         "46"        
+## [41] "88"         "367"        "34"
+```
+The remaining issues are unlikely to be fixable automatically. We will have to ignore them.
+---
+We update our data frame to have a new height column.
+
+```r
+reported_heights &lt;- reported_heights %&gt;% mutate(new_height = height) %&gt;% 
+  filter(not_inches(height)) %&gt;% mutate(new_height = problems) 
+reported_heights %&gt;% filter(!not_inches(new_height)) %&gt;% head(10)
+```
+
+```
+##             time_stamp    sex                 height new_height
+## 1  2014-09-02 15:16:23   Male                      6         72
+## 2  2014-09-02 15:16:28   Male                  5' 4"         64
+## 3  2014-09-02 15:16:32 Female                    5.3         63
+## 4  2014-09-02 15:16:37 Female                  165cm         65
+## 5  2014-09-02 15:16:46   Male                      6         72
+## 6  2014-09-02 15:16:52   Male                    5'7         67
+## 7  2014-09-02 15:16:56   Male                   5'7"         67
+## 8  2014-09-02 15:17:09 Female                   5'3"         63
+## 9  2014-09-02 15:18:00   Male 5 feet and 8.11 inches         68
+## 10 2014-09-02 15:19:48   Male                   5'11         71
+```
+--
+Q. What did we learned from this example ?
+
+A. It was quite tedious and boring. Regrettably being a data scientist is not always swashbuckling fun. Luckily enough, it pays well.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

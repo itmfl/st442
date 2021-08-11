@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Data Science</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":true,"autoSearch":true}) })</script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to Data Science
+## R Fundamentals
+### Fall 2021
+
+---
+
+
+
+
+
+# Resources for learning R
+
++ **R tutorial** in either [HTML format](https://cran.r-project.org/doc/manuals/r-release/R-intro.html) or [PDF format](https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf)
+
++ Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). 
+
++ Chapter `\(1\)` through `\(4\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
+
++ Long and Teetor [R Cookbook](https://rc2e.com/)
+
++ [JHU Coursera](https://www.coursera.org/learn/r-programming)
+
++ `?` in **R**
+
++ [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
+
++ [Ask Miao Yu, your TA](https://statistics.sciences.ncsu.edu/people/myu12/); Office hours: 12:30--2:30pm, Tuesday.
+
+---
+class: middle
+# Some basic concepts in R
+
++ The assignment operation is `&lt;-`, e.g.,
+
+```r
+a &lt;- 5
+a
+```
+
+```
+## [1] 5
+```
+
++ The fundamental data type in **R** is a `vector`
+
++ A function in **R** is defined according to the template
+
+```r
+f &lt;- function(x = NULL, y = 1, z = 2*y, ...){ ## default values are optional
+  ## Do something
+  x + 2*y + 3*z ## The output of the last statement is also the return value
+}
+f(4)
+```
+
+```
+## [1] 12
+```
+---
+class: middle
+
++ Functions in **R** are **first class objects**, i.e., they can be passed as arguments to other functions. See [here](https://bookdown.org/rdpeng/rprogdatascience/functions.html) for more info.
+
+```r
+f &lt;- function(x){
+  function(){
+    x + 10
+  }
+}
+f(1)()
+```
+
+```
+## [1] 11
+```
+
+```r
+f(2)()
+```
+
+```
+## [1] 12
+```
+
+---
+class: middle
+
++ The general copy/assignment behaviour in **R** is **copy-on-modify**. See Section 2.3 [here](https://adv-r.hadley.nz/names-values.html) for more info. 
+
++ Arguments to **R** functions are **passed-by-values** and are **lazily evaluated**
+
+```r
+f &lt;- function(a,b){
+  a
+}
+f(45)
+```
+
+```
+## [1] 45
+```
+
+```r
+f &lt;- function(a,b){
+  a + 2*b
+}
+f(45)
+```
+
+```
+## Error in f(45): argument "b" is missing, with no default
+```
++ For more gory details on functions in **R**, see [here](https://adv-r.hadley.nz/functions.html).
+
+---
+#The many vectors of R
+
+.pull-left[
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/1d1b4e1cf0dc5f6e80f621b0225354b0addb9578/6ee1c/diagrams/data-structures-overview.png" alt="Hierarchy of R's vector type (https://r4ds.had.co.nz/vectors.html)" width="125%" /&gt;
+&lt;p class="caption"&gt;Hierarchy of R's vector type (https://r4ds.had.co.nz/vectors.html)&lt;/p&gt;
+&lt;/div&gt;
+]
+.pull-right[
++ Atomic vectors are homogeneous (all elements are the same type)
++ Lists (or recursive vectors) can be heterogeneous (elements can be of different type)
++ `\(\mathrm{NULL}\)` represents vector of length `\(0\)`. 
++ vectors can be created using the function `c()`, e.g.,
+
+```r
+a &lt;- c(1,2,3)
+a
+```
+
+```
+## [1] 1 2 3
+```
+]
+---
+class: middle
+Every vector in **R** has two key properties.
+
+.pull-left[
++ type: determine via **typeof()**
+
+```r
+typeof(c("A","B","C"))
+```
+
+```
+## [1] "character"
+```
+
+```r
+typeof(1:10)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+library(nycflights13)
+typeof(flights)
+```
+
+```
+## [1] "list"
+```
+
+```r
+typeof(NULL)
+```
+
+```
+## [1] "NULL"
+```
+]
+.pull-right[ 
++ length: determine via **length()**
+
+```r
+length(letters)
+```
+
+```
+## [1] 26
+```
+
+```r
+length(1:10)
+```
+
+```
+## [1] 10
+```
+
+```r
+length(flights)
+```
+
+```
+## [1] 19
+```
+
+```r
+length(NULL)
+```
+
+```
+## [1] 0
+```
+]
+
+---
+#Atomic vectors
+
+Vectors are created in **R** using the function `c()` (short for **combine**)
+
++ Logical: simplest type of vector. Three values ( `\(\mathtt{TRUE}\)`, `\(\mathtt{FALSE}\)` and `\(\mathtt{NA}\)`).
+
+```r
+c(TRUE, FALSE, FALSE, NA, T, F)
+```
+
+```
+## [1]  TRUE FALSE FALSE    NA  TRUE FALSE
+```
+
++ Numeric: vectors whose elements are integers or doubles. Numbers are doubles by default.
+
+
+```r
+c(typeof(1), typeof(1L), typeof(1.5L))
+```
+
+```
+## [1] "double"  "integer" "double"
+```
+---
+class: middle
++ Note that doubles representation are only approximations.
+.pull-left[
+
+```r
+x &lt;- sqrt(2)^2
+x
+```
+
+```
+## [1] 2
+```
+
+```r
+x - 2
+```
+
+```
+## [1] 4.44e-16
+```
+]
+.pull-right[
+
+```r
+x == 2
+```
+
+```
+## [1] FALSE
+```
+
+```r
+dplyr::near(x,2)
+```
+
+```
+## [1] TRUE
+```
+]
+
+---
+class: middle
++ Special values (avoid using `\(==\)` to check for special values)
+    + `\(\mathtt{NA}\)`: integer and double; check with `\(\mathtt{is.na}\)` 
+    + `\(\mathtt{Inf}\)` and `\(-\mathtt{Inf}\)`: double; check with `\(\mathtt{is.infinite()}\)`       
+    + `\(\mathtt{NaN}\)`: double; check with `\(\mathtt{is.nan()}\)` or `\(\mathtt{is.na()}\)`.
+
+```r
+c(-1,0,1)/0
+```
+
+```
+## [1] -Inf  NaN  Inf
+```
+
+```r
+NA*(c(-1,0,1)/0)
+```
+
+```
+## [1]  NA NaN  NA
+```
+
++ Characters: each element of a character vector is itself a string. 
+
+```r
+x &lt;- c("A string","A longer string", "Even longer string")
+typeof(x); length(x)
+```
+
+```
+## [1] "character"
+```
+
+```
+## [1] 3
+```
+---
+class: middle
+
++ The types are, from least to most general, 
+$$ \mathtt{logical} \rightarrow \underbrace{\mathtt{integer} \rightarrow \mathtt{double}}_{\mathtt{numeric}} \rightarrow  \mathtt{character} $$
++ Explicit coercion is via: `\(\mathtt{as.logical()}\)`, `\(\mathtt{as.numeric()}\)`, `\(\mathtt{as.integer()}\)`, `\(\mathtt{as.double()}\)`, `\(\mathtt{as.character()}\)`. 
+
++ Implicit coercion: `\(\mathtt{TRUE}\)` and `\(\mathtt{FALSE}\)` are coerced to `\(1\mathrm{L}\)` and `\(0\mathrm{L}\)`. On occasions, positive integer is coerced to `\(\mathtt{TRUE}\)` and `\(0\)` is coerced to `\(\mathtt{FALSE}\)`
+
+```r
+x &lt;- 3
+if(length(x)){
+  x &lt;- rep(x, 2)
+}
+x
+```
+
+```
+## [1] 3 3
+```
+
+---
+class: middle
+
++ All atomic vectors need to be of the same type, e.g.,
+
+```r
+typeof(c(TRUE, 1L))
+```
+
+```
+## [1] "integer"
+```
+
+```r
+typeof(c(1L,1))
+```
+
+```
+## [1] "double"
+```
+
+```r
+typeof(c("1",1))
+```
+
+```
+## [1] "character"
+```
+---
+#Vector recycling rules
++ Basic mathematical operations are **vectorized** in **R**. 
+
++ If the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
+
+```r
+1:10 + 1
+```
+
+```
+##  [1]  2  3  4  5  6  7  8  9 10 11
+```
+
+```r
+1:10 + 1:2
+```
+
+```
+##  [1]  2  4  4  6  6  8  8 10 10 12
+```
+
+```r
+1:10 + 1:3
+```
+
+```
+## Warning in 1:10 + 1:3: longer object length is not a multiple of shorter object
+## length
+```
+
+```
+##  [1]  2  4  6  5  7  9  8 10 12 11
+```
+---
+class: middle
+For explicit recycling/repetition, use `\(\mathtt{rep()}\)`, e.g.,
+
+```r
+rep(1:2, times = 5)
+```
+
+```
+##  [1] 1 2 1 2 1 2 1 2 1 2
+```
+
+```r
+rep(1:2, each = 5)
+```
+
+```
+##  [1] 1 1 1 1 1 2 2 2 2 2
+```
+
+```r
+rep(1:3, times = c(2,3,4))
+```
+
+```
+## [1] 1 1 2 2 2 3 3 3 3
+```
+
+---
+# Naming elements of a vector
+
+```r
+c(x = 1,y = 2, z = 3)
+```
+
+```
+## x y z 
+## 1 2 3
+```
+
+```r
+w &lt;- c(1,2,3)
+names(w) &lt;- c("x", "y", "z")
+w
+```
+
+```
+## x y z 
+## 1 2 3
+```
+
+---
+#Vectors and subsetting
+You can access specific elements (or subset of elements) of a vector using the `[` primitive. There are four type of things that can appear within `[`
++ A numeric vector containing only integers. The integers must either be **all** non-negative or **all** non-positive
+
+.pull-left[
+
+```r
+x &lt;- 1:10
+x[c(3,2,5)]
+```
+
+```
+## [1] 3 2 5
+```
+
+```r
+x[c(3,3,2,5,5)]
+```
+
+```
+## [1] 3 3 2 5 5
+```
+]
+
+.pull-right[
+
+```r
+x[0]
+```
+
+```
+## integer(0)
+```
+
+```r
+x[c(0,-2,-4)]
+```
+
+```
+## [1]  1  3  5  6  7  8  9 10
+```
+]
+
+
+```r
+x[c(1,-2,-4)]
+```
+
+```
+## Error in x[c(1, -2, -4)]: only 0's may be mixed with negative subscripts
+```
+---
+class: middle
++ Subsetting with a logical vector `\(v\)` keeps **all** values corresponding to a `\(\mathtt{TRUE}\)` value in `\(v\)` (and add missing values if there are missing values in `\(v\)`) e.g.,
+
+```r
+x%%2 == 0
+```
+
+```
+##  [1] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE
+```
+
+```r
+x[x%%2 == 0]
+```
+
+```
+## [1]  2  4  6  8 10
+```
+
+```r
+x[c(TRUE, FALSE, NA, FALSE, TRUE)]
+```
+
+```
+## [1]  1 NA  5  6 NA 10
+```
+---
+class: middle
+
++ We can use `\(\mathtt{which}\)` to determine the indices of a logical vector with `\(\mathtt{TRUE}\)` values, e.g.,
+
+```r
+which(x %% 2 == 0)
+```
+
+```
+## [1]  2  4  6  8 10
+```
+
+```r
+which(c(TRUE, FALSE, NA, FALSE, TRUE))
+```
+
+```
+## [1] 1 5
+```
+
++ If the vector has names then you can subset it with a character vector, e.g.,
+
+```r
+w &lt;- c(x = 1, y = 2, z = 3)
+w[c("x","z","z","x")]
+```
+
+```
+## x z z x 
+## 1 3 3 1
+```
+---
+class: middle
++ Finally, you can extract all the elements with `[]` or a single element with `[[]]`, e.g.,
+
+```r
+x &lt;- 1:10
+x[]
+```
+
+```
+##  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+```r
+x[[1]]
+```
+
+```
+## [1] 1
+```
+
+```r
+x[[c(1,2)]]
+```
+
+```
+## Error in x[[c(1, 2)]]: attempt to select more than one element in vectorIndex
+```
+---
+#Recursive vectors (lists)
+Lists are **non-atomic** vectors whose elements are themselves possibly other lists. Thus, the elements of a list could have different type, e.g.,
+
+.pull-left[
+
+```r
+u &lt;- list(1,2,3)
+u
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 2
+## 
+## [[3]]
+## [1] 3
+```
+
+```r
+v &lt;- list(c(1,2,3))
+v
+```
+
+```
+## [[1]]
+## [1] 1 2 3
+```
+]
+.pull-right[
+
+```r
+x &lt;- list(1,2,"NA")
+x
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 2
+## 
+## [[3]]
+## [1] "NA"
+```
+
+```r
+y &lt;- list(c(1,2,"NA"))
+y
+```
+
+```
+## [[1]]
+## [1] "1"  "2"  "NA"
+```
+]
+---
+class: middle
+
+```r
+w &lt;- list(u,v,x,y)
+length(w)
+```
+
+```
+## [1] 4
+```
+
+```r
+str(w)
+```
+
+```
+## List of 4
+##  $ :List of 3
+##   ..$ : num 1
+##   ..$ : num 2
+##   ..$ : num 3
+##  $ :List of 1
+##   ..$ : num [1:3] 1 2 3
+##  $ :List of 3
+##   ..$ : num 1
+##   ..$ : num 2
+##   ..$ : chr "NA"
+##  $ :List of 1
+##   ..$ : chr [1:3] "1" "2" "NA"
+```
+---
+#Extracting elements from a list
+
+```r
+a &lt;- list(a = 1:3, b = "a string", c = pi, d = list(-1, -5))
+str(a)
+```
+
+```
+## List of 4
+##  $ a: int [1:3] 1 2 3
+##  $ b: chr "a string"
+##  $ c: num 3.14
+##  $ d:List of 2
+##   ..$ : num -1
+##   ..$ : num -5
+```
+
+There are three ways to subset a list, namely `[`, `[[` and `$`.
++ `[` will always extract a sub-list and hence returns **another list**.
+.pull-left[
+
+```r
+str(a[1:2])
+```
+
+```
+## List of 2
+##  $ a: int [1:3] 1 2 3
+##  $ b: chr "a string"
+```
+]
+.pull-right[
+
+```r
+str(a[4])
+```
+
+```
+## List of 1
+##  $ d:List of 2
+##   ..$ : num -1
+##   ..$ : num -5
+```
+]
+
+---
+class: clear
++ `[[` will always extract a **single element** from a list and 
+hence removes a level of nesting. 
+
+.pull-left[
+
+```r
+str(a[[4]])
+```
+
+```
+## List of 2
+##  $ : num -1
+##  $ : num -5
+```
+
+```r
+a[[c(4,1)]]
+```
+
+```
+## [1] -1
+```
+
+```r
+## Equivalently
+a[[4]][[1]] 
+```
+
+```
+## [1] -1
+```
+
+```r
+#Not equivalent
+a[[4]][1] 
+```
+
+```
+## [[1]]
+## [1] -1
+```
+]
+
+.pull-right[
+
+```r
+a[[1:2]] ## Recursive indexing
+```
+
+```
+## [1] 2
+```
+
+```r
+a[[1:3]]
+```
+
+```
+## Error in a[[1:3]]: recursive indexing failed at level 2
+```
+]
+
+---
+class: clear
++ `$` will always extract a **single named element** from a list.
+
+```r
+str(a$d)
+```
+
+```
+## List of 2
+##  $ : num -1
+##  $ : num -5
+```
+
+```r
+str(a[["d"]])
+```
+
+```
+## List of 2
+##  $ : num -1
+##  $ : num -5
+```
+
+```r
+str(a["d"])
+```
+
+```
+## List of 1
+##  $ d:List of 2
+##   ..$ : num -1
+##   ..$ : num -5
+```
+
+---
+class: clear
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/2f3f752cae25018554d484464f117e600ff365a2/37627/diagrams/lists-subsetting.png" alt="Section 20.5 of R4DS" width="70%" /&gt;
+&lt;p class="caption"&gt;Section 20.5 of R4DS&lt;/p&gt;
+&lt;/div&gt;
+---
+#Vectors and attributes
+Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement several fancy data structures using the base **R** vectors.
+.pull-left[
+
+```r
+x &lt;- c(1L, 2L, 3L)
+x
+```
+
+```
+## [1] 1 2 3
+```
+
+```r
+typeof(x)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+attributes(x)
+```
+
+```
+## NULL
+```
+
+```r
+class(x) &lt;- "Date"
+x
+```
+
+```
+## [1] "1970-01-02" "1970-01-03" "1970-01-04"
+```
+]
+.pull-right[
+
+```r
+typeof(x)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+attributes(x)
+```
+
+```
+## $class
+## [1] "Date"
+```
+
+```r
+attr(x,"Greetings") &lt;- "Hohoho 442"
+attributes(x)
+```
+
+```
+## $class
+## [1] "Date"
+## 
+## $Greetings
+## [1] "Hohoho 442"
+```
+]
+
+---
+class: clear
+
+.pull-left[
+
+```r
+y &lt;- 1:6; y
+```
+
+```
+## [1] 1 2 3 4 5 6
+```
+
+```r
+typeof(y)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+attributes(y)
+```
+
+```
+## NULL
+```
+
+```r
+names(y) &lt;- c("M","T","W",
+              "Th","F","Sat")
+y
+```
+
+```
+##   M   T   W  Th   F Sat 
+##   1   2   3   4   5   6
+```
+
+```r
+attributes(y)
+```
+
+```
+## $names
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+```
+]
+.pull-right[
+
+```r
+ ## similar to dim(y) &lt;- c(3,2)
+attr(y, "dim") &lt;- c(3,2)
+y
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6
+## attr(,"names")
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+```
+
+```r
+y["M"]
+```
+
+```
+## M 
+## 1
+```
+
+```r
+typeof(y)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+attributes(y)
+```
+
+```
+## $names
+## [1] "M"   "T"   "W"   "Th"  "F"   "Sat"
+## 
+## $dim
+## [1] 3 2
+```
+]
+---
+class: middle
+
+The three most important attributes of a vector are
++ **names** for naming the elements
++ **dimensions** or dims to make a vector behave like a matrix or array
++ **class** is for implementing the S3 object-oriented system (see Hadley's Wickham [Advanced R](https://adv-r.hadley.nz/oo.html) for the gory details of **R** numerous objected-oriented systems).
+
+Attributed vectors are used to implement *factors*, dates and times and data frames.
+---
+#Data frames
+A data frame (in base **R**) is then simply a list whose elements are vectors, each of the same length. Consider the following `\(\mathtt{mtcars}\)` data frame.
+
+
+```r
+head(mtcars)
+```
+
+```
+##                    mpg cyl disp  hp drat   wt qsec vs am gear carb
+## Mazda RX4         21.0   6  160 110 3.90 2.62 16.5  0  1    4    4
+## Mazda RX4 Wag     21.0   6  160 110 3.90 2.88 17.0  0  1    4    4
+## Datsun 710        22.8   4  108  93 3.85 2.32 18.6  1  1    4    1
+## Hornet 4 Drive    21.4   6  258 110 3.08 3.21 19.4  1  0    3    1
+## Hornet Sportabout 18.7   8  360 175 3.15 3.44 17.0  0  0    3    2
+## Valiant           18.1   6  225 105 2.76 3.46 20.2  1  0    3    1
+```
+
+```r
+typeof(mtcars)
+```
+
+```
+## [1] "list"
+```
+---
+class: clear
+
+```r
+length(mtcars)
+```
+
+```
+## [1] 11
+```
+
+```r
+str(mtcars)
+```
+
+```
+## 'data.frame':	32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : num  6 6 4 6 8 6 8 4 4 6 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : num  0 0 1 1 0 1 0 1 1 1 ...
+##  $ am  : num  1 1 1 0 0 0 0 0 0 0 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+```
+---
+class: clear
+
+```r
+attributes(mtcars)
+```
+
+```
+## $names
+##  [1] "mpg"  "cyl"  "disp" "hp"   "drat" "wt"   "qsec" "vs"   "am"   "gear"
+## [11] "carb"
+## 
+## $row.names
+##  [1] "Mazda RX4"           "Mazda RX4 Wag"       "Datsun 710"         
+##  [4] "Hornet 4 Drive"      "Hornet Sportabout"   "Valiant"            
+##  [7] "Duster 360"          "Merc 240D"           "Merc 230"           
+## [10] "Merc 280"            "Merc 280C"           "Merc 450SE"         
+## [13] "Merc 450SL"          "Merc 450SLC"         "Cadillac Fleetwood" 
+## [16] "Lincoln Continental" "Chrysler Imperial"   "Fiat 128"           
+## [19] "Honda Civic"         "Toyota Corolla"      "Toyota Corona"      
+## [22] "Dodge Challenger"    "AMC Javelin"         "Camaro Z28"         
+## [25] "Pontiac Firebird"    "Fiat X1-9"           "Porsche 914-2"      
+## [28] "Lotus Europa"        "Ford Pantera L"      "Ferrari Dino"       
+## [31] "Maserati Bora"       "Volvo 142E"         
+## 
+## $class
+## [1] "data.frame"
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
