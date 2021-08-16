@@ -385,9 +385,9 @@ class: clear
 
 ### Course Expectations & Grading
 The grading is broken down into three components
-   + homework assignments (35% of total grade)
-   + two take-home exams (30% of total grade)
-   + final project (35% of total grade)
+   + Homework assignments (35% of total grade)
+   + Two take-home exams (30% of total grade)
+   + Final project (35% of total grade)
    
 The homework assignments, their due dates, and submission formats 
 will be posted on the Moodle page for the course. 
