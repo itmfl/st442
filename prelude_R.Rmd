@@ -97,12 +97,14 @@ class: middle
 + Functions in **R** are **first class objects**, i.e., they can be passed as arguments to other functions. See [here](https://bookdown.org/rdpeng/rprogdatascience/functions.html) for more info.
 ```{r}
 f <- function(x){
-  function(){
-    x + 10
+  function(y){
+    x + y
   }
 }
-f(1)()
-f(2)()
+f(1)
+f(1)(5)
+f(2)
+f(2)(10)
 ```
 
 ---

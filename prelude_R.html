@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -94,19 +94,42 @@ class: middle
 
 ```r
 f &lt;- function(x){
-  function(){
-    x + 10
+  function(y){
+    x + y
   }
 }
-f(1)()
+f(1)
 ```
 
 ```
-## [1] 11
+## function(y){
+##     x + y
+##   }
+## &lt;environment: 0x5639cbd7ca58&gt;
 ```
 
 ```r
-f(2)()
+f(1)(5)
+```
+
+```
+## [1] 6
+```
+
+```r
+f(2)
+```
+
+```
+## function(y){
+##     x + y
+##   }
+## &lt;bytecode: 0x5639c9c500f8&gt;
+## &lt;environment: 0x5639c9f6a700&gt;
+```
+
+```r
+f(2)(10)
 ```
 
 ```

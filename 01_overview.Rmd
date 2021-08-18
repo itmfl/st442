@@ -9,7 +9,7 @@ output:
     #css: [default, "xaringan-themer.css", metropolis, metropolis-fonts,animate.css]
     css: ["xaringan-themer.css","animate.css"]
     nature:
-      highlightStyle: idea
+      highlightStyle: solarized-light
       highlightLines: true
       highlightSpans: true
       countIncrementalSlides: false
@@ -28,11 +28,11 @@ xaringanExtra::use_search(show_icon = TRUE)
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
 xaringanExtra::use_tachyons()
 htmltools::tagList(
-  xaringanExtra::use_clipboard(
-    button_text = "<i class=\"fa fa-clipboard\"></i>",
-    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
-  ),
-  rmarkdown::html_dependency_font_awesome()
+ xaringanExtra::use_clipboard(
+   button_text = "<i class=\"fa fa-clipboard\"></i>",
+   success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+ ),
+ rmarkdown::html_dependency_font_awesome()
 )
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
@@ -63,8 +63,8 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
     + PhD in Computer Science @ Indiana University.
 + Current Affiliation: Department of Statistics @ NCSU.
 + Office: SAS Hall 5236
-+ Office Hours: 10am -- 12pm Monday, or by appointment.
-+ Favourite Quote:
++ Office Hours: 10am -- noon Wednesday via Zoom or by appointment.
++ Favorite Quote:
    > Three minutes thought would suffice to find this out but thought is irksome 
    > and three  minutes is a long time.
    > 
@@ -144,6 +144,13 @@ class: middle
 ```{r echo = FALSE, out.width="90%", fig.cap="https://research.ncsu.edu/dsi/"}
 knitr::include_graphics("figures/ncsu_dsi.png")
 ```
+
+---
+# Memes !?
+```{r echo = FALSE, out.width="80%"}
+knitr::include_graphics("figures/datascientist_meme.jpg")
+```
+
 ---
 # A lot of requirements ?
 ```{r out.width = "60%", echo = FALSE, fig.cap = "http://www.kimberlycoffey.com/blog/2016/11/text-analysis"}
@@ -182,7 +189,16 @@ knitr::include_graphics("figures/venn2.png")
 > analyze a new problem, pitch manure, program a computer, cook a tasty meal, 
 > fight efficiently, die gallantly. Specialization is for insects.
 >
->                                         Robert A. Heinlein
+>                               --- Robert A. Heinlein
+
+--
+<br>
+
+> Being a scientist means living on the borderline between your competence and your incompetence. 
+> If you always feel competent, you aren't doing your job.
+>
+>  --- Carlos Bustamante
+
 
 ---
 # John Tukey's FDA
@@ -278,7 +294,7 @@ First thing first
 
 --
 <br><br>
-+ [Ask Miao Yu, your TA](https://statistics.sciences.ncsu.edu/people/myu12/); Office hours: 12:30--2:30pm, Tuesday.
++ [Ask Yunshu Zhang, your TA](https://statistics.sciences.ncsu.edu/people/yzhan234/). Office hours: Monday, 3pm--4pm and Tuesday 2pm--3pm.
 
 --
 <br><br>
@@ -343,34 +359,37 @@ dev.off()
 ```
 ---
 #Course overview
-```{r out.width="70%", echo = FALSE, fig.cap = "https://r4ds.had.co.nz"}
+```{r out.width="90%", echo = FALSE, fig.cap = "https://r4ds.had.co.nz"}
 knitr::include_graphics("https://bit.ly/2CV35vJ")
 ```
-
-We will cover the following topics
+---
+class: clear, middle
+We will cover the following tentative topics.
 + Data wrangling and tidying with dplyr and tidyr (**R** libraries)
 + Data visualization with ggplot2 (**R** library)
-+ Hitch-hiker guide to SQL.
++ Strings manipulation and text processing.
++ Hitch-hiker guide to SQL (if time permits)
 + Linear regression and scatterplot smoothing. 
 + Classification, $k$-NN, linear/quadratic discriminant analysis, logistic regression.
 + Decision trees, support vectors machine.
 + Principal components analysis, multidimensional scaling, clustering.
++ Network science.
 
 ---
 class: clear
 ### Suggested Texts
 + Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.had.co.nz)
-+ Gareth James, Daniella Witten, Trevor Hastie, and Rob Tibshirani, [An Introduction to Statistical Learning with R](http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf)
++ Gareth James, Daniella Witten, Trevor Hastie, and Rob Tibshirani, [An Introduction to Statistical Learning with R, 2nd edition](http://www.statlearning.com)
 + Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://beanumber.github.io/mdsr2e/)
 + Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
 
 ### Course Expectations & Grading
 The grading is broken down into three components
-   + homework assignments (40% of total grade)
-   + two take-home exams (30% of total grade)
-   + final project (30% of total grade)
+   + Homework assignments (35% of total grade)
+   + Two take-home exams (30% of total grade)
+   + Final project (35% of total grade)
    
-The homework assignments, their due dates, and submission format 
+The homework assignments, their due dates, and submission formats 
 will be posted on the Moodle page for the course. 
 ---
 class: clear
@@ -393,8 +412,8 @@ class: clear
 ### Key Dates
 + Census day & drop deadline: Friday, August 27, 2021.
 + Withdrawal deadline: Wednesday, October 13, 2021.
-+ Midterm Exam 1: Monday, October 4, 2021 (take home)
-+ Midterm Exam 2: Wednesday, November 10, 2021. (take home)
++ Take home exam 1: Monday, October 4, 2021 (tentative)
++ Take home exam 2: Wednesday, November 10, 2021. (tentative)
 + Term paper: Due on Monday, December 6, 2021 before 11:59pm (tentative)
 
 ### Grading scale
@@ -421,10 +440,9 @@ Grading is rounded to the nearest percentage point. Potential (upward) curving o
 class: clear
 
 ###Students with Disabilities
-Reasonable accommodations will be made for students with verifiable disabilities. In order to take advantage of available accommodations, students must register with the Disability Resource Office at Holmes Hall, Suite 304, Campus Box 7509, 919-515-7653. For more information on NC State’s policy on working with students with disabilities, please see the [Academic Accommodations for Students with Disabilities](https://policies.ncsu.edu/regulation/reg-02-20-01/)
+Reasonable accommodations will be made for students. In order to take advantage of available accommodations, students must register with the DRO at Holmes Hall, Suite 304, Campus Box 7509, 919-515-7653. For more information on NC State’s policy on working with students with disabilities, please see the [Academic Accommodations for Students with Disabilities](https://policies.ncsu.edu/regulation/reg-02-20-01/)
 
 ###Ethics
-The strength of the university depends on academic and personal integrity. In this course, you must be honest and truthful. Students are permitted and indeed encouraged to discuss lecture materials and homework problems with one another, but it is expected that the writing up of answers will be done privately. Copying by one student of another student's homework solutions is considered an ethics violation in this course. Specifically, please **do not share code** or output before your homework assignment is submitted.
-More information about university misconduct policies are available at
+The strength of the university depends on academic and personal integrity. In this course, you must be honest and truthful. Students are **permitted** to discuss lecture materials and homework problems with one another, but it is expected that the writing up of answers will be done privately. Thus copying or looking at another student's homework solutions is considered an ethics violation in this course. Specifically, please **do not share code or output** before your homework assignment is submitted. More information about university misconduct policies are available at
 + [Code of student conduct](http://policies.ncsu.edu/policy/pol-11-35-01)
 + [Academic honesty](http://policies.ncsu.edu/policy/pol-11-35-01)
