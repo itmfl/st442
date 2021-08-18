@@ -8,7 +8,7 @@ output:
     #css: ["default","metropolis","metropolis-fonts","animate.css"]
     css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: github
+      highlightStyle: solarized-light
       highlightLines: true
       highlightSpans: true
       countIncrementalSlides: false
@@ -29,6 +29,9 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 library(xaringanthemer)
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
 htmltools::tagList(
   xaringanExtra::use_clipboard(
     button_text = "<i class=\"fa fa-clipboard\"></i>",
@@ -36,14 +39,12 @@ htmltools::tagList(
   ),
   rmarkdown::html_dependency_font_awesome()
 )
-#xaringanExtra::use_animate_css()
-xaringanExtra::use_extra_styles(hover_code_line = TRUE)
-xaringanExtra::use_tachyons()
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
+   link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "hunt_sunrise.jpg",
+   title_slide_background_image = "belltower2.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -64,7 +65,7 @@ There are five main important *verbs* associated with dplyr, namely
 + [group_by](https://dplyr.tidyverse.org/reference/group_by.html) and [summarize](https://dplyr.tidyverse.org/reference/summarise.html)
 
 ---
-We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 
+We follow an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 
 
 We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
 
@@ -105,9 +106,12 @@ flights %>% filter(month == 8 & day == 21) %>%
             filter(arr_delay > 10 | dep_delay > 10)
 ```
 
-The previous example introduce the use of the $\%>\%$ pipe operator. 
-The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
-The pipe operator maps $x \%>\% f(y)$ to $f(x,y)$. 
++ The previous example introduce the `%>%` pipe operator. 
+
++ The pipe operator allows us to chain together operations without the need to introduce auxiliary variables.
+
++ The pipe operator maps `x %>% f(y)` to `f(x,y)`.
+
 ---
 #Missing values
 Missing values are represented in **R** as $\mathrm{NA}$; missing values are "contagious" hence any almost all operations involving one or more $\mathrm{NA}$ will also return a $\mathrm{NA}$. For example
