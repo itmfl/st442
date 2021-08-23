@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Data Science</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <script src="libs/mark.js/mark.min.js"></script>
+    <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-search/search.js"></script>
+    <script>window.addEventListener('load', function() { window.xeSearch = new RemarkSearch({"position":"bottom-left","caseSensitive":false,"showIcon":true,"autoSearch":true}) })</script>
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to Data Science
+## Text processing with R
+### Fall 2021
+
+---
+
+
+
+
+# Additional Readings
+
++ J. Silge and D. Robinson [Text Mining with R: A tidy approach](https://www.tidytextmining.com/)
+
++ Chapter 26 of R. Irizarry [Introduction to Data Science](https://rafalab.github.io/dsbook/text-mining.html)
+
++ Chapter 19 of B. Baumer, D. Kaplan and N. Horton [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/ch-text.html)
+
++ M. Jockers and R. Thalken [Text analysis with R](https://catalog.lib.ncsu.edu/catalog/NCSU4839893)
+
+---
+# Text data and tokenization.
+
+Let us first consider the following two stanzas from a poem by [Oscar Wilde](https://en.wikipedia.org/wiki/Oscar_Wilde)
+
+
+```r
+cat(text)
+```
+
+```
+## Tread lightly, she is near
+## 	Under the snow
+## Speak gently, she can hear
+## 	The daisies grow.
+## All her bright golden hair
+## 	Tarnished with rust
+## She that was young and fair
+## 	Fallen to dust.
+```
+--
+The raw text looks like 
+
+```r
+text
+```
+
+```
+## [1] "Tread lightly, she is near\r\n\tUnder the snow\r\nSpeak gently, she can hear\r\n\tThe daisies grow.\r\nAll her bright golden hair\r\n\tTarnished with rust\r\nShe that was young and fair\r\n\tFallen to dust."
+```
+
+---
+class: clear, middle
+
+In text mining, the first thing to do is generally to **tokenize** a given text into tokens such as letters, words, and more general [n-grams](https://en.wikipedia.org/wiki/N-gram). 
+
+We will use the [unnest_tokens](https://www.rdocumentation.org/packages/tidytext/versions/0.3.1/topics/unnest_tokens) function from the [tidytext](https://www.rdocumentation.org/packages/tidytext/versions/0.3.1) package.
+
+
+```r
+library(tidytext) ## 
+library(stringr)
+library(tibble)
+text_lines &lt;- text %&gt;% str_split(pattern = boundary("sentence")) 
+text_lines
+```
+
+```
+## [[1]]
+## [1] "Tread lightly, she is near\r\n"  "\tUnder the snow\r\n"           
+## [3] "Speak gently, she can hear\r\n"  "\tThe daisies grow.\r\n"        
+## [5] "All her bright golden hair\r\n"  "\tTarnished with rust\r\n"      
+## [7] "She that was young and fair\r\n" "\tFallen to dust."
+```
+
+```r
+text_df &lt;- tibble(lines = 1:length(text_lines[[1]]), text = text_lines[[1]])
+text_df
+```
+
+```
+## # A tibble: 8 x 2
+##   lines text                            
+##   &lt;int&gt; &lt;chr&gt;                           
+## 1     1 "Tread lightly, she is near\r\n"
+## 2     2 "\tUnder the snow\r\n"          
+## 3     3 "Speak gently, she can hear\r\n"
+## 4     4 "\tThe daisies grow.\r\n"       
+## 5     5 "All her bright golden hair\r\n"
+## 6     6 "\tTarnished with rust\r\n"     
+## # … with 2 more rows
+```
+
+---
+class: clear, middle
+We can now tokenize the above two stanzas into words.
+
+```r
+tokens &lt;- text_df %&gt;% unnest_tokens(words, text)
+tokens
+```
+
+```
+## # A tibble: 33 x 2
+##   lines words  
+##   &lt;int&gt; &lt;chr&gt;  
+## 1     1 tread  
+## 2     1 lightly
+## 3     1 she    
+## 4     1 is     
+## 5     1 near   
+## 6     2 under  
+## # … with 27 more rows
+```
+Other tokenization are also possible, e.g.,
+
+```r
+text_df %&gt;% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
+```
+
+```
+## # A tibble: 17 x 2
+##   lines ngrams           
+##   &lt;int&gt; &lt;chr&gt;            
+## 1     1 tread lightly she
+## 2     1 lightly she is   
+## 3     1 she is near      
+## 4     2 under the snow   
+## 5     3 speak gently she 
+## 6     3 gently she can   
+## # … with 11 more rows
+```
+
+---
+# Jane Austen and tokenization.
+The following is an abridged presentation of Chapter 1 of [Text Mining with R](https://www.tidytextmining.com/).
+
+```r
+library(janeaustenr) ## The package contains the text of 6 Jane Austen's novels.
+library(dplyr)
+austen_books()
+```
+
+```
+## # A tibble: 73,422 x 2
+##   text                    book               
+## * &lt;chr&gt;                   &lt;fct&gt;              
+## 1 "SENSE AND SENSIBILITY" Sense &amp; Sensibility
+## 2 ""                      Sense &amp; Sensibility
+## 3 "by Jane Austen"        Sense &amp; Sensibility
+## 4 ""                      Sense &amp; Sensibility
+## 5 "(1811)"                Sense &amp; Sensibility
+## 6 ""                      Sense &amp; Sensibility
+## # … with 73,416 more rows
+```
+
+```r
+austen_books() %&gt;% dplyr::select(book) %&gt;% unique() %&gt;% pull()
+```
+
+```
+## [1] Sense &amp; Sensibility Pride &amp; Prejudice   Mansfield Park     
+## [4] Emma                Northanger Abbey    Persuasion         
+## 6 Levels: Sense &amp; Sensibility Pride &amp; Prejudice Mansfield Park ... Persuasion
+```
+
+---
+class: clear
+Let us first add the line number and chapter number to each book.
+
+```r
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+
+original_books &lt;- austen_books() %&gt;%
+  group_by(book) %&gt;%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, 
+                                     regex("^chapter [\\divxlc]",
+                                           ignore_case = TRUE)))) %&gt;%
+  ungroup()
+
+original_books
+```
+
+```
+## # A tibble: 73,422 x 4
+##   text                    book                linenumber chapter
+##   &lt;chr&gt;                   &lt;fct&gt;                    &lt;int&gt;   &lt;int&gt;
+## 1 "SENSE AND SENSIBILITY" Sense &amp; Sensibility          1       0
+## 2 ""                      Sense &amp; Sensibility          2       0
+## 3 "by Jane Austen"        Sense &amp; Sensibility          3       0
+## 4 ""                      Sense &amp; Sensibility          4       0
+## 5 "(1811)"                Sense &amp; Sensibility          5       0
+## 6 ""                      Sense &amp; Sensibility          6       0
+## # … with 73,416 more rows
+```
+---
+class: clear
+We next tokenize the text into words and remove the common stop words.
+
+```r
+data(stop_words) ## Part of the tidytext package.
+jausten_tokenized &lt;- original_books %&gt;% unnest_tokens(word, text) %&gt;% 
+  anti_join(stop_words)
+jausten_tokenized
+```
+
+```
+## # A tibble: 217,609 x 4
+##   book                linenumber chapter word       
+##   &lt;fct&gt;                    &lt;int&gt;   &lt;int&gt; &lt;chr&gt;      
+## 1 Sense &amp; Sensibility          1       0 sense      
+## 2 Sense &amp; Sensibility          1       0 sensibility
+## 3 Sense &amp; Sensibility          3       0 jane       
+## 4 Sense &amp; Sensibility          3       0 austen     
+## 5 Sense &amp; Sensibility          5       0 1811       
+## 6 Sense &amp; Sensibility         10       1 chapter    
+## # … with 217,603 more rows
+```
+---
+Given this tidy representation, it is easy to do some data exploration. For example, what are the most common words ?
+
+```r
+words_freq &lt;- jausten_tokenized %&gt;% count(word, sort = TRUE)
+words_freq
+```
+
+```
+## # A tibble: 13,914 x 2
+##   word      n
+##   &lt;chr&gt; &lt;int&gt;
+## 1 miss   1855
+## 2 time   1337
+## 3 fanny   862
+## 4 dear    822
+## 5 lady    817
+## 6 sir     806
+## # … with 13,908 more rows
+```
+Which book is most verbose ?
+
+```r
+jausten_tokenized %&gt;% group_by(book) %&gt;% 
+  summarize(no_words = n()) %&gt;% 
+  arrange(desc(no_words))
+```
+
+```
+## # A tibble: 6 x 2
+##   book                no_words
+##   &lt;fct&gt;                  &lt;int&gt;
+## 1 Mansfield Park         47968
+## 2 Emma                   46775
+## 3 Pride &amp; Prejudice      37246
+## 4 Sense &amp; Sensibility    36330
+## 5 Persuasion             25488
+## 6 Northanger Abbey       23802
+```
+---
+Maybe a words cloud would be nice ?
+
+```r
+library(wordcloud)
+wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 400, 
+          colors = brewer.pal(8, "Dark2"))
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-light",
+"highlightLines": true,
+"highlightSpans": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

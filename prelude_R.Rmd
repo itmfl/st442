@@ -69,7 +69,7 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
 
-+ [Ask Miao Yu, your TA](https://statistics.sciences.ncsu.edu/people/myu12/); Office hours: 12:30--2:30pm, Tuesday.
++ [Ask Yunshu, your TA](https://statistics.sciences.ncsu.edu/people/yzhan234/); Office hours: 3pm--4pm Monday and 2pm --3pm, Tuesday.
 
 ---
 class: middle

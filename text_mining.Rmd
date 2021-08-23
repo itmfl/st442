@@ -1,0 +1,172 @@
+---
+title: "Introduction to Data Science"
+subtitle: "Text processing with R"
+date: "Fall 2021"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
+    nature:
+      highlightStyle: solarized-light
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
+--- 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max = 6, tibble.width=70)
+```
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_image = "belltower2.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+```
+# Additional Readings
+
++ J. Silge and D. Robinson [Text Mining with R: A tidy approach](https://www.tidytextmining.com/)
+
++ Chapter 26 of R. Irizarry [Introduction to Data Science](https://rafalab.github.io/dsbook/text-mining.html)
+
++ Chapter 19 of B. Baumer, D. Kaplan and N. Horton [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/ch-text.html)
+
++ M. Jockers and R. Thalken [Text analysis with R](https://catalog.lib.ncsu.edu/catalog/NCSU4839893)
+
+---
+# Text data and tokenization.
+
+Let us first consider the following two stanzas from a poem by [Oscar Wilde](https://en.wikipedia.org/wiki/Oscar_Wilde)
+
+```{r echo = -c(1:2)}
+library(stringr)
+text <- str_c("Tread lightly, she is near\r\n",
+"\tUnder the snow\r\n",
+"Speak gently, she can hear\r\n",
+"\tThe daisies grow.\r\n",
+"All her bright golden hair\r\n",
+"\tTarnished with rust\r\n",
+"She that was young and fair\r\n",
+"\tFallen to dust.", collapse = "")
+cat(text)
+```
+--
+The raw text looks like 
+```{r}
+text
+```
+
+---
+class: clear, middle
+
+In text mining, the first thing to do is generally to **tokenize** a given text into tokens such as letters, words, and more general [n-grams](https://en.wikipedia.org/wiki/N-gram). 
+
+We will use the [unnest_tokens](https://www.rdocumentation.org/packages/tidytext/versions/0.3.1/topics/unnest_tokens) function from the [tidytext](https://www.rdocumentation.org/packages/tidytext/versions/0.3.1) package.
+
+```{r}
+library(tidytext) ## 
+library(stringr)
+library(tibble)
+text_lines <- text %>% str_split(pattern = boundary("sentence")) 
+text_lines
+text_df <- tibble(lines = 1:length(text_lines[[1]]), text = text_lines[[1]])
+text_df
+```
+
+---
+class: clear, middle
+We can now tokenize the above two stanzas into words.
+```{r}
+tokens <- text_df %>% unnest_tokens(words, text)
+tokens
+```
+Other tokenization are also possible, e.g.,
+```{r}
+text_df %>% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
+```
+
+---
+# Jane Austen and tokenization.
+The following is an abridged presentation of Chapter 1 of [Text Mining with R](https://www.tidytextmining.com/).
+```{r}
+library(janeaustenr) ## The package contains the text of 6 Jane Austen's novels.
+library(dplyr)
+austen_books()
+austen_books() %>% dplyr::select(book) %>% unique() %>% pull()
+```
+
+---
+class: clear
+Let us first add the line number and chapter number to each book.
+```{r}
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+
+original_books <- austen_books() %>%
+  group_by(book) %>%
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, 
+                                     regex("^chapter [\\divxlc]",
+                                           ignore_case = TRUE)))) %>%
+  ungroup()
+
+original_books
+```
+---
+class: clear
+We next tokenize the text into words and remove the common stop words.
+```{r}
+data(stop_words) ## Part of the tidytext package.
+jausten_tokenized <- original_books %>% unnest_tokens(word, text) %>% 
+  anti_join(stop_words)
+jausten_tokenized
+```
+---
+Given this tidy representation, it is easy to do some data exploration. For example, what are the most common words ?
+```{r}
+words_freq <- jausten_tokenized %>% count(word, sort = TRUE)
+words_freq
+```
+Which book is most verbose ?
+```{r}
+jausten_tokenized %>% group_by(book) %>% 
+  summarize(no_words = n()) %>% 
+  arrange(desc(no_words))
+```
+---
+Maybe a words cloud would be nice ?
+```{r out.width="90%", fig.align = "center"}
+library(wordcloud)
+wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 400, 
+          colors = brewer.pal(8, "Dark2"))
+```
