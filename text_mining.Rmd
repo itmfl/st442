@@ -9,8 +9,8 @@ output:
     css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
       highlightStyle: solarized-light
-      highlightLines: true
-      highlightSpans: true
+      highlightLines: false
+      highlightSpans: false
       countIncrementalSlides: false
     # df_print: tibble
     # css: [default, metropolis, metropolis-fonts]
@@ -61,6 +61,8 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 + Chapter 19 of B. Baumer, D. Kaplan and N. Horton [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/ch-text.html)
 
 + M. Jockers and R. Thalken [Text analysis with R](https://catalog.lib.ncsu.edu/catalog/NCSU4839893)
+
++ E. Hvitfeld and J. Silge [Supervised Machine Learning for Text Analysis in R](https://smltar.com/)
 
 ---
 # Text data and tokenization.
@@ -167,6 +169,91 @@ jausten_tokenized %>% group_by(book) %>%
 Maybe a words cloud would be nice ?
 ```{r out.width="90%", fig.align = "center"}
 library(wordcloud)
-wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 400, 
+wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 500, 
           colors = brewer.pal(8, "Dark2"))
+```
+
+---
+Is a word cloud better than a bar plot or a dot plot ?
+```{r fig.show = "hold", out.width="90%"}
+library(ggplot2)
+p <- words_freq %>% filter(n > 500) %>% mutate(word = reorder(word,n)) %>% 
+  ggplot(aes(n, word)) + labs(y = NULL)
+p1 <- p + geom_col()
+p2 <- p + geom_point()
+gridExtra::grid.arrange(p1,p2,nrow = 1)
+
+```
+---
+# Battle of the authors
+Let us now compare the word distributions of Jane Austen against other authors like Herberg G. Wells and the Brontës sisters.
+
+```{r gutenberg1, cache = TRUE}
+## First download the data.
+library(gutenbergr)
+hgwells <- gutenberg_download(c(35, 36, 5230, 159))
+tidy_hgwells <- hgwells %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+bronte <- gutenberg_download(c(1260, 768, 969, 9182, 767))
+tidy_bronte <- bronte %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+```
+
+---
+```{r}
+glimpse(tidy_hgwells)
+glimpse(tidy_bronte)
+tidy_austen <- jausten_tokenized
+## Let us now create a data frame with these words and their authors
+frequency <- bind_rows(mutate(tidy_bronte, author = "Bronte sisters"),
+                       mutate(tidy_hgwells, author = "H.G. Wells"),
+                       mutate(tidy_austen, author = "Jane Austen")) %>%
+  mutate(word = str_extract(word, "[a-z']+"))
+```
+
+---
+We now see, for each author, how likely a specific word is used
+```{r}
+library(tidyr)
+frequency <- frequency %>% group_by(author, word) %>% summarise(n = n()) %>%
+  mutate(proportion = n/sum(n))%>%  ## grouped mutate! 
+  select(-n) %>% pivot_wider(names_from = author, values_from = proportion)
+frequency
+```
+
+---
+We can now visualize the distribution of the words used by the Brontes sisters and H. G. Wells, when compared to the Jane Austen baseline. 
+```{r warning = FALSE}
+p1 <- ggplot(frequency, aes(x = `Bronte sisters`, y = `Jane Austen`), 
+            color = abs(`Jane Austen` - `Bronte sisters`)) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = scales::percent_format()) +
+  scale_y_log10(labels = scales::percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), 
+                       low = "darkslategray4", high = "gray75") +
+  theme(legend.position="none") +
+  labs(y = "Jane Austen", x = NULL) + ggtitle("Bronte Sisters")
+p2 <- ggplot(frequency, aes(x = `H.G. Wells`, y = `Jane Austen`), 
+            color = abs(`Jane Austen` - `H.G. Wells`)) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = scales::percent_format()) +
+  scale_y_log10(labels = scales::percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), 
+                       low = "darkslategray4", high = "gray75") +
+  theme(legend.position="none") +
+  labs(y = "Jane Austen", x = NULL) + ggtitle("H.G. Wells")
+```
+---
+```{r out.width="70%", fig.asp = 1, warning = FALSE}
+p1
+```
+---
+```{r out.width="70%", fig.asp = 1, warning = FALSE}
+p2
 ```

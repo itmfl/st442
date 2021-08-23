@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -47,6 +47,8 @@ class: center, middle, inverse, title-slide
 + Chapter 19 of B. Baumer, D. Kaplan and N. Horton [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/ch-text.html)
 
 + M. Jockers and R. Thalken [Text analysis with R](https://catalog.lib.ncsu.edu/catalog/NCSU4839893)
+
++ E. Hvitfeld and J. Silge [Supervised Machine Learning for Text Analysis in R](https://smltar.com/)
 
 ---
 # Text data and tokenization.
@@ -109,7 +111,7 @@ text_df
 ```
 
 ```
-## # A tibble: 8 x 2
+## # A tibble: 8 × 2
 ##   lines text                            
 ##   &lt;int&gt; &lt;chr&gt;                           
 ## 1     1 "Tread lightly, she is near\r\n"
@@ -131,7 +133,7 @@ tokens
 ```
 
 ```
-## # A tibble: 33 x 2
+## # A tibble: 33 × 2
 ##   lines words  
 ##   &lt;int&gt; &lt;chr&gt;  
 ## 1     1 tread  
@@ -149,7 +151,7 @@ text_df %&gt;% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
 ```
 
 ```
-## # A tibble: 17 x 2
+## # A tibble: 17 × 2
 ##   lines ngrams           
 ##   &lt;int&gt; &lt;chr&gt;            
 ## 1     1 tread lightly she
@@ -172,7 +174,7 @@ austen_books()
 ```
 
 ```
-## # A tibble: 73,422 x 2
+## # A tibble: 73,422 × 2
 ##   text                    book               
 ## * &lt;chr&gt;                   &lt;fct&gt;              
 ## 1 "SENSE AND SENSIBILITY" Sense &amp; Sensibility
@@ -215,7 +217,7 @@ original_books
 ```
 
 ```
-## # A tibble: 73,422 x 4
+## # A tibble: 73,422 × 4
 ##   text                    book                linenumber chapter
 ##   &lt;chr&gt;                   &lt;fct&gt;                    &lt;int&gt;   &lt;int&gt;
 ## 1 "SENSE AND SENSIBILITY" Sense &amp; Sensibility          1       0
@@ -238,7 +240,7 @@ jausten_tokenized
 ```
 
 ```
-## # A tibble: 217,609 x 4
+## # A tibble: 217,609 × 4
 ##   book                linenumber chapter word       
 ##   &lt;fct&gt;                    &lt;int&gt;   &lt;int&gt; &lt;chr&gt;      
 ## 1 Sense &amp; Sensibility          1       0 sense      
@@ -258,7 +260,7 @@ words_freq
 ```
 
 ```
-## # A tibble: 13,914 x 2
+## # A tibble: 13,914 × 2
 ##   word      n
 ##   &lt;chr&gt; &lt;int&gt;
 ## 1 miss   1855
@@ -278,7 +280,7 @@ jausten_tokenized %&gt;% group_by(book) %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 2
+## # A tibble: 6 × 2
 ##   book                no_words
 ##   &lt;fct&gt;                  &lt;int&gt;
 ## 1 Mansfield Park         47968
@@ -293,18 +295,148 @@ Maybe a words cloud would be nice ?
 
 ```r
 library(wordcloud)
-wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 400, 
+wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 500, 
           colors = brewer.pal(8, "Dark2"))
 ```
 
 &lt;img src="text_mining_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+Is a word cloud better than a bar plot or a dot plot ?
+
+```r
+library(ggplot2)
+p &lt;- words_freq %&gt;% filter(n &gt; 500) %&gt;% mutate(word = reorder(word,n)) %&gt;% 
+  ggplot(aes(n, word)) + labs(y = NULL)
+p1 &lt;- p + geom_col()
+p2 &lt;- p + geom_point()
+gridExtra::grid.arrange(p1,p2,nrow = 1)
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+# Battle of the authors
+Let us now compare the word distributions of Jane Austen against other authors like Herberg G. Wells and the Brontës sisters.
+
+
+```r
+## First download the data.
+library(gutenbergr)
+hgwells &lt;- gutenberg_download(c(35, 36, 5230, 159))
+tidy_hgwells &lt;- hgwells %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  anti_join(stop_words)
+bronte &lt;- gutenberg_download(c(1260, 768, 969, 9182, 767))
+tidy_bronte &lt;- bronte %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  anti_join(stop_words)
+```
+
+---
+
+```r
+glimpse(tidy_hgwells)
+```
+
+```
+## Rows: 67,475
+## Columns: 2
+## $ gutenberg_id &lt;int&gt; 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35,…
+## $ word         &lt;chr&gt; "time", "machine", "invention", "contents", "in…
+```
+
+```r
+glimpse(tidy_bronte)
+```
+
+```
+## Rows: 255,494
+## Columns: 2
+## $ gutenberg_id &lt;int&gt; 767, 767, 767, 767, 767, 767, 767, 767, 767, 76…
+## $ word         &lt;chr&gt; "agnes", "grey", "acton", "bell", "london", "th…
+```
+
+```r
+tidy_austen &lt;- jausten_tokenized
+## Let us now create a data frame with these words and their authors
+frequency &lt;- bind_rows(mutate(tidy_bronte, author = "Bronte sisters"),
+                       mutate(tidy_hgwells, author = "H.G. Wells"),
+                       mutate(tidy_austen, author = "Jane Austen")) %&gt;%
+  mutate(word = str_extract(word, "[a-z']+"))
+```
+
+---
+We now see, for each author, how likely a specific word is used
+
+```r
+library(tidyr)
+frequency &lt;- frequency %&gt;% group_by(author, word) %&gt;% summarise(n = n()) %&gt;%
+  mutate(proportion = n/sum(n))%&gt;%  ## grouped mutate! 
+  select(-n) %&gt;% pivot_wider(names_from = author, values_from = proportion)
+frequency
+```
+
+```
+## # A tibble: 28,626 × 4
+##   word       `Bronte sisters` `H.G. Wells` `Jane Austen`
+##   &lt;chr&gt;                 &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;
+## 1 a                0.0000587     0.0000148    0.00000919
+## 2 aback            0.00000391    0.0000148   NA         
+## 3 abaht            0.00000391   NA           NA         
+## 4 abandon          0.0000313     0.0000148   NA         
+## 5 abandoned        0.0000900     0.000178     0.00000460
+## 6 abandoning       0.00000391    0.0000445   NA         
+## # … with 28,620 more rows
+```
+
+---
+We can now visualize the distribution of the words used by the Brontes sisters and H. G. Wells, when compared to the Jane Austen baseline. 
+
+```r
+p1 &lt;- ggplot(frequency, aes(x = `Bronte sisters`, y = `Jane Austen`), 
+            color = abs(`Jane Austen` - `Bronte sisters`)) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = scales::percent_format()) +
+  scale_y_log10(labels = scales::percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), 
+                       low = "darkslategray4", high = "gray75") +
+  theme(legend.position="none") +
+  labs(y = "Jane Austen", x = NULL) + ggtitle("Bronte Sisters")
+p2 &lt;- ggplot(frequency, aes(x = `H.G. Wells`, y = `Jane Austen`), 
+            color = abs(`Jane Austen` - `H.G. Wells`)) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = scales::percent_format()) +
+  scale_y_log10(labels = scales::percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), 
+                       low = "darkslategray4", high = "gray75") +
+  theme(legend.position="none") +
+  labs(y = "Jane Austen", x = NULL) + ggtitle("H.G. Wells")
+```
+---
+
+```r
+p1
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+
+```r
+p2
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-17-1.png" width="70%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "solarized-light",
-"highlightLines": true,
-"highlightSpans": true,
+"highlightLines": false,
+"highlightSpans": false,
 "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
@@ -371,24 +503,7 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
       links[i].target = '_blank';
     }
   }
-})();
-// adds .remark-code-has-line-highlighted class to <pre> parent elements
-// of code chunks containing highlighted lines with class .remark-code-line-highlighted
-(function(d) {
-  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
-  const preParents = [];
-  const findPreParent = function(line, p = 0) {
-    if (p > 1) return null; // traverse up no further than grandparent
-    const el = line.parentElement;
-    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
-  };
-
-  for (let line of hlines) {
-    let pre = findPreParent(line);
-    if (pre && !preParents.includes(pre)) preParents.push(pre);
-  }
-  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
-})(document);</script>
+})();</script>
 
 <script>
 slideshow._releaseMath = function(el) {
