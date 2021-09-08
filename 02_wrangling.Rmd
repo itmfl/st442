@@ -27,6 +27,7 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
+library(flipbookr)
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
@@ -490,9 +491,10 @@ penguins %>% summarise(across(everything(),~sum(is.na(.))))
 
 ---
 class: clear
-```{r}
+```{r penguins}
 ## Replace missing values for the numerical variables by the 
 ## average value (computed within that specie and island).
+library(dplyr)
 penguins_imputed <- penguins %>%
   group_by(species, island) %>%
   mutate(imputed = if_any(where(is.numeric), is.na),

@@ -1,5 +1,5 @@
 ---
-title: "hw1"
+title: "CSC/ST 442 Assignment 1"
 output: pdf_document
 urlcolor: blue
 ---
@@ -9,15 +9,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Instruction
-This assignment consists of $2$ problems. The assignment is due on 
-**Wednesday, September 4** at 11:59pm EDT. Please submit your assignment electronically through the moodle webpage. You are encouraged (but not required) to use 
+This assignment consists of $3$ problems. The assignment is due on 
+**Wednesday, September 1** at 11:59pm EDT. Please submit your assignment electronically through the moodle webpage. You are encouraged (but not required) to use 
 RMarkdown to write up your homework solution. To start using Rmarkdown read
 
 * Section 40.2 of  [Introduction to Data Science](https://rafalab.github.io/dsbook/reproducible-projects-with-rstudio-and-r-markdown.html)
 * the [RStudio tutorial](https://rmarkdown.rstudio.com/lesson-1.html) 
 * the [Rmarkdown cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
 
-## Problem 1 (35pts)
+## Problem 1 (30pts)
 
 This problem uses a sample of data from the [Gapminder foundation](https://www.gapminder.org/data/). If you haven't yet watched it, you might want to take a few minutes to watch the following [Hans Rosling TeD talk](https://www.ted.com/talks/hans_rosling_shows_the_best_stats_you_ve_ever_seen?language=en)
 
@@ -38,19 +38,71 @@ The variables $\mathtt{lifeExp}$, $\mathtt{pop}$ and $\mathtt{gdpPercap}$ descri
 Using this dataset, answer the following questions.
 
 1. (5pts) How many observations do we have per continent ?
-2. (5pts) How many (distinct) countries do we have for each continent ? Hint: Try the functions $\mathrm{n\_distinct}$ or $\mathrm{length(unique(...))}$. 
-3. (10pts) Create a new column named $\mathtt{gdp\_ratio}$ whose values are the GDP for that country and year divided by the corresponding GDP for the United States that year. For example, the value of $\mathtt{gdp\_ratio}$ for Afghanistan in $1952$ is roughly $0.00298$; that is to say, the GDP of Afghanistan in $1952$ is approximately $0.00298$ times that of the United States in $1952$. 
-4. (5pts) Now look at the countries in Asia. For every unique year in the dataset (namely $1952, 1957, 1962, ...$), which country has the lowest life Expectancy ? Which country has the highest lifeExpectancy ?
-5. (10pts) For every continent, find the country that experienced the sharpest 5 year drop in life expectancy during the period from $1952$ to $1997$. Hint: the change in life expectancy for each country can be computed via the code chunk
+2. (5pts) How many (distinct) countries do we have for each continent ? Hint: Try the functions $\mathrm{n\_distinct}()$.
+3. (5pts) Create a new column named $\mathtt{gdp\_ratio}$ whose values are the GDP for that country and year divided by the corresponding GDP for the United States that year. For example, the value of $\mathtt{gdp\_ratio}$ for Afghanistan in $1952$ is roughly $0.00298$; that is to say, the GDP of Afghanistan in $1952$ is approximately $0.00298$ times that of the United States in $1952$. Hint: First create a column for the `GDP` of each country. Then try the following code
 ```{r eval = FALSE}
-gapminder %>% group_by(country) %>% mutate(lifeExp_change = lifeExp - lag(lifeExp))
+gapminder %>% arrange(country,year) %>% mutate(gdp_ratio = GDP/GDP[country == "United States"])
 ```
+4. (5pts) Now look at the countries in Asia. For every unique year in the dataset (namely $1952, 1957, 1962, ...$), which country has the lowest life Expectancy ? Which country has the highest lifeExpectancy ? Hint: use a **grouped** filter.
+5. (10pts) For every continent, find the country that experienced the sharpest 5 year drop in life expectancy during the period from $1952$ to $1997$. Hint: the change in life expectancy for each country can be computed via the code chunk
+```{r eval = TRUE, message = FALSE}
+library(dplyr)
+library(gapminder)
+gapminder %>% group_by(country) %>% mutate(lifeExp_change = lifeExp - lag(lifeExp)) %>% 
+  select(lifeExp_change, everything())
+```
+Note that the `lifeExp_change` for the year $1952$ is always missing as $1952$ is the first year that has data collected.
 
 ## Problem 2 (30pts)
 
-Using the *flights* dataset from the **nycflights13** library, answer the following question.
+Using the *flights* dataset from the **nycflights13** library, answer the following question. Note that this question is slightly more open ended than the previous question.
 
-1. (5pts) Which plane $\mathrm{tailnum}$ has the worst on-time record ?
+1. (5pts) Which plane $\mathrm{tailnum}$ has the worst on-time record ? You might want to look only at planes with say at least $50$ flights (because if the plane only fly once then the on-time record is not particularly accurate).
 2. (5pts) Look at the proportion of cancelled flights (compared to the total number of flights) per day (let us define a cancelled flight as one for which the departure time or the arrival time is missing). Is the proportion of cancelled flights per day related to the average delay per day ?
-3. (10pts) What time of day (morning, noon, afternoon, evening) should we fly if we want to avoid delay as much as possible ? 
+3. (10pts) What time of day (morning, noon, afternoon, evening) should we fly if we want to avoid delay as much as possible ? Hint: You might want to look at the function [case_when](https://dplyr.tidyverse.org/reference/case_when.html) to convert the variable `sched_dep_time` into the time of day (morning, noon, afternoon, evening). For example
+```{r warning = FALSE, message = FALSE}
+library(dplyr)
+library(nycflights13)
+data(flights)
+
+time_of_day <- function(x){
+  f <- function(t){
+    if(is.na(t)){
+      t
+    }
+    else if(t <= 1000){
+      "morning"
+    }
+    else if(1101 <= t && t <= 1400){
+      "noon"
+    }
+    else if(1401 <= t && t <= 1800){
+      "afternoon"
+    }
+    else {
+      "evening"
+    }
+  }
+  sapply(x, f)
+}
+
+flights_tod <- flights %>% mutate(time_of_day = time_of_day(sched_dep_time)) %>% select(time_of_day,everything())
+flights_tod
+```
+
 4. (10pts) Departure delays are typically temporally correlated; once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using the $\mathrm{lag}$ function, explores how the delay of a flight (at a particular origin) is related to the delay of the immediately preceding flight (at the same origin). You might want to arrange the flights in order of $\mathrm{month}$ followed by $\mathrm{day}$ followed by $\mathrm{dep_time}$ before using $\mathrm{lag}$.
+
+# Problem 3 (10pts)
+Choose either one of the following two problems 
+
+(a) Go on to your favorite job posting website and look at
+the job posting for say 10 or 20 data science jobs. Note down the keywords for the required and preferred
+skills listed in these posting. Separate these keywords into categories such as 
+
++ skills I already know/fluent
++ skills I don’t know but are interested in learning and
++ I have no interests in ever acquiring these skills.
+
+Bonus points if you can automate the above process.
+
+b) If you are familiar with base R then take a look at this [vignette](https://cran.r-project.org/web/packages/dplyr/vignettes/base.html). Next, try to solve either of problem 1 or problem 2 using base R. Compare and contrast your experience with using dplyr and using base **R**. NB. If you are not familiar with base R then fret not, we will learn more about base **R** as the semester progressed.

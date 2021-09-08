@@ -18,14 +18,14 @@
  *  Version: 0.3.3
  *
  * ------------------------------------------------------- */
-@import url(https://fonts.googleapis.com/css?family=Montserrat:300,300i&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Crete+Round:300,300i&display=swap);
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap);
 @import url(https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css);
 
 
 :root {
   /* Fonts */
-  --text-font-family: Montserrat;
+  --text-font-family: 'Crete Round';
   --text-font-is-google: 1;
   --text-font-family-fallback: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial;
   --text-font-base: sans-serif;
@@ -35,7 +35,7 @@
   --code-font-family: 'Fira Code';
   --code-font-is-google: 0;
   --base-font-size: 20px;
-  --text-font-size: 1rem;
+  --text-font-size: 10;
   --code-font-size: 0.8rem;
   --code-inline-font-size: 1em;
   --header-h1-font-size: 2.75rem;
@@ -79,7 +79,7 @@ h1, h2, h3 {
 }
 .remark-slide-content {
   background-color: var(--background-color);
-  font-size: 1rem;
+  font-size: 10;
   padding: 16px 64px 16px 64px;
   width: 100%;
   height: 100%;
@@ -138,7 +138,7 @@ a, a > code {
 }
 .title-slide {
   background-color: var(--title-slide-background-color);
-  background-image: url("./belltower2.jpg");
+  background-image: url("belltower2.jpg");
   background-size: cover;
 }
 .title-slide .remark-slide-number {

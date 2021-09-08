@@ -8,16 +8,12 @@ output:
     #css: ["default","metropolis-fonts","animate.css"]
     css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: github
-      highlightLines: true
-      highlightSpans: true
+      highlightStyle: solarized-light
+      highlightLines: false
+      highlightSpans: false
       countIncrementalSlides: false
     df_print: tibble
     # css: [default, metropolis, metropolis-fonts]
-    # nature:
-    #   highlightStyle: zenburn
-    #   highlightLines: true
-    #   countIncrementalSlides: false
 --- 
 
 ```{r setup, include=FALSE}
@@ -42,9 +38,19 @@ knit_hooks$set(message = function(x, options) {
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
 library(ggplot2)
-theme_set(theme_xaringan())
+library(ggthemes)
+theme_set(theme_tufte())
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
 #style_solarized_light()
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 #style_mono_accent(base_color = "#43418A",
@@ -53,9 +59,9 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
   text_font_size = 10,
   text_font_google = google_font("Crete Round", "300", "300i"),
   code_font_size = "0.8rem",
-  link_color = "#0011FF",
+  link_color = "#03A696",
   header_font_google = google_font("Josefin Sans"),
-  title_slide_background_image = "CC.FallSunrise.9796.jpg",
+  title_slide_background_image = "belltower2.jpg",
   #title_slide_background_size = "600px",
   #title_slide_background_position = "bottom",
  # text_font_google   = google_font("Montserrat", "300", "300i"),
