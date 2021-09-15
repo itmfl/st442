@@ -18,14 +18,14 @@
  *  Version: 0.3.3
  *
  * ------------------------------------------------------- */
-@import url(https://fonts.googleapis.com/css?family=Crete+Round:300,300i&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Montserrat:300,300i&display=swap);
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap);
 @import url(https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css);
 
 
 :root {
   /* Fonts */
-  --text-font-family: 'Crete Round';
+  --text-font-family: Montserrat;
   --text-font-is-google: 1;
   --text-font-family-fallback: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial;
   --text-font-base: sans-serif;

@@ -1,50 +1,81 @@
 ---
-title: "Reshaping data"
-subtitle: "tidyr and relational data with dplyr"
-author: "CSC/ST 442"
-date: "`r Sys.Date()`"
+title: "Introduction to Data Science"
+subtitle: "Tidyr and relational data"
+date: "Fall 2021"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts]
+    #css: ["default","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: zenburn
-      highlightLines: true
+      highlightStyle: solarized-light
+      highlightLines: false
+      highlightSpans: false
       countIncrementalSlides: false
     df_print: tibble
-
+    # css: [default, metropolis, metropolis-fonts]
 --- 
+
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.retina = 3, fig.width = 8, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE,fig.showtext=TRUE)
+library(ggplot2)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
 library(knitr)
-hook_output <- knit_hooks$get("output")
-knit_hooks$set(output = function(x, options) {
-  lines <- options$output.lines
-  if (is.null(lines)) {
-    return(hook_output(x, options))  # pass to default hook
+hook_output = knit_hooks$get('message')
+knit_hooks$set(message = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
   }
-  x <- unlist(strsplit(x, "\n"))
-  more <- "..."
-  if (length(lines)==1) {        # first n lines
-    if (length(x) > lines) {
-      # truncate the output, but add ....
-      x <- c(head(x, lines), more)
-    }
-  } else {
-    x <- c(more, x[lines], more)
-  }
-  # paste these lines together
-  x <- paste(c(x, ""), collapse = "\n")
   hook_output(x, options)
 })
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
-options(htmltools.dir.version = FALSE, digits = 3, 
-        knitr.table.format = "html", tibble.print_max = 6, tibble.print_min=6,tibble.max_extra_cols=20)
-hook_source <- knitr::knit_hooks$get('source')
-knitr::knit_hooks$set(source = function(x, options) {
-  x <- stringr::str_replace(x, "^[[:blank:]]?([^*].+?)[[:blank:]]*#<<[[:blank:]]*$", "*\\1")
-  hook_source(x, options)
-})
 ```
+
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+library(ggplot2)
+library(ggthemes)
+theme_set(theme_tufte())
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+#style_solarized_light()
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+#style_mono_accent(base_color = "#43418A",
+  #title_slide_background_color = "#FFFFFF",
+  #title_slide_text_color = "#006747",
+  text_font_size = 10,
+  code_font_size = "0.8rem",
+  link_color = "#03A696",
+  header_font_google = google_font("Josefin Sans"),
+  title_slide_background_image = "belltower2.jpg",
+  #title_slide_background_size = "600px",
+  #title_slide_background_position = "bottom",
+  text_font_google   = google_font("Montserrat", "300", "300i"),
+  code_font_family = "Fira Code",
+  #header_background_auto = TRUE,
+  code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
+#   text_font_google   = google_font("Montserrat", "300", "300i"),
+#   code_font_family = "Fira Code",
+#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+# )
+```
+
+
 
 #Tidy Data
 Consider the following four different representations of the same data.
@@ -61,10 +92,11 @@ table1 <- tribble(
   "China", 2000, 213766, 1280428583
 )
 
-table2 <- gather(table1, key = "type", value = "value", cases, population) %>% arrange(country, year)
+table2 <- pivot_longer(data = table1, cols = c("cases", "population"), 
+                       names_to = "type", values_to = "value") %>% arrange(country, year)
 table3 <- table1 %>% unite(rate, cases, population, sep = "/")
-table4a <- table1 %>% select(-population) %>% spread(year, cases)
-table4b <- table1 %>% select(-cases) %>% spread(year, population)
+table4a <- table1 %>% select(-population) %>% pivot_wider(names_from = "year", values_from = "cases")
+table4b <- table1 %>% select(-cases) %>% pivot_wider(names_from = "year", values_from = "population")
 ```
 .pull-left[
 ```{r echo = FALSE}
@@ -81,7 +113,7 @@ knitr::kable(table2, caption = "Table 2") %>%
 ```
 ]
 ---
-class: clear
+class: clear, middle
 .pull-left[
 ```{r echo = FALSE}
 knitr::kable(table3, caption = "Table 3") %>% 
@@ -98,74 +130,84 @@ knitr::kable(table4b, caption = "Table 4b") %>%
 ```
 ]
 
-<br>
-<br> 
+---
+class: middle
 
-The above tables, while representing the same data, are not equally easy to use. 
-For example, table $4a$ provides the simplest way for finding the difference in the number of cases between $1999$ and $2000$. Table $1$ is the easiest table to add new variables such as 
-$\mathrm{GDP}$. Table $3$ is not particularly suitable for data analysis, 
-but is possibly useful for data collection. Table $2$ is appropriate if the 
-columns of Table $1$, instead of being *cases* and *populations*, are e.g., 
-*diabetes*, *HIV*, *colon cancer*, ... for which there is possibly 
+The above tables represent the same data with quite different characteristics. 
+
++ For example, table $4a$ provides the simplest way for finding the difference in the number of cases between $1999$ and $2000$. 
+
++ Table $1$ is the easiest table to add new variables such as 
+$\mathrm{GDP}$. 
+
++ Table $3$ is not particularly suitable for data analysis, 
+but is possibly useful for data collection. 
+
++ Table $2$ is appropriate if the columns of Table $1$, instead of being *cases* and *populations*, are e.g., 
+diseases such as *diabetes*, *HIV*, *colon cancer*, ... for which there is possibly 
 missing/unobserved data (that is not all diseases are surveyed for every country). 
 
 ---
-#gather() and spread()
+#pivoting
 
 There is often a need to transform data between two different representations 
 exemplified by Table $1$ and Table $2$ in the previous slide. 
-The main tool for doing so are the verbs **gather** and **spread** that are part of 
-the **tidyr** library.  For the motivations behind **tidyr**, 
-see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+The main tool for doing so are the verbs [pivot_longer](https://tidyr.tidyverse.org/reference/pivot_longer.html) and [pivot_wider](https://tidyr.tidyverse.org/reference/pivot_wider.html) that are part of 
+the [tidyr](https://tidyr.tidyverse.org/index.html) library.  
+
+For the motivations behind **tidyr** see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+See also the data tyding [cheatsheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/tidyr.pdf) from **Rstudio**.
+
+--
 
 To convert from Table $1$ to Table $2$, we do
 ```{r eval = FALSE}
-table2 <- gather(table1, key = "type", value = "value", cases, population)
+table2 <- pivot_longer(data = table1, cols = c("cases","population"), 
+                       names_to = "type", values_to = "value")
+## Equivalently
+## pivot_longer(table1, c("cases","population"), "type", "value")
 ```
+
+--
 
 Conversely, to convert from Table $2$ to Table $1$, we do
 ```{r eval = FALSE}
-table1 <- spread(table2, type, value)
+table1 <- pivot_wider(table2, names_from = type, values_from = count)
 ```
 
----
-class: clear
-The idea behind *gather* and *spread* is best described by the following graphic 
-wherein *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
-
-```{r echo = FALSE}
-knitr::include_graphics("figures/tidyr.png")
-```
 
 ---
 class: clear
 As another example, consider the following two representations of table $4a$.
 .pull-left[
 ```{r echo = FALSE}
-knitr::kable(table4a) %>% 
+knitr::kable(table4a, caption = "table4a") %>% 
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
 ```{r echo = FALSE}
-knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
-  arrange(country, year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4a %>% pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") %>% 
+  arrange(country, year), caption = "table4a_new") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 
 <br>
 To go from the first representation to the second representation, we do
 ```{r eval = FALSE}
-table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
+table4a_new <- table4a %>% pivot_longer(cols = c("1999","2000"), 
+                                        names_to = "year", values_to = "cases")
 ```
 and to go from the second representation to the first, we do
 ```{r eval = FALSE}
-table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>%
-  spread(year, cases)
+table4a_new %>% pivot_wider(names_from = "year", values_from = "cases") 
 ```
 ---
-# Missing data, gather, and spread.
-In our previous examples we see that *gather* and *spread* behave like inverse operations of one another. This is not always the case.
+# Missing data and pivoting.
+In our previous examples we see that **pivot_longer** and **pivot_wider** behave like inverse operations of one another. This is not always the case.
+
 Consider the following contrived dataset.
 ```{r echo = 3}
 options(tibble.print_min=8)
@@ -183,29 +225,37 @@ How many observations are missing in the above data ?
 + The observation for the $1$st quarter of $2016$ is *implicitly* missing.
 ---
 class: clear
-Spreading the above dataset and then gathering the spreaded data yield
+**pivot_longer** the `stocks` dataset and then **pivot_wider** the resulting data yields
 .pull-left[
 ```{r}
-stocks %>% spread(year, return)
-```
-```{r}
-stocks %>% spread(year, return) %>% 
-  gather(year, return, `2015`, `2016`, 
-         na.rm = TRUE)
+stocks_wide <- stocks %>% 
+  pivot_wider(names_from = "year", 
+              values_from = "return")
+stocks_wide
 ```
 ]
 .pull-right[
 ```{r}
-stocks %>% spread(year, return) %>% 
-  gather(year, return, `2015`, `2016`)
+stocks_wide %>% 
+  pivot_longer(cols = c("2015",
+                        "2016"),
+               names_to = "year",
+               values_to = "return")
 ```
 ]
----
-#Missing values: complete() and fill()
-To make missing values explicit, you can use the function **complete()**. The function takes as input a set of columns; it then finds all unique combinations of their values and then ensures that the original dataset contains all these combinations by filling in explicit **NA**s where necesary.
 
-There are also occasions in which a missing value is not really missing; instead a missing value indicate that the previous value should be carried forward. This is especially true when the data are generated via some manual data entry process. We can then 
-use **fill()** to replace missing values with the most recent non-missing value, e.g.,
+---
+#NAs: complete() and fill()
+To make missing values explicit, you can use the function [complete](https://tidyr.tidyverse.org/reference/complete.html). 
+
++ The function takes as input a set of columns
++ It then finds all unique combinations of their values 
++ Then ensures that the original dataset contains all these combinations by filling in explicit `NA`
+
+There are also occasions in which a missing value is not really missing; instead a missing value indicate that the previous value should be carried forward.
+
++ This is common when data are generated via manual data entry.
++ We can  use [fill](https://tidyr.tidyverse.org/reference/fill.html) to replace `NA` with the most recent non-`NA` value.
 
 .pull-left[
 ```{r echo=-1}
@@ -249,7 +299,9 @@ table3
 ]
 
 <br>
-We see that Table $3$ is obtained by combining the columns *cases* and *populations* in Table $1$ into the column *rate* and separating the values in that column with "/". Note that the *type* for the *rate* column is $<\mathrm{chr}>$ or character, in contrast to the type  $<\mathrm{dbl}>$ for the columns *cases* and *populations*.
+Table $3$ is obtained by combining the columns `cases` and `populations` in Table $1$ into the column `rate` and separating the values with `/`. 
+
+Note that the `rate` column has type $\langle\mathrm{chr}\rangle$ in contrast to the type of $\langle \mathrm{dbl} \rangle$ for `cases` and `populations`.
 ---
 class: clear
 
@@ -259,7 +311,8 @@ To go from Table $3$ to Table $1$, we do either
 ```{r}
 table3 %>% 
   separate(rate, 
-          into=c("cases","population"), 
+          into=c("cases",
+                 "population"), 
           sep = "/")
 ```
 ]
@@ -268,13 +321,14 @@ table3 %>%
 ```{r}
 table3 %>% 
   separate(rate, 
-           into=c("cases","population"), 
+           into=c("cases",
+                  "population"), 
            sep = "/", convert = TRUE)
 ```
 ]
 ---
 class: clear
-The inverse of **separate()** is **unite()**, e.g.,
+The inverse of [separate](https://tidyr.tidyverse.org/reference/separate.html) is [unite](https://tidyr.tidyverse.org/reference/unite.html), e.g.,
 <br>
 .pull-left[
 ```{r}
@@ -291,7 +345,7 @@ table1 %>%
 ```
 ]
 ---
-# Example 1: Tidying up tuberculosis data
+# Example 1: Tidying tuberculosis
 
 For this example we use the following dataset from the $2014$ World Health Organization (WHO) Global Tubercolosis Report. This dataset records the number of cases of tubercolosis in countries around the world during the period of $1980$ through $2013$. 
 ```{r eval = require('DT'), tidy = FALSE}
@@ -299,23 +353,26 @@ who
 ```
 ---
 class: clear
-The dataset contains quite a lot of redundant columns and missing observations. Furthermore, the numerous columns whose names start with $\mathrm{new}$ indicate that these columns' names should be recorded as values as opposed to variable names.
+The dataset contains quite a lot of redundant columns and missing observations. 
 
-We thus start **gathering** the values for the columns whose names begin with $\mathrm{new}$
+Also, the numerous columns whose names start with `new` indicate that these columns' names should be recorded as values as opposed to being variables names.
+
+We thus start by pivoting the data to a longer format.
 ```{r}
 who1 <- who %>% 
   select(-iso2,-iso3) %>%
-  gather(key = "key", value = "cases", -country, - year, na.rm = TRUE)
+  pivot_longer(col = -c("country","year"), names_to = "code", 
+               values_to = "cases", values_drop_na = TRUE)
 who1
 ```
 ---
 class: clear
 ```{r}
-who1 %>% count(key) %>% select(key) %>% pull()
+who1 %>% count(code) %>% select(code) %>% pull()
 ```
----
-class: clear
-The columns whose names begin with $\mathrm{new}$ has the following intepreration.
+
+--
+The columns whose names begin with $\mathrm{new}$ has the following interpretation.
 
 + $\mathrm{new}$ denote that the column contains new cases of TB.
 + The next $2$ or $3$ letters describe the type of TB, namely
@@ -326,11 +383,18 @@ The columns whose names begin with $\mathrm{new}$ has the following intepreratio
 + $\mathrm{m}$ and $\mathrm{f}$ denote gender.
 + The numbers denote the age group/age range.
 
-We note that the relapse cases are coded as $\mathrm{newrel}$ as opposed to $\mathrm{new\_rel}$ like the remaining cases. We thus rename $\mathrm{newrel}$ to $\mathrm{new\_rel}$ and then separate the $\mathrm{key}$ column into four columns according to the above scheme. Note that we call **separate** twice; the second separate splits at a specified location in the string.
+---
+class: middle
+
+We note that the relapse cases are coded as `newrel` as opposed to `new_rel` like the remaining cases. 
+
+We thus rename `newrel` to `new_rel` and then separate the `code` column into four columns according to the above scheme. 
+
+Note that we call **separate** twice; the second separate splits at a specified location in the string.
 ```{r}
 who2 <- who1 %>% 
-  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %>%
-  separate(key, into = c("new", "type", "sexage")) %>%
+  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) %>%
+  separate(code, into = c("new", "type", "sexage")) %>%
   select(-new) %>%
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
@@ -342,17 +406,18 @@ who2
 
 The data is now in a tidy format. In summary, we did
 ```{r eval = FALSE}
-who.tidy <- who %>% 
-  gather(key = "key", value = "cases", new_ep_f014:newrel_m65, na.rm = TRUE) %>%
-  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %>%
-  separate(key, into = c("new", "type", "sexage")) %>% 
+who_tidy <- who %>% 
+  pivot_longer(cols = 5:60, names_to = "code", 
+               values_to = "cases", values_drop_na = TRUE) %>%
+  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) %>%
+  separate(code, into = c("new", "type", "sexage")) %>% 
   select(-new, -iso2, -iso3) %>%
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
-#Example 2: Gender-neutral names
-As another example of the use of **gather()** and **spread()**, 
-suppose we want to summarize the number of people with a given name based on gender, e.g.,
+#Example 2: Names and gender
+As another example of the use of **pivot_longer()** and **pivot_wider()**, 
+suppose we want to summarize the number of people with a given name based on gender.
 
 ```{r}
 library(babynames)
@@ -405,12 +470,13 @@ babynames %>%
   filter(name %in% names) %>%
   group_by(name, sex) %>%
   summarise(total = sum(n)) %>%
-  spread(key = sex, value = total)
+  pivot_wider(names_from = "sex", 
+              values_from = "total")
 ```
 ]
 
 <br>
-We see that the use of **spread** yield a representation of our data in a way that is more conducive to our goal of determining names that are most gender-neutral.
+We see that the use of **pivot_wider()** yield a representation of the data that is more conducive to our goal of determining names that are most gender-neutral.
 ---
 class: clear
 We can now determine the most gender-neutral names for the whole babynames dataset.
@@ -419,11 +485,11 @@ babynames_wide <- babynames %>%
   group_by(sex, name) %>%
   summarise(total = sum(n)) %>%
   ## set missing values in wide table to 0
-  spread(key = sex, value = total, fill = 0)
+  pivot_wider(names_from = "sex", values_from = "total", values_fill = 0)
 babynames_wide %>% filter(M > 50000, F > 50000) %>%
-  mutate(ratio = pmin(F/M, M/F)) %>% ## vectorized version of min
+  mutate(ratio = pmin(F/M, M/F)) %>% ## parallel min
   arrange(desc(ratio)) %>%
-  head(3)
+  head(6)
 ```
 ---
 # Mutating join()
@@ -431,65 +497,78 @@ We recall the following tables
 
 .pull-left[
 ```{r echo = FALSE}
-knitr::kable(table1) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table1, caption = "table1") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 
 .pull-right[
 ```{r echo = FALSE}
-knitr::kable(table4a) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4a, capton = "table4a") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 <br>
 <br>
 ```{r echo = FALSE}
-knitr::kable(table4b) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4b, caption = "table4b") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
 class: clear
-To go from table $4a$ and $4b$ to Table $1$, we need to reshape them into "long" tables and then combine columns. More specifically
+To go from table $4a$ and $4b$ to Table $1$, we need to reshape them into long tables and then combine columns. More specifically
 .pull-left[
 ```{r eval = FALSE}
 table4a.long <- table4a %>% 
-  gather(key = "year", 
-         value = "cases", 
-         `1999`, `2000`) %>% 
+  pivot_longer(
+    cols = c("1999","2000"),
+    names_to = "year", 
+    values_to = "cases") %>% 
   arrange(year)
 ```
 ```{r echo = FALSE}
-knitr::kable(table4a %>% gather(key = "year", value = "cases", `1999`, `2000`) %>% 
+knitr::kable(table4a  %>%
+             pivot_longer(cols = c("1999","2000"),
+               names_to = "year", 
+               values_to = "cases") %>% 
   arrange(year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
 ```{r eval = FALSE}
-table4b.long <- table4b %>%
-  gather(key = "year", 
-         value = "population", 
-         `1999`, `2000`) %>%
-  arrange(country)
+table4b.long <- table4b %>% 
+  pivot_longer(
+    cols = c("1999","2000"),
+    names_to = "year", 
+    values_to = "cases") %>% 
+  arrange(year)
 ```
 ```{r echo = FALSE}
-knitr::kable(table4b %>% gather(key = "year", value = "population", `1999`, `2000`) %>% 
-  arrange(country)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+
+knitr::kable(table4b  %>%
+             pivot_longer(cols = c("1999","2000"),
+               names_to = "year", 
+               values_to = "cases") %>% 
+  arrange(year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
 class: clear
-We then *join* the columns of the *reshaped* table $4b$ to that of the reshaped $4a$. The join operation we are doing is termed a **mutating join** as we are mutating, i.e., adding a new column to table $4a$. 
+We then **join** the columns of the **reshaped** table $4b$ to that of the **reshaped** table $4a$. The join operation we are doing is termed a [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html).
 ```{r eval=FALSE}
 table4a.long %>% left_join(table4b.long)
 ```
 ```{r echo = FALSE, message = TRUE}
-table4a.long <- table4a %>% gather(key = "year", value = "cases", `1999`, `2000`)
-table4b.long <- table4b %>% gather(key = "year", value = "population", `1999`, `2000`)
+table4a.long <- table4a %>% 
+  pivot_longer(cols = c("1999","2000"),names_to = "year", values_to = "cases") %>% 
+  arrange(year)
+table4b.long <- table4b %>% 
+  pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") %>% 
+  arrange(year)
 table.joined <- table4a.long %>% left_join(table4b.long)
 knitr::kable(table.joined) %>%
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ---
 class: clear
-The help page for **mutating join** operations include
+The help page for [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html) operations include
 + $\mathrm{left\_join}(x,y, \mathrm{by} = \mathrm{NULL}, ...)$: return all rows from $x$, and all columns from $x$ and $y$. Rows in $x$ with no match in $y$ will have $\mathrm{NA}$ values in the new columns. If there are multiple matches between $x$ and $y$ then all combination of the matches are returned.
 + $\mathrm{right\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)$: return all rows from $y$, and all columns from $x$ and $y$. Rows in $y$ with no match in $x$ will have $\mathrm{NA}$ values in the new columns...
 + $\mathrm{inner\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)$: return all rows from $x$ where there are matching values in $y$, and all columns from $x$ and $y$...
@@ -526,7 +605,7 @@ knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/d37530bbf7749f48c
 
 ---
 #Combining multiple tables
-The **join()** operations are particularly important for combining multiple tables. For illustrative purposes, we look at the following tables from the **nycflights13** library.
+The **join()** operations are particularly important for combining multiple tables. For illustrastion we look at the following tables from the **nycflights13** library.
 
 + **flights**: contains information about flights departing NYC airports during $2013$.
 + **airlines**: maps abbreviated code to full carrier name.
@@ -572,24 +651,27 @@ flights.sml %>% inner_join(planes, by = "tailnum")
 ---
 class: clear
 Comparing the following two variants of **join()**, we see that there are values in the *tailnum* column of the **flights** table
-that do not appear in the **planes** table. We thus need to be careful when using **inner_join()** as it can silently remove observations.
+that do not appear in the **planes** table. 
+
+We thus need to be careful when using **inner_join()** as it can silently remove observations.
+
 ```{r message = TRUE}
 flights.sml %>% left_join(planes, by = "tailnum")
 flights.sml %>% inner_join(planes, by = "tailnum")
 ```
 ---
 class: clear
-When the identifying key of one table is different from the other table, we use the $\mathrm{by} = \mathrm{c}("\mathrm{a}", "\mathrm{b}")$ option, e.g.,
+When the identifying key of one table is different from the other table, we use `by = c("a" = "b")`, e.g.,
 ```{r}
 airports
 flights.sml %>% left_join(airports, by = c("dest" = "faa"))
 ```
 ---
 #Filtering joins
-These operations match observations in the same way as $\mathrm{left\_join}(x,y)$, but instead of adding new columns to $x$, they only filter the observations in $x$. More specifically
+These operations match observations in the same way as `left_join(x,y)`, but instead of adding new columns to $x$, they only filter the observations in $x$. More specifically
 
-+ $\mathrm{semi\_join}(x,y)$ keeps all observations in $x$ that have a match in $y$.
-+ $\mathrm{anti\_join}(x,y)$ drops all in $x$ that have a match in $y$.
++ `semi_join(x,y)` keeps all observations in $x$ that have a match in $y$.
++ `anti_join(x,y)` keeps all observations in $x$ that **do not** have a match in $y$.
 
 For example, suppose we are interested in all flights that go to the top ten most popular destinations. We first find these destinations and then filter flights to these destinations.
 
@@ -614,25 +696,36 @@ flights %>% semi_join(top_dest) %>%
 ]
 ---
 class: clear
-As another example of filtering joins, we noted that not all the tailnum associated with planes used in the **flights** table appeared in the **planes** table. We might want to count how many flights are associated with each of these tailnum.
+As another example of filtering joins, we noted that not all the tailnum associated with planes used in the **flights** table appeared in the **planes** table. 
+
+We might want to count how many flights are associated with each of these tailnum.
 ```{r}
 flights %>% anti_join(planes, by = "tailnum") %>%
   group_by(tailnum) %>% summarise(n = n()) %>% arrange(desc(n))
 ```
 ---
-# Example 3: US Healthcare Spending
-We now present a more involved example of tidying data with **tidyr** and joining tables and wrangling data with **dplyr** verbs. The example uses health care data from the [Kaiser Family Foundation](kff.org) and we follow the analysis of [S. Hicks and R. Peng](https://jhu-advdatasci.github.io/2018/lectures/03-tidyverse-1.html).
+# Example 3: US Healthcare
+We now present a more involved example of tidying data with **tidyr** and joining tables and wrangling data with **dplyr** verbs. 
 
-The data is included in three *csv* files; one file records state-level health insurance coverage from $2013$ to $2016$, another file records state-level health care expenditures from $1991$ to $2014$, and the third file records state-level life expectancy at birth.
-We take a look at the first few lines of the health insurance coverage *csv* file. 
+The example uses health care data from the **Kaiser Family Foundation** and we follow the analysis of [S. Hicks and R. Peng](https://jhu-advdatasci.github.io/2018/lectures/03-tidyverse-1.html).
+
+The data is included in three csv files
++ one file records state-level health insurance coverage from $2013$ to $2016$
++ another file records state-level health care expenditures from $1991$ to $2014$
++ the third file records state-level life expectancy at birth.
+
+We take a look at the first few lines of the health insurance coverage csv file. 
 ```{r}
+library(readr)
 read_lines(file = "https://bit.ly/2YLGiyx", n_max = 5)
 ```
 ---
 class: clear
 Ignore the first two lines. The third line contains column names. Hence
 ```{r warning = TRUE}
-coverage <- read_csv(file = "https://bit.ly/2YLGiyx", skip = 2, col_names = TRUE)
+## read_csv is part of the readr library.
+coverage <- read_csv(file = "https://bit.ly/2YLGiyx", 
+                     skip = 2, col_names = TRUE)
 coverage[53:nrow(coverage),]
 ```
 ---
@@ -645,9 +738,11 @@ coverage <- coverage[1:(which(coverage$Location == "Notes") - 1),]
 ```
 The structure of the remaining two files recording health spending and life expectancy are similar. Hence
 ```{r}
-spending <- read_csv(file = "https://bit.ly/33j3fZm", skip = 2, col_names = TRUE)
+spending <- read_csv(file = "https://bit.ly/33j3fZm", 
+                     skip = 2,  col_names = TRUE)
 spending <- spending %>% filter(cumall(Location != "Notes"))
-life_exp <- read_csv(file = "https://bit.ly/2MK13Es", skip = 2, col_names = TRUE)
+life_exp <- read_csv(file = "https://bit.ly/2MK13Es", 
+                     skip = 2, col_names = TRUE)
 life_exp <- life_exp %>% filter(cumall(Location != "Sources"))
 ```
 ---
@@ -658,55 +753,70 @@ glimpse(coverage)
 ```
 ---
 class: clear
-We gather that the data is *untidy* and needs gathering.
-```{r}
-coverage_long <- coverage %>%  gather(key = "year_type",value = "tot_coverage", 
-                                      -Location)
-coverage_long
+The data is **untidy** and needs a bit of pivoting
+```{r error = TRUE}
+coverage_long <- coverage %>%  
+  pivot_longer(cols = -c("Location"), 
+               names_to  = "year_type", values_to = "tot_coverage")
+
 ```
-Hmm, *tot_coverage* is a character vector ? Let us try converting characters to numeric.
-```{r}
-coverage_long <- coverage %>% gather(key = "year_type", value = "tot_coverage", 
-                                     -Location, convert = TRUE)
-class(coverage_long$tot_coverage)
-```
-No improvement, sadly.
+Hmm, this is annoying. It turns out that the variables like `2013__Other Public` contains missing values which are coded as "N/A" and not `NA`. 
+
 ---
 class: clear
-Turns out *tot_coverage* contains missing entries coded as "N/A". We ignore this issue with
-```{r warning = TRUE}
-coverage_long <- coverage_long %>% mutate_at("tot_coverage", as.integer)
-```
-The spending data is also untidy. More magic the gathering.
+
+Luckily enough, tis is but a scratch.
 ```{r}
-spending_long <- spending %>% gather(key = "year", value = "tot_spending", 
-                                     -Location)
+coverage <- coverage %>% mutate(across(contains("Public"),as.numeric))
+glimpse(coverage)
+```
+
+---
+class: clear
+```{r}
+coverage_long <- coverage %>%  
+  pivot_longer(cols = -c("Location"), 
+               names_to  = "year_type", values_to = "tot_coverage")
+coverage_long
+```
+
+The spending data is also untidy. More pivoting
+```{r}
+spending_long <- spending %>% 
+  pivot_longer(cols = -c("Location"), 
+               names_to = "year", values_to = "tot_spending")
 spending_long
 ```
 ---
 class: clear
-We now separate the "year" column for the *spending* data and the "year_type" column for the *coverage* data
+We now separate the `year` column for the **spending** data and the `year_type` column for the **coverage** data
 ```{r}
-(spending_long <- spending_long %>% 
+spending_long <- spending_long %>% 
   separate(year, sep = "__", into = c("year", "name"), convert = TRUE) %>%
-  select(-name))
-(coverage_long <- coverage_long %>%
-  separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE))
+  select(-name)
+spending_long
+coverage_long <- coverage_long %>%
+  separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE)
+coverage_long
 ```
 ---
 class: clear
-We also clean up the column names of the *life_exp* data.
+We also clean up the column names of the **life_exp** data frame.
 ```{r}
-life_exp <- life_exp %>% rename(life_exp_years = `Life Expectancy at Birth (years)`)
+life_exp <- life_exp %>% 
+  rename(life_exp_years = `Life Expectancy at Birth (years)`)
 ```
 
-We now add more contextual information to the *coverage* dataset, such as the state region and abbreviation. These information are available from the *state* dataset in the **datasets** package. We note that the *coverage* dataset includes records for Washington DC, which is missing from the state dataset. Hence
+We now add more contextual information to the **coverage** dataframe, such as the state region and abbreviation. 
+These information are available from the **state** dataframe in the [datasets](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/datasets-package.html) library. 
+We note that the **coverage** data frame includes records for Washington DC, which is missing from the state dataset. 
 ```{r}
 library(datasets)
 data(state)
-states.df <- tibble(state.name = c(state.name, "District of Columbia"),
-                    state.abb =  c(state.abb, "DC"),
-                    state.region = as.factor(c(as.character(state.region), "South")))
+states.df <- tibble(
+  state.name = c(state.name, "District of Columbia"),
+  state.abb =  c(state.abb, "DC"),
+  state.region = as.factor(c(as.character(state.region), "South")))
 coverage_long <- coverage_long %>% 
   left_join(states.df, by = c("Location" = "state.name"))
 coverage_long
@@ -714,7 +824,7 @@ coverage_long
 ---
 class: clear
 
-We now merge the *coverage*, *spending* and *life_exp* dataset together. The *coverage* dataset records span $2013$ to $2016$ while the *spending* dataset records span $1991$ to $2014$. In this case we wants to include only the years $2013$ and $2014$ in the merged datasets.
+We now merge the **coverage**, **spending** and **life_exp** data frames together. The **coverage** data frame records span $2013$ to $2016$ while the **spending** data frame records span $1991$ to $2014$. In this case we wants to include only the years $2013$ and $2014$ in the merged datasets.
 ```{r message = TRUE}
 hc <- coverage_long %>% 
   inner_join(spending_long) %>%
@@ -723,7 +833,8 @@ hc
 ```
 ---
 class: clear
-Our data is now in a reasonable format for visualization and further analysis. One problem remains in that *total* is not a valid type of healthcare coverage. Rather, a row for which the type is *total* is a record of the total number of people in that state. We remedy this issue via
+Our data is now in a reasonable format for visualization and further analysis. One problem remains in that "Total" is not a valid type of healthcare coverage. Rather, a row for which `type = "Total"` 
+is a record of the total number of people in that state. We remedy this issue via
 ```{r messages = TRUE}
 pop <- hc %>% 
   filter(type == "Total") %>%
@@ -731,7 +842,7 @@ pop <- hc %>%
   rename(tot_population = tot_coverage)
 hc <- hc %>%
   filter(Location != "United States", type != "Total") %>%
-  left_join(pop)
+  left_join(pop) %>% select(Location, year, type, tot_population, everything())
 hc
 ```
 ---
@@ -869,21 +980,17 @@ mapply(rep, 4:1, 1:4)
 ]
 ---
 class: clear
-.pull-left[
 ```{r}
 mapply(rep, 1:4, 4)
-```
-]
-
-.pull-right[
-```{r}
 X <- cbind(1:5, 6:10)
 mapply(function(x,y) x*y, X[,1], X[,2])
 ```
-]
 ---
 #Purrr: an alternative to apply()
-The **apply** family of operations are powerful, but its syntax is somewhat inconsistent. The **purrr** library (a part of the **tidyverse** approach) provides analogous operations with a cleaner syntax. These operations are (here $.x$ is a list or atomic vector and $.f$ is a function, **formula**, or vector)
+The [apply](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/apply) family of operations are powerful, but its syntax is somewhat inconsistent. The [purrr](https://purrr.tidyverse.org/) 
+library (a part of the [tidyverse](https://www.tidyverse.org/) ecosystem provides analogous operations with a cleaner syntax. 
+
+These operations are (here $.x$ is a list or atomic vector and $.f$ is a function, **formula**, or vector.
 
 + $\mathrm{map}(.x, .f, ...)$: makes a list
 + $\mathrm{map\_lgl}(.x, .f, ...)$: makes a logical vector
@@ -948,7 +1055,7 @@ x %>% map_dbl(2)
 ```
 ---
 class: clear
-The analogue of $\mathrm{mapply}$ for mapping over multiple arguments is $\mathrm{map2}$ and $\mathrm{pmap}$. For example
+The analogue of `mapply` for mapping over multiple arguments is `map2` and `pmap`.
 .pull-left[
 ```{r}
 mean = c(0,1,2)
@@ -968,7 +1075,7 @@ pmap_dfc(list(mean = mean,sd = sd),
 
 ---
 class: clear
-For even more "complex" iterations, there is **invoke\_map**, e.g.,
+For even more complex iterations, there is `invoke_map`, e.g.,
 .pull-left[
 ```{r code-label, eval = FALSE}
 f <- c("runif", "rnorm", "rbinom")
@@ -994,12 +1101,16 @@ invoke_map(f,
 ]
 
 ---
-#Example 4: Baseball winning percentage 
+#Example 4: Baseball winning %
 In this example we try to model the winning percentage of baseball teams in terms of simpler statistics such as the number of runs scored and runs allowed.
+We follow the presentation from section 4.2 and 7.5 of [MDSR](https://mdsr-book.github.io/mdsre).
 
-A popular model in sabermetrics is that a rough estimate of a team's expected winning percentage is (here $RS$ and $RA$ denote the total number of runs scored and runs allowed in a season). 
+A popular model in [sabermetrics](https://en.wikipedia.org/wiki/Sabermetrics)
+is that a rough estimate of a team's expected winning percentage is (here $RS$ and $RA$ denote the total number of runs scored and runs allowed in a season). 
 $$\widehat{Wpct} = \frac{1}{1 + (RA/RS)^{k}}$$
-for some choice of $k$; [Bill James](https://en.wikipedia.org/wiki/Bill_James) posited that $k = 2$. We now verify this expression using data from the **Lahman** package.
+for some choice of $k$; [Bill James](https://en.wikipedia.org/wiki/Bill_James) posited that $k = 2$. 
+
+We now verify this expression using data from the [Lahman](https://cran.r-project.org/web/packages/Lahman/index.html) library.
 ---
 class: clear
 ```{r cache = TRUE, out.width="70%", echo = -1}
@@ -1010,7 +1121,8 @@ exp_wpct <- function(x, k = 2) {
 library(Lahman)
 TeamRuns <- Teams %>% 
   rename(RS = R) %>% 
-  mutate(wpct = W / (W + L), run_ratio = RS/RA, hat.wpct = exp_wpct(run_ratio)) %>%
+  mutate(wpct = W / (W + L), run_ratio = RS/RA, 
+         hat.wpct = exp_wpct(run_ratio)) %>%
   select(yearID, teamID, lgID, wpct, hat.wpct, run_ratio) 
 TeamRuns
 ```
@@ -1021,28 +1133,37 @@ The following figure provides reasonably strong support to Bill Jame's formula.
 ggplot(data = TeamRuns, aes(x = run_ratio, y = wpct)) +
   geom_vline(xintercept = 1, color = "darkgray", linetype = 2) +
   geom_hline(yintercept = 0.5, color = "darkgray", linetype = 2) +
-  geom_point(alpha = 0.3) + stat_function(fun = exp_wpct, size = 2, color = "blue") + 
+  geom_point(alpha = 0.3) + 
+  stat_function(fun = exp_wpct, size = 2, color = "blue") + 
   xlab("Ratio of Runs Scored to Runs Allowed") + ylab("Winning Percentage")
 ```
 ---
 class: clear
-Nevertheless, we might ask whether or not $k = 2$ really the "optimal" choice for this data ? To answer this, we find $\hat{k}$ minimizing the (non-linear) least square criterion
-$$\min_{k} \sum_{i} \Bigl(Wpct_{i} - \frac{1}{1 + (RA_i/RS_i)^{k}} \Bigr)^2.$$
+Nevertheless, we might ask whether or not $k = 2$ really the "optimal" choice for this data ? 
 
-Efficient algorithms for finding $\hat{k}$ are reasonably complicated but for our current purpose, the following "exhaustive" search is sufficient. We see that the optimal $k$ for this data is roughly $1.87$.
+To answer this, we find $\hat{k}$ minimizing the (non-linear) least square criterion
+$$\min_{k} \sum_{i} \Bigl(\mathrm{Wpct}_{i} - \frac{1}{1 + (\mathrm{RA}_i/\mathrm{RS}_i)^{k}} \Bigr)^2.$$
+
+Efficient algorithms for finding $\hat{k}$ are reasonably complicated but for our current purpose, the following grid search is sufficient. 
+
 ```{r}
 kseq <- seq(from = 0.5, to = 2.5, by = 0.01)
 names(kseq) <- kseq
 mse <- map_dbl(kseq, 
         .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
         x = TeamRuns$run_ratio, y = TeamRuns$wpct)
+glimpse(mse)
 which.min(mse)
 ```
+
+We see that the optimal $k$ for this data is roughly $1.87$.
 ---
 class: clear
 We might want to see how the "optimal" value of $k$ changes over time. We see that the optimal $k$ over time ranges from $1.74$ to $2.02$. 
 ```{r}
-fit.k <- function(df, kseq = seq(from = 0.5, to = 2.5, by = 0.01), name1, name2){
+fit.k <- function(df, 
+                  kseq = seq(from = 0.5, to = 2.5, by = 0.01), 
+                  name1, name2){
   mse <- map_dbl(.x = kseq, 
           .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
           x = df[[name1]], y = df[[name2]])
@@ -1056,7 +1177,10 @@ kstar
 ```
 ---
 class: clear
-Continuing in the same vein, let us identify, for each season, the team that led their league in home runs. We first write a helper function that, given records for a subset of teams, return a data frame listing the team with the most home runs. We then split our data in groups based on $\mathrm{yearID}$ and $\mathrm{lgID}$ and apply our helper function to each group.
+Continuing in the same vein, let us identify, for each season, the team that led their league in home runs. 
+
++ We first write a helper function that, given records for a subset of teams,  return a data frame listing the team with the most home runs. 
++ We then split our data in groups based on $\mathrm{yearID}$ and $\mathrm{lgID}$ and apply our helper function to each group.
 ```{r}
 hr_leader <- function(x){
   x %>% select(yearID, lgID, teamID, HR) %>%

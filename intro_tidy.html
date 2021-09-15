@@ -1,25 +1,43 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html lang="" xml:lang="">
   <head>
-    <title>Reshaping data</title>
+    <title>Introduction to Data Science</title>
     <meta charset="utf-8" />
-    <meta name="author" content="CSC/ST 442" />
-    <meta name="date" content="2019-09-19" />
-    <link href="libs/remark-css/default.css" rel="stylesheet" />
-    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
     <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Reshaping data
-## tidyr and relational data with dplyr
-### CSC/ST 442
-### 2019-09-19
+# Introduction to Data Science
+## Tidyr and relational data
+### Fall 2021
 
 ---
+
+
+
+
+
+
 
 
 
@@ -166,7 +184,7 @@ Consider the following four different representations of the same data.
 &lt;/table&gt;
 ]
 ---
-class: clear
+class: clear, middle
 .pull-left[
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
 &lt;caption style="font-size: initial !important;"&gt;Table 3&lt;/caption&gt;
@@ -269,50 +287,62 @@ class: clear
 &lt;/table&gt;
 ]
 
-&lt;br&gt;
-&lt;br&gt; 
+---
+class: middle
 
-The above tables, while representing the same data, are not equally easy to use. 
-For example, table `\(4a\)` provides the simplest way for finding the difference in the number of cases between `\(1999\)` and `\(2000\)`. Table `\(1\)` is the easiest table to add new variables such as 
-`\(\mathrm{GDP}\)`. Table `\(3\)` is not particularly suitable for data analysis, 
-but is possibly useful for data collection. Table `\(2\)` is appropriate if the 
-columns of Table `\(1\)`, instead of being *cases* and *populations*, are e.g., 
-*diabetes*, *HIV*, *colon cancer*, ... for which there is possibly 
+The above tables represent the same data with quite different characteristics. 
+
++ For example, table `\(4a\)` provides the simplest way for finding the difference in the number of cases between `\(1999\)` and `\(2000\)`. 
+
++ Table `\(1\)` is the easiest table to add new variables such as 
+`\(\mathrm{GDP}\)`. 
+
++ Table `\(3\)` is not particularly suitable for data analysis, 
+but is possibly useful for data collection. 
+
++ Table `\(2\)` is appropriate if the columns of Table `\(1\)`, instead of being *cases* and *populations*, are e.g., 
+diseases such as *diabetes*, *HIV*, *colon cancer*, ... for which there is possibly 
 missing/unobserved data (that is not all diseases are surveyed for every country). 
 
 ---
-#gather() and spread()
+#pivoting
 
 There is often a need to transform data between two different representations 
 exemplified by Table `\(1\)` and Table `\(2\)` in the previous slide. 
-The main tool for doing so are the verbs **gather** and **spread** that are part of 
-the **tidyr** library.  For the motivations behind **tidyr**, 
-see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+The main tool for doing so are the verbs [pivot_longer](https://tidyr.tidyverse.org/reference/pivot_longer.html) and [pivot_wider](https://tidyr.tidyverse.org/reference/pivot_wider.html) that are part of 
+the [tidyr](https://tidyr.tidyverse.org/index.html) library.  
+
+For the motivations behind **tidyr** see the article [Tidy Data](https://www.jstatsoft.org/article/view/v059i10) by Hadley Wickham. 
+
+See also the data tyding [cheatsheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/tidyr.pdf) from **Rstudio**.
+
+--
 
 To convert from Table `\(1\)` to Table `\(2\)`, we do
 
 ```r
-table2 &lt;- gather(table1, key = "type", value = "value", cases, population)
+table2 &lt;- pivot_longer(data = table1, cols = c("cases","population"), 
+                       names_to = "type", values_to = "value")
+## Equivalently
+## pivot_longer(table1, c("cases","population"), "type", "value")
 ```
+
+--
 
 Conversely, to convert from Table `\(2\)` to Table `\(1\)`, we do
 
 ```r
-table1 &lt;- spread(table2, type, value)
+table1 &lt;- pivot_wider(table2, names_from = type, values_from = count)
 ```
 
----
-class: clear
-The idea behind *gather* and *spread* is best described by the following graphic 
-wherein *gather* makes "wide" data "longer" while *spread* makes "long" data "wider".
-
-&lt;img src="figures/tidyr.png" width="120%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: clear
 As another example, consider the following two representations of table `\(4a\)`.
 .pull-left[
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;table4a&lt;/caption&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
@@ -341,6 +371,7 @@ As another example, consider the following two representations of table `\(4a\)`
 ]
 .pull-right[
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;table4a_new&lt;/caption&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
@@ -387,17 +418,18 @@ As another example, consider the following two representations of table `\(4a\)`
 To go from the first representation to the second representation, we do
 
 ```r
-table4a %&gt;% gather(key = "year", value = "cases", `1999`, `2000`)
+table4a_new &lt;- table4a %&gt;% pivot_longer(cols = c("1999","2000"), 
+                                        names_to = "year", values_to = "cases")
 ```
 and to go from the second representation to the first, we do
 
 ```r
-table4a %&gt;% gather(key = "year", value = "cases", `1999`, `2000`) %&gt;%
-  spread(year, cases)
+table4a_new %&gt;% pivot_wider(names_from = "year", values_from = "cases") 
 ```
 ---
-# Missing data, gather, and spread.
-In our previous examples we see that *gather* and *spread* behave like inverse operations of one another. This is not always the case.
+# Missing data and pivoting.
+In our previous examples we see that **pivot_longer** and **pivot_wider** behave like inverse operations of one another. This is not always the case.
+
 Consider the following contrived dataset.
 
 ```r
@@ -422,11 +454,14 @@ How many observations are missing in the above data ?
 + The observation for the `\(1\)`st quarter of `\(2016\)` is *implicitly* missing.
 ---
 class: clear
-Spreading the above dataset and then gathering the spreaded data yield
+**pivot_longer** the `stocks` dataset and then **pivot_wider** the resulting data yields
 .pull-left[
 
 ```r
-stocks %&gt;% spread(year, return)
+stocks_wide &lt;- stocks %&gt;% 
+  pivot_wider(names_from = "year", 
+              values_from = "return")
+stocks_wide
 ```
 
 ```
@@ -438,30 +473,15 @@ stocks %&gt;% spread(year, return)
 ## 3       3   0.35   0.17
 ## 4       4  NA      2.66
 ```
-
-```r
-stocks %&gt;% spread(year, return) %&gt;% 
-  gather(year, return, `2015`, `2016`, 
-         na.rm = TRUE)
-```
-
-```
-## # A tibble: 6 x 3
-##   quarter year  return
-##     &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
-## 1       1 2015    1.88
-## 2       2 2015    0.59
-## 3       3 2015    0.35
-## 4       2 2016    0.92
-## 5       3 2016    0.17
-## 6       4 2016    2.66
-```
 ]
 .pull-right[
 
 ```r
-stocks %&gt;% spread(year, return) %&gt;% 
-  gather(year, return, `2015`, `2016`)
+stocks_wide %&gt;% 
+  pivot_longer(cols = c("2015",
+                        "2016"),
+               names_to = "year",
+               values_to = "return")
 ```
 
 ```
@@ -469,21 +489,28 @@ stocks %&gt;% spread(year, return) %&gt;%
 ##   quarter year  return
 ##     &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
 ## 1       1 2015    1.88
-## 2       2 2015    0.59
-## 3       3 2015    0.35
-## 4       4 2015   NA   
-## 5       1 2016   NA   
-## 6       2 2016    0.92
-## 7       3 2016    0.17
+## 2       1 2016   NA   
+## 3       2 2015    0.59
+## 4       2 2016    0.92
+## 5       3 2015    0.35
+## 6       3 2016    0.17
+## 7       4 2015   NA   
 ## 8       4 2016    2.66
 ```
 ]
----
-#Missing values: complete() and fill()
-To make missing values explicit, you can use the function **complete()**. The function takes as input a set of columns; it then finds all unique combinations of their values and then ensures that the original dataset contains all these combinations by filling in explicit **NA**s where necesary.
 
-There are also occasions in which a missing value is not really missing; instead a missing value indicate that the previous value should be carried forward. This is especially true when the data are generated via some manual data entry process. We can then 
-use **fill()** to replace missing values with the most recent non-missing value, e.g.,
+---
+#NAs: complete() and fill()
+To make missing values explicit, you can use the function [complete](https://tidyr.tidyverse.org/reference/complete.html). 
+
++ The function takes as input a set of columns
++ It then finds all unique combinations of their values 
++ Then ensures that the original dataset contains all these combinations by filling in explicit `NA`
+
+There are also occasions in which a missing value is not really missing; instead a missing value indicate that the previous value should be carried forward.
+
++ This is common when data are generated via manual data entry.
++ We can  use [fill](https://tidyr.tidyverse.org/reference/fill.html) to replace `NA` with the most recent non-`NA` value.
 
 .pull-left[
 
@@ -555,7 +582,9 @@ table3
 ]
 
 &lt;br&gt;
-We see that Table `\(3\)` is obtained by combining the columns *cases* and *populations* in Table `\(1\)` into the column *rate* and separating the values in that column with "/". Note that the *type* for the *rate* column is `\(&lt;\mathrm{chr}&gt;\)` or character, in contrast to the type  `\(&lt;\mathrm{dbl}&gt;\)` for the columns *cases* and *populations*.
+Table `\(3\)` is obtained by combining the columns `cases` and `populations` in Table `\(1\)` into the column `rate` and separating the values with `/`. 
+
+Note that the `rate` column has type `\(\langle\mathrm{chr}\rangle\)` in contrast to the type of `\(\langle \mathrm{dbl} \rangle\)` for `cases` and `populations`.
 ---
 class: clear
 
@@ -566,7 +595,8 @@ To go from Table `\(3\)` to Table `\(1\)`, we do either
 ```r
 table3 %&gt;% 
   separate(rate, 
-          into=c("cases","population"), 
+          into=c("cases",
+                 "population"), 
           sep = "/")
 ```
 
@@ -588,7 +618,8 @@ table3 %&gt;%
 ```r
 table3 %&gt;% 
   separate(rate, 
-           into=c("cases","population"), 
+           into=c("cases",
+                  "population"), 
            sep = "/", convert = TRUE)
 ```
 
@@ -606,7 +637,7 @@ table3 %&gt;%
 ]
 ---
 class: clear
-The inverse of **separate()** is **unite()**, e.g.,
+The inverse of [separate](https://tidyr.tidyverse.org/reference/separate.html) is [unite](https://tidyr.tidyverse.org/reference/unite.html), e.g.,
 &lt;br&gt;
 .pull-left[
 
@@ -649,7 +680,7 @@ table1 %&gt;%
 ```
 ]
 ---
-# Example 1: Tidying up tuberculosis data
+# Example 1: Tidying tuberculosis
 
 For this example we use the following dataset from the `\(2014\)` World Health Organization (WHO) Global Tubercolosis Report. This dataset records the number of cases of tubercolosis in countries around the world during the period of `\(1980\)` through `\(2013\)`. 
 
@@ -659,74 +690,74 @@ who
 
 ```
 ## # A tibble: 7,240 x 60
-##   country iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
-##   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
-## 1 Afghan… AF    AFG    1980          NA           NA           NA
-## 2 Afghan… AF    AFG    1981          NA           NA           NA
-## 3 Afghan… AF    AFG    1982          NA           NA           NA
-## 4 Afghan… AF    AFG    1983          NA           NA           NA
-## 5 Afghan… AF    AFG    1984          NA           NA           NA
-## 6 Afghan… AF    AFG    1985          NA           NA           NA
+##   country     iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
+##   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+## 1 Afghanistan AF    AFG    1980          NA           NA           NA
+## 2 Afghanistan AF    AFG    1981          NA           NA           NA
+## 3 Afghanistan AF    AFG    1982          NA           NA           NA
+## 4 Afghanistan AF    AFG    1983          NA           NA           NA
+## 5 Afghanistan AF    AFG    1984          NA           NA           NA
+## 6 Afghanistan AF    AFG    1985          NA           NA           NA
 ## # … with 7,234 more rows, and 53 more variables: new_sp_m3544 &lt;int&gt;,
 ## #   new_sp_m4554 &lt;int&gt;, new_sp_m5564 &lt;int&gt;, new_sp_m65 &lt;int&gt;,
 ## #   new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;, new_sp_f2534 &lt;int&gt;,
 ## #   new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;, new_sp_f5564 &lt;int&gt;,
 ## #   new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;, new_sn_m1524 &lt;int&gt;,
 ## #   new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;, new_sn_m4554 &lt;int&gt;,
-## #   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;,
-## #   new_sn_f1524 &lt;int&gt;, …
+## #   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;, …
 ```
 ---
 class: clear
-The dataset contains quite a lot of redundant columns and missing observations. Furthermore, the numerous columns whose names start with `\(\mathrm{new}\)` indicate that these columns' names should be recorded as values as opposed to variable names.
+The dataset contains quite a lot of redundant columns and missing observations. 
 
-We thus start **gathering** the values for the columns whose names begin with `\(\mathrm{new}\)`
+Also, the numerous columns whose names start with `new` indicate that these columns' names should be recorded as values as opposed to being variables names.
+
+We thus start by pivoting the data to a longer format.
 
 ```r
 who1 &lt;- who %&gt;% 
   select(-iso2,-iso3) %&gt;%
-  gather(key = "key", value = "cases", -country, - year, na.rm = TRUE)
+  pivot_longer(col = -c("country","year"), names_to = "code", 
+               values_to = "cases", values_drop_na = TRUE)
 who1
 ```
 
 ```
 ## # A tibble: 76,046 x 4
-##   country      year key         cases
-##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
-## 1 Afghanistan  1997 new_sp_m014     0
-## 2 Afghanistan  1998 new_sp_m014    30
-## 3 Afghanistan  1999 new_sp_m014     8
-## 4 Afghanistan  2000 new_sp_m014    52
-## 5 Afghanistan  2001 new_sp_m014   129
-## 6 Afghanistan  2002 new_sp_m014    90
-## # … with 7.604e+04 more rows
+##   country      year code         cases
+##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
+## 1 Afghanistan  1997 new_sp_m014      0
+## 2 Afghanistan  1997 new_sp_m1524    10
+## 3 Afghanistan  1997 new_sp_m2534     6
+## 4 Afghanistan  1997 new_sp_m3544     3
+## 5 Afghanistan  1997 new_sp_m4554     5
+## 6 Afghanistan  1997 new_sp_m5564     2
+## # … with 76,040 more rows
 ```
 ---
 class: clear
 
 ```r
-who1 %&gt;% count(key) %&gt;% select(key) %&gt;% pull()
+who1 %&gt;% count(code) %&gt;% select(code) %&gt;% pull()
 ```
 
 ```
-##  [1] "new_ep_f014"  "new_ep_f1524" "new_ep_f2534" "new_ep_f3544"
-##  [5] "new_ep_f4554" "new_ep_f5564" "new_ep_f65"   "new_ep_m014" 
-##  [9] "new_ep_m1524" "new_ep_m2534" "new_ep_m3544" "new_ep_m4554"
-## [13] "new_ep_m5564" "new_ep_m65"   "new_sn_f014"  "new_sn_f1524"
-## [17] "new_sn_f2534" "new_sn_f3544" "new_sn_f4554" "new_sn_f5564"
-## [21] "new_sn_f65"   "new_sn_m014"  "new_sn_m1524" "new_sn_m2534"
-## [25] "new_sn_m3544" "new_sn_m4554" "new_sn_m5564" "new_sn_m65"  
-## [29] "new_sp_f014"  "new_sp_f1524" "new_sp_f2534" "new_sp_f3544"
-## [33] "new_sp_f4554" "new_sp_f5564" "new_sp_f65"   "new_sp_m014" 
-## [37] "new_sp_m1524" "new_sp_m2534" "new_sp_m3544" "new_sp_m4554"
-## [41] "new_sp_m5564" "new_sp_m65"   "newrel_f014"  "newrel_f1524"
-## [45] "newrel_f2534" "newrel_f3544" "newrel_f4554" "newrel_f5564"
-## [49] "newrel_f65"   "newrel_m014"  "newrel_m1524" "newrel_m2534"
-## [53] "newrel_m3544" "newrel_m4554" "newrel_m5564" "newrel_m65"
+##  [1] "new_ep_f014"  "new_ep_f1524" "new_ep_f2534" "new_ep_f3544" "new_ep_f4554"
+##  [6] "new_ep_f5564" "new_ep_f65"   "new_ep_m014"  "new_ep_m1524" "new_ep_m2534"
+## [11] "new_ep_m3544" "new_ep_m4554" "new_ep_m5564" "new_ep_m65"   "new_sn_f014" 
+## [16] "new_sn_f1524" "new_sn_f2534" "new_sn_f3544" "new_sn_f4554" "new_sn_f5564"
+## [21] "new_sn_f65"   "new_sn_m014"  "new_sn_m1524" "new_sn_m2534" "new_sn_m3544"
+## [26] "new_sn_m4554" "new_sn_m5564" "new_sn_m65"   "new_sp_f014"  "new_sp_f1524"
+## [31] "new_sp_f2534" "new_sp_f3544" "new_sp_f4554" "new_sp_f5564" "new_sp_f65"  
+## [36] "new_sp_m014"  "new_sp_m1524" "new_sp_m2534" "new_sp_m3544" "new_sp_m4554"
+## [41] "new_sp_m5564" "new_sp_m65"   "newrel_f014"  "newrel_f1524" "newrel_f2534"
+## [46] "newrel_f3544" "newrel_f4554" "newrel_f5564" "newrel_f65"   "newrel_m014" 
+## [51] "newrel_m1524" "newrel_m2534" "newrel_m3544" "newrel_m4554" "newrel_m5564"
+## [56] "newrel_m65"
 ```
----
-class: clear
-The columns whose names begin with `\(\mathrm{new}\)` has the following intepreration.
+
+--
+The columns whose names begin with `\(\mathrm{new}\)` has the following interpretation.
 
 + `\(\mathrm{new}\)` denote that the column contains new cases of TB.
 + The next `\(2\)` or `\(3\)` letters describe the type of TB, namely
@@ -737,12 +768,19 @@ The columns whose names begin with `\(\mathrm{new}\)` has the following inteprer
 + `\(\mathrm{m}\)` and `\(\mathrm{f}\)` denote gender.
 + The numbers denote the age group/age range.
 
-We note that the relapse cases are coded as `\(\mathrm{newrel}\)` as opposed to `\(\mathrm{new\_rel}\)` like the remaining cases. We thus rename `\(\mathrm{newrel}\)` to `\(\mathrm{new\_rel}\)` and then separate the `\(\mathrm{key}\)` column into four columns according to the above scheme. Note that we call **separate** twice; the second separate splits at a specified location in the string.
+---
+class: middle
+
+We note that the relapse cases are coded as `newrel` as opposed to `new_rel` like the remaining cases. 
+
+We thus rename `newrel` to `new_rel` and then separate the `code` column into four columns according to the above scheme. 
+
+Note that we call **separate** twice; the second separate splits at a specified location in the string.
 
 ```r
 who2 &lt;- who1 %&gt;% 
-  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
-  separate(key, into = c("new", "type", "sexage")) %&gt;%
+  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) %&gt;%
+  separate(code, into = c("new", "type", "sexage")) %&gt;%
   select(-new) %&gt;%
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
@@ -754,32 +792,33 @@ who2
 ```
 
 ```
-## # A tibble: 76,046 x 6
-##   country      year type  sex   age   cases
-##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
-## 1 Afghanistan  1997 sp    m     014       0
-## 2 Afghanistan  1998 sp    m     014      30
-## 3 Afghanistan  1999 sp    m     014       8
-## 4 Afghanistan  2000 sp    m     014      52
-## 5 Afghanistan  2001 sp    m     014     129
-## 6 Afghanistan  2002 sp    m     014      90
-## # … with 7.604e+04 more rows
+## # A tibble: 76,046 x 7
+##   country      year type  sex   age   cases key         
+##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt;       
+## 1 Afghanistan  1997 sp    m     014       0 new_sp_m014 
+## 2 Afghanistan  1997 sp    m     1524     10 new_sp_m1524
+## 3 Afghanistan  1997 sp    m     2534      6 new_sp_m2534
+## 4 Afghanistan  1997 sp    m     3544      3 new_sp_m3544
+## 5 Afghanistan  1997 sp    m     4554      5 new_sp_m4554
+## 6 Afghanistan  1997 sp    m     5564      2 new_sp_m5564
+## # … with 76,040 more rows
 ```
 
 The data is now in a tidy format. In summary, we did
 
 ```r
-who.tidy &lt;- who %&gt;% 
-  gather(key = "key", value = "cases", new_ep_f014:newrel_m65, na.rm = TRUE) %&gt;%
-  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
-  separate(key, into = c("new", "type", "sexage")) %&gt;% 
+who_tidy &lt;- who %&gt;% 
+  pivot_longer(cols = 5:60, names_to = "code", 
+               values_to = "cases", values_drop_na = TRUE) %&gt;%
+  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
+  separate(code, into = c("new", "type", "sexage")) %&gt;% 
   select(-new, -iso2, -iso3) %&gt;%
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
-#Example 2: Gender-neutral names
-As another example of the use of **gather()** and **spread()**, 
-suppose we want to summarize the number of people with a given name based on gender, e.g.,
+#Example 2: Names and gender
+As another example of the use of **pivot_longer()** and **pivot_wider()**, 
+suppose we want to summarize the number of people with a given name based on gender.
 
 
 ```r
@@ -797,7 +836,7 @@ babynames
 ## 4  1880 F     Elizabeth  1939 0.0199
 ## 5  1880 F     Minnie     1746 0.0179
 ## 6  1880 F     Margaret   1578 0.0162
-## # … with 1.925e+06 more rows
+## # … with 1,924,659 more rows
 ```
 ---
 class: clear
@@ -878,7 +917,8 @@ babynames %&gt;%
   filter(name %in% names) %&gt;%
   group_by(name, sex) %&gt;%
   summarise(total = sum(n)) %&gt;%
-  spread(key = sex, value = total)
+  pivot_wider(names_from = "sex", 
+              values_from = "total")
 ```
 
 ```
@@ -892,7 +932,7 @@ babynames %&gt;%
 ]
 
 &lt;br&gt;
-We see that the use of **spread** yield a representation of our data in a way that is more conducive to our goal of determining names that are most gender-neutral.
+We see that the use of **pivot_wider()** yield a representation of the data that is more conducive to our goal of determining names that are most gender-neutral.
 ---
 class: clear
 We can now determine the most gender-neutral names for the whole babynames dataset.
@@ -902,20 +942,23 @@ babynames_wide &lt;- babynames %&gt;%
   group_by(sex, name) %&gt;%
   summarise(total = sum(n)) %&gt;%
   ## set missing values in wide table to 0
-  spread(key = sex, value = total, fill = 0)
+  pivot_wider(names_from = "sex", values_from = "total", values_fill = 0)
 babynames_wide %&gt;% filter(M &gt; 50000, F &gt; 50000) %&gt;%
-  mutate(ratio = pmin(F/M, M/F)) %&gt;% ## vectorized version of min
+  mutate(ratio = pmin(F/M, M/F)) %&gt;% ## parallel min
   arrange(desc(ratio)) %&gt;%
-  head(3)
+  head(6)
 ```
 
 ```
-## # A tibble: 3 x 4
+## # A tibble: 6 x 4
 ##   name        F      M ratio
-##   &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+##   &lt;chr&gt;   &lt;int&gt;  &lt;int&gt; &lt;dbl&gt;
 ## 1 Riley  100881  92789 0.920
 ## 2 Jackie  90604  78405 0.865
 ## 3 Casey   76020 110165 0.690
+## 4 Jessie 167010 110027 0.659
+## 5 Avery  117789  53519 0.454
+## 6 Leslie 266474 112689 0.423
 ```
 ---
 # Mutating join()
@@ -923,6 +966,7 @@ We recall the following tables
 
 .pull-left[
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;table1&lt;/caption&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
@@ -1002,6 +1046,7 @@ We recall the following tables
 &lt;br&gt;
 &lt;br&gt;
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
+&lt;caption style="font-size: initial !important;"&gt;table4b&lt;/caption&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
@@ -1030,14 +1075,15 @@ We recall the following tables
 ]
 ---
 class: clear
-To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to reshape them into "long" tables and then combine columns. More specifically
+To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to reshape them into long tables and then combine columns. More specifically
 .pull-left[
 
 ```r
 table4a.long &lt;- table4a %&gt;% 
-  gather(key = "year", 
-         value = "cases", 
-         `1999`, `2000`) %&gt;% 
+  pivot_longer(
+    cols = c("1999","2000"),
+    names_to = "year", 
+    values_to = "cases") %&gt;% 
   arrange(year)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1085,18 +1131,19 @@ table4a.long &lt;- table4a %&gt;%
 .pull-right[
 
 ```r
-table4b.long &lt;- table4b %&gt;%
-  gather(key = "year", 
-         value = "population", 
-         `1999`, `2000`) %&gt;%
-  arrange(country)
+table4b.long &lt;- table4b %&gt;% 
+  pivot_longer(
+    cols = c("1999","2000"),
+    names_to = "year", 
+    values_to = "cases") %&gt;% 
+  arrange(year)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
  &lt;thead&gt;
   &lt;tr&gt;
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
    &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; population &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -1106,24 +1153,24 @@ table4b.long &lt;- table4b %&gt;%
    &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-   &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
@@ -1135,14 +1182,14 @@ table4b.long &lt;- table4b %&gt;%
 ]
 ---
 class: clear
-We then *join* the columns of the *reshaped* table `\(4b\)` to that of the reshaped `\(4a\)`. The join operation we are doing is termed a **mutating join** as we are mutating, i.e., adding a new column to table `\(4a\)`. 
+We then **join** the columns of the **reshaped** table `\(4b\)` to that of the **reshaped** table `\(4a\)`. The join operation we are doing is termed a [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html).
 
 ```r
 table4a.long %&gt;% left_join(table4b.long)
 ```
 
 ```
-## Joining, by = c("country", "year")
+## Joining, by = c("country", "year", "cases")
 ```
 
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1151,7 +1198,6 @@ table4a.long %&gt;% left_join(table4b.long)
    &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
    &lt;th style="text-align:left;"&gt; year &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; cases &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; population &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
@@ -1159,43 +1205,37 @@ table4a.long %&gt;% left_join(table4b.long)
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 745 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.00e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 37737 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.72e+08 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 1999 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 212258 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.27e+09 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 2666 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 2.06e+07 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; Brazil &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 80488 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.75e+08 &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
    &lt;td style="text-align:left;"&gt; China &lt;/td&gt;
    &lt;td style="text-align:left;"&gt; 2000 &lt;/td&gt;
    &lt;td style="text-align:right;"&gt; 213766 &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.28e+09 &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 ---
 class: clear
-The help page for **mutating join** operations include
+The help page for [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html) operations include
 + `\(\mathrm{left\_join}(x,y, \mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(x\)`, and all columns from `\(x\)` and `\(y\)`. Rows in `\(x\)` with no match in `\(y\)` will have `\(\mathrm{NA}\)` values in the new columns. If there are multiple matches between `\(x\)` and `\(y\)` then all combination of the matches are returned.
 + `\(\mathrm{right\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(y\)`, and all columns from `\(x\)` and `\(y\)`. Rows in `\(y\)` with no match in `\(x\)` will have `\(\mathrm{NA}\)` values in the new columns...
 + `\(\mathrm{inner\_join}(x,y,\mathrm{by} = \mathrm{NULL}, ...)\)`: return all rows from `\(x\)` where there are matching values in `\(y\)`, and all columns from `\(x\)` and `\(y\)`...
@@ -1235,7 +1275,7 @@ class: clear
 
 ---
 #Combining multiple tables
-The **join()** operations are particularly important for combining multiple tables. For illustrative purposes, we look at the following tables from the **nycflights13** library.
+The **join()** operations are particularly important for combining multiple tables. For illustrastion we look at the following tables from the **nycflights13** library.
 
 + **flights**: contains information about flights departing NYC airports during `\(2013\)`.
 + **airlines**: maps abbreviated code to full carrier name.
@@ -1255,10 +1295,11 @@ flights
 ## 1  2013     1     1      517            515         2      830
 ## 2  2013     1     1      533            529         4      850
 ## 3  2013     1     1      542            540         2      923
-## # … with 3.368e+05 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
-## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # … with 336,773 more rows, and 12 more variables:
+## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
+## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
+## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
@@ -1283,11 +1324,11 @@ airports
 
 ```
 ## # A tibble: 1,458 x 8
-##   faa   name                      lat   lon   alt    tz dst   tzone        
-##   &lt;chr&gt; &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;        
-## 1 04G   Lansdowne Airport        41.1 -80.6  1044    -5 A     America/New_…
-## 2 06A   Moton Field Municipal …  32.5 -85.7   264    -6 A     America/Chic…
-## 3 06C   Schaumburg Regional      42.0 -88.1   801    -6 A     America/Chic…
+##   faa   name                   lat   lon   alt    tz dst   tzone      
+##   &lt;chr&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      
+## 1 04G   Lansdowne Airport     41.1 -80.6  1044    -5 A     America/Ne…
+## 2 06A   Moton Field Municip…  32.5 -85.7   264    -6 A     America/Ch…
+## 3 06C   Schaumburg Regional   42.0 -88.1   801    -6 A     America/Ch…
 ## # … with 1,455 more rows
 ```
 ---
@@ -1299,11 +1340,11 @@ planes
 
 ```
 ## # A tibble: 3,322 x 9
-##   tailnum  year type       manufacturer   model  engines seats speed engine
-##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; 
-## 1 N10156   2004 Fixed win… EMBRAER        EMB-1…       2    55    NA Turbo…
-## 2 N102UW   1998 Fixed win… AIRBUS INDUST… A320-…       2   182    NA Turbo…
-## 3 N103US   1999 Fixed win… AIRBUS INDUST… A320-…       2   182    NA Turbo…
+##   tailnum  year type    manufacturer  model engines seats speed engine
+##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; 
+## 1 N10156   2004 Fixed … EMBRAER       EMB-…       2    55    NA Turbo…
+## 2 N102UW   1998 Fixed … AIRBUS INDUS… A320…       2   182    NA Turbo…
+## 3 N103US   1999 Fixed … AIRBUS INDUS… A320…       2   182    NA Turbo…
 ## # … with 3,319 more rows
 ```
 
@@ -1314,11 +1355,11 @@ weather
 ```
 ## # A tibble: 26,115 x 15
 ##   origin  year month   day  hour  temp  dewp humid wind_dir wind_speed
-##   &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
+##   &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
 ## 1 EWR     2013     1     1     1  39.0  26.1  59.4      270      10.4 
 ## 2 EWR     2013     1     1     2  39.0  27.0  61.6      250       8.06
 ## 3 EWR     2013     1     1     3  39.0  28.0  64.4      240      11.5 
-## # … with 2.611e+04 more rows, and 5 more variables: wind_gust &lt;dbl&gt;,
+## # … with 26,112 more rows, and 5 more variables: wind_gust &lt;dbl&gt;,
 ## #   precip &lt;dbl&gt;, pressure &lt;dbl&gt;, visib &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
@@ -1337,7 +1378,7 @@ flights.sml
 ## 1  2013     1     1      517 N14228  UA      IAH  
 ## 2  2013     1     1      533 N24211  UA      IAH  
 ## 3  2013     1     1      542 N619AA  AA      MIA  
-## # … with 3.368e+05 more rows
+## # … with 336,773 more rows
 ```
 
 ```r
@@ -1350,12 +1391,12 @@ flights.sml %&gt;% inner_join(airlines)
 
 ```
 ## # A tibble: 336,776 x 8
-##    year month   day dep_time tailnum carrier dest  name                  
-##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;                 
-## 1  2013     1     1      517 N14228  UA      IAH   United Air Lines Inc. 
-## 2  2013     1     1      533 N24211  UA      IAH   United Air Lines Inc. 
-## 3  2013     1     1      542 N619AA  AA      MIA   American Airlines Inc.
-## # … with 3.368e+05 more rows
+##    year month   day dep_time tailnum carrier dest  name               
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;              
+## 1  2013     1     1      517 N14228  UA      IAH   United Air Lines I…
+## 2  2013     1     1      533 N24211  UA      IAH   United Air Lines I…
+## 3  2013     1     1      542 N619AA  AA      MIA   American Airlines …
+## # … with 336,773 more rows
 ```
 ---
 class: clear
@@ -1372,13 +1413,13 @@ flights.sml %&gt;% inner_join(planes)
 
 ```
 ## # A tibble: 4,630 x 14
-##    year month   day dep_time tailnum carrier dest  type  manufacturer model
-##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;
-## 1  2013     1    18     1846 N37465  UA      FLL   Fixe… BOEING       737-…
-## 2  2013    10     1      647 N355JB  B6      BOS   Fixe… EMBRAER      ERJ …
-## 3  2013    10     1      652 N37471  UA      LAX   Fixe… BOEING       737-…
-## # … with 4,627 more rows, and 4 more variables: engines &lt;int&gt;,
-## #   seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+##    year month   day dep_time tailnum carrier dest  type   manufacturer
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       
+## 1  2013     1    18     1846 N37465  UA      FLL   Fixed… BOEING      
+## 2  2013    10     1      647 N355JB  B6      BOS   Fixed… EMBRAER     
+## 3  2013    10     1      652 N37471  UA      LAX   Fixed… BOEING      
+## # … with 4,627 more rows, and 5 more variables: model &lt;chr&gt;,
+## #   engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
 ```
 
 ```r
@@ -1387,18 +1428,22 @@ flights.sml %&gt;% inner_join(planes, by = "tailnum")
 
 ```
 ## # A tibble: 284,170 x 15
-##   year.x month   day dep_time tailnum carrier dest  year.y type 
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
-## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
-## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
-## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
-## # … with 2.842e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+##   year.x month   day dep_time tailnum carrier dest  year.y type       
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
+## # … with 284,167 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
+## #   engine &lt;chr&gt;
 ```
 ---
 class: clear
 Comparing the following two variants of **join()**, we see that there are values in the *tailnum* column of the **flights** table
-that do not appear in the **planes** table. We thus need to be careful when using **inner_join()** as it can silently remove observations.
+that do not appear in the **planes** table. 
+
+We thus need to be careful when using **inner_join()** as it can silently remove observations.
+
 
 ```r
 flights.sml %&gt;% left_join(planes, by = "tailnum")
@@ -1406,13 +1451,14 @@ flights.sml %&gt;% left_join(planes, by = "tailnum")
 
 ```
 ## # A tibble: 336,776 x 15
-##   year.x month   day dep_time tailnum carrier dest  year.y type 
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
-## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
-## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
-## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
-## # … with 3.368e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+##   year.x month   day dep_time tailnum carrier dest  year.y type       
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
+## # … with 336,773 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
+## #   engine &lt;chr&gt;
 ```
 
 ```r
@@ -1421,17 +1467,18 @@ flights.sml %&gt;% inner_join(planes, by = "tailnum")
 
 ```
 ## # A tibble: 284,170 x 15
-##   year.x month   day dep_time tailnum carrier dest  year.y type 
-##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;
-## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixe…
-## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixe…
-## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixe…
-## # … with 2.842e+05 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+##   year.x month   day dep_time tailnum carrier dest  year.y type       
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
+## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
+## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
+## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
+## # … with 284,167 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
+## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
+## #   engine &lt;chr&gt;
 ```
 ---
 class: clear
-When the identifying key of one table is different from the other table, we use the `\(\mathrm{by} = \mathrm{c}("\mathrm{a}", "\mathrm{b}")\)` option, e.g.,
+When the identifying key of one table is different from the other table, we use `by = c("a" = "b")`, e.g.,
 
 ```r
 airports
@@ -1439,11 +1486,11 @@ airports
 
 ```
 ## # A tibble: 1,458 x 8
-##   faa   name                      lat   lon   alt    tz dst   tzone        
-##   &lt;chr&gt; &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;        
-## 1 04G   Lansdowne Airport        41.1 -80.6  1044    -5 A     America/New_…
-## 2 06A   Moton Field Municipal …  32.5 -85.7   264    -6 A     America/Chic…
-## 3 06C   Schaumburg Regional      42.0 -88.1   801    -6 A     America/Chic…
+##   faa   name                   lat   lon   alt    tz dst   tzone      
+##   &lt;chr&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      
+## 1 04G   Lansdowne Airport     41.1 -80.6  1044    -5 A     America/Ne…
+## 2 06A   Moton Field Municip…  32.5 -85.7   264    -6 A     America/Ch…
+## 3 06C   Schaumburg Regional   42.0 -88.1   801    -6 A     America/Ch…
 ## # … with 1,455 more rows
 ```
 
@@ -1453,20 +1500,20 @@ flights.sml %&gt;% left_join(airports, by = c("dest" = "faa"))
 
 ```
 ## # A tibble: 336,776 x 14
-##    year month   day dep_time tailnum carrier dest  name    lat   lon   alt
-##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
-## 1  2013     1     1      517 N14228  UA      IAH   Geor…  30.0 -95.3    97
-## 2  2013     1     1      533 N24211  UA      IAH   Geor…  30.0 -95.3    97
-## 3  2013     1     1      542 N619AA  AA      MIA   Miam…  25.8 -80.3     8
-## # … with 3.368e+05 more rows, and 3 more variables: tz &lt;dbl&gt;, dst &lt;chr&gt;,
-## #   tzone &lt;chr&gt;
+##    year month   day dep_time tailnum carrier dest  name      lat   lon
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1  2013     1     1      517 N14228  UA      IAH   George…  30.0 -95.3
+## 2  2013     1     1      533 N24211  UA      IAH   George…  30.0 -95.3
+## 3  2013     1     1      542 N619AA  AA      MIA   Miami …  25.8 -80.3
+## # … with 336,773 more rows, and 4 more variables: alt &lt;dbl&gt;,
+## #   tz &lt;dbl&gt;, dst &lt;chr&gt;, tzone &lt;chr&gt;
 ```
 ---
 #Filtering joins
-These operations match observations in the same way as `\(\mathrm{left\_join}(x,y)\)`, but instead of adding new columns to `\(x\)`, they only filter the observations in `\(x\)`. More specifically
+These operations match observations in the same way as `left_join(x,y)`, but instead of adding new columns to `\(x\)`, they only filter the observations in `\(x\)`. More specifically
 
-+ `\(\mathrm{semi\_join}(x,y)\)` keeps all observations in `\(x\)` that have a match in `\(y\)`.
-+ `\(\mathrm{anti\_join}(x,y)\)` drops all in `\(x\)` that have a match in `\(y\)`.
++ `semi_join(x,y)` keeps all observations in `\(x\)` that have a match in `\(y\)`.
++ `anti_join(x,y)` keeps all observations in `\(x\)` that **do not** have a match in `\(y\)`.
 
 For example, suppose we are interested in all flights that go to the top ten most popular destinations. We first find these destinations and then filter flights to these destinations.
 
@@ -1492,7 +1539,7 @@ flights %&gt;%
 ## 1  2013     1     1 MIA  
 ## 2  2013     1     1 ATL  
 ## 3  2013     1     1 ORD  
-## # … with 1.411e+05 more rows
+## # … with 141,142 more rows
 ```
 ]
 .pull-right[
@@ -1509,12 +1556,14 @@ flights %&gt;% semi_join(top_dest) %&gt;%
 ## 1  2013     1     1 MIA  
 ## 2  2013     1     1 ATL  
 ## 3  2013     1     1 ORD  
-## # … with 1.411e+05 more rows
+## # … with 141,142 more rows
 ```
 ]
 ---
 class: clear
-As another example of filtering joins, we noted that not all the tailnum associated with planes used in the **flights** table appeared in the **planes** table. We might want to count how many flights are associated with each of these tailnum.
+As another example of filtering joins, we noted that not all the tailnum associated with planes used in the **flights** table appeared in the **planes** table. 
+
+We might want to count how many flights are associated with each of these tailnum.
 
 ```r
 flights %&gt;% anti_join(planes, by = "tailnum") %&gt;%
@@ -1531,13 +1580,20 @@ flights %&gt;% anti_join(planes, by = "tailnum") %&gt;%
 ## # … with 719 more rows
 ```
 ---
-# Example 3: US Healthcare Spending
-We now present a more involved example of tidying data with **tidyr** and joining tables and wrangling data with **dplyr** verbs. The example uses health care data from the [Kaiser Family Foundation](kff.org) and we follow the analysis of [S. Hicks and R. Peng](https://jhu-advdatasci.github.io/2018/lectures/03-tidyverse-1.html).
+# Example 3: US Healthcare
+We now present a more involved example of tidying data with **tidyr** and joining tables and wrangling data with **dplyr** verbs. 
 
-The data is included in three *csv* files; one file records state-level health insurance coverage from `\(2013\)` to `\(2016\)`, another file records state-level health care expenditures from `\(1991\)` to `\(2014\)`, and the third file records state-level life expectancy at birth.
-We take a look at the first few lines of the health insurance coverage *csv* file. 
+The example uses health care data from the **Kaiser Family Foundation** and we follow the analysis of [S. Hicks and R. Peng](https://jhu-advdatasci.github.io/2018/lectures/03-tidyverse-1.html).
+
+The data is included in three csv files
++ one file records state-level health insurance coverage from `\(2013\)` to `\(2016\)`
++ another file records state-level health care expenditures from `\(1991\)` to `\(2014\)`
++ the third file records state-level life expectancy at birth.
+
+We take a look at the first few lines of the health insurance coverage csv file. 
 
 ```r
+library(readr)
 read_lines(file = "https://bit.ly/2YLGiyx", n_max = 5)
 ```
 
@@ -1553,7 +1609,9 @@ class: clear
 Ignore the first two lines. The third line contains column names. Hence
 
 ```r
-coverage &lt;- read_csv(file = "https://bit.ly/2YLGiyx", skip = 2, col_names = TRUE)
+## read_csv is part of the readr library.
+coverage &lt;- read_csv(file = "https://bit.ly/2YLGiyx", 
+                     skip = 2, col_names = TRUE)
 ```
 
 ```
@@ -1574,20 +1632,18 @@ coverage[53:nrow(coverage),]
 
 ```
 ## # A tibble: 26 x 29
-##   Location `2013__Employer` `2013__Non-Grou… `2013__Medicaid`
-##   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
-## 1 Notes                  NA               NA               NA
-## 2 The maj…               NA               NA               NA
-## 3 &lt;NA&gt;                   NA               NA               NA
-## # … with 23 more rows, and 25 more variables: `2013__Medicare` &lt;dbl&gt;,
-## #   `2013__Other Public` &lt;chr&gt;, `2013__Uninsured` &lt;dbl&gt;,
-## #   `2013__Total` &lt;dbl&gt;, `2014__Employer` &lt;dbl&gt;, `2014__Non-Group` &lt;dbl&gt;,
-## #   `2014__Medicaid` &lt;dbl&gt;, `2014__Medicare` &lt;dbl&gt;, `2014__Other
-## #   Public` &lt;chr&gt;, `2014__Uninsured` &lt;dbl&gt;, `2014__Total` &lt;dbl&gt;,
-## #   `2015__Employer` &lt;dbl&gt;, `2015__Non-Group` &lt;dbl&gt;,
-## #   `2015__Medicaid` &lt;dbl&gt;, `2015__Medicare` &lt;dbl&gt;, `2015__Other
-## #   Public` &lt;chr&gt;, `2015__Uninsured` &lt;dbl&gt;, `2015__Total` &lt;dbl&gt;,
-## #   `2016__Employer` &lt;dbl&gt;, `2016__Non-Group` &lt;dbl&gt;, …
+##   Location          `2013__Employer` `2013__Non-Grou… `2013__Medicaid`
+##   &lt;chr&gt;                        &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Notes                           NA               NA               NA
+## 2 The majority of …               NA               NA               NA
+## 3 &lt;NA&gt;                            NA               NA               NA
+## # … with 23 more rows, and 25 more variables: 2013__Medicare &lt;dbl&gt;,
+## #   2013__Other Public &lt;chr&gt;, 2013__Uninsured &lt;dbl&gt;,
+## #   2013__Total &lt;dbl&gt;, 2014__Employer &lt;dbl&gt;, 2014__Non-Group &lt;dbl&gt;,
+## #   2014__Medicaid &lt;dbl&gt;, 2014__Medicare &lt;dbl&gt;,
+## #   2014__Other Public &lt;chr&gt;, 2014__Uninsured &lt;dbl&gt;,
+## #   2014__Total &lt;dbl&gt;, 2015__Employer &lt;dbl&gt;, 2015__Non-Group &lt;dbl&gt;,
+## #   2015__Medicaid &lt;dbl&gt;, 2015__Medicare &lt;dbl&gt;, …
 ```
 ---
 class: clear
@@ -1601,9 +1657,11 @@ coverage &lt;- coverage[1:(which(coverage$Location == "Notes") - 1),]
 The structure of the remaining two files recording health spending and life expectancy are similar. Hence
 
 ```r
-spending &lt;- read_csv(file = "https://bit.ly/33j3fZm", skip = 2, col_names = TRUE)
+spending &lt;- read_csv(file = "https://bit.ly/33j3fZm", 
+                     skip = 2,  col_names = TRUE)
 spending &lt;- spending %&gt;% filter(cumall(Location != "Notes"))
-life_exp &lt;- read_csv(file = "https://bit.ly/2MK13Es", skip = 2, col_names = TRUE)
+life_exp &lt;- read_csv(file = "https://bit.ly/2MK13Es", 
+                     skip = 2, col_names = TRUE)
 life_exp &lt;- life_exp %&gt;% filter(cumall(Location != "Sources"))
 ```
 ---
@@ -1615,65 +1673,123 @@ glimpse(coverage)
 ```
 
 ```
-## Observations: 52
-## Variables: 29
-## $ Location             &lt;chr&gt; "United States", "Alabama", "Alaska", "Ariz…
-## $ `2013__Employer`     &lt;dbl&gt; 1.56e+08, 2.13e+06, 3.65e+05, 2.88e+06, 1.1…
-## $ `2013__Non-Group`    &lt;dbl&gt; 13816000, 174200, 24000, 170800, 155600, 19…
-## $ `2013__Medicaid`     &lt;dbl&gt; 54919100, 869700, 95000, 1346100, 600800, 8…
-## $ `2013__Medicare`     &lt;dbl&gt; 40876300, 783000, 55200, 842000, 515200, 38…
-## $ `2013__Other Public` &lt;chr&gt; "6295400", "85600", "60600", "N/A", "67600"…
-## $ `2013__Uninsured`    &lt;dbl&gt; 41795100, 724800, 102200, 1223000, 436800, …
-## $ `2013__Total`        &lt;dbl&gt; 3.13e+08, 4.76e+06, 7.02e+05, 6.60e+06, 2.9…
-...
+## Rows: 52
+## Columns: 29
+## $ Location             &lt;chr&gt; "United States", "Alabama", "Alaska", "…
+## $ `2013__Employer`     &lt;dbl&gt; 1.56e+08, 2.13e+06, 3.65e+05, 2.88e+06,…
+## $ `2013__Non-Group`    &lt;dbl&gt; 13816000, 174200, 24000, 170800, 155600…
+## $ `2013__Medicaid`     &lt;dbl&gt; 54919100, 869700, 95000, 1346100, 60080…
+## $ `2013__Medicare`     &lt;dbl&gt; 40876300, 783000, 55200, 842000, 515200…
+## $ `2013__Other Public` &lt;chr&gt; "6295400", "85600", "60600", "N/A", "67…
+## $ `2013__Uninsured`    &lt;dbl&gt; 41795100, 724800, 102200, 1223000, 4368…
+## $ `2013__Total`        &lt;dbl&gt; 3.13e+08, 4.76e+06, 7.02e+05, 6.60e+06,…
+## $ `2014__Employer`     &lt;dbl&gt; 1.54e+08, 2.20e+06, 3.45e+05, 2.84e+06,…
+## $ `2014__Non-Group`    &lt;dbl&gt; 19313000, 288900, 26800, 333500, 231700…
+## $ `2014__Medicaid`     &lt;dbl&gt; 61650400, 891900, 130100, 1639400, 6392…
+## $ `2014__Medicare`     &lt;dbl&gt; 41896500, 718400, 55300, 911100, 479400…
+## $ `2014__Other Public` &lt;chr&gt; "5985000", "143900", "37300", "N/A", "8…
+## $ `2014__Uninsured`    &lt;dbl&gt; 32967500, 522200, 100800, 827100, 28720…
+## $ `2014__Total`        &lt;dbl&gt; 3.16e+08, 4.77e+06, 6.96e+05, 6.66e+06,…
+## $ `2015__Employer`     &lt;dbl&gt; 1.56e+08, 2.22e+06, 3.56e+05, 2.77e+06,…
+## $ `2015__Non-Group`    &lt;dbl&gt; 21816500, 291500, 22300, 278400, 200200…
+## $ `2015__Medicaid`     &lt;dbl&gt; 62384500, 911400, 128100, 1711500, 6414…
+## $ `2015__Medicare`     &lt;dbl&gt; 43308400, 719100, 60900, 949000, 484500…
+## $ `2015__Other Public` &lt;chr&gt; "6422300", "174600", "47700", "189300",…
+## $ `2015__Uninsured`    &lt;dbl&gt; 28965900, 519400, 90500, 844800, 268400…
+## $ `2015__Total`        &lt;dbl&gt; 3.19e+08, 4.83e+06, 7.05e+05, 6.74e+06,…
+## $ `2016__Employer`     &lt;dbl&gt; 1.57e+08, 2.26e+06, 3.24e+05, 3.01e+06,…
+## $ `2016__Non-Group`    &lt;dbl&gt; 21884400, 262400, 20300, 377000, 252900…
+## $ `2016__Medicaid`     &lt;dbl&gt; 62303400, 997000, 145400, 1468400, 6186…
+## $ `2016__Medicare`     &lt;dbl&gt; 44550200, 761200, 68200, 1028000, 49000…
+## $ `2016__Other Public` &lt;chr&gt; "6192200", "128800", "55600", "172500",…
+## $ `2016__Uninsured`    &lt;dbl&gt; 28051900, 420800, 96900, 833700, 225500…
+## $ `2016__Total`        &lt;dbl&gt; 3.20e+08, 4.83e+06, 7.11e+05, 6.89e+06,…
 ```
 ---
 class: clear
-We gather that the data is *untidy* and needs gathering.
+The data is **untidy** and needs a bit of pivoting
 
 ```r
-coverage_long &lt;- coverage %&gt;%  gather(key = "year_type",value = "tot_coverage", 
-                                      -Location)
+coverage_long &lt;- coverage %&gt;%  
+  pivot_longer(cols = -c("Location"), 
+               names_to  = "year_type", values_to = "tot_coverage")
+```
+
+```
+## Error: Can't combine `2013__Employer` &lt;double&gt; and `2013__Other Public` &lt;character&gt;.
+```
+Hmm, this is annoying. It turns out that the variables like `2013__Other Public` contains missing values which are coded as "N/A" and not `NA`. 
+
+---
+class: clear
+
+Luckily enough, tis is but a scratch.
+
+```r
+coverage &lt;- coverage %&gt;% mutate(across(contains("Public"),as.numeric))
+glimpse(coverage)
+```
+
+```
+## Rows: 52
+## Columns: 29
+## $ Location             &lt;chr&gt; "United States", "Alabama", "Alaska", "…
+## $ `2013__Employer`     &lt;dbl&gt; 1.56e+08, 2.13e+06, 3.65e+05, 2.88e+06,…
+## $ `2013__Non-Group`    &lt;dbl&gt; 13816000, 174200, 24000, 170800, 155600…
+## $ `2013__Medicaid`     &lt;dbl&gt; 54919100, 869700, 95000, 1346100, 60080…
+## $ `2013__Medicare`     &lt;dbl&gt; 40876300, 783000, 55200, 842000, 515200…
+## $ `2013__Other Public` &lt;dbl&gt; 6295400, 85600, 60600, NA, 67600, 67540…
+## $ `2013__Uninsured`    &lt;dbl&gt; 41795100, 724800, 102200, 1223000, 4368…
+## $ `2013__Total`        &lt;dbl&gt; 3.13e+08, 4.76e+06, 7.02e+05, 6.60e+06,…
+## $ `2014__Employer`     &lt;dbl&gt; 1.54e+08, 2.20e+06, 3.45e+05, 2.84e+06,…
+## $ `2014__Non-Group`    &lt;dbl&gt; 19313000, 288900, 26800, 333500, 231700…
+## $ `2014__Medicaid`     &lt;dbl&gt; 61650400, 891900, 130100, 1639400, 6392…
+## $ `2014__Medicare`     &lt;dbl&gt; 41896500, 718400, 55300, 911100, 479400…
+## $ `2014__Other Public` &lt;dbl&gt; 5985000, 143900, 37300, NA, 82000, 6344…
+## $ `2014__Uninsured`    &lt;dbl&gt; 32967500, 522200, 100800, 827100, 28720…
+## $ `2014__Total`        &lt;dbl&gt; 3.16e+08, 4.77e+06, 6.96e+05, 6.66e+06,…
+## $ `2015__Employer`     &lt;dbl&gt; 1.56e+08, 2.22e+06, 3.56e+05, 2.77e+06,…
+## $ `2015__Non-Group`    &lt;dbl&gt; 21816500, 291500, 22300, 278400, 200200…
+## $ `2015__Medicaid`     &lt;dbl&gt; 62384500, 911400, 128100, 1711500, 6414…
+## $ `2015__Medicare`     &lt;dbl&gt; 43308400, 719100, 60900, 949000, 484500…
+## $ `2015__Other Public` &lt;dbl&gt; 6422300, 174600, 47700, 189300, 63700, …
+## $ `2015__Uninsured`    &lt;dbl&gt; 28965900, 519400, 90500, 844800, 268400…
+## $ `2015__Total`        &lt;dbl&gt; 3.19e+08, 4.83e+06, 7.05e+05, 6.74e+06,…
+## $ `2016__Employer`     &lt;dbl&gt; 1.57e+08, 2.26e+06, 3.24e+05, 3.01e+06,…
+## $ `2016__Non-Group`    &lt;dbl&gt; 21884400, 262400, 20300, 377000, 252900…
+## $ `2016__Medicaid`     &lt;dbl&gt; 62303400, 997000, 145400, 1468400, 6186…
+## $ `2016__Medicare`     &lt;dbl&gt; 44550200, 761200, 68200, 1028000, 49000…
+## $ `2016__Other Public` &lt;dbl&gt; 6192200, 128800, 55600, 172500, 67500, …
+## $ `2016__Uninsured`    &lt;dbl&gt; 28051900, 420800, 96900, 833700, 225500…
+## $ `2016__Total`        &lt;dbl&gt; 3.20e+08, 4.83e+06, 7.11e+05, 6.89e+06,…
+```
+
+---
+class: clear
+
+```r
+coverage_long &lt;- coverage %&gt;%  
+  pivot_longer(cols = -c("Location"), 
+               names_to  = "year_type", values_to = "tot_coverage")
 coverage_long
 ```
 
 ```
 ## # A tibble: 1,456 x 3
-##   Location      year_type      tot_coverage
-##   &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;       
-## 1 United States 2013__Employer 155696900   
-## 2 Alabama       2013__Employer 2126500     
-## 3 Alaska        2013__Employer 364900      
+##   Location      year_type       tot_coverage
+##   &lt;chr&gt;         &lt;chr&gt;                  &lt;dbl&gt;
+## 1 United States 2013__Employer     155696900
+## 2 United States 2013__Non-Group     13816000
+## 3 United States 2013__Medicaid      54919100
 ## # … with 1,453 more rows
 ```
-Hmm, *tot_coverage* is a character vector ? Let us try converting characters to numeric.
+
+The spending data is also untidy. More pivoting
 
 ```r
-coverage_long &lt;- coverage %&gt;% gather(key = "year_type", value = "tot_coverage", 
-                                     -Location, convert = TRUE)
-class(coverage_long$tot_coverage)
-```
-
-```
-## [1] "character"
-```
-No improvement, sadly.
----
-class: clear
-Turns out *tot_coverage* contains missing entries coded as "N/A". We ignore this issue with
-
-```r
-coverage_long &lt;- coverage_long %&gt;% mutate_at("tot_coverage", as.integer)
-```
-
-```
-## Warning: NAs introduced by coercion
-```
-The spending data is also untidy. More magic the gathering.
-
-```r
-spending_long &lt;- spending %&gt;% gather(key = "year", value = "tot_spending", 
-                                     -Location)
+spending_long &lt;- spending %&gt;% 
+  pivot_longer(cols = -c("Location"), 
+               names_to = "year", values_to = "tot_spending")
 spending_long
 ```
 
@@ -1682,18 +1798,19 @@ spending_long
 ##   Location      year                        tot_spending
 ##   &lt;chr&gt;         &lt;chr&gt;                              &lt;dbl&gt;
 ## 1 United States 1991__Total Health Spending       675896
-## 2 Alabama       1991__Total Health Spending        10393
-## 3 Alaska        1991__Total Health Spending         1458
+## 2 United States 1992__Total Health Spending       731455
+## 3 United States 1993__Total Health Spending       778684
 ## # … with 1,245 more rows
 ```
 ---
 class: clear
-We now separate the "year" column for the *spending* data and the "year_type" column for the *coverage* data
+We now separate the `year` column for the **spending** data and the `year_type` column for the **coverage** data
 
 ```r
-(spending_long &lt;- spending_long %&gt;% 
+spending_long &lt;- spending_long %&gt;% 
   separate(year, sep = "__", into = c("year", "name"), convert = TRUE) %&gt;%
-  select(-name))
+  select(-name)
+spending_long
 ```
 
 ```
@@ -1701,41 +1818,46 @@ We now separate the "year" column for the *spending* data and the "year_type" co
 ##   Location       year tot_spending
 ##   &lt;chr&gt;         &lt;int&gt;        &lt;dbl&gt;
 ## 1 United States  1991       675896
-## 2 Alabama        1991        10393
-## 3 Alaska         1991         1458
+## 2 United States  1992       731455
+## 3 United States  1993       778684
 ## # … with 1,245 more rows
 ```
 
 ```r
-(coverage_long &lt;- coverage_long %&gt;%
-  separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE))
+coverage_long &lt;- coverage_long %&gt;%
+  separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE)
+coverage_long
 ```
 
 ```
 ## # A tibble: 1,456 x 4
-##   Location       year type     tot_coverage
-##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
-## 1 United States  2013 Employer    155696900
-## 2 Alabama        2013 Employer      2126500
-## 3 Alaska         2013 Employer       364900
+##   Location       year type      tot_coverage
+##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt;
+## 1 United States  2013 Employer     155696900
+## 2 United States  2013 Non-Group     13816000
+## 3 United States  2013 Medicaid      54919100
 ## # … with 1,453 more rows
 ```
 ---
 class: clear
-We also clean up the column names of the *life_exp* data.
+We also clean up the column names of the **life_exp** data frame.
 
 ```r
-life_exp &lt;- life_exp %&gt;% rename(life_exp_years = `Life Expectancy at Birth (years)`)
+life_exp &lt;- life_exp %&gt;% 
+  rename(life_exp_years = `Life Expectancy at Birth (years)`)
 ```
 
-We now add more contextual information to the *coverage* dataset, such as the state region and abbreviation. These information are available from the *state* dataset in the **datasets** package. We note that the *coverage* dataset includes records for Washington DC, which is missing from the state dataset. Hence
+We now add more contextual information to the **coverage** dataframe, such as the state region and abbreviation. 
+These information are available from the **state** dataframe in the [datasets](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/datasets-package.html) library. 
+We note that the **coverage** data frame includes records for Washington DC, which is missing from the state dataset. 
 
 ```r
 library(datasets)
 data(state)
-states.df &lt;- tibble(state.name = c(state.name, "District of Columbia"),
-                    state.abb =  c(state.abb, "DC"),
-                    state.region = as.factor(c(as.character(state.region), "South")))
+states.df &lt;- tibble(
+  state.name = c(state.name, "District of Columbia"),
+  state.abb =  c(state.abb, "DC"),
+  state.region = as.factor(c(as.character(state.region), "South")))
 coverage_long &lt;- coverage_long %&gt;% 
   left_join(states.df, by = c("Location" = "state.name"))
 coverage_long
@@ -1743,17 +1865,17 @@ coverage_long
 
 ```
 ## # A tibble: 1,456 x 6
-##   Location       year type     tot_coverage state.abb state.region
-##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;           &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;       
-## 1 United States  2013 Employer    155696900 &lt;NA&gt;      &lt;NA&gt;        
-## 2 Alabama        2013 Employer      2126500 AL        South       
-## 3 Alaska         2013 Employer       364900 AK        West        
+##   Location       year type      tot_coverage state.abb state.region
+##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;     &lt;fct&gt;       
+## 1 United States  2013 Employer     155696900 &lt;NA&gt;      &lt;NA&gt;        
+## 2 United States  2013 Non-Group     13816000 &lt;NA&gt;      &lt;NA&gt;        
+## 3 United States  2013 Medicaid      54919100 &lt;NA&gt;      &lt;NA&gt;        
 ## # … with 1,453 more rows
 ```
 ---
 class: clear
 
-We now merge the *coverage*, *spending* and *life_exp* dataset together. The *coverage* dataset records span `\(2013\)` to `\(2016\)` while the *spending* dataset records span `\(1991\)` to `\(2014\)`. In this case we wants to include only the years `\(2013\)` and `\(2014\)` in the merged datasets.
+We now merge the **coverage**, **spending** and **life_exp** data frames together. The **coverage** data frame records span `\(2013\)` to `\(2016\)` while the **spending** data frame records span `\(1991\)` to `\(2014\)`. In this case we wants to include only the years `\(2013\)` and `\(2014\)` in the merged datasets.
 
 ```r
 hc &lt;- coverage_long %&gt;% 
@@ -1775,16 +1897,18 @@ hc
 
 ```
 ## # A tibble: 728 x 8
-##   Location  year type  tot_coverage state.abb state.region tot_spending
-##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;               &lt;dbl&gt;
-## 1 United …  2013 Empl…    155696900 &lt;NA&gt;      &lt;NA&gt;              2435624
-## 2 Alabama   2013 Empl…      2126500 AL        South               33788
-## 3 Alaska    2013 Empl…       364900 AK        West                 7684
-## # … with 725 more rows, and 1 more variable: life_exp_years &lt;dbl&gt;
+##   Location       year type      tot_coverage state.abb state.region
+##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;     &lt;fct&gt;       
+## 1 United States  2013 Employer     155696900 &lt;NA&gt;      &lt;NA&gt;        
+## 2 United States  2013 Non-Group     13816000 &lt;NA&gt;      &lt;NA&gt;        
+## 3 United States  2013 Medicaid      54919100 &lt;NA&gt;      &lt;NA&gt;        
+## # … with 725 more rows, and 2 more variables: tot_spending &lt;dbl&gt;,
+## #   life_exp_years &lt;dbl&gt;
 ```
 ---
 class: clear
-Our data is now in a reasonable format for visualization and further analysis. One problem remains in that *total* is not a valid type of healthcare coverage. Rather, a row for which the type is *total* is a record of the total number of people in that state. We remedy this issue via
+Our data is now in a reasonable format for visualization and further analysis. One problem remains in that "Total" is not a valid type of healthcare coverage. Rather, a row for which `type = "Total"` 
+is a record of the total number of people in that state. We remedy this issue via
 
 ```r
 pop &lt;- hc %&gt;% 
@@ -1793,25 +1917,25 @@ pop &lt;- hc %&gt;%
   rename(tot_population = tot_coverage)
 hc &lt;- hc %&gt;%
   filter(Location != "United States", type != "Total") %&gt;%
-  left_join(pop)
+  left_join(pop) %&gt;% select(Location, year, type, tot_population, everything())
 hc
 ```
 
 ```
 ## # A tibble: 612 x 9
-##   Location  year type  tot_coverage state.abb state.region tot_spending
-##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;               &lt;dbl&gt;
-## 1 Alabama   2013 Empl…      2126500 AL        South               33788
-## 2 Alaska    2013 Empl…       364900 AK        West                 7684
-## 3 Arizona   2013 Empl…      2883800 AZ        West                41481
-## # … with 609 more rows, and 2 more variables: life_exp_years &lt;dbl&gt;,
-## #   tot_population &lt;int&gt;
+##   Location  year type      tot_population tot_coverage state.abb
+##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    
+## 1 Alabama   2013 Employer         4763900      2126500 AL       
+## 2 Alabama   2013 Non-Group        4763900       174200 AL       
+## 3 Alabama   2013 Medicaid         4763900       869700 AL       
+## # … with 609 more rows, and 3 more variables: state.region &lt;fct&gt;,
+## #   tot_spending &lt;dbl&gt;, life_exp_years &lt;dbl&gt;
 ```
 ---
 class: clear
 Let us now try to answer the following question of "Is there a relationship between healthcare coverage and healthcare spending in the US ?" We take a look at Employer type coverage for `\(2013\)`. A naive visualization indicates a strong relationship, but there is confounding effect due to population size.
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-77-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-75-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 If we remove the effect of population, the relationship between spending and coverage becomes much weaker. 
@@ -1826,7 +1950,7 @@ hc %&gt;% filter(type == "Employer", year == "2013") %&gt;%
   ylab("proportion of Employer coverage") + geom_smooth(method = "lm")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-78-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-76-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 # Automation and iteration
 Compare the following code chunks.
@@ -1847,7 +1971,7 @@ output
 ```
 
 ```
-## [1] 0.0671 0.0496 0.1986 0.0237
+## [1]  0.0338 -0.1550  0.0328  0.0326
 ```
 
 ```r
@@ -1855,8 +1979,8 @@ apply(df,2,median)
 ```
 
 ```
-##      a      b      c      d 
-## 0.0671 0.0496 0.1986 0.0237
+##       a       b       c       d 
+##  0.0338 -0.1550  0.0328  0.0326
 ```
 ]
 
@@ -1868,16 +1992,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.0671
+## [1] 0.0338
 ## 
 ## $b
-## [1] 0.0496
+## [1] -0.155
 ## 
 ## $c
-## [1] 0.199
+## [1] 0.0328
 ## 
 ## $d
-## [1] 0.0237
+## [1] 0.0326
 ```
 
 ```r
@@ -1885,8 +2009,8 @@ sapply(df,median)
 ```
 
 ```
-##      a      b      c      d 
-## 0.0671 0.0496 0.1986 0.0237
+##       a       b       c       d 
+##  0.0338 -0.1550  0.0328  0.0326
 ```
 ]
 ---
@@ -1907,10 +2031,10 @@ output2
 ```
 
 ```
-##         [,1]    [,2]   [,3]    [,4]
-## [1,] -0.6453 -0.3789 -0.643 -0.9529
-## [2,]  0.0671  0.0496  0.199  0.0237
-## [3,]  0.4099  0.8619  0.656  0.6337
+##         [,1]   [,2]    [,3]    [,4]
+## [1,] -0.7319 -0.661 -0.6750 -0.8362
+## [2,]  0.0338 -0.155  0.0328  0.0326
+## [3,]  1.0034  0.734  0.6547  0.6663
 ```
 ]
 
@@ -1921,10 +2045,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##           a       b      c       d
-## 25% -0.6453 -0.3789 -0.643 -0.9529
-## 50%  0.0671  0.0496  0.199  0.0237
-## 75%  0.4099  0.8619  0.656  0.6337
+##           a      b       c       d
+## 25% -0.7319 -0.661 -0.6750 -0.8362
+## 50%  0.0338 -0.155  0.0328  0.0326
+## 75%  1.0034  0.734  0.6547  0.6663
 ```
 
 ```r
@@ -1932,10 +2056,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##           a       b      c       d
-## 25% -0.6453 -0.3789 -0.643 -0.9529
-## 50%  0.0671  0.0496  0.199  0.0237
-## 75%  0.4099  0.8619  0.656  0.6337
+##           a      b       c       d
+## 25% -0.7319 -0.661 -0.6750 -0.8362
+## 50%  0.0338 -0.155  0.0328  0.0326
+## 75%  1.0034  0.734  0.6547  0.6663
 ```
 ]
 ---
@@ -2086,7 +2210,6 @@ mapply(rep, 4:1, 1:4)
 ]
 ---
 class: clear
-.pull-left[
 
 ```r
 mapply(rep, 1:4, 4)
@@ -2099,9 +2222,6 @@ mapply(rep, 1:4, 4)
 ## [3,]    1    2    3    4
 ## [4,]    1    2    3    4
 ```
-]
-
-.pull-right[
 
 ```r
 X &lt;- cbind(1:5, 6:10)
@@ -2111,10 +2231,12 @@ mapply(function(x,y) x*y, X[,1], X[,2])
 ```
 ## [1]  6 14 24 36 50
 ```
-]
 ---
 #Purrr: an alternative to apply()
-The **apply** family of operations are powerful, but its syntax is somewhat inconsistent. The **purrr** library (a part of the **tidyverse** approach) provides analogous operations with a cleaner syntax. These operations are (here `\(.x\)` is a list or atomic vector and `\(.f\)` is a function, **formula**, or vector)
+The [apply](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/apply) family of operations are powerful, but its syntax is somewhat inconsistent. The [purrr](https://purrr.tidyverse.org/) 
+library (a part of the [tidyverse](https://www.tidyverse.org/) ecosystem provides analogous operations with a cleaner syntax. 
+
+These operations are (here `\(.x\)` is a list or atomic vector and `\(.f\)` is a function, **formula**, or vector.
 
 + `\(\mathrm{map}(.x, .f, ...)\)`: makes a list
 + `\(\mathrm{map\_lgl}(.x, .f, ...)\)`: makes a logical vector
@@ -2192,7 +2314,166 @@ str(models)
 ##   ..$ fitted.values: Named num [1:11] 26.5 21.6 21.8 27.1 30.5 ...
 ##   .. ..- attr(*, "names")= chr [1:11] "1" "2" "3" "4" ...
 ##   ..$ assign       : int [1:2] 0 1
-...
+##   ..$ qr           :List of 5
+##   .. ..$ qr   : num [1:11, 1:2] -3.317 0.302 0.302 0.302 0.302 ...
+##   .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. ..$ : chr [1:11] "1" "2" "3" "4" ...
+##   .. .. .. ..$ : chr [1:2] "(Intercept)" "wt"
+##   .. .. ..- attr(*, "assign")= int [1:2] 0 1
+##   .. ..$ qraux: num [1:2] 1.3 1.5
+##   .. ..$ pivot: int [1:2] 1 2
+##   .. ..$ tol  : num 1e-07
+##   .. ..$ rank : int 2
+##   .. ..- attr(*, "class")= chr "qr"
+##   ..$ df.residual  : int 9
+##   ..$ xlevels      : Named list()
+##   ..$ call         : language lm(formula = mpg ~ wt, data = .)
+##   ..$ terms        :Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. ..$ : chr "wt"
+##   .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. ..- attr(*, "order")= int 1
+##   .. .. ..- attr(*, "intercept")= int 1
+##   .. .. ..- attr(*, "response")= int 1
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..$ model        :'data.frame':	11 obs. of  2 variables:
+##   .. ..$ mpg: num [1:11] 22.8 24.4 22.8 32.4 30.4 33.9 21.5 27.3 26 30.4 ...
+##   .. ..$ wt : num [1:11] 2.32 3.19 3.15 2.2 1.61 ...
+##   .. ..- attr(*, "terms")=Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. .. ..$ : chr "wt"
+##   .. .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. .. ..- attr(*, "order")= int 1
+##   .. .. .. ..- attr(*, "intercept")= int 1
+##   .. .. .. ..- attr(*, "response")= int 1
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..- attr(*, "class")= chr "lm"
+##  $ :List of 12
+##   ..$ coefficients : Named num [1:2] 28.41 -2.78
+##   .. ..- attr(*, "names")= chr [1:2] "(Intercept)" "wt"
+##   ..$ residuals    : Named num [1:7] -0.125 0.584 1.929 -0.69 0.355 ...
+##   .. ..- attr(*, "names")= chr [1:7] "1" "2" "3" "4" ...
+##   ..$ effects      : Named num [1:7] -52.235 -2.427 2.111 -0.353 0.679 ...
+##   .. ..- attr(*, "names")= chr [1:7] "(Intercept)" "wt" "" "" ...
+##   ..$ rank         : int 2
+##   ..$ fitted.values: Named num [1:7] 21.1 20.4 19.5 18.8 18.8 ...
+##   .. ..- attr(*, "names")= chr [1:7] "1" "2" "3" "4" ...
+##   ..$ assign       : int [1:2] 0 1
+##   ..$ qr           :List of 5
+##   .. ..$ qr   : num [1:7, 1:2] -2.646 0.378 0.378 0.378 0.378 ...
+##   .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. ..$ : chr [1:7] "1" "2" "3" "4" ...
+##   .. .. .. ..$ : chr [1:2] "(Intercept)" "wt"
+##   .. .. ..- attr(*, "assign")= int [1:2] 0 1
+##   .. ..$ qraux: num [1:2] 1.38 1.12
+##   .. ..$ pivot: int [1:2] 1 2
+##   .. ..$ tol  : num 1e-07
+##   .. ..$ rank : int 2
+##   .. ..- attr(*, "class")= chr "qr"
+##   ..$ df.residual  : int 5
+##   ..$ xlevels      : Named list()
+##   ..$ call         : language lm(formula = mpg ~ wt, data = .)
+##   ..$ terms        :Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. ..$ : chr "wt"
+##   .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. ..- attr(*, "order")= int 1
+##   .. .. ..- attr(*, "intercept")= int 1
+##   .. .. ..- attr(*, "response")= int 1
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6d8d78&gt; 
+##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..$ model        :'data.frame':	7 obs. of  2 variables:
+##   .. ..$ mpg: num [1:7] 21 21 21.4 18.1 19.2 17.8 19.7
+##   .. ..$ wt : num [1:7] 2.62 2.88 3.21 3.46 3.44 ...
+##   .. ..- attr(*, "terms")=Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. .. ..$ : chr "wt"
+##   .. .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. .. ..- attr(*, "order")= int 1
+##   .. .. .. ..- attr(*, "intercept")= int 1
+##   .. .. .. ..- attr(*, "response")= int 1
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6d8d78&gt; 
+##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..- attr(*, "class")= chr "lm"
+##  $ :List of 12
+##   ..$ coefficients : Named num [1:2] 23.87 -2.19
+##   .. ..- attr(*, "names")= chr [1:2] "(Intercept)" "wt"
+##   ..$ residuals    : Named num [1:14] 2.374 -1.741 1.455 1.61 -0.381 ...
+##   .. ..- attr(*, "names")= chr [1:14] "1" "2" "3" "4" ...
+##   ..$ effects      : Named num [1:14] -56.499 -6.003 0.816 1.22 -0.807 ...
+##   .. ..- attr(*, "names")= chr [1:14] "(Intercept)" "wt" "" "" ...
+##   ..$ rank         : int 2
+##   ..$ fitted.values: Named num [1:14] 16.3 16 14.9 15.7 15.6 ...
+##   .. ..- attr(*, "names")= chr [1:14] "1" "2" "3" "4" ...
+##   ..$ assign       : int [1:2] 0 1
+##   ..$ qr           :List of 5
+##   .. ..$ qr   : num [1:14, 1:2] -3.742 0.267 0.267 0.267 0.267 ...
+##   .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. ..$ : chr [1:14] "1" "2" "3" "4" ...
+##   .. .. .. ..$ : chr [1:2] "(Intercept)" "wt"
+##   .. .. ..- attr(*, "assign")= int [1:2] 0 1
+##   .. ..$ qraux: num [1:2] 1.27 1.11
+##   .. ..$ pivot: int [1:2] 1 2
+##   .. ..$ tol  : num 1e-07
+##   .. ..$ rank : int 2
+##   .. ..- attr(*, "class")= chr "qr"
+##   ..$ df.residual  : int 12
+##   ..$ xlevels      : Named list()
+##   ..$ call         : language lm(formula = mpg ~ wt, data = .)
+##   ..$ terms        :Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. ..$ : chr "wt"
+##   .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. ..- attr(*, "order")= int 1
+##   .. .. ..- attr(*, "intercept")= int 1
+##   .. .. ..- attr(*, "response")= int 1
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca712fe8&gt; 
+##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..$ model        :'data.frame':	14 obs. of  2 variables:
+##   .. ..$ mpg: num [1:14] 18.7 14.3 16.4 17.3 15.2 10.4 10.4 14.7 15.5 15.2 ...
+##   .. ..$ wt : num [1:14] 3.44 3.57 4.07 3.73 3.78 ...
+##   .. ..- attr(*, "terms")=Classes 'terms', 'formula'  language mpg ~ wt
+##   .. .. .. ..- attr(*, "variables")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "factors")= int [1:2, 1] 0 1
+##   .. .. .. .. ..- attr(*, "dimnames")=List of 2
+##   .. .. .. .. .. ..$ : chr [1:2] "mpg" "wt"
+##   .. .. .. .. .. ..$ : chr "wt"
+##   .. .. .. ..- attr(*, "term.labels")= chr "wt"
+##   .. .. .. ..- attr(*, "order")= int 1
+##   .. .. .. ..- attr(*, "intercept")= int 1
+##   .. .. .. ..- attr(*, "response")= int 1
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca712fe8&gt; 
+##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##   ..- attr(*, "class")= chr "lm"
 ```
 
 ```r
@@ -2224,7 +2505,29 @@ str(summary(models[[1]]))
 ##   .. ..- attr(*, "order")= int 1
 ##   .. ..- attr(*, "intercept")= int 1
 ##   .. ..- attr(*, "response")= int 1
-...
+##   .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. ..- attr(*, "predvars")= language list(mpg, wt)
+##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
+##   .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
+##  $ residuals    : Named num [1:11] -3.6701 2.8428 1.0169 5.2523 -0.0513 ...
+##   ..- attr(*, "names")= chr [1:11] "1" "2" "3" "4" ...
+##  $ coefficients : num [1:2, 1:4] 39.57 -5.65 4.35 1.85 9.1 ...
+##   ..- attr(*, "dimnames")=List of 2
+##   .. ..$ : chr [1:2] "(Intercept)" "wt"
+##   .. ..$ : chr [1:4] "Estimate" "Std. Error" "t value" "Pr(&gt;|t|)"
+##  $ aliased      : Named logi [1:2] FALSE FALSE
+##   ..- attr(*, "names")= chr [1:2] "(Intercept)" "wt"
+##  $ sigma        : num 3.33
+##  $ df           : int [1:3] 2 9 2
+##  $ r.squared    : num 0.509
+##  $ adj.r.squared: num 0.454
+##  $ fstatistic   : Named num [1:3] 9.32 1 9
+##   ..- attr(*, "names")= chr [1:3] "value" "numdf" "dendf"
+##  $ cov.unscaled : num [1:2, 1:2] 1.701 -0.705 -0.705 0.308
+##   ..- attr(*, "dimnames")=List of 2
+##   .. ..$ : chr [1:2] "(Intercept)" "wt"
+##   .. ..$ : chr [1:2] "(Intercept)" "wt"
+##  - attr(*, "class")= chr "summary.lm"
 ```
 
 ```r
@@ -2273,7 +2576,7 @@ x %&gt;% map_dbl(2)
 ```
 ---
 class: clear
-The analogue of `\(\mathrm{mapply}\)` for mapping over multiple arguments is `\(\mathrm{map2}\)` and `\(\mathrm{pmap}\)`. For example
+The analogue of `mapply` for mapping over multiple arguments is `map2` and `pmap`.
 .pull-left[
 
 ```r
@@ -2287,10 +2590,10 @@ mapply(rnorm, mean, sd, 3) ## Oops
 ## numeric(0)
 ## 
 ## [[2]]
-## [1] 2.61
+## [1] -3.01
 ## 
 ## [[3]]
-## [1]  5.53 -3.20
+## [1] -1.84 -0.14
 ```
 
 ```r
@@ -2299,10 +2602,10 @@ mapply(rnorm, mean = mean,
 ```
 
 ```
-##        [,1]   [,2]    [,3]
-## [1,]  0.361  0.427 -0.0845
-## [2,] -0.435  2.394 -2.6764
-## [3,]  0.622 -1.915  0.8195
+##        [,1]  [,2]  [,3]
+## [1,]  0.678 0.257  2.56
+## [2,] -0.608 0.608  5.21
+## [3,]  0.887 4.499 -1.81
 ```
 ]
 
@@ -2315,17 +2618,17 @@ pmap_dfc(list(mean = mean,sd = sd),
 
 ```
 ## # A tibble: 3 x 3
-##      V1    V2    V3
-##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 -1.42  2.64 0.314
-## 2  1.13  2.52 6.25 
-## 3 -1.36  3.81 8.59
+##     ...1  ...2  ...3
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 -0.251 -1.39 -4.51
+## 2  0.501 -1.59  4.68
+## 3 -1.11   1.82  4.20
 ```
 ]
 
 ---
 class: clear
-For even more "complex" iterations, there is **invoke\_map**, e.g.,
+For even more complex iterations, there is `invoke_map`, e.g.,
 .pull-left[
 
 ```r
@@ -2350,34 +2653,38 @@ invoke_map(f,
 
 ```
 ## [[1]]
-## [1] -0.0481
+## [1] 0.755
 ## 
 ## [[2]]
-## [1] 3.45
+## [1] 0.682
 ## 
 ## [[3]]
-## [1] 5
+## [1] 7
 ```
 
 ```
 ## [[1]]
-## [1]  0.552 -0.212
+## [1] -0.00247 -0.38898
 ## 
 ## [[2]]
-## [1]  3.97 -7.47  1.36
+## [1]  2.44 -3.88  4.44
 ## 
 ## [[3]]
-## [1] 3 7 6 8
+## [1] 5 3 6 7
 ```
 ]
 
 ---
-#Example 4: Baseball winning percentage 
+#Example 4: Baseball winning %
 In this example we try to model the winning percentage of baseball teams in terms of simpler statistics such as the number of runs scored and runs allowed.
+We follow the presentation from section 4.2 and 7.5 of [MDSR](https://mdsr-book.github.io/mdsre).
 
-A popular model in sabermetrics is that a rough estimate of a team's expected winning percentage is (here `\(RS\)` and `\(RA\)` denote the total number of runs scored and runs allowed in a season). 
+A popular model in [sabermetrics](https://en.wikipedia.org/wiki/Sabermetrics)
+is that a rough estimate of a team's expected winning percentage is (here `\(RS\)` and `\(RA\)` denote the total number of runs scored and runs allowed in a season). 
 `$$\widehat{Wpct} = \frac{1}{1 + (RA/RS)^{k}}$$`
-for some choice of `\(k\)`; [Bill James](https://en.wikipedia.org/wiki/Bill_James) posited that `\(k = 2\)`. We now verify this expression using data from the **Lahman** package.
+for some choice of `\(k\)`; [Bill James](https://en.wikipedia.org/wiki/Bill_James) posited that `\(k = 2\)`. 
+
+We now verify this expression using data from the [Lahman](https://cran.r-project.org/web/packages/Lahman/index.html) library.
 ---
 class: clear
 
@@ -2388,19 +2695,20 @@ exp_wpct &lt;- function(x, k = 2) {
 library(Lahman)
 TeamRuns &lt;- Teams %&gt;% 
   rename(RS = R) %&gt;% 
-  mutate(wpct = W / (W + L), run_ratio = RS/RA, hat.wpct = exp_wpct(run_ratio)) %&gt;%
+  mutate(wpct = W / (W + L), run_ratio = RS/RA, 
+         hat.wpct = exp_wpct(run_ratio)) %&gt;%
   select(yearID, teamID, lgID, wpct, hat.wpct, run_ratio) 
 TeamRuns
 ```
 
 ```
-## # A tibble: 2,895 x 6
+## # A tibble: 2,925 x 6
 ##   yearID teamID lgID   wpct hat.wpct run_ratio
 ##    &lt;int&gt; &lt;fct&gt;  &lt;fct&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 ## 1   1871 BS1    NA    0.667    0.637     1.32 
 ## 2   1871 CH1    NA    0.679    0.611     1.25 
 ## 3   1871 CL1    NA    0.345    0.348     0.730
-## # … with 2,892 more rows
+## # … with 2,922 more rows
 ```
 ---
 class: clear
@@ -2410,17 +2718,21 @@ The following figure provides reasonably strong support to Bill Jame's formula.
 ggplot(data = TeamRuns, aes(x = run_ratio, y = wpct)) +
   geom_vline(xintercept = 1, color = "darkgray", linetype = 2) +
   geom_hline(yintercept = 0.5, color = "darkgray", linetype = 2) +
-  geom_point(alpha = 0.3) + stat_function(fun = exp_wpct, size = 2, color = "blue") + 
+  geom_point(alpha = 0.3) + 
+  stat_function(fun = exp_wpct, size = 2, color = "blue") + 
   xlab("Ratio of Runs Scored to Runs Allowed") + ylab("Winning Percentage")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-98-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-95-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
-Nevertheless, we might ask whether or not `\(k = 2\)` really the "optimal" choice for this data ? To answer this, we find `\(\hat{k}\)` minimizing the (non-linear) least square criterion
-`$$\min_{k} \sum_{i} \Bigl(Wpct_{i} - \frac{1}{1 + (RA_i/RS_i)^{k}} \Bigr)^2.$$`
+Nevertheless, we might ask whether or not `\(k = 2\)` really the "optimal" choice for this data ? 
 
-Efficient algorithms for finding `\(\hat{k}\)` are reasonably complicated but for our current purpose, the following "exhaustive" search is sufficient. We see that the optimal `\(k\)` for this data is roughly `\(1.87\)`.
+To answer this, we find `\(\hat{k}\)` minimizing the (non-linear) least square criterion
+`$$\min_{k} \sum_{i} \Bigl(\mathrm{Wpct}_{i} - \frac{1}{1 + (\mathrm{RA}_i/\mathrm{RS}_i)^{k}} \Bigr)^2.$$`
+
+Efficient algorithms for finding `\(\hat{k}\)` are reasonably complicated but for our current purpose, the following grid search is sufficient. 
+
 
 ```r
 kseq &lt;- seq(from = 0.5, to = 2.5, by = 0.01)
@@ -2428,6 +2740,15 @@ names(kseq) &lt;- kseq
 mse &lt;- map_dbl(kseq, 
         .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
         x = TeamRuns$run_ratio, y = TeamRuns$wpct)
+glimpse(mse)
+```
+
+```
+##  Named num [1:201] 0.00502 0.00495 0.00489 0.00482 0.00476 ...
+##  - attr(*, "names")= chr [1:201] "0.5" "0.51" "0.52" "0.53" ...
+```
+
+```r
 which.min(mse)
 ```
 
@@ -2435,12 +2756,16 @@ which.min(mse)
 ## 1.87 
 ##  138
 ```
+
+We see that the optimal `\(k\)` for this data is roughly `\(1.87\)`.
 ---
 class: clear
 We might want to see how the "optimal" value of `\(k\)` changes over time. We see that the optimal `\(k\)` over time ranges from `\(1.74\)` to `\(2.02\)`. 
 
 ```r
-fit.k &lt;- function(df, kseq = seq(from = 0.5, to = 2.5, by = 0.01), name1, name2){
+fit.k &lt;- function(df, 
+                  kseq = seq(from = 0.5, to = 2.5, by = 0.01), 
+                  name1, name2){
   mse &lt;- map_dbl(.x = kseq, 
           .f = function(x,y,k) mean((y - exp_wpct(x,k))^2),
           x = df[[name1]], y = df[[name2]])
@@ -2467,7 +2792,10 @@ kstar
 ```
 ---
 class: clear
-Continuing in the same vein, let us identify, for each season, the team that led their league in home runs. We first write a helper function that, given records for a subset of teams, return a data frame listing the team with the most home runs. We then split our data in groups based on `\(\mathrm{yearID}\)` and `\(\mathrm{lgID}\)` and apply our helper function to each group.
+Continuing in the same vein, let us identify, for each season, the team that led their league in home runs. 
+
++ We first write a helper function that, given records for a subset of teams,  return a data frame listing the team with the most home runs. 
++ We then split our data in groups based on `\(\mathrm{yearID}\)` and `\(\mathrm{lgID}\)` and apply our helper function to each group.
 
 ```r
 hr_leader &lt;- function(x){
@@ -2481,7 +2809,7 @@ hr_leaders
 ```
 
 ```
-## # A tibble: 280 x 4
+## # A tibble: 282 x 4
 ##   yearID lgID  teamID    HR
 ##    &lt;int&gt; &lt;fct&gt; &lt;fct&gt;  &lt;int&gt;
 ## 1   1871 NA    CH1       10
@@ -2490,7 +2818,7 @@ hr_leaders
 ## 4   1874 NA    BS1       17
 ## 5   1875 NA    BS1       15
 ## 6   1876 NL    BSN        9
-## # … with 274 more rows
+## # … with 276 more rows
 ```
 ---
 class: clear
@@ -2505,13 +2833,14 @@ hr_leaders %&gt;%
              label = "AL adopts designated hitter rule", hjust = "left")
 ```
 
-&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-102-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_tidy_files/figure-html/unnamed-chunk-99-1.png" width="80%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "zenburn",
-"highlightLines": true,
+"highlightStyle": "solarized-light",
+"highlightLines": false,
+"highlightSpans": false,
 "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
@@ -2552,9 +2881,25 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     }
     deleted = true;
   });
-})();</script>
-
-<script>
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
 (function() {
   var links = document.getElementsByTagName('a');
   for (var i = 0; i < links.length; i++) {
@@ -2562,8 +2907,7 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
       links[i].target = '_blank';
     }
   }
-})();
-</script>
+})();</script>
 
 <script>
 slideshow._releaseMath = function(el) {
