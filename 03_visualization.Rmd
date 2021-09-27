@@ -9,10 +9,9 @@ output:
     css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
       highlightStyle: solarized-light
-      highlightLines: true
-      highlightSpans: true
+      highlightLines: false
+      highlightSpans: false
       countIncrementalSlides: false
-      #slideNumberFormat: "%current%"
     df_print: tibble
     # css: [default, metropolis, metropolis-fonts]
     # nature:
@@ -33,15 +32,22 @@ library(flipbookr)
 theme_set(theme_tufte())
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
-xaringanExtra::use_clipboard(button_text = "<i class=\"fa fa-clipboard\"></i>")
 xaringanExtra::use_extra_styles(hover_code_line = TRUE)
 xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
    link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
    title_slide_background_image = "./belltower2.jpg",
+   link_color = "#03A696",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -56,11 +62,14 @@ The **ggplot2** package provides a unifying framework and, correspondingly, a gr
 The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
 Some useful online resources on on **ggplot2** are
-+ The book [ggplot2: Elegant graphics for data analysis](https://catalog.lib.ncsu.edu/catalog/NCSU3716602)
++ The book [ggplot2: Elegant graphics for data analysis](https://ggplot2-book.org) by H. Wickham.
 
-+ The [R Graphics Cookbook](https://r-graphics.org). 
++ The book [Data Visualization](https://socviz.co/) by K. Healy.
+
++ The [R Graphics Cookbook](https://r-graphics.org) by W. Chang.
 
 + The [R Studio ggplot2 cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
 ---
 class: clear
 
@@ -127,7 +136,8 @@ p1 <- ggplot(data = mpg) +
   geom_point(mapping = aes(x = displ, y = hwy, size = class))
 p2 <- ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
-require(gridExtra)
+## The gridExtra library is nice for showing multiple figures in a panel.
+require(gridExtra) 
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
@@ -166,7 +176,7 @@ ggplot(data = mpg) +
 ```
 ---
 class: clear
-We can also facet our plots using a combination of two (categorical) variables.
+We can also facet our plots using a combination of two (categorical) variables
 ```{r, fig.align = 'center', out.width = "80%", fig.asp = 0.6, fig.retina = 3}
 ggplot(data = mpg) + 
   geom_point(aes(x = displ, y = hwy, col = cyl)) +
@@ -202,7 +212,6 @@ ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
   geom_smooth(data = dplyr::filter(mpg, class == "subcompact"))
 ```
 ---
-class: header_background
 #Histograms and Bar Plots
 We now present two of the most elementary and widely used plots.
 ```{r cache = TRUE, fig.asp = 0.5, out.width="80%"}
@@ -279,7 +288,6 @@ grid.arrange(p1,p2,ncol = 2)
 ## Surely it is time to stop.
 
 ---
-class: header_background
 # Don't call me Shirley.
 
 ```{r echo = FALSE, out.width = "35%"}
@@ -296,7 +304,6 @@ p + coord_polar()
 ```
 
 ---
-class: header_background
 #Bar plots vs dot plots ?
 The plot on the right is known as a Cleveland dot plot after [William Cleveland](https://en.wikipedia.org/wiki/William_S._Cleveland). The dot plot is quite a bit less "noisy" compared to the bar plot.
 ```{r cache = TRUE, out.width = "70%", fig.asp = 0.5}
@@ -307,7 +314,6 @@ p2 <- p + geom_point(size = 3) + coord_flip() + theme_bw()
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
-class: header_background
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
 ```{r cache = TRUE}
@@ -335,7 +341,6 @@ p + geom_col(colour = "black", size = 0.25) +
   scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
 ```
 ---
-class: header_background
 # Example 1: US Gun Murders
 We now present a few more sophisticated examples of **ggplot2** output. 
 ```{r cache = TRUE, echo = TRUE}
@@ -406,7 +411,6 @@ p <- ggplot(murders, aes(x = population/10^6, y = total)) +
 p
 ```
 ---
-class: header_background
 # Example 2: Baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly $1.6$ million names during the period from $1900$ to $2010$. 
 
@@ -604,7 +608,6 @@ p <- ggplot(data = com_fem,
   coord_flip() ## coord_flip flips the $x$ and $y$ coordinate
 ```
 ---
-class: header_background
 # Example 3: Weather trends
 ```{r cache = TRUE, echo = FALSE, out.width="80%"}
 source("R_scripts/daytona.R")
@@ -801,13 +804,11 @@ class: clear
 p
 ```
 ---
-class: header_background
 # Hotdogs ?
 ```{r echo = FALSE}
 knitr::include_graphics("figures/nathan_hotdog.png")
 ```
 ---
-class: header_background
 # R Hotdogs ?
 ```{r echo = FALSE, warnings = FALSE}
 source("./R_scripts/hotdogs.R")

@@ -8,17 +8,17 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 We will be reproducing the code in Section 12.4 of Benjamin Baumer, Daniel Kaplan and Nicholas Horton's book [MDSR](https://beanumber.github.io/mdsr2e/ch-vizIII.html#extended-example-hot-dog-eating). The original graphic we are trying to reproduce is from [here](https://flowingdata.com/2008/07/03/nathans-annual-hot-dog-eating-contest-kobayashi-vs-chestnut/hot-dogs/).
 
-```{r fig.retina = 3, out.width = "120%"}
+```{r fig.retina = 3, out.width = "120%", echo = FALSE}
 knitr::include_graphics("https://i0.wp.com/flowingdata.com/wp-content/uploads/2008/07/hot-dogs.jpg?w=897&ssl=1")
 ```
 
-It was said that the figure was generated in *R* and then edited in Adobe Illustrator. The following code in Baumer et al. illustrate how far one can goes (without too much effort) in reproducing the figure using *R* itself.
+It was said that the figure was generated in **R** and then edited in **Adobe Illustrator**. The following code taken from Baumer et al. illustrate how far one can goes (without too much effort) in reproducing the figure using **R** itself.
 
 ## Loading the data.
 
 First we load in the data; the data is given as a csv file.
-```{r}
-library(magrittr) ## To get the '%>%' operator.
+```{r message = FALSE}
+library(dplyr) ## To get the '%>%' operator and the bind_rows function.
 hd <- readr::read_csv("http://datasets.flowingdata.com/hot-dog-contest-winners.csv")
 names(hd) <- gsub(" ", "_", names(hd)) %>% ## Replace " " by "_" in column names
   tolower() ## Convert column names to lower case
@@ -32,7 +32,7 @@ new_data <- data.frame(
   dogs_eaten = c(19.5, 17, 10, 14, 13),
   country = rep(NA, 5), new_record = c(1,1,0,0,0)
 )
-hd <- dplyr::bind_rows(hd, new_data)
+hd <- bind_rows(hd, new_data)
 ```
 
 ## First plot
@@ -54,7 +54,7 @@ p
 ## Adding the annotations text
 We first create a dataframe containing the locations for the annotation texts.
 ```{r warning = FALSE, fig.width = 8}
-text <- dplyr::bind_rows(
+text <- bind_rows(
   # Frank Dellarosa
   data.frame(x = 1941.5, y = 37, 
     label = paste("Frank Dellarosa eats 21 and a half HDBs over 12\n",
@@ -94,7 +94,7 @@ p
 We now create a data frame defining the gray line segments in the original figure.
 ```{r out.width = "80%"}
 ## Read ?geom_path
-segments <- dplyr::bind_rows(
+segments <- bind_rows(
   data.frame(x = c(1979, 1991, 1991, NA), y = c(37, 37, 21, NA)),
   data.frame(x = c(1995, 2007, 2007, NA), y = c(69, 69, 66, NA)), 
   data.frame(x = c(1990, 2006, 2006, NA), y = c(58, 58, 53.75, NA)),

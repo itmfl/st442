@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -64,7 +64,7 @@ flights
 ```
 
 ```
-## # A tibble: 336,776 × 19
+## # A tibble: 336,776 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      517            515         2      830
@@ -88,7 +88,7 @@ filter(flights, month == 8, day == 21)
 ```
 
 ```
-## # A tibble: 990 × 19
+## # A tibble: 990 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -116,7 +116,7 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ```
 
 ```
-## # A tibble: 637 × 19
+## # A tibble: 637 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -144,7 +144,7 @@ filter(august21_jfk_lga, arr_delay &gt; 10 | dep_delay &gt; 10)
 ```
 
 ```
-## # A tibble: 106 × 19
+## # A tibble: 106 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -169,7 +169,7 @@ flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;%
 ```
 
 ```
-## # A tibble: 106 × 19
+## # A tibble: 106 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -278,7 +278,7 @@ filter(df, x &gt; 1)
 ```
 
 ```
-## # A tibble: 1 × 1
+## # A tibble: 1 x 1
 ##       x
 ##   &lt;dbl&gt;
 ## 1     3
@@ -289,7 +289,7 @@ filter(df, is.na(x) | x &gt; 1)
 ```
 
 ```
-## # A tibble: 2 × 1
+## # A tibble: 2 x 1
 ##       x
 ##   &lt;dbl&gt;
 ## 1    NA
@@ -305,7 +305,7 @@ arrange(flights_dest, dest, month, day)
 ```
 
 ```
-## # A tibble: 336,776 × 19
+## # A tibble: 336,776 x 19
 ##   dest   year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1 ABQ    2013     4    22     1712           1630        42     1946
@@ -328,7 +328,7 @@ arrange(flights_dest, desc(dest), month, day)
 ```
 
 ```
-## # A tibble: 336,776 × 19
+## # A tibble: 336,776 x 19
 ##   dest   year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1 XNA    2013     1     1      656            705        -9     1007
@@ -354,7 +354,7 @@ flights_sml
 ```
 
 ```
-## # A tibble: 336,776 × 7
+## # A tibble: 336,776 x 7
 ##    year month   day dep_time sched_dep_time arr_time sched_arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;    &lt;int&gt;          &lt;int&gt;
 ## 1  2013     1     1      517            515      830            819
@@ -399,7 +399,7 @@ rename(flights_sml,
 ```
 
 ```
-## # A tibble: 336,776 × 7
+## # A tibble: 336,776 x 7
 ##    year month   day departure_time sched_dep_time arrival_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;          &lt;int&gt;        &lt;int&gt;
 ## 1  2013     1     1            517            515          830
@@ -419,7 +419,7 @@ select(flights_sml, dep_time, everything())
 ```
 
 ```
-## # A tibble: 336,776 × 7
+## # A tibble: 336,776 x 7
 ##   dep_time  year month   day sched_dep_time arr_time sched_arr_time
 ##      &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;    &lt;int&gt;          &lt;int&gt;
 ## 1      517  2013     1     1            515      830            819
@@ -444,7 +444,7 @@ mutate(flights_sml, gain = arr_delay - dep_delay,
 ```
 
 ```
-## # A tibble: 336,776 × 10
+## # A tibble: 336,776 x 10
 ##    year month   day dep_delay arr_delay distance air_time  gain speed
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  2013     1     1         2        11     1400      227     9  370.
@@ -466,7 +466,7 @@ transmute(flights, gain = arr_delay - dep_delay,
 ```
 
 ```
-## # A tibble: 336,776 × 3
+## # A tibble: 336,776 x 3
 ##    gain hours gain_per_hour
 ##   &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
 ## 1     9  3.78          2.38
@@ -486,7 +486,7 @@ summarize(flights, delay = mean(dep_delay)) ## oops! missing values
 ```
 
 ```
-## # A tibble: 1 × 1
+## # A tibble: 1 x 1
 ##   delay
 ##   &lt;dbl&gt;
 ## 1    NA
@@ -497,7 +497,7 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 ```
 
 ```
-## # A tibble: 1 × 1
+## # A tibble: 1 x 1
 ##   delay
 ##   &lt;dbl&gt;
 ## 1  12.6
@@ -511,7 +511,7 @@ flights %&gt;% group_by(year, month, day)
 ```
 
 ```
-## # A tibble: 336,776 × 19
+## # A tibble: 336,776 x 19
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -536,7 +536,7 @@ summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 
 ```
-## # A tibble: 365 × 4
+## # A tibble: 365 x 4
 ## # Groups:   year, month [12]
 ##    year month   day delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
@@ -563,7 +563,7 @@ delays
 ```
 
 ```
-## # A tibble: 96 × 4
+## # A tibble: 96 x 4
 ##   dest  count  dist avg_delay
 ##   &lt;chr&gt; &lt;int&gt; &lt;dbl&gt;     &lt;dbl&gt;
 ## 1 ABQ     254 1826       18.1
@@ -599,7 +599,7 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ```
 
 ```
-## # A tibble: 365 × 5
+## # A tibble: 365 x 5
 ## # Groups:   year, month [12]
 ##    year month   day avg_delay avg_positive_delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;              &lt;dbl&gt;
@@ -620,7 +620,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  dist_sd
 ##   &lt;chr&gt;   &lt;dbl&gt;
 ## 1 EGE     10.5 
@@ -641,7 +641,7 @@ not_canceled %&gt;% group_by(year,month,day) %&gt;%
 ```
 
 ```
-## # A tibble: 365 × 5
+## # A tibble: 365 x 5
 ## # Groups:   year, month [12]
 ##    year month   day first_dep last_dep
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;int&gt;    &lt;int&gt;
@@ -662,7 +662,7 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ```
 
 ```
-## # A tibble: 770 × 20
+## # A tibble: 770 x 20
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -686,7 +686,7 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ```
 
 ```
-## # A tibble: 365 × 4
+## # A tibble: 365 x 4
 ## # Groups:   year, month [12]
 ##    year month   day n_early
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
@@ -708,7 +708,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  long_delay_pct
 ##   &lt;chr&gt;          &lt;dbl&gt;
 ## 1 CAE            0.255
@@ -729,7 +729,7 @@ daily
 ```
 
 ```
-## # A tibble: 336,776 × 19
+## # A tibble: 336,776 x 19
 ## # Groups:   dest, month, day [31,229]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -755,7 +755,7 @@ daily %&gt;% summarize(flights = n()) %&gt;%
 ```
 
 ```
-## # A tibble: 105 × 2
+## # A tibble: 105 x 2
 ##   dest  flights
 ##   &lt;chr&gt;   &lt;int&gt;
 ## 1 ABQ       254
@@ -780,7 +780,7 @@ group_by(not_canceled, dest, month) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      250. 
@@ -800,7 +800,7 @@ group_by(not_canceled, dest) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      249. 
@@ -821,7 +821,7 @@ group_by(not_canceled, dest, month) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      244  
@@ -841,7 +841,7 @@ group_by(not_canceled, dest) %&gt;%
 ```
 
 ```
-## # A tibble: 104 × 2
+## # A tibble: 104 x 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ       246 
@@ -862,7 +862,7 @@ summarize(daily, flights = n())
 ```
 
 ```
-## # A tibble: 365 × 4
+## # A tibble: 365 x 4
 ## # Groups:   year, month [12]
 ##    year month   day flights
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
@@ -880,7 +880,7 @@ daily %&gt;% ungroup() %&gt;% summarize(flights = n())
 ```
 
 ```
-## # A tibble: 1 × 1
+## # A tibble: 1 x 1
 ##   flights
 ##     &lt;int&gt;
 ## 1  336776
@@ -898,7 +898,7 @@ flights_sml %&gt;% group_by(year, month, day) %&gt;%
 ```
 
 ```
-## # A tibble: 3,609 × 7
+## # A tibble: 3,609 x 7
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_delay arr_delay distance air_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
@@ -922,7 +922,7 @@ flights %&gt;% group_by(dest) %&gt;%
 ```
 
 ```
-## # A tibble: 131,106 × 6
+## # A tibble: 131,106 x 6
 ## # Groups:   dest [77]
 ##    year month   day dest  arr_delay prop_delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt;      &lt;dbl&gt;
@@ -956,7 +956,7 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ```
 
 ```
-## # A tibble: 2,777 × 7
+## # A tibble: 2,777 x 7
 ## # Groups:   playerID [1,315]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
@@ -977,7 +977,7 @@ mutate(players, G_rank = min_rank(G))
 ```
 
 ```
-## # A tibble: 20,087 × 8
+## # A tibble: 19,978 x 8
 ## # Groups:   playerID [1,359]
 ##   playerID  yearID teamID     G    AB     R     H G_rank
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;int&gt;
@@ -987,7 +987,7 @@ mutate(players, G_rank = min_rank(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198     12
 ## 5 aaronha01   1958 ML1      153   601   109   196     13
 ## 6 aaronha01   1959 ML1      154   629   116   223     17
-## # … with 20,081 more rows
+## # … with 19,972 more rows
 ```
 ---
 class: clear
@@ -999,7 +999,7 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ```
 
 ```
-## # A tibble: 7,973 × 7
+## # A tibble: 7,945 x 7
 ## # Groups:   playerID [1,291]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
@@ -1009,7 +1009,7 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ## 4 aaronha01   1959 ML1      154   629   116   223
 ## 5 aaronha01   1961 ML1      155   603   115   197
 ## 6 aaronha01   1964 ML1      145   570   103   187
-## # … with 7,967 more rows
+## # … with 7,939 more rows
 ```
 ---
 class: clear
@@ -1020,7 +1020,7 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ```
 
 ```
-## # A tibble: 20,087 × 8
+## # A tibble: 19,978 x 8
 ## # Groups:   playerID [1,359]
 ##   playerID  yearID teamID     G    AB     R     H    G_z
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;
@@ -1030,7 +1030,7 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198  0.411
 ## 5 aaronha01   1958 ML1      153   601   109   196  0.519
 ## 6 aaronha01   1959 ML1      154   629   116   223  0.573
-## # … with 20,081 more rows
+## # … with 19,972 more rows
 ```
 ---
 class: clear
@@ -1047,7 +1047,7 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 ```
 
 ```
-## # A tibble: 235 × 3
+## # A tibble: 235 x 3
 ## # Groups:   teamID [79]
 ##   teamID quartile batting_avg
 ##   &lt;fct&gt;     &lt;int&gt;       &lt;dbl&gt;
@@ -1056,7 +1056,7 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 ## 3 ANA           3       0.282
 ## 4 ANA           4       0.301
 ## 5 ARI           1       0.157
-## 6 ARI           2       0.254
+## 6 ARI           2       0.258
 ## # … with 229 more rows
 ```
 
@@ -1073,15 +1073,15 @@ df
 ```
 
 ```
-## # A tibble: 100 × 3
-##       x      y      z
-##   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-## 1 0.236 0.0182 0.585 
-## 2 0.628 0.295  0.222 
-## 3 0.548 0.779  0.0951
-## 4 0.888 0.392  0.736 
-## 5 0.244 0.396  0.844 
-## 6 0.601 0.690  0.540 
+## # A tibble: 100 x 3
+##        x       y     z
+##    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.0541 0.198   0.593
+## 2 0.889  0.00422 0.979
+## 3 0.317  0.920   0.805
+## 4 0.0734 0.929   0.499
+## 5 0.541  0.119   0.735
+## 6 0.776  0.843   0.758
 ## # … with 94 more rows
 ```
 ]
@@ -1093,10 +1093,10 @@ df %&gt;% summarize(
 ```
 
 ```
-## # A tibble: 1 × 3
+## # A tibble: 1 x 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.455 0.535 0.470
+## 1 0.504 0.514 0.523
 ```
 
 ```r
@@ -1121,15 +1121,15 @@ df
 ```
 
 ```
-## # A tibble: 100 × 4
-##       x      y      z names
-##   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
-## 1 0.236 0.0182 0.585  a    
-## 2 0.628 0.295  0.222  b    
-## 3 0.548 0.779  0.0951 c    
-## 4 0.888 0.392  0.736  d    
-## 5 0.244 0.396  0.844  e    
-## 6 0.601 0.690  0.540  f    
+## # A tibble: 100 x 4
+##        x       y     z names
+##    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 0.0541 0.198   0.593 a    
+## 2 0.889  0.00422 0.979 b    
+## 3 0.317  0.920   0.805 c    
+## 4 0.0734 0.929   0.499 d    
+## 5 0.541  0.119   0.735 e    
+## 6 0.776  0.843   0.758 f    
 ## # … with 94 more rows
 ```
 
@@ -1139,10 +1139,10 @@ df %&gt;% summarize(across(where(is.numeric),
 ```
 
 ```
-## # A tibble: 1 × 9
+## # A tibble: 1 x 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.455 0.290    53.5  0.535 0.276    319.  0.470 0.300    160.
+## 1  0.504 0.322    175.  0.514 0.317    237.  0.523 0.285    79.8
 ```
 
 ---
@@ -1160,10 +1160,10 @@ df %&gt;% summarize(across(where(is.numeric),
 ```
 
 ```
-## # A tibble: 1 × 9
+## # A tibble: 1 x 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.455 0.290    53.5  0.535 0.276    319.  0.470 0.300    160.
+## 1  0.504 0.322    175.  0.514 0.317    237.  0.523 0.285    79.8
 ```
 
 ```r
@@ -1173,10 +1173,10 @@ df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
 ```
 
 ```
-## # A tibble: 1 × 6
+## # A tibble: 1 x 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.535 0.276    319.  0.470 0.300    160.
+## 1  0.514 0.317    237.  0.523 0.285    79.8
 ```
 
 ```r
@@ -1197,7 +1197,7 @@ penguins
 ```
 
 ```
-## # A tibble: 344 × 8
+## # A tibble: 344 x 8
 ##   species island    bill_length_mm bill_depth_mm flipper_length_mm
 ##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;
 ## 1 Adelie  Torgersen           39.1          18.7               181
@@ -1217,7 +1217,7 @@ penguins %&gt;% summarise(across(c(species, island, sex),n_distinct))
 ```
 
 ```
-## # A tibble: 1 × 3
+## # A tibble: 1 x 3
 ##   species island   sex
 ##     &lt;int&gt;  &lt;int&gt; &lt;int&gt;
 ## 1       3      3     3
@@ -1232,7 +1232,7 @@ penguins %&gt;% summarise(across(everything(),~sum(is.na(.))))
 ```
 
 ```
-## # A tibble: 1 × 8
+## # A tibble: 1 x 8
 ##   species island bill_length_mm bill_depth_mm flipper_length_mm
 ##     &lt;int&gt;  &lt;int&gt;          &lt;int&gt;         &lt;int&gt;             &lt;int&gt;
 ## 1       0      0              2             2                 2
@@ -1245,6 +1245,7 @@ class: clear
 ```r
 ## Replace missing values for the numerical variables by the 
 ## average value (computed within that specie and island).
+library(dplyr)
 penguins_imputed &lt;- penguins %&gt;%
   group_by(species, island) %&gt;%
   mutate(imputed = if_any(where(is.numeric), is.na),
@@ -1258,7 +1259,7 @@ penguins_imputed
 ```
 
 ```
-## # A tibble: 344 × 9
+## # A tibble: 344 x 9
 ##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
 ##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
 ## 1 FALSE   Adelie  Torgersen           39.1          18.7             181 
@@ -1276,7 +1277,7 @@ penguins_imputed %&gt;% filter(imputed == TRUE)
 ```
 
 ```
-## # A tibble: 2 × 9
+## # A tibble: 2 x 9
 ##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
 ##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
 ## 1 TRUE    Adelie  Torgersen           39.0          18.4             191.
@@ -1298,7 +1299,7 @@ flights %&gt;% filter(if_any(everything(), is.na))
 ```
 
 ```
-## # A tibble: 9,430 × 19
+## # A tibble: 9,430 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1     1525           1530        -5     1934
@@ -1323,7 +1324,7 @@ flights %&gt;% filter(if_all(contains("delay"), ~ . &lt; 10))
 ```
 
 ```
-## # A tibble: 213,870 × 19
+## # A tibble: 213,870 x 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      544            545        -1     1004
@@ -1348,7 +1349,7 @@ flights %&gt;% select(arr_delay)
 ```
 
 ```
-## # A tibble: 336,776 × 1
+## # A tibble: 336,776 x 1
 ##   arr_delay
 ##       &lt;dbl&gt;
 ## 1        11
@@ -1418,7 +1419,7 @@ pop_dest %&gt;% summarise(delay_quantile = quantile(arr_delay))
 ```
 
 ```
-## # A tibble: 385 × 2
+## # A tibble: 385 x 2
 ## # Groups:   dest [77]
 ##   dest  delay_quantile
 ##   &lt;chr&gt;          &lt;dbl&gt;
@@ -1442,7 +1443,7 @@ pop_dest %&gt;% ungroup() %&gt;%
 ```
 
 ```
-## # A tibble: 5 × 1
+## # A tibble: 5 x 1
 ##   delay_quantile
 ##            &lt;dbl&gt;
 ## 1            -86
@@ -1476,7 +1477,7 @@ pop_dest %&gt;% ungroup() %&gt;% summarise(my_quantile(arr_delay))
 ```
 
 ```
-## # A tibble: 1 × 5
+## # A tibble: 1 x 5
 ##     min percentile25 median percentile75   max
 ##   &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;
 ## 1   -86          -17     -5           14  1272
@@ -1487,7 +1488,7 @@ pop_dest %&gt;% summarise(my_quantile(arr_delay)) ### Yay!
 ```
 
 ```
-## # A tibble: 77 × 6
+## # A tibble: 77 x 6
 ##   dest    min percentile25 median percentile75   max
 ##   &lt;chr&gt; &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;
 ## 1 ALB     -34        -17       -4         28     328
@@ -1509,7 +1510,7 @@ pop_dest %&gt;%
 ```
 
 ```
-## # A tibble: 385 × 3
+## # A tibble: 385 x 3
 ## # Groups:   dest [77]
 ##   dest    val     q
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;

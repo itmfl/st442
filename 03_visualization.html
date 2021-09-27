@@ -10,13 +10,15 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <script src="libs/clipboard/clipboard.min.js"></script>
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
-    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
-    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -38,11 +40,14 @@ The **ggplot2** package provides a unifying framework and, correspondingly, a gr
 The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
 Some useful online resources on on **ggplot2** are
-+ The book [ggplot2: Elegant graphics for data analysis](https://catalog.lib.ncsu.edu/catalog/NCSU3716602)
++ The book [ggplot2: Elegant graphics for data analysis](https://ggplot2-book.org) by H. Wickham.
 
-+ The [R Graphics Cookbook](https://r-graphics.org). 
++ The book [Data Visualization](https://socviz.co/) by K. Healy.
+
++ The [R Graphics Cookbook](https://r-graphics.org) by W. Chang.
 
 + The [R Studio ggplot2 cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
 ---
 class: clear
 
@@ -220,7 +225,8 @@ p1 &lt;- ggplot(data = mpg) +
   geom_point(mapping = aes(x = displ, y = hwy, size = class))
 p2 &lt;- ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
-require(gridExtra)
+## The gridExtra library is nice for showing multiple figures in a panel.
+require(gridExtra) 
 grid.arrange(p1,p2,ncol = 2)
 ```
 
@@ -275,7 +281,7 @@ ggplot(data = mpg) +
 &lt;img src="03_visualization_files/figure-html/facet1-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
-We can also facet our plots using a combination of two (categorical) variables.
+We can also facet our plots using a combination of two (categorical) variables
 
 ```r
 ggplot(data = mpg) + 
@@ -323,7 +329,6 @@ ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 #Histograms and Bar Plots
 We now present two of the most elementary and widely used plots.
 
@@ -439,7 +444,6 @@ grid.arrange(p1,p2,ncol = 2)
 ## Surely it is time to stop.
 
 ---
-class: header_background
 # Don't call me Shirley.
 
 &lt;img src="https://hugelolcdn.com/i/123968.gif" width="35%" style="display: block; margin: auto;" /&gt;
@@ -457,7 +461,6 @@ p + coord_polar()
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 ---
-class: header_background
 #Bar plots vs dot plots ?
 The plot on the right is known as a Cleveland dot plot after [William Cleveland](https://en.wikipedia.org/wiki/William_S._Cleveland). The dot plot is quite a bit less "noisy" compared to the bar plot.
 
@@ -471,7 +474,6 @@ grid.arrange(p1,p2,ncol = 2)
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-21-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
 
@@ -524,7 +526,6 @@ p + geom_col(colour = "black", size = 0.25) +
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-24-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 # Example 1: US Gun Murders
 We now present a few more sophisticated examples of **ggplot2** output. 
 
@@ -624,7 +625,6 @@ p &lt;- ggplot(murders, aes(x = population/10^6, y = total)) +
 p
 ```
 ---
-class: header_background
 # Example 2: Baby names
 This example tries to reproduce a few representative figures/plots from the article *How to tell someone's age when all you know is her name* on the website [Five Thirty Eight](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/). The example follows section 3.3 of the book *Modern Data Science with R* and uses data from the **babynames** package; this package contains information about roughly `\(1.6\)` million names during the period from `\(1900\)` to `\(2010\)`. 
 
@@ -817,7 +817,6 @@ p &lt;- ggplot(data = com_fem,
   coord_flip() ## coord_flip flips the $x$ and $y$ coordinate
 ```
 ---
-class: header_background
 # Example 3: Weather trends
 
 ```
@@ -1086,11 +1085,9 @@ p &lt;- p +
 class: clear
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-57-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 # Hotdogs ?
 &lt;img src="figures/nathan_hotdog.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
-class: header_background
 # R Hotdogs ?
 
 ```
@@ -1104,8 +1101,8 @@ class: header_background
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "solarized-light",
-"highlightLines": true,
-"highlightSpans": true,
+"highlightLines": false,
+"highlightSpans": false,
 "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
@@ -1172,24 +1169,7 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
       links[i].target = '_blank';
     }
   }
-})();
-// adds .remark-code-has-line-highlighted class to <pre> parent elements
-// of code chunks containing highlighted lines with class .remark-code-line-highlighted
-(function(d) {
-  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
-  const preParents = [];
-  const findPreParent = function(line, p = 0) {
-    if (p > 1) return null; // traverse up no further than grandparent
-    const el = line.parentElement;
-    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
-  };
-
-  for (let line of hlines) {
-    let pre = findPreParent(line);
-    if (pre && !preParents.includes(pre)) preParents.push(pre);
-  }
-  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
-})(document);</script>
+})();</script>
 
 <script>
 slideshow._releaseMath = function(el) {

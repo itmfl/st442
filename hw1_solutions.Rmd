@@ -189,6 +189,20 @@ We emphasize that there is no single right way to quantify the relationship betw
 For question 3, we first define the time of day as morning if the scheduled departure time is before 11am, noon if it is from $11$am to $2$pm, afternoon if between $2$ pm and $6$pm, and evening if after $6$pm. We then compute the delay as the sum of the departure and arrival delay. 
 Note that you have not seen the case_when and the between functions in your lecture slides, but we expect that you should be able to find it on your own or do something else different.
 ```{r}
+time_of_day <- function(x){
+  if(x <= 1100){
+    "morning"
+  }
+  else if(1101 <= x && x <= 1400){
+    "noon"
+  }
+  else if(1401 <= x && x <= 1800){
+    "afternoon"
+  }
+  else if(x >= 1801){
+    "evening"
+  }
+}
 flights_tod <- flights %>% mutate(time_of_day = case_when(
   sched_dep_time <= 1100 ~ "morning",
   between(sched_dep_time,1101,1400) ~ "noon",
