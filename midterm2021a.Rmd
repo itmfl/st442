@@ -1,0 +1,117 @@
+---
+title: "CSC/ST 442 Fall 2021: Midterm 1"
+output: 
+  pdf_document:
+      df_print: tibble
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max = 6, tibble.width=70)
+```
+
+## Instructions
+
++ This is a take home exam. Please upload your solution onto **Moodle** by 4pm (Raleigh, NC local time) on 
+Thursday, September 30, 2021. You can upload your solutions as a single file that includes the **code** and the **abbreviated** output (for example by using the function `head`). Please do not include pages and pages of output.
+
++ The exam is open book and open notes, i.e., you are free to use your textbook and **R** documentations. You are also allowed to search the web for example of **R** codes. However, you are **not** allowed to ask for or receive assistance from any one else. Your work **must** be your own. Submission of your work onto Moodle is **equivalent** to you **signing** the honor pledge below (you do not need to upload this signature onto Moodle).
+
++ Clarifications about questions can and should be emailed to the course instructor **only**. I will try to answer them as promptly as I can (given sufficient lead time, e.g., please do not email me after say 2pm on Thursday and expect a response.
+
++ Please make sure that your uploaded solutions are as **neat** and **legible** as possible. 
+Hard to read answers are hard to grade and lead to grade disputes which are difficult to reconcile.
+
+# Honor pledge
+
+The honor code is strictly enforced. By **uploading your solutions** onto Moodle you indicate that you had **signed** the honor pledge below and you understand the Code of Student Conduct and that the consequences for violating it can include a failing grade for the exam or failure in the class as a whole; Submission of your work is your pledge that you have neither given nor received unauthorized assistance on this exam.
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+_________________ $\qquad \qquad$ _________________ $\qquad \qquad$ __________________
+
+<br>
+<br>
+$\qquad$ **Today's Date**  $\qquad \qquad \qquad \qquad \qquad$ **Name**  $\qquad \qquad \qquad \qquad \qquad$ **Signature**
+
+\newpage
+
+# Problem I (20pts)
+
+This problem uses data from the `babynames` package together with the `make_babynames_dist()` function from the `mdsr` package. A snippet of the data is given below.
+
+```{r}
+## First do an install.packages("babynames") if the babynames library is missing from your R installation.
+## Next do an install.packages("mdsr") if the mdsr library is missing from your R installation.
+library(babynames) 
+library(mdsr)
+names_df <- make_babynames_dist()
+names_df
+```
+
+Using this data, generate the following figure.
+```{r echo=FALSE,out.width="60%", fig.align="center"}
+knitr::include_graphics('figures/midterm2021_figure_agespread.png')
+```
+
+**Note** You don't have to generate the exact figure, but it should be a **qualitatively similar** approximation of this figure.
+
+# Problem II (25pts)
+
+The next problem uses weather data from the **nycflights13** library. This dataset records **hourly** weather data for three airports (EWR, JFK, and LGA) in 2013.
+A snippet of the data is given below. Using this data, answer the following questions.
+
+```{r message = FALSE}
+library(nycflights13)
+library(dplyr)
+weather
+```
+
+Write code using **dplyr** functions to answer the following questions.
+
+(a) (5pts) The average atmospheric pressure at sea level is approximately $1013$ millibars. When there's a storm or hurricane, the pressure can drop down by $20$ millibars with $\mathtt{wind\_speed}$ of at least $30$ miles per hour.  Find observations that correspond to potential storms in the `weather` data.
+
+
+(b) (5pts) Find the **ten most** rainy day in the NYC metro area in $2013$. 
+
+
+(c) (5pts) Find, **for each airport**, the month with the most days where the average daily temperature 
+is below freezing.
+
+(d) (5pts) Heatstrokes usually occurs on days where the **highest** temperature is $95$ degrees Farenheit or higher. Using the data for $\mathtt{JFK}$ airport, how will you determine whether or not there is a period of **three consecutive** days in $2013$ where the highest temperature is at least $95$ degrees Farenheit ?
+
+
+(e) (5pts) The three airports are all in the NYC metro area and hence we expect that they should have similar weather at any given hour. Find the dates and time of the **ten** observations
+with the largest temperature difference between the three airports.
+
+
+\newpage
+
+# Problem III (30pts)
+
+The next problem uses data from the $2016$ election cycle in the USA. The data is part of the [fec16](https://github.com/baumer-lab/fec16) package. Please refer to the package link for more details about the data.
+
+We are interested in the following tables/dataframes in this data (1) `candidates`, (2) `results_senate`, and (3) `contributions`. For the `contributions` data frame, the provided data is only a random sample with $1000$ rows so we will first download the full data which contains approximately $516k$ records using the function `read_all_contributions()` that is part of the [fec16](https://github.com/baumer-lab/fec16) package.
+
+```{r download_data, cache = TRUE, message = FALSE}
+## First do an install.packages("fec16") if the fec16 library is missing.
+library(fec16)
+## If you are using Rmarkdown you might want to run this chunk only once 
+## or set the chunk option cache=TRUE
+## so as to not download the data again and again and again
+all_contributions <- read_all_contributions()
+all_contributions
+```
+
+Using the data frames mentioned above, write code to answer the following question.
+
+(a) (10pts) In the $2016$ US **senate** election, is there any **challenger** candidate(s) who won against the incumbent candidate(s) ? Please include the name of challenger candidate(s) who won and the incumbent candidates who lost.
+
+(c) (20pts) Draw a **scatterplot** visualizing the relationship between the total amount of contributions a candidate received and the number of votes they got in the US **senate** elections. Describe the trend that you observed in this scatterplot. So each dot in the scatterplot represent a candidate, with the $x$ axes being the amount of money contributed to the candidate and the $y$ axes being the amount of votes won by the candidate (in the corresponding US senate election).
+
+# Problem IV (25pts)
