@@ -8,11 +8,11 @@ output:
     #css: ["default","metropolis","metropolis-fonts","animate.css"]
     css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: github
+      highlightStyle: solarized-light
       highlightLines: true
       highlightSpans: true
       countIncrementalSlides: false
-      slideNumberFormat: "%current%"
+      #slideNumberFormat: "%current%"
     df_print: tibble
     # css: [default, metropolis, metropolis-fonts]
     # nature:
@@ -27,9 +27,9 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
-library(tidyverse)
 library(ggplot2)
 library(ggthemes)
+library(flipbookr)
 theme_set(theme_tufte())
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
@@ -39,8 +39,9 @@ xaringanExtra::use_tachyons()
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
+   link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "./hunt_sunrise.jpg",
+   title_slide_background_image = "./belltower2.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -49,9 +50,10 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
 )
 ```
-class: header_background
 #ggplot2
-We introduce the **ggplot2** package which provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
+The **ggplot2** package provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. 
+
+The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
 Some useful online resources on on **ggplot2** are
 + The book [ggplot2: Elegant graphics for data analysis](https://catalog.lib.ncsu.edu/catalog/NCSU3716602)
@@ -89,7 +91,6 @@ grid::grid.draw(p)
 
 Close, but no cigar ? In any case, the above plot is nice in that a total of six variables are mapped to six *aesthetics*; $x$ and $y$ axis mapped to the location of the army, the size of the army is mapped to the size of the line, the direction of movement is mapped to color, date of points along retreat path is mapped to the text below plot, and the temperature during the retreat is mapped to the line below the plot.
 ---
-class: header_background
 #ggplot2 basic
 We start with a very simple plot. Consider the following dataset about fuel efficiency for cars.
 
@@ -99,16 +100,16 @@ data(mpg)
 dplyr::select(mpg, -fl, -class)
 ```
 ---
-class: clear
-We now plot a scatterplot of the relationship between engine size vs
-mile per gallon for highway driving.
+`r chunk_reveal("mpg")`
 
-```{r, fig.align = 'center', out.width = "80%", fig.asp = 0.6, fig.retina = 3}
-p <- ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy)) + 
-  xlab("Engine Size") + ylab("Highway mile per gallon")
-p
+```{r mpg, include = FALSE}
+library(ggplot2)
+ggplot(data = mpg) + 
+  aes(x = displ) +
+  aes(y = hwy) +
+  geom_point()
 ```
+
 ---
 class: clear
 We next color the cars based on its class (e.g., compact vs suv vs pickup)
@@ -130,7 +131,6 @@ require(gridExtra)
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
-class: header_background
 #aes()
 We see that the plots differ in which aesthetic the variable *class* is mapped to, e.g., color vs size vs alpha translucency.
 
@@ -153,28 +153,32 @@ ggplot(mpg) +
   geom_point(aes(x = displ, y = hwy), color = "blue", shape = 24)
 ```
 ---
-class: header_background
 #facet
-We can also introduce additional (categorical) variables through the use of faceting, i.e., split your data into groups and display different subplots (but using the same *geom_functions*) for each subgroups. 
-```{r, fig.align = 'center', out.width = "70%", fig.asp = 0.6, fig.retina = 3}
+We can also introduce additional (categorical) variables through faceting, i.e., 
+
++ split your data into groups 
++ display different subplots (but using the same [geom](https://ggplot2.tidyverse.org/reference)) for each subgroups. 
+
+```{r facet1, fig.align = 'center', out.width = "60%"}
 ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy, col = cyl)) +
-  facet_wrap(~ class, nrow = 2)
+  geom_point(aes(x = displ, y = hwy, col = cyl)) +
+  facet_wrap(~class, nrow = 2)
 ```
 ---
 class: clear
-We can also facet our plots using a combination of two (categorical) variables, e.g.,
+We can also facet our plots using a combination of two (categorical) variables.
 ```{r, fig.align = 'center', out.width = "80%", fig.asp = 0.6, fig.retina = 3}
 ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy, col = cyl)) +
+  geom_point(aes(x = displ, y = hwy, col = cyl)) +
   facet_grid(drv ~ cyl)
 ```
 ---
-class: header_background
 #Geometric objects
+
 Consider the following three plots. Each plot uses the same $x$ and $y$ coordinates, but different *geoms* or geometric objects.
+
 ```{r, out.width = "100%", fig.show = 'hold', fig.asp = 0.4}
-p <- ggplot(data = mpg, mapping = aes(x = displ, y = hwy))
+p <- ggplot(data = mpg, aes(x = displ, y = hwy))
 p1 <- p + geom_point() + ggtitle("Plot 1")
 p2 <- p + geom_smooth() + ggtitle("Plot 2")
 p3 <- p + geom_point() + geom_smooth() + ggtitle("Plot 3")
@@ -462,6 +466,12 @@ median_yob <- joseph %>%
 median_yob
 ```
 ```{r echo = FALSE, ref.label='median_yob'}
+library(dplyr)
+median_yob <- joseph %>% 
+  mutate(prop = cumsum(est_alive_today)/sum(est_alive_today)) %>%
+  filter(prop >= 0.5) %>% ## a binary search is more efficient
+  arrange(year) %>% select(year) %>% pull() %>% first()
+median_yob
 ```
 ---
 class: clear
@@ -607,7 +617,7 @@ We now describe code to generate the graphic we saw earlier about temperature tr
 
 The data for this graphic is available as a white-space separated file. We first read the data and rename the columns
 ```{r cache = TRUE}
-library(tidyverse)
+library(readr)
 DAY <- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
 names(DAY) <- c("Month", "Day", "Year", "Temp")
 DAY <- select(DAY, "Year", "Month", "Day", "Temp")
@@ -799,8 +809,9 @@ knitr::include_graphics("figures/nathan_hotdog.png")
 ---
 class: header_background
 # R Hotdogs ?
-```{r echo = FALSE}
+```{r echo = FALSE, warnings = FALSE}
 source("./R_scripts/hotdogs.R")
 p <- hotdogs_plot()
 print(p)
 ```
+
