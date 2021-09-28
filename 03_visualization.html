@@ -35,7 +35,9 @@ class: center, middle, inverse, title-slide
 
 
 #ggplot2
-We introduce the **ggplot2** package which provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
+The **ggplot2** package provides a unifying framework and, correspondingly, a grammar for describing and specifying graphics. 
+
+The use of a grammar allows for a coherent system for describing and building graphics using a number of simple and well-defined commands. 
 
 Some useful online resources on on **ggplot2** are
 + The book [ggplot2: Elegant graphics for data analysis](https://ggplot2-book.org) by H. Wickham.
@@ -75,7 +77,7 @@ dplyr::select(mpg, -fl, -class)
 ```
 
 ```
-## # A tibble: 234 x 9
+## # A tibble: 234 × 9
 ##   manufacturer model displ  year   cyl trans      drv     cty   hwy
 ##   &lt;chr&gt;        &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt; &lt;int&gt; &lt;int&gt;
 ## 1 audi         a4      1.8  1999     4 auto(l5)   f        18    29
@@ -87,19 +89,121 @@ dplyr::select(mpg, -fl, -class)
 ## # … with 228 more rows
 ```
 ---
-class: clear
-We now plot a scatterplot of the relationship between engine size vs
-mile per gallon for highway driving.
+count: false
+ 
 
+.panel1-mpg-auto[
 
 ```r
-p &lt;- ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy)) + 
-  xlab("Engine Size") + ylab("Highway mile per gallon")
-p
+*library(ggplot2)
 ```
+]
+ 
+.panel2-mpg-auto[
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-5-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+count: false
+ 
+
+.panel1-mpg-auto[
+
+```r
+library(ggplot2)
+*ggplot(data = mpg)
+```
+]
+ 
+.panel2-mpg-auto[
+&lt;img src="03_visualization_files/figure-html/mpg_auto_02_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+count: false
+ 
+
+.panel1-mpg-auto[
+
+```r
+library(ggplot2)
+ggplot(data = mpg) +
+* aes(x = displ)
+```
+]
+ 
+.panel2-mpg-auto[
+&lt;img src="03_visualization_files/figure-html/mpg_auto_03_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+count: false
+ 
+
+.panel1-mpg-auto[
+
+```r
+library(ggplot2)
+ggplot(data = mpg) +
+  aes(x = displ) +
+* aes(y = hwy)
+```
+]
+ 
+.panel2-mpg-auto[
+&lt;img src="03_visualization_files/figure-html/mpg_auto_04_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+count: false
+ 
+
+.panel1-mpg-auto[
+
+```r
+library(ggplot2)
+ggplot(data = mpg) +
+  aes(x = displ) +
+  aes(y = hwy) +
+* geom_point()
+```
+]
+ 
+.panel2-mpg-auto[
+&lt;img src="03_visualization_files/figure-html/mpg_auto_05_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;style&gt;
+.panel1-mpg-auto {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-mpg-auto {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-mpg-auto {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
 ---
 class: clear
 We next color the cars based on its class (e.g., compact vs suv vs pickup)
@@ -111,7 +215,7 @@ p &lt;- ggplot(data = mpg) +
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-6-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-5-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Compare the previous plot with the following two plots.
@@ -134,7 +238,7 @@ grid.arrange(p1,p2,ncol = 2)
 ## Warning: Using alpha for a discrete variable is not advised.
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-7-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 #aes()
 We see that the plots differ in which aesthetic the variable *class* is mapped to, e.g., color vs size vs alpha translucency.
@@ -159,42 +263,48 @@ ggplot(mpg) +
   geom_point(aes(x = displ, y = hwy), color = "blue", shape = 24)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-8-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-7-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 #facet
-We can also introduce additional (categorical) variables through the use of faceting, i.e., split your data into groups and display different subplots (but using the same *geom_functions*) for each subgroups. 
+We can also introduce additional (categorical) variables through faceting, i.e., 
+
++ split your data into groups 
++ display different subplots (but using the same [geom](https://ggplot2.tidyverse.org/reference)) for each subgroups. 
+
 
 ```r
 ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy, col = cyl)) +
-  facet_wrap(~ class, nrow = 2)
+  geom_point(aes(x = displ, y = hwy, col = cyl)) +
+  facet_wrap(~class, nrow = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-9-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/facet1-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We can also facet our plots using a combination of two (categorical) variables
 
 ```r
 ggplot(data = mpg) + 
-  geom_point(mapping = aes(x = displ, y = hwy, col = cyl)) +
+  geom_point(aes(x = displ, y = hwy, col = cyl)) +
   facet_grid(drv ~ cyl)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-8-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 #Geometric objects
+
 Consider the following three plots. Each plot uses the same `\(x\)` and `\(y\)` coordinates, but different *geoms* or geometric objects.
 
+
 ```r
-p &lt;- ggplot(data = mpg, mapping = aes(x = displ, y = hwy))
+p &lt;- ggplot(data = mpg, aes(x = displ, y = hwy))
 p1 &lt;- p + geom_point() + ggtitle("Plot 1")
 p2 &lt;- p + geom_smooth() + ggtitle("Plot 2")
 p3 &lt;- p + geom_point() + geom_smooth() + ggtitle("Plot 3")
 grid.arrange(p1,p2,p3, ncol = 3)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Compare also the following two plots.
@@ -206,7 +316,7 @@ p2 &lt;- p + geom_smooth(aes(color = drv))
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-12-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-10-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Finally, each geom object can also use different data set.
@@ -217,7 +327,7 @@ ggplot(mpg, mapping = aes(x = displ, y = hwy)) +
   geom_smooth(data = dplyr::filter(mpg, class == "subcompact"))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 #Histograms and Bar Plots
 We now present two of the most elementary and widely used plots.
@@ -229,15 +339,15 @@ SAT_2010
 ```
 
 ```
-## # A tibble: 50 x 9
-##   state expenditure pupil_teacher_r… salary  read  math write total
-##   &lt;fct&gt;       &lt;int&gt;            &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-## 1 Alab…          10             15.3  49948   556   550   544  1650
-## 2 Alas…          17             16.2  62654   518   515   491  1524
-## 3 Ariz…           9             21.4  49298   519   525   500  1544
-## 4 Arka…          10             14.1  49033   566   566   552  1684
-## 5 Cali…          10             24.1  71611   501   516   500  1517
-## 6 Colo…          10             17.4  51660   568   572   555  1695
+## # A tibble: 50 × 9
+##   state   expenditure pupil_teacher_ra… salary  read  math write total
+##   &lt;fct&gt;         &lt;int&gt;             &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1 Alabama          10              15.3  49948   556   550   544  1650
+## 2 Alaska           17              16.2  62654   518   515   491  1524
+## 3 Arizona           9              21.4  49298   519   525   500  1544
+## 4 Arkans…          10              14.1  49033   566   566   552  1684
+## 5 Califo…          10              24.1  71611   501   516   500  1517
+## 6 Colora…          10              17.4  51660   568   572   555  1695
 ## # … with 44 more rows, and 1 more variable: sat_pct &lt;int&gt;
 ```
 ---
@@ -249,7 +359,7 @@ p2 &lt;- ggplot(SAT_2010, aes(x = math)) + geom_density() + geom_rug()
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Compare the following two plots. For more details, see the section for computed variables in `\(\mathrm{?geom\_histogram()}\)`.
@@ -261,7 +371,7 @@ p2 &lt;- ggplot(SAT_2010, aes(x = math)) +
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-16-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Compare the following codes.
@@ -272,7 +382,7 @@ ggplot(data = head(SAT_2010,10), aes(x = state)) + xlab("") +
   geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-17-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ```r
 ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") +
@@ -283,7 +393,7 @@ ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") +
 ## Error: stat_count() can only have an x or y aesthetic.
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-17-2.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-2.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -300,7 +410,7 @@ p2 &lt;- p + geom_bar(aes(y = math), stat = "identity")
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-18-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 
@@ -314,7 +424,7 @@ p2 &lt;- p + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-19-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-17-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Now compare the following codes.
@@ -328,7 +438,7 @@ p2 &lt;- p + scale_y_reverse() + coord_flip()
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-20-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-18-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 --
 
 ## Surely it is time to stop.
@@ -348,7 +458,7 @@ p &lt;- ggplot(data = head(SAT_2010,10),
 p + coord_polar()
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-22-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 ---
 #Bar plots vs dot plots ?
@@ -362,7 +472,7 @@ p2 &lt;- p + geom_point(size = 3) + coord_flip() + theme_bw()
 grid.arrange(p1,p2,ncol = 2)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-23-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-21-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 #Polished graphics
 Plots generated from *ggplot2* is reasonably polished, but a little touches here and there can make these graphics even better. We illustrate this by visualizing the temperature anomaly pattern in Berkeley, CA.
@@ -379,7 +489,7 @@ climate_sub
 ```
 
 ```
-## # A tibble: 105 x 7
+## # A tibble: 105 × 7
 ##   Source    Year Anomaly1y Anomaly5y Anomaly10y Unc10y pos  
 ##   &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt; &lt;lgl&gt;
 ## 1 Berkeley  1900        NA        NA     -0.171  0.108 FALSE
@@ -398,7 +508,7 @@ p &lt;- ggplot(climate_sub, aes(x = Year, y = Anomaly10y, fill = pos))
 p + geom_col()
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-25-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-23-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 This figure looks fine but the color are "reversed" and the legend is redundant and distracting.
 ---
@@ -409,7 +519,12 @@ p + geom_col(colour = "black", size = 0.25) +
   scale_fill_manual(values = c("#CCEEFF", "#FFDDDD"), guide = FALSE)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-26-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+```
+## Warning: It is deprecated to specify `guide = FALSE` to remove a guide. Please
+## use `guide = "none"` instead.
+```
+
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-24-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 # Example 1: US Gun Murders
 We now present a few more sophisticated examples of **ggplot2** output. 
@@ -423,7 +538,7 @@ murders
 ```
 
 ```
-## # A tibble: 51 x 5
+## # A tibble: 51 × 5
 ##   state      abb   region population total
 ##   &lt;chr&gt;      &lt;chr&gt; &lt;fct&gt;       &lt;dbl&gt; &lt;dbl&gt;
 ## 1 Alabama    AL    South     4779736   135
@@ -444,7 +559,7 @@ p &lt;- ggplot(murders, aes(x = population/10^6, y = total)) +
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-28-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 We remedy the above situation by plotting on a `\(\log\)` `\(\log\)` scale.
@@ -455,7 +570,7 @@ p &lt;- p + scale_x_continuous(trans = "log10") +
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 We now add text labels.
@@ -464,7 +579,7 @@ We now add text labels.
 p + geom_text(aes(label = abb))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-28-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 The previous output looks quite a bit ugly as the text is all jumbled up with the data points. We can adjust this by nudging the labels slightly.
@@ -473,7 +588,7 @@ The previous output looks quite a bit ugly as the text is all jumbled up with th
 p + geom_text(aes(label = abb), nudge_x = 0.1)
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-31-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-29-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 The output is not really improved. So we give up and call in the [big guns](https://cran.r-project.org/web/packages/ggrepel).
@@ -483,7 +598,7 @@ library(ggrepel)
 p + geom_text_repel(aes(label = abb))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 A few more polishing touches yield the following output
@@ -521,22 +636,22 @@ head(BabyNamesDist)
 ```
 
 ```
-## # A tibble: 6 x 9
-##    year sex   name      n   prop alive_prob count_thousands age_today
-##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;     &lt;dbl&gt;
-## 1  1900 F     Mary  16706 0.0526          0           16.7        114
-## 2  1900 F     Helen  6343 0.0200          0            6.34       114
-## 3  1900 F     Anna   6114 0.0192          0            6.11       114
-## 4  1900 F     Marg…  5304 0.0167          0            5.30       114
-## 5  1900 F     Ruth   4765 0.0150          0            4.76       114
-## 6  1900 F     Eliz…  4096 0.0129          0            4.10       114
+## # A tibble: 6 × 9
+##    year sex   name          n   prop alive_prob count_thousands age_today
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+## 1  1900 F     Mary      16706 0.0526          0           16.7        114
+## 2  1900 F     Helen      6343 0.0200          0            6.34       114
+## 3  1900 F     Anna       6114 0.0192          0            6.11       114
+## 4  1900 F     Margaret   5304 0.0167          0            5.30       114
+## 5  1900 F     Ruth       4765 0.0150          0            4.76       114
+## 6  1900 F     Elizabeth  4096 0.0129          0            4.10       114
 ## # … with 1 more variable: est_alive_today &lt;dbl&gt;
 ```
 ---
 class: clear, middle
 We aim to generate plots such as the one below. This plot describe the age distribution of boys born in the USA whose name is Joseph. The name Joseph reaches peak popularity during the `\(1950\)`'s and appears to be declining in popularity since the mid `\(1990\)`'s. 
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-34-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We first generate the blue bars and the black line in the previous plot.
@@ -599,7 +714,7 @@ josephine &lt;- filter(BabyNamesDist, name == "Josephine", sex == "F")
 p %+% josephine
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-38-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-36-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 For even more compelling examples, consider
@@ -609,7 +724,7 @@ p2 &lt;- p + facet_wrap(~ sex)
 p2 %+% filter(BabyNamesDist, name == "Jessie")
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-39-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-37-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 
@@ -618,11 +733,11 @@ p3 &lt;- p + facet_grid(name ~ sex)
 p3 %+% filter(BabyNamesDist, name %in% c("Jessie", "Marion", "Jackie"))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-40-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-38-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 We now go back to our original motivation, namely guessing the age of a person given her name. For the `\(25\)` most popular names, we get the following graphic
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-41-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-39-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 The code to generate the above graphic is as follows. First we find the `\(25\)` most popular female names for people currently alive.
@@ -636,7 +751,7 @@ com_fem_names &lt;- BabyNamesDist %&gt;% filter(sex == "F") %&gt;%
 A selection of the most popular names are
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   name          N est_num_alive
 ##   &lt;chr&gt;     &lt;int&gt;         &lt;dbl&gt;
 ## 1 Mary        111      2210010.
@@ -668,7 +783,7 @@ head(com_fem)
 ```
 
 ```
-## # A tibble: 6 x 5
+## # A tibble: 6 × 5
 ##   name      est_num_alive q1_age median_age q3_age
 ##   &lt;chr&gt;             &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;
 ## 1 Mary           2210010.     52         62     73
@@ -703,7 +818,17 @@ p &lt;- ggplot(data = com_fem,
 ```
 ---
 # Example 3: Weather trends
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-47-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+```
+## Warning: 4 parsing failures.
+##  row col  expected    actual                                                                           file
+## 4623  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 4979  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 5016  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 5213  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+```
+
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-45-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 We now describe code to generate the graphic we saw earlier about temperature trend in Dayton, OH. The original code is from [Brad Boehmke](https://rpubs.com/bradleyboehmke/weather_graphic) and is an attempt to reproduce a well-known visualization from Eward Tufte's classic book [Visual display of quantitative information](https://www.edwardtufte.com/tufte/books_vdqi).
@@ -711,15 +836,27 @@ We now describe code to generate the graphic we saw earlier about temperature tr
 The data for this graphic is available as a white-space separated file. We first read the data and rename the columns
 
 ```r
-library(tidyverse)
+library(readr)
 DAY &lt;- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
+```
+
+```
+## Warning: 4 parsing failures.
+##  row col  expected    actual                     file
+## 4623  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 4979  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 5016  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 5213  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+```
+
+```r
 names(DAY) &lt;- c("Month", "Day", "Year", "Temp")
 DAY &lt;- select(DAY, "Year", "Month", "Day", "Temp")
 DAY
 ```
 
 ```
-## # A tibble: 9,265 x 4
+## # A tibble: 9,265 × 4
 ##    Year Month   Day  Temp
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  1995     1     1  39  
@@ -760,7 +897,7 @@ Past
 ```
 
 ```
-## # A tibble: 8,884 x 11
+## # A tibble: 8,884 × 11
 ##    Year Month   Day  Temp newDay upper lower   avg    se avg_upper
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
 ## 1  1995     1     1  39        1  50.8  -0.3  31.4  2.39      36.5
@@ -777,7 +914,7 @@ filter(Past, newDay == 1)
 ```
 
 ```
-## # A tibble: 25 x 11
+## # A tibble: 25 × 11
 ##    Year Month   Day  Temp newDay upper lower   avg    se avg_upper
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
 ## 1  1995     1     1  39        1  50.8  -0.3  31.4  2.39      36.5
@@ -830,7 +967,7 @@ p &lt;- ggplot(Past, mapping=aes(newDay, Temp)) +
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-52-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-50-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We next plot the temperature for `\(2014\)` along with the average temperature based on historical data.
@@ -845,7 +982,7 @@ p &lt;- p +  geom_line(Present, mapping=aes(x=newDay, y=Temp))
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-53-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-51-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We then plot the dates (in `\(2014\)`) for which the temperature break either the lowest or the highest record.
@@ -858,7 +995,7 @@ p &lt;- p + geom_point(data=filter(PresentRecords, recordlow == "Y"),
 p
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-52-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 We then setup the axes and labels.
@@ -892,7 +1029,7 @@ p &lt;- p + coord_cartesian(ylim = c(-20,100)) +
 class: clear
 The previous code chunk yields the following output. 
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-56-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-54-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Final output is obtained by adding `\(\mathrm{annotate}\)` commands for the annotations.
@@ -946,13 +1083,19 @@ p &lt;- p +
 ```
 ---
 class: clear
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-59-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-57-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 # Hotdogs ?
 &lt;img src="figures/nathan_hotdog.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 # R Hotdogs ?
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-61-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+```
+## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
+## "none")` instead.
+```
+
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-59-1.png" width="120%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

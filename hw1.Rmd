@@ -34,7 +34,7 @@ gapminder
 library(gapminder)
 gapminder
 ```
-The variables $\mathtt{lifeExp}$, $\mathtt{pop}$ and $\mathtt{gdpPercap}$ describe the life expectancy at birth, the total population, and the per-capita GDP for each country in the observed year. 
+The variables `lifeExp`, `pop` and `gdpPercap` describe the life expectancy at birth, the total population, and the per-capita GDP for each country in the observed year. 
 
 Using this dataset, answer the following questions.
 
@@ -263,3 +263,4 @@ Bonus points if you can automate the above process.
 b) If you are familiar with base R then take a look at this [vignette](https://cran.r-project.org/web/packages/dplyr/vignettes/base.html). Next, try to solve either of problem 1 or problem 2 using base R. Compare and contrast your experience with using dplyr and using base **R**. NB. If you are not familiar with base R then fret not, we will learn more about base **R** as the semester progressed.
 
 **Answer** Hopefully this question will provide you with a brief glimpse into the major difference between two related but  possibly quite distinct ecosystem for **R**, namely the base **R** ecosystem and the **tidyverse** ecosystem. I believe that the **tidyverse** ecosystem is easier for beginner to pick up as it hide a lot of the complexity/idiosyncracies of **R**, but after a certain level of fluency, it is desirable to know base **R** so that you can leverage the full power of **R** together with its diverse and enormous collection of packages.  
+
