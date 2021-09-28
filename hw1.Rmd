@@ -1,11 +1,12 @@
 ---
-title: "CSC/ST 442 Assignment 1"
+title: "CSC/ST 442 Assignment 1 Solution Sketch"
 output: pdf_document
 urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(tibble.print_min=4,tibble.print_max =6)
 ```
 
 ## Instruction
@@ -38,59 +39,211 @@ The variables $\mathtt{lifeExp}$, $\mathtt{pop}$ and $\mathtt{gdpPercap}$ descri
 Using this dataset, answer the following questions.
 
 1. (5pts) How many observations do we have per continent ?
+
+**Answer:** We can answer this question with the following code chunk
+```{r message = FALSE}
+## Note that we need to load the dplyr library in order to have access to the %>% operator and the 
+## group_by and summarize functions. If you fail to load the dplyr library you will get weird messages
+## indicating that filter and select not working properly.
+library(dplyr) 
+gapminder %>% group_by(continent) %>% summarize(num_observations = n())
+```
+As you can see, the syntax is quite succinct. Take the data, group by continent, and summarize (or count) the number of rows in each group.
+
 2. (5pts) How many (distinct) countries do we have for each continent ? Hint: Try the functions $\mathrm{n\_distinct}()$.
+
+**Answer:** This is once again another application of **group_by** and **summarize**. 
+```{r}
+gapminder %>% group_by(continent) %>% summarize(n_countries = n_distinct(country))
+```
+
 3. (5pts) Create a new column named $\mathtt{gdp\_ratio}$ whose values are the GDP for that country and year divided by the corresponding GDP for the United States that year. For example, the value of $\mathtt{gdp\_ratio}$ for Afghanistan in $1952$ is roughly $0.00298$; that is to say, the GDP of Afghanistan in $1952$ is approximately $0.00298$ times that of the United States in $1952$. Hint: First create a column for the `GDP` of each country. Then try the following code
 ```{r eval = FALSE}
 gapminder %>% arrange(country,year) %>% mutate(gdp_ratio = GDP/GDP[country == "United States"])
 ```
+
+**Answer** The column $\mathtt{gdpPercap}$ is the gdp per capita. We want to get the GDP and so we have to multiply the gdpPercap with the `pop}`(population) variable.
+
+```{r}
+gapminder <- gapminder %>% mutate(GDP = gdpPercap * pop) ## Create a new column call GDP.
+```
+
+We can now arrange the observations by country name and year before dividing the GDP of these countries by the GDP of the USA. Note that because this data is quite simple (each country have the **same number** of observations corresponding to the GDP in $1952, 1957, \dots, 2007$ we can now leverage the implicit **vector recyling** to recycle the GDP of the USA (this is a vector of $12$ numbers) into a vector of length $1704$ (and so we recycle the GDP values of the USA $142$ times). Since we had taken the care to rearrange the observations by country name and by year, the GDP values are properly aligned and so we can simply use elementwise division (after recyling the GDP values for the USA) to get the `gdp_ratio`. In summary we have the following code chunk
+
+```{r}
+gapminder <- gapminder %>% arrange(country,year) %>% 
+  mutate(gdp_ratio = GDP/GDP[country == "United States"])
+```
+
+Look at the succinctness of the above code. I think this code clearly illustrates the power of vectorized operations and vector recycling. Let us now check whether the values match with what we asked for in the problem description.
+```{r}
+gapminder %>% filter(country == "Afghanistan")
+```
+
 4. (5pts) Now look at the countries in Asia. For every unique year in the dataset (namely $1952, 1957, 1962, ...$), which country has the lowest life Expectancy ? Which country has the highest lifeExpectancy ? Hint: use a **grouped** filter.
+
+Answer: Consider the following code chunk.
+
+```{r}
+gapminder %>% filter(continent == "Asia") %>% group_by(year) %>%
+  filter(lifeExp == min(lifeExp) | lifeExp == max(lifeExp))
+```
+Note that we have to use a grouped filter as opposed to a **grouped summarize** because, as we recall, a **grouped summarize** drops all the columns except the column used in the grouping and the column used to summarize the statistics (and so the country name will not be listed). More specifically
+```{r}
+gapminder %>% filter(continent == "Asia") %>% group_by(year) %>%
+  summarize(minlifeExp = min(lifeExp), maxlifeExp = max(lifeExp))
+```
+
+Finally, note that our original answer can also be shortened a bit by using the **range** function, i.e.,
+```{r eval = FALSE}
+gapminder %>% filter(continent == "Asia") %>% group_by(year) %>%
+  filter(lifeExp %in% range(lifeExp))
+```
+
 5. (10pts) For every continent, find the country that experienced the sharpest 5 year drop in life expectancy during the period from $1952$ to $1997$. Hint: the change in life expectancy for each country can be computed via the code chunk
 ```{r eval = TRUE, message = FALSE}
 library(dplyr)
 library(gapminder)
-gapminder %>% group_by(country) %>% mutate(lifeExp_change = lifeExp - lag(lifeExp)) %>% 
+gapminder_change <- gapminder %>% group_by(country) %>% 
+  mutate(lifeExp_change = lifeExp - lag(lifeExp)) %>% 
   select(lifeExp_change, everything())
+gapminder_change
 ```
 Note that the `lifeExp_change` for the year $1952$ is always missing as $1952$ is the first year that has data collected.
+
+**Answer** We want to first compute the change in lifeExp for each country. The code we provided above 
+is a **grouped** mutate. We see here that the mutate operations is done for each country, and so for the year $1952$, the value for $\mathrm{lifeExp\_change}$ is missing as there is no year prior to that. Note that if we do not group the data by country before computing $\mathrm{lifeExp\_change}$ then we can get misleading results, namely
+```{r}
+gapminder %>% mutate(lifeExp_change = lifeExp - lag(lifeExp)) %>%
+  filter(country %in% c("Japan","Cuba")) %>% arrange(year) %>% select(lifeExp_change,everything())
+```
+Note how the `lifeExp_change` for both Japan and Cuba in $1952$ are not `NA` and is thus wrong.
+
+Once we computed the change in lifeExp, then the country that experienced the sharpest 5 years drop is the country with the minimum value of `lifeExp_change` (negative values of `lifeExp_change` correspond to drop/decline of `lifeExp`, so we want the minimum or most negative value). But since we want to do it for each continent, we will need to group our data by continent. However, the data frame $\mathrm{gapminder.change}$ is the result of a grouped mutate (group by country), and since we no longer need this grouping, we fist have to ungroup the data. We also have to be careful and remove away the missing observations (due to the fact that`lifeExp_chang` for $1952$ is missing)
+```{r}
+gapminder_change %>% ungroup() %>% group_by(continent) %>%
+  filter(year > 1952) %>%
+  filter(lifeExp_change == min(lifeExp_change))
+```
+Think over why the following code does not work (hint: what happens to the minimum when there are missing values ?) and how does this affect the equality testing (`==`) operation ?
+```{r}
+gapminder_change %>% ungroup() %>% group_by(continent) %>%
+  filter(year > 1952 & lifeExp_change == min(lifeExp_change))
+```
+The following code also works, but is a little bit more dangerous as we are ignoring all missing values and thus we 
+can't be sure if there are missing values that does not correspond to the year $1952$ (which we might care about).
+```{r}
+gapminder_change %>% ungroup() %>% group_by(continent) %>%
+  filter(lifeExp_change == min(lifeExp_change, na.rm = TRUE))
+```
 
 ## Problem 2 (30pts)
 
 Using the *flights* dataset from the **nycflights13** library, answer the following question. Note that this question is slightly more open ended than the previous question.
 
 1. (5pts) Which plane $\mathrm{tailnum}$ has the worst on-time record ? You might want to look only at planes with say at least $50$ flights (because if the plane only fly once then the on-time record is not particularly accurate).
-2. (5pts) Look at the proportion of cancelled flights (compared to the total number of flights) per day (let us define a cancelled flight as one for which the departure time or the arrival time is missing). Is the proportion of cancelled flights per day related to the average delay per day ?
-3. (10pts) What time of day (morning, noon, afternoon, evening) should we fly if we want to avoid delay as much as possible ? Hint: You might want to look at the function [case_when](https://dplyr.tidyverse.org/reference/case_when.html) to convert the variable `sched_dep_time` into the time of day (morning, noon, afternoon, evening). For example
-```{r warning = FALSE, message = FALSE}
-library(dplyr)
+
+**Answer:** We have to first define on-time record. One possible defintion is the average arrival delay. Another possible definition is the percentage of canceled flights. Other definitions are possible, such as the average arrival delay weighted by flight distance or average arrival delay as compared to other "equivalent" flights to the same destinations. We will only do the bare minimum here.
+```{r}
 library(nycflights13)
-data(flights)
-
-time_of_day <- function(x){
-  f <- function(t){
-    if(is.na(t)){
-      t
-    }
-    else if(t <= 1000){
-      "morning"
-    }
-    else if(1101 <= t && t <= 1400){
-      "noon"
-    }
-    else if(1401 <= t && t <= 1800){
-      "afternoon"
-    }
-    else {
-      "evening"
-    }
-  }
-  sapply(x, f)
-}
-
-flights_tod <- flights %>% mutate(time_of_day = time_of_day(sched_dep_time)) %>% select(time_of_day,everything())
-flights_tod
+library(dplyr)
+flights %>% group_by(tailnum) %>% 
+  summarise(n = n(), avg_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  arrange(desc(avg_delay))
+flights %>% group_by(tailnum) %>% 
+  summarise(n = n(), pct_canceled = sum(is.na(arr_delay))/n()) %>%
+  arrange(desc(pct_canceled))
+```
+We see that either of the above definitions are problematic as the tailnums with the worst on-time record according to either metric only have a single flight. We therefore might choose to filter only tailnums with at least say $50$ flights in 2013 (the number $50$ here is arbitrary). This illustrates the importance of keeping track of how many observations you are summarizing over so as to be sure that you are not basing your conclusion only on a single observation from a group.
+```{r}
+flights %>% group_by(tailnum) %>% 
+  summarise(n = n(), avg_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(n >= 50) %>%
+  arrange(desc(avg_delay))
+flights %>% group_by(tailnum) %>% 
+  summarise(n = n(), pct_canceled = sum(is.na(arr_delay))/n()) %>%
+  filter(n >= 50) %>%
+  arrange(desc(pct_canceled))
+```
+We observe that not all flights have a proper tailnum, so we might want to first remove those observations.
+```{r eval = FALSE}
+flights %>% filter(!is.na(tailnum)) %>%
+  group_by(tailnum) %>% 
+  summarise(n = n(), avg_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(n >= 50) %>%
+  arrange(desc(avg_delay))
+flights %>% filter(!is.na(tailnum)) %>%
+  group_by(tailnum) %>% 
+  summarise(n = n(), pct_canceled = sum(is.na(arr_delay))/n()) %>%
+  filter(n >= 50) %>%
+  arrange(desc(pct_canceled))
 ```
 
-4. (10pts) Departure delays are typically temporally correlated; once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using the $\mathrm{lag}$ function, explores how the delay of a flight (at a particular origin) is related to the delay of the immediately preceding flight (at the same origin). You might want to arrange the flights in order of $\mathrm{month}$ followed by $\mathrm{day}$ followed by $\mathrm{dep_time}$ before using $\mathrm{lag}$.
+2. (5pts) Look at the proportion of cancelled flights (compared to the total number of flights) per day (let us define a cancelled flight as one for which the departure time or the arrival time is missing). Is the proportion of cancelled flights per day related to the average delay per day ?
+
+**Answer** Consider the following code chunk.
+
+```{r out.width='70%', message = FALSE, fig.align = "center"}
+library(ggplot2)
+canceled_delays <- flights %>% group_by(month, day) %>% 
+  summarise(n = n(), 
+            pct_canceled = sum(is.na(arr_delay) | is.na(dep_delay))/n,
+            avg_delay = mean(dep_delay,na.rm = TRUE))
+canceled_delays
+cor(canceled_delays$pct_canceled, canceled_delays$avg_delay, method = "pearson")
+cor(canceled_delays$pct_canceled, canceled_delays$avg_delay, method = "spearman")
+canceled_delays %>% ggplot(aes(x = avg_delay, y = pct_canceled)) + 
+  geom_point() + geom_smooth()
+```
+
+We emphasize that there is no single right way to quantify the relationship between these two variable. What we did here is to show a few examples using either the [Pearson product correlation](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient) or [Spearman rank correlation](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient) between the percentage of canceled flights and the average delay, or a scatterplot of the two variables. In all cases there is evidence of a strong relationship between the variables.
+
+3. (10pts) What time of day (morning, noon, afternoon, evening) should we fly if we want to avoid delay as much as possible ? Hint: You might want to look at the function [case_when](https://dplyr.tidyverse.org/reference/case_when.html) to convert the variable `sched_dep_time` into the time of day (morning, noon, afternoon, evening). 
+
+**Answer** Following the hint we first define the time of day as morning if the scheduled departure time is before 11am, noon if it is from $11$am to $2$pm, afternoon if between $2$ pm and $6$pm, and evening if after $6$pm. We then compute the delay as the sum of the departure and arrival delay. For more on the **case_when** function see the document on `if` and vectorized operations on your Moodle page. 
+```{r}
+flights_tod <- flights %>% mutate(time_of_day = case_when(
+  sched_dep_time <= 1100 ~ "morning",
+  between(sched_dep_time,1101,1400) ~ "noon",
+  between(sched_dep_time,1401,1800) ~ "afternoon",
+  sched_dep_time > 1801 ~ "evening"
+)) %>% select(time_of_day, everything())
+flights_tod
+```
+With this new column added, everything else follows easily.
+```{r}
+flights_tod %>% group_by(time_of_day) %>% 
+  summarise(n = n(), avg_delay = mean(arr_delay + dep_delay, na.rm = TRUE)) %>%
+  arrange(avg_delay)
+```
+We see that the best time of day to fly is in the morning. Note also that there are several flights that do not have a reported scheduled departure time. 
+
+4. (10pts) Departure delays are typically temporally correlated; once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using the `lag` function, explores how the delay of a flight (at a particular origin) is related to the delay of the immediately preceding flight (at the same origin). You might want to arrange the flights in order of `month` followed by `day` followed by `dep_time` before using `lag`.
+
+**Answer** The following code chunk creates a new column that records the departure delay for the **previous** scheduled deparature flight.
+```{r cache = TRUE, out.width='70%'}
+flights_lag_delay <- 
+flights %>% group_by(origin) %>% 
+  arrange(month,day,sched_dep_time) %>%
+  filter(!is.na(dep_delay)) %>%
+  mutate(prev_dep_delay = lag(dep_delay))
+flights_lag_delay
+```
+
+Using this new column, we could maybe try to visualize the relationship between the current departure delay and the previous departure delay in terms of a scatter plot.
+```{r, out.width="60%", fig.align = "center"}
+flights_lag_delay %>% ggplot(aes(x = prev_dep_delay, y = dep_delay)) +
+  geom_point()
+```
+However, due to the huge number of points near the origin (as the scale for the departure delays are quite large, from a few minutes to over 10 hours), it is quite hard to  glean information from the plot. We may contemplate transforming the data by taking logarithms of the `dep_delay` and `prev_dep_delay` but there are a large number of negative values in the delays and so the logarithms of these values are `NaN`.
+
+In this case, a much simpler (but possibly not as informative) answer is just to compute a notion of correlation between the current delay and the previous delay.
+```{r}
+flights_lag_delay <- flights_lag_delay %>% filter(!is.na(prev_dep_delay)) 
+cor(flights_lag_delay$dep_delay, flights_lag_delay$prev_dep_delay)
+```
+We see that there is some evidence of correlation between the delays. A thorough and careful investigation of the relationship between these delays is possibly non-trivial.
+
 
 # Problem 3 (10pts)
 Choose either one of the following two problems 
@@ -105,4 +258,8 @@ skills listed in these posting. Separate these keywords into categories such as
 
 Bonus points if you can automate the above process.
 
+**Answer** The request to automate the process is mostly a tongue-in-cheek joke (as it requires some non-trivial amount of webscraping that we had not or may not even discussed in this class). Nevertheless, hopefully this question did make you think a bit more about your skillsets as well as what kind of data scientist you want to be.
+
 b) If you are familiar with base R then take a look at this [vignette](https://cran.r-project.org/web/packages/dplyr/vignettes/base.html). Next, try to solve either of problem 1 or problem 2 using base R. Compare and contrast your experience with using dplyr and using base **R**. NB. If you are not familiar with base R then fret not, we will learn more about base **R** as the semester progressed.
+
+**Answer** Hopefully this question will provide you with a brief glimpse into the major difference between two related but  possibly quite distinct ecosystem for **R**, namely the base **R** ecosystem and the **tidyverse** ecosystem. I believe that the **tidyverse** ecosystem is easier for beginner to pick up as it hide a lot of the complexity/idiosyncracies of **R**, but after a certain level of fluency, it is desirable to know base **R** so that you can leverage the full power of **R** together with its diverse and enormous collection of packages.  
