@@ -6,41 +6,55 @@ date: "Fall 2021"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts]
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: zenburn
-      highlightLines: true
+      highlightStyle: solarized-light
       countIncrementalSlides: false
-
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
-options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE,warning = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
 ```
 
 ```{r xaringan-themer, include = FALSE}
 library(xaringanthemer)
-library(tidyverse)
-# duo_accent(primary_color = "#006747", secondary_color = "#CFC493",
-#   title_slide_background_color = "#FFFFFF",
-#   title_slide_text_color = "#006747",
-#   header_font_google = google_font("Josefin Sans"),
-#   title_slide_background_image = "ncstate.png",
-#   title_slide_background_size = "600px",
-#   title_slide_background_position = "bottom",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-# )
-# duo(primary_color = "#1F4257", secondary_color = "#F97B64",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-# )
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+xaringanExtra::use_animate_css()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_image = "belltower2.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
 ```
 # RDBMS
 
-RDMBS stands for relational database management systems.
+RDBMS stands for relational database management systems.
 
 A RDBMS organized data according to a collection of **tables**, with possible links between tables.
 
@@ -50,7 +64,7 @@ knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/245292d1ea724f6c3
 
 ---
 class: clear
-```{r echo = FALSE, out.width="60%"}
+```{r echo = FALSE, out.width="50%"}
 knitr::include_graphics("figures/sql_nutshell.png")
 ```
 
@@ -210,6 +224,7 @@ Let us now query data from this database.
 ```{r}
 library(DBI)
 library(RSQLite)
+library(dplyr)
 con_sqlite <- dbConnect(RSQLite::SQLite(),"tmp_sqlite")
 flights <- con_sqlite %>% tbl("flights")
 flights
@@ -248,15 +263,15 @@ Finally, if we want, we can send SQL code directly to the database through [DBI:
 
 ```{r}
 query2a <- con_sqlite %>% dbGetQuery('SELECT
-  count(*) as numFlights,
-  sum(iif(arr_delay < 15, 1.0, 0.0))/count(*) as ontimePct,
-  sum(iif(arr_delay < 0, 1.0, 0.0))/count(*) as earlyPct,
-  sum(arr_delay) / 1e6 as netMinLate,
-  sum(iif(arr_delay > 0, arr_delay, 0)) / 1e6 as minLate,
-  sum(iif(arr_delay < 0, arr_delay, 0)) / 1e6 as minEarly
-from "flights" as o
-where year = 2013
-limit 0, 6;')
+  COUNT(*) as numFlights,
+  SUM(IIF(arr_delay < 15, 1.0, 0.0))/count(*) as ontimePct,
+  SUM(IIF(arr_delay < 0, 1.0, 0.0))/count(*) as earlyPct,
+  SUM(arr_delay) / 1e6 as netMinLate,
+  SUM(IIF(arr_delay > 0, arr_delay, 0)) / 1e6 as minLate,
+  SUM(IIF(arr_delay < 0, arr_delay, 0)) / 1e6 as minEarly
+FROM "flights" as o
+WHERE year = 2013
+LIMIT 0, 6;')
 query2a
 ```
 
@@ -285,15 +300,15 @@ This code however doesn't seem to work as expected.
 
 ```{r}
 query2c <- con_sqlite %>% dbGetQuery('SELECT
-  count(*) as numFlights,
-  sum(iif(arr_delay < 15, 1, 0))/count(*) as ontimePct,
-  sum(iif(arr_delay < 0, 1, 0))/count(*) as earlyPct,
-  sum(arr_delay) / 1e6 as netMinLate,
-  sum(iif(arr_delay > 0, arr_delay, 0)) / 1e6 as minLate,
-  sum(iif(arr_delay < 0, arr_delay, 0)) / 1e6 as minEarly
-from "flights" as o
-where year = 2013
-limit 0, 6;')
+  COUNT(*) as numFlights,
+  SUM(IIF(arr_delay < 15, 1, 0))/count(*) as ontimePct,
+  SUM(IIF(arr_delay < 0, 1, 0))/count(*) as earlyPct,
+  SUM(arr_delay) / 1e6 as netMinLate,
+  SUM(IIF(arr_delay > 0, arr_delay, 0)) / 1e6 as minLate,
+  SUM(IIF(arr_delay < 0, arr_delay, 0)) / 1e6 as minEarly
+FROM "flights" as o
+WHERE year = 2013
+LIMIT 0, 6;')
 query2c
 ```
 

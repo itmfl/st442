@@ -174,7 +174,8 @@ x %>% str_sort(locale = "haw") ## Hawaiian's don't speak English!
 + To sort the letters in a string, you will have to first split the string using `str_split`.
 ```{r}
 ## This code chunk is just a quick hack. 
-sapply(lapply(str_split(x, ""), str_sort), function(z) str_c(z, collapse = ""))
+sapply(lapply(str_split(x, ""), str_sort), 
+       function(z) str_c(z, collapse = ""))
 ```
 ---
 # Pattern matching in strings
@@ -281,7 +282,7 @@ The most important things to remember are
 
 + `\\1`, `\\2`, for back references
 ---
-# Example 1: Macbeth
+# Example: Macbeth
 We will follow the presentation from Chapter 19 of the book [Modern Data Science with R](https://mdsr-book.github.io/mdsr2e/ch-text.html#regular-expressions-using-macbeth)
 
 ```{r}
