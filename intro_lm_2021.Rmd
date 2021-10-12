@@ -511,6 +511,85 @@ The above equation is then equivalent to
 $$\mathbf{X}^{\top} \mathbf{X} \hat{\boldsymbol{\beta}} = \mathbf{X}^{\top} \boldsymbol{y}.$$
 
 ---
+# Recap of matrix multiplication.
+
+Let $\mathbf{A}$ be a $p \times q$ matrix with entries $(a_{ij})$ and $\mathbf{B}$ be a $q \times r$ matrix with entries $(b_{ij})$. Then $\mathbf{C} = \mathbf{A} \mathbf{B}$ is a $p \times r$ matrix with entries $(c_{ij})$ given by
+$$c_{ij} = \sum_{k} a_{ik} b_{kj}.$$
+
+Recall that $(\mathbf{A} \mathbf{B})^{\top} = \mathbf{B}^{\top} \mathbf{A}^{\top}$ where $\top$ denote the matrix **transpose**. 
+
+As a **very special** case of matrix multiplication, let $\boldsymbol{v} = (v_1, v_2,\dots, v_p)$ and $\boldsymbol{w} = (w_1, w_2, \dots, w_p)$ be $p \times 1$ and $q \times 1$ **column** vectors. Then
+$$\boldsymbol{v} \boldsymbol{w}^{\top} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_p \end{bmatrix} \begin{bmatrix} w_1 & w_2 & \dots & w_q \end{bmatrix}  = \begin{bmatrix} v_1 w_1 & v_1 w_2 & v_1 w_3 & \dots & v_1 w_q \\ v_2 w_1 & v_2 w_2 & v_2 w_3 & \dots & v_2 w_q \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ v_p w_1 & v_p w_2 & v_p w_3 & \dots & v_p w_q \end{bmatrix}$$
+is a $p \times q$ matrix. 
+
+---
+class: clear
+
+As another special case of matrix multiplication, let $\boldsymbol{v} = (v_1, v_2,\dots, v_p)$ and $\boldsymbol{w} = (w_1, w_2, \dots, w_p)$ be $p \times 1$ **column** vectors. Then $\boldsymbol{v}^{\top} \boldsymbol{w}$ is a **scalar** given by 
+$$\boldsymbol{v}^{\top} \boldsymbol{w} = \begin{bmatrix} v_1 & v_2 & \dots & v_p \end{bmatrix} \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_p \end{bmatrix} = v_1 w_1 + v_2 w_2 + \dots + v_p w_p = \boldsymbol{w}^{\top} \boldsymbol{v}.$$
+
+We therefore have, for any vector $\boldsymbol{v} = (v_1, v_2, \dots, v_p)$, 
+$$v_1^2 + v_2^2 + \dots + v_p^2 = \sum_{j} v_j^2 = \boldsymbol{v}^{\top} \boldsymbol{v}.$$
+
+---
+class: clear
+
+Now let $\mathbf{A}$ and $\mathbf{B}$ be $p \times q$ and $q \times r$ matrices and write $\mathbf{A}$ and $\mathbf{B}$ in terms of rows vectors and columns vectors, i.e.,
+$$\mathbf{A} = \begin{bmatrix} \boldsymbol{a}_1^{\top} \\ \boldsymbol{a}_2^{\top} \\ \vdots \\ \boldsymbol{a}_p^{\top} \end{bmatrix}, \quad \mathbf{B} = \begin{bmatrix} \boldsymbol{b}_1 & \boldsymbol{b}_2 & \cdots & \boldsymbol{b}_r \end{bmatrix}.$$
+
+We then have
+$$\mathbf{A} \mathbf{B} = \begin{bmatrix} \boldsymbol{a}_1^{\top} \mathbf{B} \\ \boldsymbol{a}_2^{\top} \mathbf{B} \\ \vdots \\ \boldsymbol{a}_p^{\top} \mathbf{B} \end{bmatrix} = \begin{bmatrix} \mathbf{A} \boldsymbol{b}_1 & \mathbf{A} \boldsymbol{b}_2 & \cdots & \mathbf{A} \boldsymbol{b}_r \end{bmatrix}
+= \begin{bmatrix} \boldsymbol{a}_1^{\top} \boldsymbol{b}_1 & \boldsymbol{a}_1^{\top} \boldsymbol{b}_2 & \cdots & \boldsymbol{a}_1^{\top} \boldsymbol{b}_r\\
+\boldsymbol{a}_2^{\top} \boldsymbol{b}_1 & \boldsymbol{a}_2^{\top} \boldsymbol{b}_2 & \cdots & \boldsymbol{a}_2^{\top} \boldsymbol{b}_r \\ \vdots & \vdots & \ddots & \vdots \\
+\boldsymbol{a}_p^{\top} \boldsymbol{b}_1 & \boldsymbol{a}_p^{\top} \boldsymbol{b}_2 & \cdots & \boldsymbol{a}_p^{\top} \boldsymbol{b}_r\end{bmatrix}.$$
+
+---
+# Matrix multiplication in R
+
+Matrices are multiplied in **R** using the `%*%` operation. For example
+```{r}
+A <- matrix(c(1:6), nrow = 3, byrow = TRUE)
+B <- matrix(c(1:8), nrow = 2, byrow = TRUE)
+A
+B
+A %*% B
+```
+
+---
+Note that the `*` operation is for **elementwise** matrix multiplication.
+```{r error = TRUE}
+A*B
+A2 <- matrix(c(3:8), nrow = 3, byrow = TRUE)
+A2
+A*A2
+A %*% A2
+```
+
+---
+Finally, a vector (when used with matrix multiplication) is by default a **column** vector if multiplied on the right and is a **row** vector if multiplied on the left.
+```{r error = TRUE}
+v <- c(4,5)
+v
+A %*% v
+v %*% B
+```
+
+---
+class: clear 
+
+The matrix transpose is given by the function `t()`.
+```{r}
+t(B)
+t(v)
+```
+
+There is some inconsistencies with using `t()`for a matrix vector product.
+```{r error = TRUE}
+t(v) %*% B
+A %*% t(v)
+```
+
+---
 # The normal equation
 
 Let $\{(Y_i, X^{(1)}_i, X^{(2)}_i, \dots, X^{(p-1)}_i)\}_{i=1}^{n}$ be $n$ data points. For the $i$th observation, $Y_i$ is the value of the response variable and $X_i^{(k)}$ is the value of the $k$th predictor variable.
@@ -606,7 +685,6 @@ y <- sat$math
 ## solve denotes matrix inverse, t denote matrix transpose
 beta.hat <- solve(t(X) %*% X) %*% t(X) %*% y
 beta.hat
-t(beta.hat)
 ```
 ---
 # How to interpret a coefficent ?

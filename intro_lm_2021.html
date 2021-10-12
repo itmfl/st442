@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -485,6 +485,197 @@ The above equation is then equivalent to
 `$$\mathbf{X}^{\top} \mathbf{X} \hat{\boldsymbol{\beta}} = \mathbf{X}^{\top} \boldsymbol{y}.$$`
 
 ---
+# Recap of matrix multiplication.
+
+Let `\(\mathbf{A}\)` be a `\(p \times q\)` matrix with entries `\((a_{ij})\)` and `\(\mathbf{B}\)` be a `\(q \times r\)` matrix with entries `\((b_{ij})\)`. Then `\(\mathbf{C} = \mathbf{A} \mathbf{B}\)` is a `\(p \times r\)` matrix with entries `\((c_{ij})\)` given by
+`$$c_{ij} = \sum_{k} a_{ik} b_{kj}.$$`
+
+Recall that `\((\mathbf{A} \mathbf{B})^{\top} = \mathbf{B}^{\top} \mathbf{A}^{\top}\)` where `\(\top\)` denote the matrix **transpose**. 
+
+As a **very special** case of matrix multiplication, let `\(\boldsymbol{v} = (v_1, v_2,\dots, v_p)\)` and `\(\boldsymbol{w} = (w_1, w_2, \dots, w_p)\)` be `\(p \times 1\)` and `\(q \times 1\)` **column** vectors. Then
+`$$\boldsymbol{v} \boldsymbol{w}^{\top} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_p \end{bmatrix} \begin{bmatrix} w_1 &amp; w_2 &amp; \dots &amp; w_q \end{bmatrix}  = \begin{bmatrix} v_1 w_1 &amp; v_1 w_2 &amp; v_1 w_3 &amp; \dots &amp; v_1 w_q \\ v_2 w_1 &amp; v_2 w_2 &amp; v_2 w_3 &amp; \dots &amp; v_2 w_q \\ \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\ v_p w_1 &amp; v_p w_2 &amp; v_p w_3 &amp; \dots &amp; v_p w_q \end{bmatrix}$$`
+is a `\(p \times q\)` matrix. 
+
+---
+class: clear
+
+As another special case of matrix multiplication, let `\(\boldsymbol{v} = (v_1, v_2,\dots, v_p)\)` and `\(\boldsymbol{w} = (w_1, w_2, \dots, w_p)\)` be `\(p \times 1\)` **column** vectors. Then `\(\boldsymbol{v}^{\top} \boldsymbol{w}\)` is a **scalar** given by 
+`$$\boldsymbol{v}^{\top} \boldsymbol{w} = \begin{bmatrix} v_1 &amp; v_2 &amp; \dots &amp; v_p \end{bmatrix} \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_p \end{bmatrix} = v_1 w_1 + v_2 w_2 + \dots + v_p w_p = \boldsymbol{w}^{\top} \boldsymbol{v}.$$`
+
+We therefore have, for any vector `\(\boldsymbol{v} = (v_1, v_2, \dots, v_p)\)`, 
+`$$v_1^2 + v_2^2 + \dots + v_p^2 = \sum_{j} v_j^2 = \boldsymbol{v}^{\top} \boldsymbol{v}.$$`
+
+---
+class: clear
+
+Now let `\(\mathbf{A}\)` and `\(\mathbf{B}\)` be `\(p \times q\)` and `\(q \times r\)` matrices and write `\(\mathbf{A}\)` and `\(\mathbf{B}\)` in terms of rows vectors and columns vectors, i.e.,
+`$$\mathbf{A} = \begin{bmatrix} \boldsymbol{a}_1^{\top} \\ \boldsymbol{a}_2^{\top} \\ \vdots \\ \boldsymbol{a}_p^{\top} \end{bmatrix}, \quad \mathbf{B} = \begin{bmatrix} \boldsymbol{b}_1 &amp; \boldsymbol{b}_2 &amp; \cdots &amp; \boldsymbol{b}_r \end{bmatrix}.$$`
+
+We then have
+`$$\mathbf{A} \mathbf{B} = \begin{bmatrix} \boldsymbol{a}_1^{\top} \mathbf{B} \\ \boldsymbol{a}_2^{\top} \mathbf{B} \\ \vdots \\ \boldsymbol{a}_p^{\top} \mathbf{B} \end{bmatrix} = \begin{bmatrix} \mathbf{A} \boldsymbol{b}_1 &amp; \mathbf{A} \boldsymbol{b}_2 &amp; \cdots &amp; \mathbf{A} \boldsymbol{b}_r \end{bmatrix}
+= \begin{bmatrix} \boldsymbol{a}_1^{\top} \boldsymbol{b}_1 &amp; \boldsymbol{a}_1^{\top} \boldsymbol{b}_2 &amp; \cdots &amp; \boldsymbol{a}_1^{\top} \boldsymbol{b}_r\\
+\boldsymbol{a}_2^{\top} \boldsymbol{b}_1 &amp; \boldsymbol{a}_2^{\top} \boldsymbol{b}_2 &amp; \cdots &amp; \boldsymbol{a}_2^{\top} \boldsymbol{b}_r \\ \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\boldsymbol{a}_p^{\top} \boldsymbol{b}_1 &amp; \boldsymbol{a}_p^{\top} \boldsymbol{b}_2 &amp; \cdots &amp; \boldsymbol{a}_p^{\top} \boldsymbol{b}_r\end{bmatrix}.$$`
+
+---
+# Matrix multiplication in R
+
+Matrices are multiplied in **R** using the `%*%` operation. For example
+
+```r
+A &lt;- matrix(c(1:6), nrow = 3, byrow = TRUE)
+B &lt;- matrix(c(1:8), nrow = 2, byrow = TRUE)
+A
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    2
+## [2,]    3    4
+## [3,]    5    6
+```
+
+```r
+B
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    5    6    7    8
+```
+
+```r
+A %*% B
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]   11   14   17   20
+## [2,]   23   30   37   44
+## [3,]   35   46   57   68
+```
+
+---
+Note that the `*` operation is for **elementwise** matrix multiplication.
+
+```r
+A*B
+```
+
+```
+## Error in A * B: non-conformable arrays
+```
+
+```r
+A2 &lt;- matrix(c(3:8), nrow = 3, byrow = TRUE)
+A2
+```
+
+```
+##      [,1] [,2]
+## [1,]    3    4
+## [2,]    5    6
+## [3,]    7    8
+```
+
+```r
+A*A2
+```
+
+```
+##      [,1] [,2]
+## [1,]    3    8
+## [2,]   15   24
+## [3,]   35   48
+```
+
+```r
+A %*% A2
+```
+
+```
+## Error in A %*% A2: non-conformable arguments
+```
+
+---
+Finally, a vector (when used with matrix multiplication) is by default a **column** vector if multiplied on the right and is a **row** vector if multiplied on the left.
+
+```r
+v &lt;- c(4,5)
+v
+```
+
+```
+## [1] 4 5
+```
+
+```r
+A %*% v
+```
+
+```
+##      [,1]
+## [1,]   14
+## [2,]   32
+## [3,]   50
+```
+
+```r
+v %*% B
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]   29   38   47   56
+```
+
+---
+class: clear 
+
+The matrix transpose is given by the function `t()`.
+
+```r
+t(B)
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    5
+## [2,]    2    6
+## [3,]    3    7
+## [4,]    4    8
+```
+
+```r
+t(v)
+```
+
+```
+##      [,1] [,2]
+## [1,]    4    5
+```
+
+There is some inconsistencies with using `t()`for a matrix vector product.
+
+```r
+t(v) %*% B
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]   29   38   47   56
+```
+
+```r
+A %*% t(v)
+```
+
+```
+## Error in A %*% t(v): non-conformable arguments
+```
+
+---
 # The normal equation
 
 Let `\(\{(Y_i, X^{(1)}_i, X^{(2)}_i, \dots, X^{(p-1)}_i)\}_{i=1}^{n}\)` be `\(n\)` data points. For the `\(i\)`th observation, `\(Y_i\)` is the value of the response variable and `\(X_i^{(k)}\)` is the value of the `\(k\)`th predictor variable.
@@ -676,15 +867,6 @@ beta.hat
 ## expend        9.63
 ## ratio         3.83
 ## salary       -4.64
-```
-
-```r
-t(beta.hat)
-```
-
-```
-##      (Intercept) expend ratio salary
-## [1,]         549   9.63  3.83  -4.64
 ```
 ---
 # How to interpret a coefficent ?
@@ -1093,7 +1275,7 @@ class: clear
 Q. What about confidence regions for two or more coefficients ?
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-31-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-36-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
 &lt;p class="caption"&gt;Confidence ellipse and individual confidence intervals&lt;/p&gt;
 &lt;/div&gt;
 
