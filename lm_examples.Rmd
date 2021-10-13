@@ -1,0 +1,218 @@
+---
+title: "Brief vignette on linear models."
+output: html_document
+---
+
+## Multivariate normals and linear transformations.
+
+We first generate a bunch of data points from the bivariate normal with mean $0$ and identity covariance matrix. We then draw the scatterplot for these points and the super-imposed the **countours** for the pdf of the bivariate normal with identity covariance matrix on top of the scatter plot. The **contours** are concentric circles in this case.
+
+```{r out.width="70%", fig.align = "center"}
+library(ggplot2)
+m <- c(0,0)
+sigma <- matrix(c(1,0,0,1),nrow = 2)
+data.grid <- expand.grid(s.1 = seq(-3, 3, length.out=200), s.2 = seq(-3, 3, length.out=200))
+q.samp <- cbind(data.grid, prob = mvtnorm::dmvnorm(data.grid, mean = m, sigma = sigma))
+df <- data.frame(x = rnorm(1000),y = rnorm(1000))
+ggplot(q.samp, aes(x=s.1, y=s.2)) + 
+    geom_contour(aes(z = prob)) +
+    coord_fixed(xlim = c(-3, 3), ylim = c(-3, 3), ratio = 1) + 
+  geom_point(data = df, aes (x = x,y = y), alpha = 0.25)
+```
+
+We now transform the data through some simple linear transformations.
+
+```{r message = FALSE, out.width="70%", fig.align = "center"}
+library(dplyr)
+df_transformed <- df %>% mutate(x2 = 2*x - y + 1, y2 = 0.5*x + 2*y - 1) %>% 
+  select(x2,y2) %>% 
+  rename(x = x2, y = y2)
+Tmat <- matrix(c(2,-1,0.5,2),nrow = 2, byrow = TRUE)
+Tmat
+sigma_transformed <- Tmat %*% sigma %*% t(Tmat)
+sigma_transformed ## Transformation of covariance matrix
+m_transformed <- Tmat %*% m + c(1,-1) ## transformation of mean.
+data.grid <- expand.grid(s.1 = seq(-6, 6, length.out=200), s.2 = seq(-6, 6, length.out=200))
+q.samp <- cbind(data.grid, prob = mvtnorm::dmvnorm(data.grid, mean = m_transformed, sigma = sigma_transformed))
+ggplot(q.samp, aes(x=s.1, y=s.2)) + 
+    geom_contour(aes(z = prob)) +
+    coord_fixed(xlim = c(-6, 6), ylim = c(-6, 6), ratio = 1) + 
+  geom_point(data = df_transformed, aes (x = x,y = y), alpha = 0.25)
+```
+
+We see that the points are transformed accordingly and furthermore, the **contours** for the transformed data are now concentric **ellipses**.
+
+## Ames housing dataset.
+
+We now provide a more detailed example of regression analysis using the [Ames housing dataset](https://cran.r-project.org/web/packages/AmesHousing/index.html). The data was collected by Dean De Cock of Truman State University. See this [article](http://jse.amstat.org/v19n3/decock.pdf) in the Journal of Statistical Education describing the data.
+
+```{r}
+library(AmesHousing)
+ames <- make_ames()
+ames
+names(ames)
+```
+
+For a description of these variables, see the [data documentation](http://jse.amstat.org/v19n3/decock/DataDocumentation.txt). 
+
+### Data Exploration
+
+We will now consider a series of linear models for predicting the sales price of the house (coded as variable `Sale_Price` in the data). But first, let us take a quick look at the data.
+
+```{r out.width="70%", fig.align = "center"}
+library(ggplot2)
+ames %>% ggplot(aes(x = Sale_Price)) + geom_histogram(bins = 50)
+```
+
+We see that the sale price is quite skewed. This suggests that a logarithmic transformation of the variable `Sale_Price` could be appropriate. However, taking logarithmic transformation of the response could hinder interpretability as it is not clear how a coefficient now relates to the final `Sale_Price`. 
+
+Let us also try to identify potential outliers in the data. We start with a simple scatterplot of `Sale_Price` against `Gr_Liv_Area` (square footage of living area). 
+```{r out.width="70%", fig.align = "center"}
+ames %>% ggplot(aes(x = Gr_Liv_Area, y = Sale_Price)) + geom_point()
+```
+
+We see that there are five potential outliers, corresponding to house with `Gr_Liv_Area` above $4000$ square foot. Let us take a look at these.
+```{r}
+library(dplyr)
+ames %>% filter(Gr_Liv_Area >= 4000) %>% select(Gr_Liv_Area, Sale_Price, Sale_Condition)
+```
+
+We will thus choose to remove these data from our modeling. For simplicity, we will also only consider sells for which `Sale_Condition` is `Normal`.
+
+```{r}
+ames_subset <- ames %>% filter(Gr_Liv_Area < 4000, Sale_Condition == "Normal")
+ames_subset %>% summarize(count = n())
+```
+
+### First Modeling Attempt
+
+We now consider a simple model for predicting `Sale_Price`. To get a baseline, we start with a model with only `Gr_Liv_Area` as the predictor variable.
+
+```{r}
+mod0 <- lm(Sale_Price ~ Gr_Liv_Area, data = ames_subset)
+summary(mod0)
+mae_mod0 <- mean(abs(ames_subset$Sale_Price - mod0$fitted.values)) ## Mean Absolute Error
+mae_mod0
+```
+We see that the average error (`MAE`) for this model is roughly $33$ thousand dollars and the root mean square error (`RMSE`) is roughly $45$ thousand dollars.
+
+Let us now try adding a few more variables to see how much we can reduce these errors. We can add a few variables, starting with the number of bedrooms `Bedroom_AbvGr`, number of bathrooms `Full_Bath` and `Half_Bath`, kitchen quality `Kitchen_Qual`, basement size `Bsmt_Fin_SF_1` and `Bsmt_Fin_SF_2`, and basement quality `BsmtFin_Type_1` and `BsmtFin_Type_2`. 
+
+```{r}
+mod1 <- update(mod0, . ~ . + Bedroom_AbvGr + Full_Bath + Half_Bath + Kitchen_Qual + BsmtFin_SF_1 + 
+                 BsmtFin_SF_2 + BsmtFin_Type_1 + BsmtFin_Type_2)
+summary(mod1)
+mae_mod1 <- mean(abs(ames_subset$Sale_Price - mod1$fitted.values))
+mae_mod1
+```
+
+We see that the error had decreased by roughly a factor or $30%$ for both the `MAE` and `RMSE`. There is, however, the issue that one coefficients is not defined. Let us try to see why this is the case.
+```{r}
+ames_subset %>% filter(BsmtFin_Type_1 == "Unf") %>% select(c(contains("BsmtFin"), ends_with("SF")))
+```
+
+It turns out that if the basement is unfinished then the square footage is set to a constant value equal to $7$ and this creates a design matrix that is column rank deficient, thereby leading to the singularity in the estimate. We can fix this issue by changing the coding of the data to remove the `Unf` level in the `BsmtFin_Type_1` level by combining it with the `No_Basement` level.
+
+```{r}
+library(forcats)
+ames_subset %>% select(BsmtFin_Type_1) %>% pull() %>% table
+ames_subset <- ames_subset %>% mutate(BsmtFin_Type_1 = 
+                                        fct_collapse(BsmtFin_Type_1, No_Basement = c("No_Basement","Unf")))
+mod1 <- update(mod1, data = ames_subset)
+summary(mod1)
+mae_mod1 <- mean(abs(ames_subset$Sale_Price - mod1$fitted.values))
+mae_mod1
+```
+
+## Second Modeling Attempt.
+
+Let us now continue to add more variables. Looking at the variable list, we can maybe try adding the variables for type of foundation, overall quality of the house, overall condition, house type, and building type, and proximity to various conditions.
+
+```{r}
+mod2 <- update(mod1, . ~ . + Foundation + Overall_Qual + Overall_Cond + Condition_1 + Condition_2 + Bldg_Type + House_Style)
+summary(mod2)
+mae_mod2 <- mean(abs(ames_subset$Sale_Price - mod2$fitted.values))
+mae_mod2
+```
+
+Looking through the coefficients, it suggest that we can try to remove the variable `Condition_2` without increasing the error much. Let us try that
+
+```{r}
+mod3 <- update(mod2, . ~ . - Condition_2)
+summary(mod3)
+mae_mod3 <- mean(abs(ames_subset$Sale_Price - mod3$fitted.values))
+mae_mod3
+```
+
+Let us now try to add in the neighborhood information as each neighborhood could have quite different price points. We may also want to allow for interaction between the neighborhood and the size of the house in each neighborhood.
+
+```{r}
+mod4 <- update(mod3, . ~ . + Neighborhood + Neighborhood*Gr_Liv_Area)
+summary(mod4)
+mae_mod4 <- mean(abs(ames_subset$Sale_Price - mod4$fitted.values))
+mae_mod4
+```
+
+Nevertheless, the more important question we have to ask is that by introducing the neighborhood variable and its interaction with `Gr_Liv_Area` we had 
+
++ Introduced an addition $53$ parameters to the model. 
++ There are now $115$ coefficients to be estimated. 
++ Is the jump from $62$ to $115$ parameters merit the 
+    - reduction in `MAE` by approximately `r round((mae_mod3 - mae_mod4)/100)*100` dollars or
+    - reduction in `RMSE` by approximately `r round((summary(mod3)$sigma - summary(mod4)$sigma)/109)*100` dollars ? 
++ Finally, can the model now be used in say a different city/town where there are no longer the same neighborhood information ?
+
+In light of these issues. We will ignore the neighborhood information and stick with `model3`.
+
+## Evaluating the model.
+
+Let us now suppose that the `MAE` of roughly $16K$ is acceptable to us. Let us now see if there are any noticeable patterns of outliers or non-constant variance in the residuals. 
+
+```{r warning = FALSE}
+plot(mod3, sub.caption = "", which = c(1,3,5))
+```
+
+It is obvious from the second residual vs fitted value plot that there is a sign of non-constant variance. This make sense because the fluctuation in sale price for more expensive houses are in general larger than that for cheaper houses. 
+
+We can try to see how well our predictor variables does when we take the log transform of the response variable.
+```{r}
+mod3_log_SP <- update(mod3, log(Sale_Price) ~ .)
+summary(mod3_log_SP)$sigma
+mae_mod3_log_SP <- mean(abs(log(ames_subset$Sale_Price) - mod3_log_SP$fitted.values))
+mae_mod3_log_SP
+```
+
+The above numbers can be interpreted as estimate of the **relative error** in our prediction. So our estimated sale price is roughly $8\% - 12\%$ away from the **expected** sale price. Is this error acceptable ? 
+
+## Simplifying the model.t
+We will now assume that `mod3` is acceptable. Let us see if we can find a simpler model with similar error. We first start by trying to ignore the variables associated with `BsmtFin_Type_2` and `BsmtFin_SF_2`.
+
+```{r}
+mod3_simp1 <- update(mod3, . ~ . - BsmtFin_SF_2 - BsmtFin_Type_2)
+summary(mod3_simp1)
+mae_mod3_simp1<- mean(abs(ames_subset$Sale_Price - mod3_simp1$fitted.values))
+mae_mod3_simp1
+```
+
+Compared to the `MAE` of `r round(mae_mod3)` and `RMSE` of `r round(summary(mod3)$sigma)` for the model `mod3`, we see that there is strong justification to remove these variables. We can try to automate the process by using some variable selection procedure. We will use a step-selection procedure based on the [Akaike Information Criterion](https://en.wikipedia.org/wiki/Akaike_information_criterion) from the [MASS](https://cran.r-project.org/web/packages/MASS/index.html) library.
+
+```{r}
+library(MASS)
+mod3_stepAIC <- stepAIC(mod3, direction = "both")
+summary(mod3_stepAIC)
+mod3_simp1_stepAIC <- stepAIC(mod3_simp1, direction = "both")
+summary(mod3_simp1_stepAIC)
+```
+
+In conclusion, the model `mod3` appear to provide a nice balance between complexity and accuracy.
+
+## But wait, there is more.
+
++ Our whole procedure is done based on using the data to estimate the parameters and then using the fitted model to evaluate the error. 
+
++ As we said earlier in our lecture slides, the error estimate is likely to be overly optimistic.
+
++ We could split the data into training data and test data and use the training data to estimate the coefficients and use the test data to evaluate the error.
+
++ Model selection is now quite a bit harder to automate. However, automatic model selection is also a controversial topic, so maybe this is not such a big issue.
+

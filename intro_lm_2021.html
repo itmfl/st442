@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -1011,10 +1011,45 @@ Y_i = \beta_0 + \sum_{k=1}^{p-1} \beta_k X^{(k)}_i + \color{red}{\epsilon_i} \\
 
 This then implies the **linear model**
 `$$\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}; \quad \boldsymbol{\epsilon} = \begin{bmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_n \end{bmatrix}, \quad \mathbb{E}[\boldsymbol{\epsilon}] = \boldsymbol{0}, \quad \mathrm{Var}[\boldsymbol{\epsilon}] = \sigma^2 \mathbf{I}.$$`
+
+---
+### Interlude: covariance and linear transformations
+
+Let `\(\boldsymbol{z} = (Z_1, Z_2, \dots, Z_p)\)` be a **random vector**. That is, each component `\(Z_i\)` of `\(\boldsymbol{z}\)` is a **random variable**.
+
+We can define the **mean vector** `\(\boldsymbol{\mu}\)` for `\(\boldsymbol{z}\)` as `\(\mathbb{E}[\boldsymbol{z}] = \boldsymbol{\mu} = (\mu_1, \mu_2, \dots, \mu_p)\)` where `\(\mu_i = \mathbb{E}[Z_i]\)`. 
+
+The **covariance matrix** for `\(\boldsymbol{z}\)` is then the `\(p \times p\)` matrix defined by
+`$$\mathrm{Var}[\boldsymbol{z}] = \mathbb{E}[(\boldsymbol{z} - \boldsymbol{\mu})(\boldsymbol{z} - \boldsymbol{\mu})^{\top}] = \left[\begin{smallmatrix} \mathbb{E}[(Z_1 - \mu_1)^2] &amp; \mathbb{E}[(Z_1 - \mu_1)(Z_2 - \mu_2)] &amp; \cdots &amp; \mathbb{E}[(Z_1 - \mu_1)(Z_p - \mu_p)] \\
+\mathbb{E}[(Z_2 - \mu_2)(Z_1 - \mu_1)] &amp; \mathbb{E}[(Z_2 - \mu_2)^2 ]&amp; \cdots &amp; \mathbb{E}[(Z_2 - \mu_2)(Z_p - \mu_p)] \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\mathbb{E}[(Z_p - \mu_p)(Z_1 - \mu_1)] &amp; \mathbb{E}[(Z_p - \mu_p)(Z_p - \mu_2)] &amp; \cdots &amp; \mathbb{E}[(Z_p - \mu_p)^2]. \end{smallmatrix} \right].$$`
+
+
 ---
 class: clear
 
-With the above assumptions,
+Now let `\(\mathbf{A}\)` be a `\(q \times p\)` **deterministic** matrix and `\(\boldsymbol{\delta} = (\delta_1, \delta_2, \dots, \delta_q)\)` be a **deterministic** vector. Let `\(\boldsymbol{y} = \mathbf{A} \boldsymbol{z} + \boldsymbol{\delta}\)`. We then have
+`\begin{gather*}
+\mathbb{E}[\boldsymbol{y}] = \mathbb{E}[\boldsymbol{A} \boldsymbol{z} + \boldsymbol{\delta}] = \mathbf{A} \mathbb{E}[\boldsymbol{z}] + \boldsymbol{\delta} = \mathbf{A} \boldsymbol{\mu} + \boldsymbol{\delta}
+\end{gather*}`
+
+--
+
+Similarly, we also have
+
+`$$\begin{split}
+\mathrm{Var}[\boldsymbol{y}] &amp;= \mathbb{E}[(\boldsymbol{y} - \mathbb{E}[\boldsymbol{y}])(\boldsymbol{y} - \mathbb{E}[\boldsymbol{y}])^{\top}] \\ &amp;= 
+\mathbb{E}[(\mathbf{A} (\boldsymbol{z} - \boldsymbol{\mu}))(\mathbf{A} (\boldsymbol{z} - \boldsymbol{\mu}))^{\top}] \\ &amp;= \mathbb{E}[\mathbf{A} (\boldsymbol{z} - \boldsymbol{\mu})(\boldsymbol{z} - \boldsymbol{\mu})^{\top} \mathbf{A}^{\top}] = \mathbf{A} \mathbb{E}[(\boldsymbol{z} - \boldsymbol{\mu})(\boldsymbol{z} - \boldsymbol{\mu})^{\top}] \mathbf{A}^{\top} = \mathbf{A} \mathrm{Var}[\boldsymbol{z}] \mathbf{A}^{\top}.
+\end{split}$$`
+
+
+---
+class: clear
+
+Recall the linear model `\(\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\)` where `\(\mathbb{E}[\boldsymbol{\epsilon}] = \boldsymbol{0}\)` and `\(\mathrm{Var}[\boldsymbol{\epsilon}] = \sigma^2 \mathbf{I}\)`. 
+
+Under these assumptions, we have
 
 + `\(\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}\)` is an **estimate** (hence a random variable) of `\(\boldsymbol{\beta}\)` and satisfies
 `$$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\boldsymbol{\epsilon}] \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$`
@@ -1025,13 +1060,6 @@ where `\(\boldsymbol{x}_i^{\top}\)` is the `\(i\)`th-row of `\(\mathbf{X}\)` and
 
 + For a new set of predictor variables `\(\boldsymbol{x}_* \in \mathbb{R}^{p}\)`, `\(\hat{Y}_* = \boldsymbol{x}_*^{\top} \hat{\boldsymbol{\beta}}\)` is an estimate of the **expected** value `\(\mathbb{E}[Y_*] = \boldsymbol{x}_*^{\top} \beta\)` with `\(\mathrm{Var}[\hat{Y}_*] = \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*\)`.
 
-
-+ (**Important**) The above expressions are interpreted under the assumption that
-
-  -   The model `\(\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\)` is really true and
-
-  - Repeated sampling of `\(\boldsymbol{y}\)` with `\(\mathbf{X}\)` fixed.
-
 ---
 class: clear
 
@@ -1040,6 +1068,15 @@ $$ \widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}] = \mathrm{MSE} \times (\math
 
 + The **estimated** covariance matrix of the **fitted** values `\(\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}\)` and the estimated variance of a new prediction `\(\hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}}\)` are
 `$$\widehat{\mathrm{Var}}[\hat{\boldsymbol{y}}] = \mathrm{MSE} \times \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}; \quad \widehat{\mathrm{Var}}[\hat{Y}_*] = \mathrm{MSE} \times \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}.$$`
+
+
++ (**Important**) The above expressions are interpreted under the assumption that
+
+  - The model `\(\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}\)` is really true and
+
+  - Repeated sampling of `\(\boldsymbol{y}\)` with `\(\mathbf{X}\)` fixed.
+
+
 ---
 class: clear
 
@@ -1109,6 +1146,18 @@ influence(mod)$hat ## Give the diagonal entries of the hat matrix H.
 + Indeed, because the fitted value `\(\hat{Y}_i\)` are the **estimates** of the **expected** value `\(\mathbb{E}[Y_i]\)`. This is a feature not a bug. 
 
 + In general, as `\(n\)` increases, the diagonal entries `\(h_{ii}\)` decreases to `\(0\)`.
+
+---
+# Quadratic forms
+
+**Definition**: Let `\(\mathbf{M}\)` be a `\(n \times n\)` **symmetric** matrix and `\(\boldsymbol{x} = (x_1, x_2, \dots, x_n) \in \mathbb{R}^{n}\)` be a `\(n \times 1\)` column vector. Then
+`$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = \sum_{i} \sum_{j} x_i x_j m_{ij}$$`
+is a quadratic form.
+
+For example, let `$$\mathbf{M} = \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 2 &amp; 4 &amp; 1 \\ 3 &amp; 1 &amp; 1 \end{bmatrix}$$`.
+
+Then for `\(\boldsymbol{x} = (u,v,w) \in \mathbb{R}^{3}\)`, 
+`$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = u^2 + 4 uv + 6uw + 4v^2 + 2 vw + w^2.$$`
 
 ---
 ## Multivariate normal distribution
@@ -1308,17 +1357,7 @@ A square matrix `\(\mathbf{Q}\)` is said to be *orthogonal* if
     
 are all orthogonal matrices.
     
----
-# Quadratic forms
 
-**Definition**: Let `\(\mathbf{M}\)` be a `\(n \times n\)` matrix and `\(\boldsymbol{x} = (x_1, x_2, \dots, x_n) \in \mathbb{R}^{n}\)` be a `\(n \times 1\)` column vector. Then
-`$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = \sum_{i} \sum_{j} x_i x_j m_{ij}$$`
-is a quadratic form.
-
-For example, let `$$\mathbf{M} = \begin{bmatrix} 1 &amp; 2 &amp; 3 \\ 2 &amp; 4 &amp; 1 \\ 3 &amp; 1 &amp; 1 \end{bmatrix}$$`.
-
-Then for `\(\boldsymbol{x} = (u,v,w) \in \mathbb{R}^{3}\)`, 
-`$$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = u^2 + 4 uv + 6uw + 4v^2 + 2 vw + w^2.$$`
 
 ---
 # Positive semidefinite matrices
