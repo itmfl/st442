@@ -1,32 +1,65 @@
 ---
 title: "Introduction to R"
-subtitle: "A used-car salesman perspective"
-author: "Minh Tang"
-date: "Fall 2020"
+subtitle: "A used car salesman perspective"
+date: "Fall 2022"
 output:
   xaringan::moon_reader:
     lib_dir: libs
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: zenburn
-      highlightLines: true
+      highlightStyle: solarized-light
+      highlightLines: false
+      highlightSpans: false
       countIncrementalSlides: false
-    df_print: tibble
-
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", warning = FALSE, message = FALSE)
-options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6)
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max = 6, tibble.width=70)
 ```
 
 ```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
 library(tidyverse)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+#   title_slide_background_image = "belltower2.jpg",
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
 ```
+
 #Brief self-introduction
 + Name: Minh Tang. 
 + Birthplace: Vietnam.
 + Degrees: 
     + BS in Computer Science in Thailand. (Prolog, Pascal, Java, C, C++)
-    + MS in Computer Science @ U. Wisconsin Milwaukee. (Ruby, Perl, Lisp, More C++)
+    + MS in Computer Science @ U. Wisconsin Milwaukee. (Ruby, Perl, Lisp, Tcl/Tk, More C++)
     + PhD in Computer Science @ Indiana University. (Python, Scheme, OCamL, Haskell, R)
 + Current Affiliation: Department of Statistics @ NCSU.
 + Favorite Quote:
@@ -46,30 +79,21 @@ library(tidyverse)
 >
 > https://www.r-project.org/about.html
 
-
---
-## Q: Why R?
-
---
-## A: Why not R?
-
 ---
 # The R environment
 R is an integrated suite of software facilities for data manipulation, calculation and graphical display. It includes
 + an effective data handling and storage facility,
 + a suite of operators for calculations on arrays, in particular matrices,
 + a large, coherent, integrated collection of intermediate tools for data analysis,
-+ graphical facilities for data analysis and display either on-screen or on hardcopy, and
-+ a well-developed, simple and effective programming language which includes conditionals, loops, user-defined recursive functions and input and output facilities.
++ graphical facilities for data analysis and display.
++ a well-developed, simple and effective programming language.
 + effective tools for **literate programming**, e.g., creating a report that seamlessly weave code/data together with formulas, texts, documentation. In fact, these slides are written in *Rmarkdown*.
 
----
-class: clear
 
 + The term "environment" is intended to characterize it as a fully planned and coherent system, rather than an incremental accretion of very specific and inflexible tools, as is frequently the case with other data analysis software. R can be extended (easily) via packages. 
 
-+ There are about eight packages supplied with the R distribution and many more (>10,000) 
-are available through the CRAN family of Internet sites.
++ There are many (>10,000) **R libraries** that 
+are available through the [CRAN](https://cran.r-project.org/) repositories. 
 
 ---
 # Resources for learning R
@@ -147,7 +171,7 @@ length(NULL)
 ]
 
 ---
-#Important type of atomic vectors
+#Type of atomic vectors
 
 Vectors are created in **R** using the function $\mathtt{c()}$ for combine.
 
@@ -156,7 +180,7 @@ Vectors are created in **R** using the function $\mathtt{c()}$ for combine.
 c(TRUE, FALSE, FALSE, NA, T, F)
 ```
 
-+ Numeric: vectors whose elements are integers or doubles. Numbers are doubles by default.
++ Numeric: Elements are integers or doubles (default). 
 Note that doubles representation are only approximations.
 ```{r}
 c(typeof(1), typeof(1L), typeof(1.5L))
@@ -216,14 +240,22 @@ typeof(c("1",1))
 ```
 ---
 #Vector recycling rules
-Basic mathematical operations are vectorized in **R**. In the case where the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
+Basic mathematical operations are **vectorized** in **R**. In the case where the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
 ```{r warning = TRUE}
-1:10 + 1
-1:10 + 1:2
-1:10 + 1:3
+x <- 1:10; x
+x + 1
+x*2
+x^2
+
 ```
+
 ---
 class: clear
+```{r}
+sqrt(x)
+x + 1:2
+x + 1:3
+```
 For explicit recycling/repetition, use $\mathtt{rep()}$, e.g.,
 ```{r}
 rep(1:2, times = 5)
@@ -236,12 +268,13 @@ rep(1:3, times = c(2,3,4))
 ```{r}
 c(x = 1,y = 2, z = 3)
 w <- c(1,2,3)
+w
 names(w) <- c("x", "y", "z")
 w
 ```
 
 ---
-#Subsetting elements of a vector
+#Subsetting elements
 Vectors are subset in **R** using the `[` function. There are four type of things that can appear within `[`
 + A numeric vector containing only integers. The integers must either be **all** non-negative or **all** non-positive
 
@@ -274,7 +307,7 @@ x[c(TRUE, FALSE, NA, FALSE, TRUE)]
 ---
 class: clear
 
-+ We can use $\mathtt{which}$ to determine the indices of a logical vector with $\mathtt{TRUE}$ values, e.g.,
++ use $\mathtt{which}$ to find indices of a logical vector with $\mathtt{TRUE}$ values, e.g.,
 ```{r}
 which(x %% 2 == 0)
 which(c(TRUE, FALSE, NA, FALSE, TRUE))
@@ -346,21 +379,13 @@ class: clear
 + `[[` will always extract a **single element** from a list and 
 hence removes a level of nesting. 
 
-.pull-left[
 ```{r error = TRUE}
 str(a[[4]])
 a[[c(4,1)]]
 a[[4]][[1]] ## Equivalent to the above
 a[[4]][1] #Not equivalent to the above
 ```
-]
 
-.pull-right[
-```{r error = TRUE}
-a[[1:2]] ## Recursive indexing
-a[[1:3]]
-```
-]
 
 ---
 class: clear
@@ -378,21 +403,18 @@ knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/2f3f752cae2501855
 ```
 ---
 #Vectors and attributes
-Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement quite a few fancy data structures using the base **R** vectors. For example
-.pull-left[
+Any vector can contain arbitrary metadata through its attributes. Attributes allows us to implement (fancy?) data structures using vectors as bases, e.g.,
 ```{r}
 x <- c(1L, 2L, 3L); x
 typeof(x); attributes(x)
 ```
-]
-.pull-right[
+---
 ```{r}
 class(x) <- "Date"; x
 typeof(x); attributes(x)
 attr(x,"Greetings") <- "Welcome to 442"
 attributes(x)
 ```
-]
 
 ---
 class: clear
@@ -448,128 +470,32 @@ attributes(mtcars)
 ```
 
 ---
-# Automation and iteration
-Compare the following code chunks.
-.pull-left[
-```{r}
-df <- data.frame(
-  a = rnorm(100),
-  b = rnorm(100),
-  c = rnorm(100),
-  d = rnorm(100)
-)
-output <- numeric(length(df))
-for(i in 1:length(df)){
-  output[i] <- median(df[[i]])
-}
-output
-apply(df,2,median)
-```
-]
+#dplyr
 
-.pull-right[
-```{r}
-lapply(df,median)
-sapply(df,median)
-```
-]
----
-class: clear
-The **apply** family of operations allow for complex iterations over elements of a data frame, list, or matrix, without the need to write explicit loops construct. For example,
-
-.pull-left[
-```{r}
-probs = c(0.25,0.5,0.75)
-output2 <- matrix(0, length(probs), 
-                     length(df))
-for(i in seq_along(df)){
-  output2[,i] <- quantile(df[[i]], 
-                          probs)
-}
-output2
-```
-]
-
-.pull-right[
-```{r}
-apply(df, 2, quantile, probs)
-sapply(df, quantile, probs)
-```
-]
----
-class: clear
-
-There are numerous variants of *apply*, including
-
-+ $\mathrm{apply}(X, \mathrm{margin}, \mathrm{FUN}, ...)$ which takes a data frame, array or matrix $X$ and returns a vector/array/list of values obtained by applying $\mathrm{FUN}$ to the margins (e.g., rows and columns) of $X$. 
-
-+ $\mathrm{lapply}(X, \mathrm{FUN}, ...)$ which takes a list $X$ and return a list of the same length as $X$, each element of which is the result of applying $\mathrm{FUN}$ to the corresponding element of $X$.
-
-+ $\mathrm{sapply}(X, \mathrm{FUN}, ...)$ is a user-friendly wrapper of $\mathrm{lapply}$ that try to return a vector, matrix, or array, if possible.
-
-+ $\mathrm{mapply}(\mathrm{FUN}, ..., \mathrm{MoreArgs})$ is a multivariate version of $\mathrm{sapply}$; $\mathrm{mapply}$ applies FUN to the first elements of each $...$ argument, the second elements, the third elements, and so on.
-
-+ $\mathrm{tapply}(X, \mathrm{INDEX}, \mathrm{FUN} = \mathrm{NULL}, ...)$ apply $\mathrm{FUN}$ to each (non-empty) group of values of $X$ given by a unique combination of the levels of factors contained in the list $\mathrm{INDEX}$
-
----
-class: clear
-The following are some examples of *apply* and its variants.
-
-```{r}
-# ?beaver1 and ?beaver2
-beaver <- list(beaver1 = beaver1, beaver2 = beaver2)
-lapply(beaver, function(x) apply(x,2,mean))
-
-
-
-sapply(beaver, function(x) apply(x,2,mean))
-```
-
----
-class: clear
-
-```{r}
-## Version that does not use anonymous functions
-beaver_fn <- function(x){
-  apply(x,2,mean) ## Automatically return the output from the last statement
-}
-
-lapply(beaver, beaver_fn)
-```
-
-+ For more on writing functions in **R**, see [this note](http://homepage.divms.uiowa.edu/~luke/R/references.html) and [that note](http://adv-r.had.co.nz/Functions.html). 
-
-+ In particular, **R** uses pass-by-values in its function calls. 
-
-+ For more on automation and iteration, see [here](https://beanumber.github.io/mdsr2e/ch-iteration.html)
-
-
----
-# Data Wrangling with R
 We introduce the **dplyr** package written by Hadley Wickham, Roman Fran&ccedil;ois, Lionel Henry, and Kirill M&uuml;ller. This package is a core member of the **tidyverse** approach to data manipulation; the tidyverse provides a coherent framework for reading, pre-processing/wrangling, visualizing, and modeling data.
 
 There are five main important *verbs* associated with dplyr, namely
 
-+ *filter*
-+ *select*
-+ *mutate* and *transmute*
-+ *group_by* and *summarize*
-
-**NB** You can also use dplyr with SQL databases through the package [dbplyr](https://cran.r-project.org/web/packages/dbplyr/vignettes/dbplyr.html). Note, however, that the performance might be worse than writing your own **optimized** SQL queries.
++ [filter](https://dplyr.tidyverse.org/reference/filter.html)
++ [select](https://dplyr.tidyverse.org/reference/select.html)
++ [arrange](https://dplyr.tidyverse.org/reference/arrange.html)
++ [mutate](https://dplyr.tidyverse.org/reference/mutate.html) and [rename](https://dplyr.tidyverse.org/reference/rename.html)
++ [group_by](https://dplyr.tidyverse.org/reference/group_by.html) and [summarize](https://dplyr.tidyverse.org/reference/summarise.html)
 
 ---
-class: clear
-We shall follow an an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
+We follow an abbreviated presentation from Chapter 5 of [R for data science](https://r4ds.had.co.nz/). 
+
+We first load the *flights13* dataset from the **nycflights13** package. This dataset describe the on-time data for all flights departing from NYC airports (i.e. JFK, LGA or EWA) in 2013.
 
 ```{r warning=FALSE, message = FALSE}
-library(tidyverse)
+library(dplyr)
 library(nycflights13)
 data(flights)
 flights
 ```
 ---
 #filter()
-Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and return a new data frame.
+Let us find flights departing NYC on August 21. Note that **dplyr** verbs takes a data frame and returns a new data frame.
 ```{r}
 filter(flights, month == 8, day == 21)
 ## Equivalently: filter(flights, month == 8 & day == 21)
@@ -589,11 +515,8 @@ Let us now check, among all the flights on August 21 from either JFK or LGA, whi
 august21_jfk_lga <- filter(august21, origin %in% c("JFK","LGA"))
 filter(august21_jfk_lga, arr_delay > 10 | dep_delay > 10)
 ```
-
-Missing values are represented in **R** as $\mathrm{NA}$; missing values are "contagious" hence any almost all operations involving one or more $\mathrm{NA}$ will also return a $\mathrm{NA}$. This has **very important** consequences when you filter data. See section 5.2.3 of [R for data science](https://r4ds.had.co.nz/).
 ---
-# Pipes
-
+class: clear
 We can do all of the above filtering using a single chain sequence as follows
 ```{r}
 flights %>% filter(month == 8 & day == 21) %>% 
@@ -601,10 +524,39 @@ flights %>% filter(month == 8 & day == 21) %>%
             filter(arr_delay > 10 | dep_delay > 10)
 ```
 
-The previous example introduce the use of the $\%>\%$ pipe operator. 
-The pipe operator allows us an elegant way to chain together a sequence of operations without the need to introduce auxiliary variables.
-The pipe operator maps $x \%>\% f(y)$ to $f(x,y)$. 
++ The previous example introduce the `%>%` pipe operator. 
 
++ The pipe operator allows us to chain together operations without the need to introduce auxiliary variables.
+
++ The pipe operator maps `x %>% f(y)` to `f(x,y)`.
+
+---
+#Missing values
+Missing values are represented in **R** as $\mathrm{NA}$; missing values are "contagious" hence any almost all operations involving one or more $\mathrm{NA}$ will also return a $\mathrm{NA}$. For example
+```{r}
+NA > 5
+10 == NA
+NA + 10
+2*NA
+```
+---
+class: clear
+Further examples include
+```{r}
+NA == NA
+0*NA
+NA^0
+NA | TRUE
+FALSE & NA
+```
+---
+class: clear
+**filter** only includes rows where the condition is $\mathrm{TRUE}$, i.e., it excludes rows with both $\mathrm{FALSE}$ and $\mathrm{NA}$ values. To preserve missing values, we have to ask for them explicitly, e.g.,
+```{r}
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+filter(df, is.na(x) | x > 1)
+```
 ---
 #arrange()
 The *arrange* verb is similar to the *filter* verb, but instead of selecting rows, it reorder them according to some set of column names (or more complicated expressions). As an example, let us order the flights first by the three letter code for the airport destination, then by the date of flight.
@@ -648,13 +600,13 @@ rename(flights_sml,
 ```
 ---
 class: clear
-A useful helper function for use with select is the **everything()** function, which matches all variables, e.g., to move a specific variable to the first column of data frame, we can do
+A useful helper function for use with select is the **everything()** function, which matches all variables. For example, to move a specific variable to the first column of data frame, we can do
 ```{r}
 select(flights_sml, dep_time, everything())
 ```
 ---
 # mutate()
-The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. 
+The *mutate* verb is used to add new columns (that are possibly functions of existing columns) to a data frame; the new columns are always added as the last columns. For example
 ```{r}
 flights_sml <- select(flights, year:day,ends_with("delay"),
                       distance, air_time)
@@ -682,7 +634,7 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 ```{r}
-flights %>% dplyr::group_by(year, month, day)
+flights %>% group_by(year, month, day)
 ```
 ---
 class: clear
@@ -704,13 +656,12 @@ delays
 ```
 ---
 class: clear
-
 We can then plot how the average delay varies with the distance.
 ```{r message = FALSE, fig.align = 'center', out.width='80%'}
 library(ggplot2)
 ggplot(delays, aes(x = dist, y  = avg_delay)) + 
   geom_point(aes(size = count)) +
-  geom_smooth(se = FALSE) + ylab("average delay") + theme_classic()
+  geom_smooth(se = FALSE) + ylab("average delay") + theme_bw()
 ```
 ---
 class: clear
@@ -770,12 +721,32 @@ daily %>% summarize(flights = n()) %>%
 ```
 ---
 class: clear
-Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$; e.g.,
+Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$. 
 
+Consider the following examples.
+
+```{r echo = -1}
+#options(tibble.print_max = 6, tibble.print_min = 4)
+group_by(not_canceled, dest, month) %>% 
+  summarize(air_time = mean(air_time)) %>% 
+  summarize(air_time = mean(air_time))
+```
+---
+class: clear
+```{r}
+group_by(not_canceled, dest) %>% 
+  summarize(air_time = mean(air_time))
+```
+---
+class: clear
 ```{r}
 group_by(not_canceled, dest, month) %>% 
   summarize(air_time = median(air_time)) %>% 
   summarize(air_time = median(air_time))
+```
+---
+class: clear
+```{r}
 group_by(not_canceled, dest) %>% 
   summarize(air_time = median(air_time))
 ```
@@ -788,8 +759,8 @@ summarize(daily, flights = n())
 daily %>% ungroup() %>% summarize(flights = n())
 ```
 ---
-#grouped_mutate and grouped_filter
-We can also do a number of very useful operations by combining $\mathrm{group\_by}$ with either $\mathrm{filter}$ or $\mathrm{mutate}$. For example
+#grouped mutate + filter
+We can also do a number of very useful operations by combining $\mathrm{group\_by}$ with either $\mathrm{filter}$ or $\mathrm{filter}$. For example
 ```{r message = TRUE}
 ## Find the worst flights with longest delay each day
 flights_sml <- select(flights, year:day, ends_with("delay"),
@@ -798,7 +769,6 @@ flights_sml %>% group_by(year, month, day) %>%
   filter(rank(desc(arr_delay)) <= 10)
 ```
 ---
-class: clear
 ```{r}
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
@@ -808,20 +778,18 @@ flights %>% group_by(dest) %>%
   select(year:day, dest, arr_delay, prop_delay)
 ```
 ---
-class: clear
 Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command $\mathrm{vignette("window-functions")}$. 
 
 The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
 ```{r}
 library(Lahman)
-batting <- Lahman::Batting %>% as.tibble() %>% 
+batting <- Lahman::Batting %>% as_tibble() %>% 
            select(playerID, yearID, teamID, G, AB, R, H) %>%
            arrange(playerID, yearID, teamID) %>%
            semi_join(Lahman::AwardsPlayers, by = "playerID")
 players <- batting %>% group_by(playerID)
 ```
 ---
-class: clear
 Using this dataset, let us try a few $\mathrm{group\_mutate}$ and $\mathrm{group\_filter}$ operations. 
 ```{r}
 ## For each player, find the two years with most hits
@@ -858,64 +826,142 @@ batting %>% group_by(teamID,playerID) %>%
   group_by(teamID,quartile) %>% 
   summarise(batting_avg = sum(total_hits)/sum(total_ab))
 ```
----
-#Scoped variants of dplyr verbs
-The dplyr verbs we see before also have **scoped** variants with the suffixes $\_\mathrm{if}$, $\_\mathrm{at}$ and $\_\mathrm{all}$. 
-
-+ $\_\mathrm{if}$ pick variables based on a *predicate* function, e.g., $\mathrm{is.numeric()}$.
-+ $\_\mathrm{at}$ pick variables using the same syntax as $\mathrm{select}$
-+ $\_\mathrm{all}$ operates on all variables.
-
-These variants are best illustrated using examples. For more details see the [cheat sheet](https://github.com/dcl-docs/cheat-sheets/blob/master/scoped_verbs.md).
 
 ---
-#summarise and do
-Continuing the above theme. Suppose we want to find the quantiles for $\mathrm{arr\_delay}$ as grouped by popular destination.
-We first try the following code.
-```{r error = TRUE}
-pop_dest <- flights %>% 
-  group_by(dest) %>% 
-  filter(n() > 365,!is.na(arr_delay))
-pop_dest %>% summarise(delay_quantile = quantile(arr_delay))
+#across() and multiple columns
+The **dplyr** verbs such as **mutate** and **summarize** we saw previously can also be combined with the [across](https://dplyr.tidyverse.org/reference/across.html) function to allow for doing the same operation on multiple columns. See also this [vignette](https://dplyr.tidyverse.org/articles/colwise.html).
+.pull-left[
+```{r}
+df <- tibble(
+  x = runif(100), 
+  y = runif(100), z = runif(100))
+df
 ```
+]
+.pull-right[
+```{r}
+df %>% summarize(
+  across(c(x,y,z),mean))
+## Equivalently
+## df %>% summarize(
+##   across(everything(),mean))
+```
+]
 
-The code doesn't work. Let us first simplify the problem and find the quantiles for 
-$\mathrm{arr\_delay}$ for the **ungrouped** data.
-```{r error = TRUE}
-pop_dest %>% ungroup() %>% 
-  summarise(delay_quantile = quantile(arr_delay))
-```
 ---
 class: clear
-We see the same error message. After some thought (googling?), we realize that the issue is because **dplyr** verbs takes as input a data frame and outputs another data frame. The output of $\mathrm{quantile}$ is not a data frame. Helper functions to the rescue.
-```{r error = TRUE}
-quantile(pop_dest$arr_delay,na.rm = TRUE)
-my_quantile <- function(df){
-  z <- quantile(df$arr_delay,na.rm = TRUE)
-  tibble(min = z[1], percentile25 = z[2], median = z[3], 
-         percentile75 = z[4], max = z[5])
+
+With **across **you can also 
++ apply multiple operations 
++ name the return values
++ select a subset of columns according to some condition
+
+```{r}
+df <- df %>% mutate(names = rep(letters,4)[1:100])
+df
+df %>% summarize(across(where(is.numeric),
+                        list(mean = mean, sd = sd, ratio = ~max(.)/min(.))))
+
+```
+
+---
+class: clear
+
+The previous examples uses the $.$ operator, which serves as a placeholder for the variable/data of interest. See also the documentation for the [magrittr library](https://github.com/tidyverse/magrittr). It is, however, generally cleaner (syntax wise), to define and use a named function as opposed to an anonymous function.
+
+```{r}
+max_min_ratio <- function(x){
+  max(x)/min(x)
 }
-pop_dest %>% ungroup() %>% summarise(my_quantile) ## Oops!
-pop_dest %>% ungroup() %>% my_quantile ### Yay!
+df %>% summarize(across(where(is.numeric),
+                        list(mean = mean, sd = sd, ratio = max_min_ratio)))
+
+# You can also combine multiple selection criteria
+df %>% summarize(across(where(is.numeric) & c(-x),
+                        list(mean = mean, sd = sd, ratio = max_min_ratio)))
+
+## Equivalently
+## df %>% summarize(across(c(y,z), 
+##     list(mean = mean, sd = sd, ratio = max_min_ratio)))
+```
+
+---
+class: clear
+
+The following example shows the power of combining **across** with **group_by** and **mutate**. See this [blog post](https://www.rebeccabarter.com/blog/2020-07-09-across/) by 
+R. Barter for more details. 
+```{r}
+library(palmerpenguins)
+penguins
+## Let us first count the number of species, number of island 
+## and number of different sexes of the penguins
+penguins %>% summarise(across(c(species, island, sex),n_distinct))
+
+```
+
+---
+class: clear
+```{r}
+## Let us count the number of missing values in each columns
+penguins %>% summarise(across(everything(),~sum(is.na(.))))
+```
+
+---
+class: clear
+```{r penguins}
+## Replace missing values for the numerical variables by the 
+## average value (computed within that specie and island).
+library(dplyr)
+penguins_imputed <- penguins %>%
+  group_by(species, island) %>%
+  mutate(imputed = if_any(where(is.numeric), is.na),
+         across(where(is.numeric), 
+                ~if_else(condition = is.na(.), 
+                         true = mean(., na.rm = T), 
+                         false = as.numeric(.)))) %>% ungroup() %>% 
+  select(imputed, everything())
+
+penguins_imputed
+penguins_imputed %>% filter(imputed == TRUE)
+```
+
+---
+class: clear
+
+The **filter** verb does not work with **across**; we instead use the helpers [if_any](https://dplyr.tidyverse.org/reference/across.html) and [if_all](https://dplyr.tidyverse.org/reference/across.html).
+
+
+
+```{r}
+## Find all observations with at least one missing value
+flights %>% filter(if_any(everything(), is.na))
+```
+
+---
+class: clear
+```{r}
+## Find all flights with little delay
+flights %>% filter(if_all(contains("delay"), ~ . < 10))
+```
+
+---
+#dplyr::pull()
+Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
+```{r error = TRUE}
+flights %>% select(arr_delay)
+class(flights %>% select(arr_delay))
 ```
 ---
 class: clear
-Let us now un-un-group the (grouped) data.
-```{r}
-pop_dest %>% my_quantile ### Oops!
+```{r error = TRUE}
+flights %>% pull(arr_delay) %>% head
+class(flights %>% pull(arr_delay))
 ```
-Our helper function $\mathrm{my\_quantile}$ does not understand grouped vs ungrouped data.
-Luckily, since we "Think and do", after some thinking (googling?)
-```{r}
-pop_dest %>% 
-  do(my_quantile(.))
-```
----
-class: clear
-The help page for $\mathrm{dplyr::do}$ reads
-
-```{r out.width = "70%", echo = FALSE}
-knitr::include_graphics("figures/dplyr_do.png")
+--
+If we now extract the standard deviation from the above data frame/vector, we get
+```{r error = TRUE}
+flights %>% select(arr_delay) %>% sd(na.rm = TRUE)
+flights %>% pull(arr_delay) %>% sd(na.rm = TRUE)
 ```
 
-See also section 5.12 of [Introduction to Data Science](https://rafalab.github.io/dsbook/tidyverse.html#do)
+The difference in the above output is due to the fact that $\mathrm{sd}$ expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column $\mathrm{arr\_delay}$ ,we need to use $\mathrm{pull}$. 
