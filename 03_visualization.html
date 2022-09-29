@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <script src="libs/clipboard/clipboard.min.js"></script>
@@ -25,9 +25,15 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Visualizing data with ggplot2
-### Fall 2021
+]
+.date[
+### Fall 2022
+]
 
 ---
 
@@ -89,120 +95,14 @@ dplyr::select(mpg, -fl, -class)
 ## # … with 228 more rows
 ```
 ---
-count: false
- 
-
-.panel1-mpg-auto[
-
-```r
-*library(ggplot2)
-```
-]
- 
-.panel2-mpg-auto[
-
-]
-
----
-count: false
- 
-
-.panel1-mpg-auto[
 
 ```r
 library(ggplot2)
-*ggplot(data = mpg)
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point()
 ```
-]
- 
-.panel2-mpg-auto[
-&lt;img src="03_visualization_files/figure-html/mpg_auto_02_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
 
----
-count: false
- 
-
-.panel1-mpg-auto[
-
-```r
-library(ggplot2)
-ggplot(data = mpg) +
-* aes(x = displ)
-```
-]
- 
-.panel2-mpg-auto[
-&lt;img src="03_visualization_files/figure-html/mpg_auto_03_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-
----
-count: false
- 
-
-.panel1-mpg-auto[
-
-```r
-library(ggplot2)
-ggplot(data = mpg) +
-  aes(x = displ) +
-* aes(y = hwy)
-```
-]
- 
-.panel2-mpg-auto[
-&lt;img src="03_visualization_files/figure-html/mpg_auto_04_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-
----
-count: false
- 
-
-.panel1-mpg-auto[
-
-```r
-library(ggplot2)
-ggplot(data = mpg) +
-  aes(x = displ) +
-  aes(y = hwy) +
-* geom_point()
-```
-]
- 
-.panel2-mpg-auto[
-&lt;img src="03_visualization_files/figure-html/mpg_auto_05_output-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-
-&lt;style&gt;
-.panel1-mpg-auto {
-  color: black;
-  width: 38.6060606060606%;
-  hight: 32%;
-  float: left;
-  padding-left: 1%;
-  font-size: 80%
-}
-.panel2-mpg-auto {
-  color: black;
-  width: 59.3939393939394%;
-  hight: 32%;
-  float: left;
-  padding-left: 1%;
-  font-size: 80%
-}
-.panel3-mpg-auto {
-  color: black;
-  width: NA%;
-  hight: 33%;
-  float: left;
-  padding-left: 1%;
-  font-size: 80%
-}
-&lt;/style&gt;
-
-
-
-
+&lt;img src="03_visualization_files/figure-html/mpg-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: clear
@@ -228,14 +128,6 @@ p2 &lt;- ggplot(data = mpg) +
 ## The gridExtra library is nice for showing multiple figures in a panel.
 require(gridExtra) 
 grid.arrange(p1,p2,ncol = 2)
-```
-
-```
-## Warning: Using size for a discrete variable is not advised.
-```
-
-```
-## Warning: Using alpha for a discrete variable is not advised.
 ```
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
@@ -340,15 +232,16 @@ SAT_2010
 
 ```
 ## # A tibble: 50 × 9
-##   state   expenditure pupil_teacher_ra… salary  read  math write total
-##   &lt;fct&gt;         &lt;int&gt;             &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-## 1 Alabama          10              15.3  49948   556   550   544  1650
-## 2 Alaska           17              16.2  62654   518   515   491  1524
-## 3 Arizona           9              21.4  49298   519   525   500  1544
-## 4 Arkans…          10              14.1  49033   566   566   552  1684
-## 5 Califo…          10              24.1  71611   501   516   500  1517
-## 6 Colora…          10              17.4  51660   568   572   555  1695
-## # … with 44 more rows, and 1 more variable: sat_pct &lt;int&gt;
+##   state      expendit…¹ pupil…² salary  read  math write total sat_pct
+##   &lt;fct&gt;           &lt;int&gt;   &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
+## 1 Alabama            10    15.3  49948   556   550   544  1650       8
+## 2 Alaska             17    16.2  62654   518   515   491  1524      52
+## 3 Arizona             9    21.4  49298   519   525   500  1544      28
+## 4 Arkansas           10    14.1  49033   566   566   552  1684       5
+## 5 California         10    24.1  71611   501   516   500  1517      53
+## 6 Colorado           10    17.4  51660   568   572   555  1695      19
+## # … with 44 more rows, and abbreviated variable names ¹​expenditure,
+## #   ²​pupil_teacher_ratio
 ```
 ---
 class: clear
@@ -390,7 +283,8 @@ ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") +
 ```
 
 ```
-## Error: stat_count() can only have an x or y aesthetic.
+## Error in `f()`:
+## ! stat_count() can only have an x or y aesthetic.
 ```
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-2.png" width="70%" style="display: block; margin: auto;" /&gt;
@@ -637,15 +531,16 @@ head(BabyNamesDist)
 
 ```
 ## # A tibble: 6 × 9
-##    year sex   name          n   prop alive_prob count_thousands age_today
-##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;     &lt;dbl&gt;
-## 1  1900 F     Mary      16706 0.0526          0           16.7        114
-## 2  1900 F     Helen      6343 0.0200          0            6.34       114
-## 3  1900 F     Anna       6114 0.0192          0            6.11       114
-## 4  1900 F     Margaret   5304 0.0167          0            5.30       114
-## 5  1900 F     Ruth       4765 0.0150          0            4.76       114
-## 6  1900 F     Elizabeth  4096 0.0129          0            4.10       114
-## # … with 1 more variable: est_alive_today &lt;dbl&gt;
+##    year sex   name          n   prop alive_p…¹ count…² age_t…³ est_a…⁴
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1  1900 F     Mary      16706 0.0526         0   16.7      114       0
+## 2  1900 F     Helen      6343 0.0200         0    6.34     114       0
+## 3  1900 F     Anna       6114 0.0192         0    6.11     114       0
+## 4  1900 F     Margaret   5304 0.0167         0    5.30     114       0
+## 5  1900 F     Ruth       4765 0.0150         0    4.76     114       0
+## 6  1900 F     Elizabeth  4096 0.0129         0    4.10     114       0
+## # … with abbreviated variable names ¹​alive_prob, ²​count_thousands,
+## #   ³​age_today, ⁴​est_alive_today
 ```
 ---
 class: clear, middle
@@ -818,16 +713,6 @@ p &lt;- ggplot(data = com_fem,
 ```
 ---
 # Example 3: Weather trends
-
-```
-## Warning: 4 parsing failures.
-##  row col  expected    actual                                                                           file
-## 4623  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
-## 4979  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
-## 5016  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
-## 5213  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
-```
-
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-45-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
@@ -838,18 +723,6 @@ The data for this graphic is available as a white-space separated file. We first
 ```r
 library(readr)
 DAY &lt;- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
-```
-
-```
-## Warning: 4 parsing failures.
-##  row col  expected    actual                     file
-## 4623  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
-## 4979  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
-## 5016  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
-## 5213  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
-```
-
-```r
 names(DAY) &lt;- c("Month", "Day", "Year", "Temp")
 DAY &lt;- select(DAY, "Year", "Month", "Day", "Temp")
 DAY
@@ -1084,18 +957,6 @@ p &lt;- p +
 ---
 class: clear
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-57-1.png" width="120%" style="display: block; margin: auto;" /&gt;
----
-# Hotdogs ?
-&lt;img src="figures/nathan_hotdog.png" width="120%" style="display: block; margin: auto;" /&gt;
----
-# R Hotdogs ?
-
-```
-## Warning: `guides(&lt;scale&gt; = FALSE)` is deprecated. Please use `guides(&lt;scale&gt; =
-## "none")` instead.
-```
-
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-59-1.png" width="120%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
@@ -1144,6 +1005,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

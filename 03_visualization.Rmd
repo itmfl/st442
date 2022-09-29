@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Visualizing data with ggplot2"
-date: "Fall 2021"
+date: "Fall 2022"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -28,7 +28,6 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 library(xaringanthemer)
 library(ggplot2)
 library(ggthemes)
-library(flipbookr)
 theme_set(theme_tufte())
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
@@ -44,9 +43,7 @@ htmltools::tagList(
 style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
-   link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "./belltower2.jpg",
    link_color = "#03A696",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
@@ -109,13 +106,9 @@ data(mpg)
 dplyr::select(mpg, -fl, -class)
 ```
 ---
-`r chunk_reveal("mpg")`
-
-```{r mpg, include = FALSE}
+```{r mpg}
 library(ggplot2)
-ggplot(data = mpg) + 
-  aes(x = displ) +
-  aes(y = hwy) +
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
   geom_point()
 ```
 
@@ -131,7 +124,7 @@ p
 ---
 class: clear
 Compare the previous plot with the following two plots.
-```{r fig.align = 'center', fig.asp = 0.4, message = FALSE, fig.retina = 3, out.width = "120%"}
+```{r fig.align = 'center', fig.asp = 0.4, message = FALSE, fig.retina = 3, out.width = "120%", warning = FALSE}
 p1 <- ggplot(data = mpg) + 
   geom_point(mapping = aes(x = displ, y = hwy, size = class))
 p2 <- ggplot(data = mpg) + 
@@ -803,16 +796,3 @@ class: clear
 ```{r cache = TRUE, echo = FALSE}
 p
 ```
----
-# Hotdogs ?
-```{r echo = FALSE}
-knitr::include_graphics("figures/nathan_hotdog.png")
-```
----
-# R Hotdogs ?
-```{r echo = FALSE, warnings = FALSE}
-source("./R_scripts/hotdogs.R")
-p <- hotdogs_plot()
-print(p)
-```
-

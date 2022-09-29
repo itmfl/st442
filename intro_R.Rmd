@@ -738,19 +738,6 @@ group_by(not_canceled, dest) %>%
   summarize(air_time = mean(air_time))
 ```
 ---
-class: clear
-```{r}
-group_by(not_canceled, dest, month) %>% 
-  summarize(air_time = median(air_time)) %>% 
-  summarize(air_time = median(air_time))
-```
----
-class: clear
-```{r}
-group_by(not_canceled, dest) %>% 
-  summarize(air_time = median(air_time))
-```
----
 #ungroup()
 To remove grouping structure on grouped data, use $\mathrm{ungroup()}$, e.g.,
 ```{r}
@@ -883,65 +870,6 @@ df %>% summarize(across(where(is.numeric) & c(-x),
 ## Equivalently
 ## df %>% summarize(across(c(y,z), 
 ##     list(mean = mean, sd = sd, ratio = max_min_ratio)))
-```
-
----
-class: clear
-
-The following example shows the power of combining **across** with **group_by** and **mutate**. See this [blog post](https://www.rebeccabarter.com/blog/2020-07-09-across/) by 
-R. Barter for more details. 
-```{r}
-library(palmerpenguins)
-penguins
-## Let us first count the number of species, number of island 
-## and number of different sexes of the penguins
-penguins %>% summarise(across(c(species, island, sex),n_distinct))
-
-```
-
----
-class: clear
-```{r}
-## Let us count the number of missing values in each columns
-penguins %>% summarise(across(everything(),~sum(is.na(.))))
-```
-
----
-class: clear
-```{r penguins}
-## Replace missing values for the numerical variables by the 
-## average value (computed within that specie and island).
-library(dplyr)
-penguins_imputed <- penguins %>%
-  group_by(species, island) %>%
-  mutate(imputed = if_any(where(is.numeric), is.na),
-         across(where(is.numeric), 
-                ~if_else(condition = is.na(.), 
-                         true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) %>% ungroup() %>% 
-  select(imputed, everything())
-
-penguins_imputed
-penguins_imputed %>% filter(imputed == TRUE)
-```
-
----
-class: clear
-
-The **filter** verb does not work with **across**; we instead use the helpers [if_any](https://dplyr.tidyverse.org/reference/across.html) and [if_all](https://dplyr.tidyverse.org/reference/across.html).
-
-
-
-```{r}
-## Find all observations with at least one missing value
-flights %>% filter(if_any(everything(), is.na))
-```
-
----
-class: clear
-```{r}
-## Find all flights with little delay
-flights %>% filter(if_all(contains("delay"), ~ . < 10))
 ```
 
 ---
