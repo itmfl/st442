@@ -9,7 +9,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-search/search.js"></script>
@@ -20,8 +20,8 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
     <link rel="stylesheet" href="animate.css" type="text/css" />
   </head>
@@ -29,9 +29,15 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Course overview
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -77,7 +83,7 @@ class: clear, middle
 &lt;img src="figures/sexiest.png" width="950%" style="display: block; margin: auto;" /&gt;
 ---
 # The rise of data?
-&lt;img src="figures/data_never_sleeps.jpg" width="35%" style="display: block; margin: auto;" /&gt;
+&lt;img src="figures/data_never_sleeps.jpg" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 # But not all data are useful!
@@ -89,16 +95,13 @@ class: clear, middle
 &lt;img src="figures/cheezeburger3.jpg" width="55%" style="display: block; margin: auto;" /&gt;&lt;img src="figures/cheezeburger4.jpg" width="55%" style="display: block; margin: auto;" /&gt;
 ]
 ---
-# Shortage of data scientists
+# In demand ??
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="figures/linkedin1.png" alt="Linkedin economic report" width="70%" /&gt;
+&lt;img src="figures/linkedin_pulse2023.png" alt="Linkedin economic report" width="70%" /&gt;
 &lt;p class="caption"&gt;Linkedin economic report&lt;/p&gt;
 &lt;/div&gt;
-
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="figures/ibm.png" alt="IBM" width="70%" /&gt;
-&lt;p class="caption"&gt;IBM&lt;/p&gt;
-&lt;/div&gt;
+---
+&lt;img src="figures/bls.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 &lt;div class="figure" style="text-align: center"&gt;
@@ -107,14 +110,8 @@ class: clear, middle
 &lt;/div&gt;
 
 --
-Who are these pesky data engineers ?
 
----
-class: clear, middle
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="figures/linkedin_shortage.png" alt="Linkedin economic report" width="70%" /&gt;
-&lt;p class="caption"&gt;Linkedin economic report&lt;/p&gt;
-&lt;/div&gt;
+Who are these pesky data engineers ?
 ---
 class: middle
 # Data Science is right here.
@@ -123,6 +120,12 @@ class: middle
 &lt;div class="figure" style="text-align: center"&gt;
 &lt;img src="figures/ncsu_dsi.png" alt="https://research.ncsu.edu/dsi/" width="90%" /&gt;
 &lt;p class="caption"&gt;https://research.ncsu.edu/dsi/&lt;/p&gt;
+&lt;/div&gt;
+---
+class: middle
+&lt;div class="figure" style="text-align: center"&gt;
+&lt;img src="figures/dsa_ncsu.png" alt="https://datascienceacademy.ncsu.edu" width="90%" /&gt;
+&lt;p class="caption"&gt;https://datascienceacademy.ncsu.edu&lt;/p&gt;
 &lt;/div&gt;
 
 ---
@@ -135,6 +138,7 @@ class: middle
 &lt;img src="https://bit.ly/2Mmu7lW" alt="http://www.kimberlycoffey.com/blog/2016/11/text-analysis" width="60%" /&gt;
 &lt;p class="caption"&gt;http://www.kimberlycoffey.com/blog/2016/11/text-analysis&lt;/p&gt;
 &lt;/div&gt;
+---
 
 ---
 # Many Venns of data science
@@ -189,11 +193,6 @@ class: clear, middle
  
 A pdf of the article is provided [here](https://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf). 
  
-
-
-
-
-
 ---
 #R ? Aarghhh!
 &gt; R is a language and environment for statistical computing and graphics. 
@@ -263,71 +262,12 @@ First thing first
 
 --
 &lt;br&gt;&lt;br&gt;
-+ [Ask Yunshu Zhang, your TA](https://statistics.sciences.ncsu.edu/people/yzhan234/). Office hours: Monday, 3pm--4pm and Tuesday 2pm--3pm.
++ [Ask Yujing Gao, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/). 
 
 --
 &lt;br&gt;&lt;br&gt;
 + [Least helpful](https://minh-tang.github.io)
 
----
-class: clear
-
-The previous Venn diagram was generated using the following code taken from a [Stack Exchange discussion](https://datascience.stackexchange.com/questions/2403/data-science-without-knowledge-of-a-specific-topic-is-it-worth-pursuing-as-a-ca).
-
-```r
-draw.ellipse &lt;- function(center,angle,semimajor,semiminor,
-                         radius, h,s,v,...) {
-  shape &lt;- rbind(c(cos(angle),-sin(angle)),c(sin(angle),cos(angle))) %*% 
-    diag(c(semimajor,semiminor))
-  tt &lt;- seq(0,2*pi,length.out=1000)
-  foo &lt;- matrix(center,nrow=2,ncol=length(tt),byrow=FALSE)+
-         shape%*%(radius*rbind(cos(tt),sin(tt)))
-  polygon(foo[1,],foo[2,],col=hsv(h,s,v,alpha=.5),
-          border="black",...)
-}
-name &lt;- function(x,y,label,cex=1.2,...) text(x,y,label,cex=cex,...)
-
-png("~/Venn.png",width=800,height=600)
-    opar &lt;- par(mai=c(0,0,0,0),lwd=3,font=2)
-        plot(c(0,100),c(0,90),type="n",bty="n",
-             xaxt="n",yaxt="n",xlab="",ylab="")
-        draw.ellipse(center=c(30,30),angle=0.75*pi, semimajor=2,
-                     semiminor=1,radius=20,h=60/360,s=.068,v=.976)
-        draw.ellipse(center=c(70,30),angle=0.25*pi,semimajor=2,
-                     semiminor=1,radius=20,h=83/360,s=.482,v=.894)
-        draw.ellipse(center=c(48,40),angle=0.7*pi,semimajor=2,
-                     semiminor=1,radius=20,h=174/360,s=.397,v=.8)
-        draw.ellipse(center=c(52,40),angle=0.3*pi,semimajor=2,
-                     semiminor=1,radius=20,h=200/360,s=.774,v=.745)
-```
----
-class: clear
-
-```r
-        name(50,90,"The Data Scientist Venn Diagram",pos=1,cex=2)
-        name(8,62,"Communi-\ncation",cex=1.5,pos=3)
-        name(30,78,"Statistics",cex=1.5)
-        name(70,78,"Programming",cex=1.5)
-        name(92,62,"Business",cex=1.5,pos=3)
-
-        name(10,45,"Hot\nAir")
-        name(90,45,"The\nAccountant")
-        name(33,65,"The\nData\nNerd")
-        name(67,65,"The\nHacker")
-        name(27,50,"The\nStats\nProf")
-        name(73,50,"The\nIT\nGuy")
-        name(50,55,"R\nCore\nTeam")
-        name(38,38,"The\nGood\nConsultant")
-        name(62,38,"Drew\nConway's\nData\nScientist")
-        name(50,24,"The\nperfect\nData\nScientist!")
-        name(31,18,"Comp\nSci\nProf")
-        name(69,18,"The\nNumber\nCruncher")
-        name(42,11,"Head\nof IT")
-        name(58,11,"Ana-\nlyst")
-        name(50,5,"The\nSalesperson")
-    par(opar)
-dev.off()
-```
 ---
 #Course overview
 &lt;div class="figure" style="text-align: center"&gt;
@@ -350,16 +290,16 @@ We will cover the following tentative topics.
 ---
 class: clear
 ### Suggested Texts
-+ Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.had.co.nz)
++ Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.hadley.nz)
 + Gareth James, Daniella Witten, Trevor Hastie, and Rob Tibshirani, [An Introduction to Statistical Learning with R, 2nd edition](http://www.statlearning.com)
-+ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://beanumber.github.io/mdsr2e/)
++ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/)
 + Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
 
 ### Course Expectations &amp; Grading
 The grading is broken down into three components
-   + homework assignments (35% of total grade)
-   + two take-home exams (30% of total grade)
-   + final project (35% of total grade)
+   + Homework assignments (35% of total grade)
+   + Two take-home exams (30% of total grade)
+   + Final project (35% of total grade)
    
 The homework assignments, their due dates, and submission formats 
 will be posted on the Moodle page for the course. 
@@ -367,7 +307,8 @@ will be posted on the Moodle page for the course.
 class: clear
 
 ### Homework policy
-The class has, with high probability, 7 -- 8 homework assignments. Every student is allowed a **quota of at most 2 late** homework submissions (they will not be penalized but need to be submitted no later than **48** hours after the deadline). Once the quota is exceeded, no further late submissions will be graded. 
+The class has, with high probability, 7 -- 8 homework assignments. Every student is allowed a **quota of at most 2 late** homework submissions 
+(they will not be penalized but need to be submitted no later than **72** hours after the deadline). Once the quota is exceeded, no further late submissions will be graded. 
 
 
 ### Term paper
@@ -382,14 +323,15 @@ You are responsible for keeping track of your scores and to notify the course in
 ---
 class: clear
 ### Key Dates
-+ Census day &amp; drop deadline: Friday, August 27, 2021.
-+ Withdrawal deadline: Wednesday, October 13, 2021.
-+ Take home exam 1: Monday, October 4, 2021 (tentative)
-+ Take home exam 2: Wednesday, November 10, 2021. (tentative)
-+ Term paper: Due on Monday, December 6, 2021 before 11:59pm (tentative)
++ Census day &amp; drop deadline: Friday, September 1, 2023.
++ Withdrawal deadline: Wednesday, October 19, 2023.
++ Take home exam 1: Wednesday, September 27, 2023 (tentative)
++ Take home exam 2: Wednesday, November 8, 2023. (tentative)
++ Term paper: Due on Tuesday, December 12, 2023 before 11:59pm (tentative)
 
 ### Grading scale
-Grading is rounded to the nearest percentage point. Potential (upward) curving of the grades might also be done at the instructor discretion. Guaranteed letter grades, regardless of curving, are as follows, 
+Grading is rounded to the nearest percentage point. Potential (upward) curving of the grades might also be done at the instructor discretion. Guaranteed letter grades, 
+regardless of curving, are as follows, 
 
 .pull-left[
 + 95% and above: A+
@@ -466,6 +408,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

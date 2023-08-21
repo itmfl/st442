@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -22,17 +22,23 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Strings, text processing, and regexp
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -50,7 +56,7 @@ For more documentation on **stringr**, see
 
 + The [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
 
-+ Chapter 14 of [R for data science](https://r4ds.had.co.nz/strings.html)
++ Chapters 15 and 16 of [R for data science](https://r4ds.had.co.nz/strings.html)
 
 + Chapter 24 of [Introduction to data science](https://rafalab.github.io/dsbook/string-processing.html)
 
@@ -717,7 +723,7 @@ macbeth_chars
 ## 4 MACBETH "^\\s+MACBETH" FALSE 
 ## 5 MACBETH "^\\s+MACBETH" FALSE 
 ## 6 MACBETH "^\\s+MACBETH" FALSE 
-## # … with 12,770 more rows
+## # ℹ 12,770 more rows
 ```
 
 Next, let us add in the line numbers for each sentence and also remove the unimportant header lines.
@@ -785,7 +791,10 @@ reported_heights &lt;- reported_heights %&gt;%
 ```
 
 ```
-## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
+## Warning: There was 1 warning in `mutate()`.
+## ℹ In argument: `new_height = as.numeric(height)`.
+## Caused by warning:
+## ! NAs introduced by coercion
 ```
 
 ```r
@@ -812,21 +821,18 @@ reported_heights %&gt;% filter(not_inches(height)) %&gt;%
 ```
 
 ```
-##  [1] "168"            "186"            "5 .11"          "5.9"           
-##  [5] "5.11"           "168"            "174"            "5'10''"        
-##  [9] "5' 7\""         "172"            "160"            "170"           
-## [13] "169"            "7,283,465"      "175"            "5.1"           
-## [17] "5.5"            "120"            "87"             "89"            
-## [21] "165"            "173"            "5.7"            "5"             
-## [25] "5.7"            "169"            "5.5"            "5.7"           
-## [29] "5,3"            "178"            "6"              "1,70"          
-## [33] "185"            "5ft 9 inches"   "180"            "5.2"           
-## [37] "170"            "5.5"            "5.6"            "5'2\""         
-## [41] "6"              "183"            "511"            "5.5"           
-## [45] "10000"          "6'"             "170"            "5.69"          
-## [49] "6"              "5'8\""          "184"            "5' 4\""        
-## [53] "5,8"            "5.7"            "7"              "5 feet 7inches"
-## [57] "5'2"            "160"            "5.11"           "5.6"
+##  [1] "5.1"          "170"          "25"           "6*12"         "5.75"        
+##  [6] "6.2"          "1,70"         "6.1"          "179"          "174"         
+## [11] "5.11"         "5.7"          "22"           "5.5"          "5'7"         
+## [16] "5'5"          "120"          "19"           "5.5"          "5'3\""       
+## [21] "5'6''"        "5'8\""        "5'5\""        "173"          "1.6"         
+## [26] "5'6"          "172"          "180"          "69\""         "185"         
+## [31] "5.6"          "5ft 9 inches" "5'10"         "34"           "5.5"         
+## [36] "5'7\""        "12"           "180"          "5"            "174"         
+## [41] "175"          "5.1"          "162"          "157"          "87"          
+## [46] "5'5''"        "100"          "160"          "5'6"          "173"         
+## [51] "5.7"          "174"          "5.9"          "6"            "164"         
+## [56] "1"            "5'2"          "5.8"          "172"          "161"
 ```
 
 ---
@@ -937,26 +943,26 @@ problems[not_inches(problems)] %&gt;% sample(60)
 ```
 
 ```
-##  [1] "5.1"                    "6.5"                    "6"                     
-##  [4] "5.3"                    "5 11"                   "&gt;9000"                 
-##  [7] "5.6"                    "511"                    "5.9"                   
-## [10] "5.7"                    "5.8"                    "5 feet and 8.11 inches"
-## [13] "6"                      "5.6"                    "5.11"                  
-## [16] "5.6"                    "6.7"                    "5.5"                   
-## [19] "86"                     "5.1"                    "728,346"               
-## [22] "1,70"                   "5.25"                   "47"                    
-## [25] "1.6"                    "69\""                   "5.1"                   
-## [28] "5.5"                    "5.9"                    "5.6"                   
-## [31] "5.7"                    "5"                      "5.5"                   
-## [34] "25"                     "6"                      "6"                     
-## [37] "5.2"                    "5.8"                    "5.69"                  
-## [40] "87"                     "5.9"                    "6.1"                   
-## [43] "34"                     "6"                      "5.5"                   
-## [46] "10000"                  "5.11"                   "5"                     
-## [49] "6.3"                    "7,283,465"              "6"                     
-## [52] "yyy"                    "5.11"                   "5.8"                   
-## [55] "12"                     "5"                      "5.7"                   
-## [58] "1"                      "5 feet 6 inches"        "5"
+##  [1] "Five foot eight inches" "0"                      "5.2"                   
+##  [4] "5 feet 6 inches"        "649,606"                "6"                     
+##  [7] "5.8"                    "7,283,465"              "1"                     
+## [10] "5.5"                    "5.1"                    "5"                     
+## [13] "5 feet 7inches"         "10000"                  "6"                     
+## [16] "39"                     "86"                     "7"                     
+## [19] "5.1"                    "6.2"                    "87"                    
+## [22] "6"                      "0.7"                    "103.2"                 
+## [25] "5.9"                    "5.9"                    "5.7"                   
+## [28] "5.11"                   "5.75"                   "5.9"                   
+## [31] "5.7"                    "5 feet and 8.11 inches" "5"                     
+## [34] "6"                      "6.1"                    "5ft 9 inches"          
+## [37] "5.25"                   "5.5"                    "6.5"                   
+## [40] "5.9"                    "5.5"                    "6.3"                   
+## [43] "5.4"                    "6"                      "5.8"                   
+## [46] "5.5"                    "5.1"                    "5,4"                   
+## [49] "5.57"                   "5.7"                    "34"                    
+## [52] "728,346"                "5.25"                   "5.5"                   
+## [55] "5.6"                    "5.69"                   "6.5"                   
+## [58] "6"                      "5.5"                    "6"
 ```
 ---
 The third issue could be adding `ft` or `feet` or `inches` to the reported heights.
@@ -1229,6 +1235,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

@@ -21,17 +21,23 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Text processing with R
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -93,7 +99,7 @@ We will use the [unnest_tokens](https://www.rdocumentation.org/packages/tidytext
 library(tidytext) ## 
 library(stringr)
 library(tibble)
-text_lines &lt;- text %&gt;% str_split(pattern = boundary("sentence")) 
+text_lines &lt;- text |&gt; str_split(pattern = boundary("sentence")) 
 text_lines
 ```
 
@@ -120,7 +126,7 @@ text_df
 ## 4     4 "\tThe daisies grow.\r\n"       
 ## 5     5 "All her bright golden hair\r\n"
 ## 6     6 "\tTarnished with rust\r\n"     
-## # … with 2 more rows
+## # ℹ 2 more rows
 ```
 
 ---
@@ -128,7 +134,7 @@ class: clear, middle
 We can now tokenize the above two stanzas into words.
 
 ```r
-tokens &lt;- text_df %&gt;% unnest_tokens(words, text)
+tokens &lt;- text_df |&gt; unnest_tokens(words, text)
 tokens
 ```
 
@@ -142,12 +148,12 @@ tokens
 ## 4     1 is     
 ## 5     1 near   
 ## 6     2 under  
-## # … with 27 more rows
+## # ℹ 27 more rows
 ```
 Other tokenization are also possible, e.g.,
 
 ```r
-text_df %&gt;% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
+text_df |&gt; unnest_tokens(ngrams, text, token = "ngrams", n = 3)
 ```
 
 ```
@@ -160,7 +166,7 @@ text_df %&gt;% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
 ## 4     2 under the snow   
 ## 5     3 speak gently she 
 ## 6     3 gently she can   
-## # … with 11 more rows
+## # ℹ 11 more rows
 ```
 
 ---
@@ -183,11 +189,11 @@ austen_books()
 ## 4 ""                      Sense &amp; Sensibility
 ## 5 "(1811)"                Sense &amp; Sensibility
 ## 6 ""                      Sense &amp; Sensibility
-## # … with 73,416 more rows
+## # ℹ 73,416 more rows
 ```
 
 ```r
-austen_books() %&gt;% dplyr::select(book) %&gt;% unique() %&gt;% pull()
+austen_books() |&gt; dplyr::select(book) |&gt; unique() |&gt; pull()
 ```
 
 ```
@@ -205,13 +211,12 @@ library(janeaustenr)
 library(dplyr)
 library(stringr)
 
-original_books &lt;- austen_books() %&gt;%
-  group_by(book) %&gt;%
+original_books &lt;- austen_books() |&gt;
   mutate(linenumber = row_number(),
          chapter = cumsum(str_detect(text, 
-                                     regex("^chapter [\\divxlc]",
-                                           ignore_case = TRUE)))) %&gt;%
-  ungroup()
+                                     regex("^chapter [\\divxlc]", 
+                                           ignore_case = TRUE))), 
+         .by = book)
 
 original_books
 ```
@@ -226,7 +231,7 @@ original_books
 ## 4 ""                      Sense &amp; Sensibility          4       0
 ## 5 "(1811)"                Sense &amp; Sensibility          5       0
 ## 6 ""                      Sense &amp; Sensibility          6       0
-## # … with 73,416 more rows
+## # ℹ 73,416 more rows
 ```
 ---
 class: clear
@@ -234,7 +239,7 @@ We next tokenize the text into words and remove the common stop words.
 
 ```r
 data(stop_words) ## Part of the tidytext package.
-jausten_tokenized &lt;- original_books %&gt;% unnest_tokens(word, text) %&gt;% 
+jausten_tokenized &lt;- original_books |&gt; unnest_tokens(word, text) |&gt; 
   anti_join(stop_words)
 jausten_tokenized
 ```
@@ -249,13 +254,13 @@ jausten_tokenized
 ## 4 Sense &amp; Sensibility          3       0 austen     
 ## 5 Sense &amp; Sensibility          5       0 1811       
 ## 6 Sense &amp; Sensibility         10       1 chapter    
-## # … with 217,603 more rows
+## # ℹ 217,603 more rows
 ```
 ---
 Given this tidy representation, it is easy to do some data exploration. For example, what are the most common words ?
 
 ```r
-words_freq &lt;- jausten_tokenized %&gt;% count(word, sort = TRUE)
+words_freq &lt;- jausten_tokenized |&gt; count(word, sort = TRUE)
 words_freq
 ```
 
@@ -269,13 +274,13 @@ words_freq
 ## 4 dear    822
 ## 5 lady    817
 ## 6 sir     806
-## # … with 13,908 more rows
+## # ℹ 13,908 more rows
 ```
 Which book is most verbose ?
 
 ```r
-jausten_tokenized %&gt;% group_by(book) %&gt;% 
-  summarize(no_words = n()) %&gt;% 
+jausten_tokenized |&gt; group_by(book) |&gt; 
+  summarize(no_words = n()) |&gt; 
   arrange(desc(no_words))
 ```
 
@@ -306,7 +311,7 @@ Is a word cloud better than a bar plot or a dot plot ?
 
 ```r
 library(ggplot2)
-p &lt;- words_freq %&gt;% filter(n &gt; 500) %&gt;% mutate(word = reorder(word,n)) %&gt;% 
+p &lt;- words_freq |&gt; filter(n &gt; 500) |&gt; mutate(word = reorder(word,n)) |&gt; 
   ggplot(aes(n, word)) + labs(y = NULL)
 p1 &lt;- p + geom_col()
 p2 &lt;- p + geom_point()
@@ -323,12 +328,12 @@ Let us now compare the word distributions of Jane Austen against other authors l
 ## First download the data.
 library(gutenbergr)
 hgwells &lt;- gutenberg_download(c(35, 36, 5230, 159))
-tidy_hgwells &lt;- hgwells %&gt;%
-  unnest_tokens(word, text) %&gt;%
+tidy_hgwells &lt;- hgwells |&gt;
+  unnest_tokens(word, text) |&gt;
   anti_join(stop_words)
 bronte &lt;- gutenberg_download(c(1260, 768, 969, 9182, 767))
-tidy_bronte &lt;- bronte %&gt;%
-  unnest_tokens(word, text) %&gt;%
+tidy_bronte &lt;- bronte |&gt;
+  unnest_tokens(word, text) |&gt;
   anti_join(stop_words)
 ```
 
@@ -339,7 +344,7 @@ glimpse(tidy_hgwells)
 ```
 
 ```
-## Rows: 67,475
+## Rows: 67,942
 ## Columns: 2
 ## $ gutenberg_id &lt;int&gt; 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35,…
 ## $ word         &lt;chr&gt; "time", "machine", "invention", "contents", "in…
@@ -350,7 +355,7 @@ glimpse(tidy_bronte)
 ```
 
 ```
-## Rows: 255,494
+## Rows: 255,798
 ## Columns: 2
 ## $ gutenberg_id &lt;int&gt; 767, 767, 767, 767, 767, 767, 767, 767, 767, 76…
 ## $ word         &lt;chr&gt; "agnes", "grey", "acton", "bell", "london", "th…
@@ -361,7 +366,7 @@ tidy_austen &lt;- jausten_tokenized
 ## Let us now create a data frame with these words and their authors
 frequency &lt;- bind_rows(mutate(tidy_bronte, author = "Bronte sisters"),
                        mutate(tidy_hgwells, author = "H.G. Wells"),
-                       mutate(tidy_austen, author = "Jane Austen")) %&gt;%
+                       mutate(tidy_austen, author = "Jane Austen")) |&gt;
   mutate(word = str_extract(word, "[a-z']+"))
 ```
 
@@ -370,23 +375,23 @@ We now see, for each author, how likely a specific word is used
 
 ```r
 library(tidyr)
-frequency &lt;- frequency %&gt;% group_by(author, word) %&gt;% summarise(n = n()) %&gt;%
-  mutate(proportion = n/sum(n))%&gt;%  ## grouped mutate! 
-  select(-n) %&gt;% pivot_wider(names_from = author, values_from = proportion)
+frequency &lt;- frequency |&gt; group_by(author, word) |&gt; summarise(n = n()) |&gt;
+  mutate(proportion = n/sum(n))|&gt;  ## grouped mutate! 
+  select(-n) |&gt; pivot_wider(names_from = author, values_from = proportion)
 frequency
 ```
 
 ```
-## # A tibble: 28,626 × 4
+## # A tibble: 28,265 × 4
 ##   word       `Bronte sisters` `H.G. Wells` `Jane Austen`
 ##   &lt;chr&gt;                 &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;
-## 1 a                0.0000587     0.0000148    0.00000919
-## 2 aback            0.00000391    0.0000148   NA         
+## 1 a                0.0000665     0.0000147    0.00000919
+## 2 aback            0.00000391    0.0000147   NA         
 ## 3 abaht            0.00000391   NA           NA         
-## 4 abandon          0.0000313     0.0000148   NA         
-## 5 abandoned        0.0000900     0.000178     0.00000460
-## 6 abandoning       0.00000391    0.0000445   NA         
-## # … with 28,620 more rows
+## 4 abandon          0.0000313     0.0000147   NA         
+## 5 abandoned        0.0000899     0.000177     0.00000460
+## 6 abandoning       0.00000391    0.0000442   NA         
+## # ℹ 28,259 more rows
 ```
 
 ---
@@ -430,6 +435,756 @@ p2
 ```
 
 &lt;img src="text_mining_files/figure-html/unnamed-chunk-17-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+We can also provide a **rough** measure of the (pairwise) similiarities between the authors.
+
+```r
+cor.test(frequency$`Bronte sisters`, frequency$`Jane Austen`)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  frequency$`Bronte sisters` and frequency$`Jane Austen`
+## t = 111, df = 10275, p-value &lt;2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.729 0.746
+## sample estimates:
+##   cor 
+## 0.738
+```
+
+```r
+cor.test(frequency$`H.G. Wells`, frequency$`Jane Austen`)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  frequency$`H.G. Wells` and frequency$`Jane Austen`
+## t = 35, df = 6008, p-value &lt;2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.393 0.435
+## sample estimates:
+##   cor 
+## 0.414
+```
+---
+
+```r
+cor.test(frequency$`H.G. Wells`, frequency$`Bronte sisters`)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  frequency$`H.G. Wells` and frequency$`Bronte sisters`
+## t = 79, df = 8265, p-value &lt;2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.643 0.667
+## sample estimates:
+##   cor 
+## 0.655
+```
+
+---
+#Sentiment analysis
+
+Given a section of text, one common task is to determine whether the text is **positive**, **negative**, or **neutral**. 
+
+The simplest approach to sentiment analysis is to assign each word a sentiment value (say positive or negative). 
+The sentiment of a section of text is then the sum of the sentiment values of all the words in that section. 
+
+For example, if *love* and *sunshine* have sentiment values of `\(10\)`, and *rainy* has sentiment of `\(-5\)`, with all other words neutral, then
+
++ *I love sunshine* has positive sentiment.
++ *I love rainy days* also has positive sentiment.
++ *It is rainy today* has negative sentiment.
+---
+Some sentiment **lexicons** are provided with the `textdata` library.
+
+
+```r
+library(tidytext)
+library(textdata)
+get_sentiments("afinn") ## can also be bing, nrc, and loughran
+```
+
+```
+## # A tibble: 2,477 × 2
+##   word       value
+##   &lt;chr&gt;      &lt;dbl&gt;
+## 1 abandon       -2
+## 2 abandoned     -2
+## 3 abandons      -2
+## 4 abducted      -2
+## 5 abduction     -2
+## 6 abductions    -2
+## # ℹ 2,471 more rows
+```
+
+---
+
+```r
+cat(text)
+```
+
+```
+## Tread lightly, she is near
+## 	Under the snow
+## Speak gently, she can hear
+## 	The daisies grow.
+## All her bright golden hair
+## 	Tarnished with rust
+## She that was young and fair
+## 	Fallen to dust.
+```
+
+```r
+text_lines &lt;- text |&gt; str_split(pattern = boundary("sentence"))
+text_df &lt;- tibble(text = text_lines[[1]]) |&gt; 
+  unnest_tokens(word, text)
+text_df |&gt; inner_join(get_sentiments("afinn"))
+```
+
+```
+## # A tibble: 3 × 2
+##   word   value
+##   &lt;chr&gt;  &lt;dbl&gt;
+## 1 bright     1
+## 2 fair       2
+## 3 fallen    -2
+```
+---
+
+```r
+text_df |&gt; inner_join(get_sentiments("bing")) |&gt; print(n=7)
+```
+
+```
+## # A tibble: 7 × 2
+##   word      sentiment
+##   &lt;chr&gt;     &lt;chr&gt;    
+## 1 bright    positive 
+## 2 golden    positive 
+## 3 tarnished negative 
+## 4 rust      negative 
+## 5 fair      positive 
+## 6 fallen    negative 
+## 7 dust      negative
+```
+
+---
+#Guy Fieri Food Review
+
+We now try another example based on the following [NYT restaurant review](https://www.nytimes.com/2012/11/14/dining/reviews/restaurant-review-guys-american-kitchen-bar-in-times-square.html).
+
+
+```r
+txt_df &lt;- tibble(txt = readLines("guy_fieri.txt")) |&gt; 
+  filter(txt != "") |&gt; unnest_tokens(word, txt)
+txt_df |&gt; inner_join(get_sentiments("bing"))
+```
+
+```
+## # A tibble: 67 × 2
+##   word       sentiment
+##   &lt;chr&gt;      &lt;chr&gt;    
+## 1 panic      negative 
+## 2 crazy      negative 
+## 3 super      positive 
+## 4 unreliable negative 
+## 5 joy        positive 
+## 6 fried      negative 
+## # ℹ 61 more rows
+```
+
+```r
+txt_df |&gt; inner_join(get_sentiments("bing")) |&gt; 
+  summarize(positive = sum(sentiment == "positive")/n())
+```
+
+```
+## # A tibble: 1 × 1
+##   positive
+##      &lt;dbl&gt;
+## 1    0.522
+```
+---
+
+```r
+txt_df |&gt; inner_join(get_sentiments("afinn"))
+```
+
+```
+## # A tibble: 47 × 2
+##   word    value
+##   &lt;chr&gt;   &lt;dbl&gt;
+## 1 panic      -3
+## 2 crazy      -2
+## 3 natural     1
+## 4 super       3
+## 5 missing    -2
+## 6 joy         3
+## # ℹ 41 more rows
+```
+
+```r
+txt_df |&gt; inner_join(get_sentiments("afinn")) |&gt; 
+  summarize(sentiment = sum(value)/n())
+```
+
+```
+## # A tibble: 1 × 1
+##   sentiment
+##       &lt;dbl&gt;
+## 1     0.596
+```
+We see that sentiment analysis using only unigrams is too simplistic and cannot recognize sarcastic tones.
+
+---
+#Pride &amp; Prejudice
+
+We now follow an example from Chapter 2 of [Text Mining with R](https://www.tidytextmining.com/sentiment).
+
+
+```r
+## First, subset the data
+pride_prejudice &lt;- jausten_tokenized |&gt; filter(book == "Pride &amp; Prejudice")
+pride_prejudice
+```
+
+```
+## # A tibble: 37,246 × 4
+##   book              linenumber chapter word     
+##   &lt;fct&gt;                  &lt;int&gt;   &lt;int&gt; &lt;chr&gt;    
+## 1 Pride &amp; Prejudice          1       0 pride    
+## 2 Pride &amp; Prejudice          1       0 prejudice
+## 3 Pride &amp; Prejudice          3       0 jane     
+## 4 Pride &amp; Prejudice          3       0 austen   
+## 5 Pride &amp; Prejudice          7       1 chapter  
+## 6 Pride &amp; Prejudice          7       1 1        
+## # ℹ 37,240 more rows
+```
+---
+Now compute the AFINN sentiments for each segment of text
+
+```r
+afinn &lt;- pride_prejudice |&gt; inner_join(get_sentiments("afinn"))
+afinn
+```
+
+```
+## # A tibble: 6,065 × 5
+##   book              linenumber chapter word      value
+##   &lt;fct&gt;                  &lt;int&gt;   &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt;
+## 1 Pride &amp; Prejudice         18       1 dear          2
+## 2 Pride &amp; Prejudice         28       1 cried        -2
+## 3 Pride &amp; Prejudice         34       1 dear          2
+## 4 Pride &amp; Prejudice         37       1 delighted     3
+## 5 Pride &amp; Prejudice         37       1 agreed        1
+## 6 Pride &amp; Prejudice         47       1 dear          2
+## # ℹ 6,059 more rows
+```
+
+```r
+afinn &lt;- afinn |&gt;
+  group_by(index = linenumber %/% 80) |&gt;
+  summarise(sentiment = sum(value)) |&gt; mutate(method = "AFINN")
+afinn
+```
+
+```
+## # A tibble: 163 × 3
+##   index sentiment method
+##   &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt; 
+## 1     0        20 AFINN 
+## 2     1        -5 AFINN 
+## 3     2        12 AFINN 
+## 4     3        20 AFINN 
+## 5     4        48 AFINN 
+## 6     5        26 AFINN 
+## # ℹ 157 more rows
+```
+
+---
+Next calculate the sentiments based on Bing lexicon
+
+```r
+bing &lt;- pride_prejudice |&gt; 
+  inner_join(get_sentiments("bing")) |&gt;
+  count(index = linenumber %/% 80, sentiment)
+bing
+```
+
+```
+## # A tibble: 326 × 3
+##   index sentiment     n
+##   &lt;dbl&gt; &lt;chr&gt;     &lt;int&gt;
+## 1     0 negative      7
+## 2     0 positive     15
+## 3     1 negative     20
+## 4     1 positive     14
+## 5     2 negative     15
+## 6     2 positive     14
+## # ℹ 320 more rows
+```
+
+```r
+bing &lt;- bing |&gt; 
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |&gt;
+  mutate(sentiment = positive - negative)
+bing
+```
+
+```
+## # A tibble: 163 × 4
+##   index negative positive sentiment
+##   &lt;dbl&gt;    &lt;int&gt;    &lt;int&gt;     &lt;int&gt;
+## 1     0        7       15         8
+## 2     1       20       14        -6
+## 3     2       15       14        -1
+## 4     3       19       26         7
+## 5     4       23       37        14
+## 6     5       15       29        14
+## # ℹ 157 more rows
+```
+
+---
+Finally we do the same for the NRC lexicon.
+
+```r
+nrc &lt;- pride_prejudice |&gt; 
+  inner_join(get_sentiments("nrc"), relationship="many-to-many")
+nrc
+```
+
+```
+## # A tibble: 26,856 × 5
+##   book              linenumber chapter word      sentiment
+##   &lt;fct&gt;                  &lt;int&gt;   &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;    
+## 1 Pride &amp; Prejudice          1       0 pride     joy      
+## 2 Pride &amp; Prejudice          1       0 pride     positive 
+## 3 Pride &amp; Prejudice          1       0 prejudice anger    
+## 4 Pride &amp; Prejudice          1       0 prejudice negative 
+## 5 Pride &amp; Prejudice         10       1 truth     positive 
+## 6 Pride &amp; Prejudice         10       1 truth     trust    
+## # ℹ 26,850 more rows
+```
+
+```r
+## We filter only the positive and negative sentiments from NRC
+nrc &lt;- nrc |&gt; filter(sentiment %in% c("positive","negative")) |&gt;
+  count(index = linenumber %/% 80, sentiment) |&gt;  
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |&gt;
+  mutate(sentiment = positive - negative)
+nrc
+```
+
+```
+## # A tibble: 163 × 4
+##   index negative positive sentiment
+##   &lt;dbl&gt;    &lt;int&gt;    &lt;int&gt;     &lt;int&gt;
+## 1     0       10       28        18
+## 2     1       17       31        14
+## 3     2       22       27         5
+## 4     3       16       54        38
+## 5     4       17       44        27
+## 6     5       11       43        32
+## # ℹ 157 more rows
+```
+---
+Combine the three lexicons and plot the result.
+
+```r
+bing &lt;- bing |&gt; select(index,sentiment) |&gt; mutate(method = "bing")
+nrc &lt;- nrc |&gt; select(index, sentiment) |&gt; mutate(method = "nrc")
+p &lt;- bind_rows(afinn,bing,nrc) |&gt; 
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+p
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-29-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+---
+#TF-IDF
+
+Given a collection of documents or text, how do we determine which words or topics is important in each document ?
+
+One simple measure is via term-frequency vs inverse document frequency, or TF-IDF.
+
++ Term frequency `\(\mathrm{TF}(t,d)\)` counts how often a term/word `\(t\)` appears in a **single** document `\(d\)`.
++ Inverse document frequency `\(\mathrm{IDF}(t,\mathcal{D})\)` weights a term `\(t\)` inversely to its frequency among all documents `\(\mathcal{D}\)`.
+
+`\begin{gather*}
+\mathrm{TF}(t,d) = \frac{\mathrm{freq}(t,d)}{\sum_{t' \in d} \mathrm{freq}(t',d)} \\
+\mathrm{IDF}(t,\mathcal{D}) = \log \frac{|\mathcal{D}|}{|\{d \in\mathcal{D} \colon t \in d\}|}
+\end{gather*}`
+The TF-IDF measure of a term `\(t\)` for a document `\(d\)` is then `\(\mathrm{TF}(t,d) \times \mathrm{IDF}(t,\mathcal{D})\)`.
+
+---
+Let us now look at the TF-IDF for Jane Austen's novels.
+
+
+```r
+library(dplyr)
+library(janeaustenr)
+library(tidytext)
+jausten_words &lt;- austen_books() |&gt; unnest_tokens(word,text) |&gt; 
+  filter(str_detect(word,"^[a-zA-Z']+$"))
+jausten_words  
+```
+
+```
+## # A tibble: 723,369 × 2
+##   book                word       
+##   &lt;fct&gt;               &lt;chr&gt;      
+## 1 Sense &amp; Sensibility sense      
+## 2 Sense &amp; Sensibility and        
+## 3 Sense &amp; Sensibility sensibility
+## 4 Sense &amp; Sensibility by         
+## 5 Sense &amp; Sensibility jane       
+## 6 Sense &amp; Sensibility austen     
+## # ℹ 723,363 more rows
+```
+
+```r
+book_words &lt;- jausten_words |&gt; count(word,book, sort = TRUE)
+book_words
+```
+
+```
+## # A tibble: 39,648 × 3
+##   word  book               n
+##   &lt;chr&gt; &lt;fct&gt;          &lt;int&gt;
+## 1 the   Mansfield Park  6206
+## 2 to    Mansfield Park  5475
+## 3 and   Mansfield Park  5438
+## 4 to    Emma            5239
+## 5 the   Emma            5201
+## 6 and   Emma            4896
+## # ℹ 39,642 more rows
+```
+---
+
+```r
+total_words &lt;- book_words |&gt; group_by(book) |&gt; summarize(total = sum(n))
+book_words &lt;- left_join(book_words, total_words)
+book_words
+```
+
+```
+## # A tibble: 39,648 × 4
+##   word  book               n  total
+##   &lt;chr&gt; &lt;fct&gt;          &lt;int&gt;  &lt;int&gt;
+## 1 the   Mansfield Park  6206 159769
+## 2 to    Mansfield Park  5475 159769
+## 3 and   Mansfield Park  5438 159769
+## 4 to    Emma            5239 160624
+## 5 the   Emma            5201 160624
+## 6 and   Emma            4896 160624
+## # ℹ 39,642 more rows
+```
+
+---
+
+```r
+## The term frequency is simply n/total in the book_words df.
+ggplot(book_words, aes(n/total, fill = book)) +
+  geom_histogram(show.legend = FALSE) + xlab("TF") +
+  facet_wrap(~book, ncol = 3, scales = "free_y") + xlim(NA, 0.0009)
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-32-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+We next compute the IDF
+
+```r
+doc_frequency &lt;- jausten_words |&gt; group_by(word) |&gt; 
+  summarize(n = length(unique(book)))
+doc_frequency
+```
+
+```
+## # A tibble: 14,039 × 2
+##   word          n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 a             6
+## 2 a'n't         1
+## 3 abandoned     1
+## 4 abashed       1
+## 5 abate         1
+## 6 abatement     4
+## # ℹ 14,033 more rows
+```
+
+```r
+N &lt;- length(levels(jausten_words$book))
+doc_frequency &lt;- doc_frequency |&gt; mutate(idf = log(N/n))
+doc_frequency
+```
+
+```
+## # A tibble: 14,039 × 3
+##   word          n   idf
+##   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt;
+## 1 a             6 0    
+## 2 a'n't         1 1.79 
+## 3 abandoned     1 1.79 
+## 4 abashed       1 1.79 
+## 5 abate         1 1.79 
+## 6 abatement     4 0.405
+## # ℹ 14,033 more rows
+```
+---
+The TF-IDF is then simply
+
+```r
+tf_idf &lt;- book_words |&gt; mutate(tf = n/total) |&gt; 
+  select(word, book, tf) |&gt; 
+  left_join(doc_frequency) |&gt; 
+  mutate(tf_idf = tf*idf)
+tf_idf
+```
+
+```
+## # A tibble: 39,648 × 6
+##   word  book               tf     n   idf tf_idf
+##   &lt;chr&gt; &lt;fct&gt;           &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 the   Mansfield Park 0.0388     6     0      0
+## 2 to    Mansfield Park 0.0343     6     0      0
+## 3 and   Mansfield Park 0.0340     6     0      0
+## 4 to    Emma           0.0326     6     0      0
+## 5 the   Emma           0.0324     6     0      0
+## 6 and   Emma           0.0305     6     0      0
+## # ℹ 39,642 more rows
+```
+
+```r
+tf_idf &lt;- tf_idf |&gt; filter(tf_idf &gt; 0) |&gt; arrange(desc(tf_idf))
+tf_idf
+```
+
+```
+## # A tibble: 24,144 × 6
+##   word     book                     tf     n   idf  tf_idf
+##   &lt;chr&gt;    &lt;fct&gt;                 &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;
+## 1 elinor   Sense &amp; Sensibility 0.00520     1  1.79 0.00931
+## 2 marianne Sense &amp; Sensibility 0.00410     1  1.79 0.00735
+## 3 crawford Mansfield Park      0.00309     1  1.79 0.00553
+## 4 darcy    Pride &amp; Prejudice   0.00306     1  1.79 0.00549
+## 5 elliot   Persuasion          0.00304     1  1.79 0.00544
+## 6 emma     Emma                0.00489     2  1.10 0.00538
+## # ℹ 24,138 more rows
+```
+---
+Equivalently, we can use the `bind_tf_idf` function.
+
+```r
+tf_idf &lt;- book_words |&gt; bind_tf_idf(word,book,n) |&gt; filter(tf_idf &gt; 0)
+tf_idf |&gt; arrange(desc(tf_idf))
+```
+
+```
+## # A tibble: 24,144 × 7
+##   word     book                    n  total      tf   idf  tf_idf
+##   &lt;chr&gt;    &lt;fct&gt;               &lt;int&gt;  &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
+## 1 elinor   Sense &amp; Sensibility   623 119899 0.00520  1.79 0.00931
+## 2 marianne Sense &amp; Sensibility   492 119899 0.00410  1.79 0.00735
+## 3 crawford Mansfield Park        493 159769 0.00309  1.79 0.00553
+## 4 darcy    Pride &amp; Prejudice     373 121724 0.00306  1.79 0.00549
+## 5 elliot   Persuasion            254  83612 0.00304  1.79 0.00544
+## 6 emma     Emma                  786 160624 0.00489  1.10 0.00538
+## # ℹ 24,138 more rows
+```
+---
+Finally, let us try visualizing all the important words in each document.
+
+```r
+library(forcats)
+tf_idf |&gt;
+  slice_max(tf_idf, n = 15, by = book) |&gt;
+  ggplot(aes(tf_idf, fct_reorder(word, tf_idf), fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 3, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-36-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+---
+# TF-IDF for Physics
+We next follow another example from Section 3.4 of [Text Mining with R](https://www.tidytextmining.com/tfidf).
+
+
+```r
+library(gutenbergr)
+physics &lt;- gutenberg_download(c(37729, 14725, 13476, 30155), 
+                              meta_fields = "author")
+physics_words &lt;- physics |&gt;
+  unnest_tokens(word, text) |&gt;
+  count(author, word, sort = TRUE)
+
+physics_words
+```
+
+```
+## # A tibble: 12,668 × 3
+##   author              word      n
+##   &lt;chr&gt;               &lt;chr&gt; &lt;int&gt;
+## 1 Galilei, Galileo    the    3760
+## 2 Tesla, Nikola       the    3604
+## 3 Huygens, Christiaan the    3553
+## 4 Einstein, Albert    the    2993
+## 5 Galilei, Galileo    of     2049
+## 6 Einstein, Albert    of     2029
+## # ℹ 12,662 more rows
+```
+
+---
+
+```r
+plot_physics &lt;- physics_words |&gt; bind_tf_idf(word, author, n) |&gt;
+  mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                            "Huygens, Christiaan", 
+                                            "Tesla, Nikola",
+                                            "Einstein, Albert")))
+plot_physics |&gt; slice_max(tf_idf, n = 15, by = author) |&gt; 
+  mutate(word = reorder(word, tf_idf)) |&gt;
+  ggplot(aes(tf_idf, word, fill = author)) + geom_col(show.legend = FALSE) +
+  labs(x = "tf-idf", y = NULL) + facet_wrap(~author, ncol = 2, scales = "free")
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-38-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+
+---
+It turns out that there are quite a few weird words and notations. We therefore need to do some pre-processing before computing the tf-idf scores.
+
+```r
+mystopwords &lt;- tibble(word = c("eq", "co", "rc", "ac", "ak", "bn", 
+                                   "fig", "file", "cg", "cb", "cm",
+                               "ab", "_k", "_k_", "_x"))
+
+physics_words &lt;- anti_join(physics_words, mystopwords, 
+                           by = "word")
+
+plot_physics &lt;- physics_words |&gt;
+  bind_tf_idf(word, author, n) |&gt;
+  mutate(word = str_remove_all(word, "_")) |&gt;
+  slice_max(tf_idf, n = 15, by = author) |&gt;
+  mutate(word = fct_reorder(word, tf_idf)) |&gt;
+  mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                            "Huygens, Christiaan",
+                                            "Tesla, Nikola",
+                                            "Einstein, Albert")))
+```
+---
+
+```r
+ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~author, ncol = 2, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-40-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+---
+Finally, another useful representation of terms vs document is via a document term matrix (DTM) or term document matrix (TDM)
+
+```r
+physics_dtm &lt;- physics_words |&gt; cast_dtm(author,word,n)
+physics_dtm
+```
+
+```
+## &lt;&lt;DocumentTermMatrix (documents: 4, terms: 8052)&gt;&gt;
+## Non-/sparse entries: 12652/19556
+## Sparsity           : 61%
+## Maximal term length: 20
+## Weighting          : term frequency (tf)
+```
+
+```r
+library(tm)
+inspect(physics_dtm[,1:10])
+```
+
+```
+## &lt;&lt;DocumentTermMatrix (documents: 4, terms: 10)&gt;&gt;
+## Non-/sparse entries: 39/1
+## Sparsity           : 3%
+## Maximal term length: 5
+## Weighting          : term frequency (tf)
+## Sample             :
+##                      Terms
+## Docs                     a  and  in  is   of that  the   to water which
+##   Einstein, Albert     751  426 754 508 2029  373 2993  879     1   332
+##   Galilei, Galileo     708 1148 840 584 2049 1104 3760 1133   828   404
+##   Huygens, Christiaan  517  882 745 791 1708  798 3553 1207    26   870
+##   Tesla, Nikola       1176  879 986 816 1737  349 3604 1087     0   304
+```
+---
+
+```r
+inspect(physics_dtm[,11:20])
+```
+
+```
+## &lt;&lt;DocumentTermMatrix (documents: 4, terms: 10)&gt;&gt;
+## Non-/sparse entries: 40/0
+## Sparsity           : 0%
+## Maximal term length: 4
+## Weighting          : term frequency (tf)
+## Sample             :
+##                      Terms
+## Docs                   as  be   i  it not  or this  we will with
+##   Einstein, Albert    281 280  80 240 153  79  359 433   62  357
+##   Galilei, Galileo    452 480 362 732 398 358  180 146   97  247
+##   Huygens, Christiaan 495 533 252 581 142 147  404  94  374  124
+##   Tesla, Nikola       404 503 281 563 191 270  284 114   82  426
+```
+These representations will be useful in our subsequent discussion of topic modeling.
+---
+#Topic Modeling
+
+The idea behind topic modeling is that (1) each document is a mixture of topics and (2) every topic is a collection of words.
+
+For example, a news article can be `\(90\%\)` about the "technology" topic and `\(10\%\)` about "celebrity" topic. The "technology" topic contains words like "Twitter, cloud, autonomous, vehicles, ..." while "celebrity" contains words like "paparazzi, influence, Twitter, movie, star".
+
+The mathematics behind topic modeling is reasonably complicated so we will only present topic modeling through some examples.
+
+
+```r
+library(topicmodels)
+data("AssociatedPress")
+AssociatedPress
+```
+
+```
+## &lt;&lt;DocumentTermMatrix (documents: 2246, terms: 10473)&gt;&gt;
+## Non-/sparse entries: 302031/23220327
+## Sparsity           : 99%
+## Maximal term length: 18
+## Weighting          : term frequency (tf)
+```
+---
+Let us first model the collection of AP news article (there are 2246 articles) using a topic models with two topics.
+
+```r
+ap_lda &lt;- LDA(AssociatedPress, k = 2, contorl = list(seed = 1234))
+ap_lda
+```
+
+```
+## A LDA_VEM topic model with 2 topics.
+```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
@@ -478,6 +1233,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

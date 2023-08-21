@@ -15,7 +15,7 @@
  *    - xaringan wiki: https://github.com/yihui/xaringan/wiki
  *    - remarkjs wiki: https://github.com/gnab/remark/wiki
  *
- *  Version: 0.4.1
+ *  Version: 0.4.2
  *
  * ------------------------------------------------------- */
 @import url(https://fonts.googleapis.com/css?family=Montserrat:300,300i&display=swap);
@@ -46,13 +46,13 @@
   --text-color: #000000;
   --header-color: #035AA6;
   --background-color: #FFFFFF;
-  --link-color: #03A696;
+  --link-color: #035AA6;
   --text-bold-color: #035AA6;
   --code-highlight-color: rgba(255,255,0,0.5);
   --inverse-text-color: #000000;
   --inverse-background-color: #03A696;
   --inverse-header-color: #000000;
-  --inverse-link-color: #03A696;
+  --inverse-link-color: #035AA6;
   --title-slide-background-color: #035AA6;
   --title-slide-text-color: #FFFFFF;
   --header-background-color: #035AA6;
@@ -191,7 +191,9 @@ blockquote {
 th, td {
   padding: 5px;
 }
-.remark-slide thead, .remark-slide tfoot, .remark-slide tr:nth-child(even) {
+.remark-slide table:not(.table-unshaded) thead,
+.remark-slide table:not(.table-unshaded) tfoot,
+.remark-slide table:not(.table-unshaded) tr:nth-child(even) {
   background: #CCEDEA;
 }
 table.dataTable tbody {

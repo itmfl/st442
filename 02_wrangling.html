@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -21,17 +21,23 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Data wrangling with dplyr
+]
+.date[
 ### Fall 2021
+]
 
 ---
 
@@ -64,7 +70,7 @@ flights
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      517            515         2      830
@@ -73,11 +79,11 @@ flights
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 #filter()
@@ -88,7 +94,7 @@ filter(flights, month == 8, day == 21)
 ```
 
 ```
-## # A tibble: 990 x 19
+## # A tibble: 990 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -97,10 +103,11 @@ filter(flights, month == 8, day == 21)
 ## 4  2013     8    21      453            500        -7      634
 ## 5  2013     8    21      528            530        -2      757
 ## 6  2013     8    21      536            545        -9      808
-## # … with 984 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 984 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ```r
@@ -116,7 +123,7 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ```
 
 ```
-## # A tibble: 637 x 19
+## # A tibble: 637 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -125,10 +132,11 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ## 4  2013     8    21      536            545        -9      808
 ## 5  2013     8    21      540            540         0      837
 ## 6  2013     8    21      544            545        -1      911
-## # … with 631 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 631 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ```r
@@ -144,7 +152,7 @@ filter(august21_jfk_lga, arr_delay &gt; 10 | dep_delay &gt; 10)
 ```
 
 ```
-## # A tibble: 106 x 19
+## # A tibble: 106 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -153,23 +161,24 @@ filter(august21_jfk_lga, arr_delay &gt; 10 | dep_delay &gt; 10)
 ## 4  2013     8    21      555            600        -5      839
 ## 5  2013     8    21      558            600        -2      830
 ## 6  2013     8    21      625            600        25      903
-## # … with 100 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 100 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
 We can do all of the above filtering using a single chain sequence as follows
 
 ```r
-flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;% 
-            filter(origin %in% c("JFK","LGA")) %&gt;%
+flights |&gt; filter(month == 8 &amp; day == 21) |&gt;
+            filter(origin %in% c("JFK","LGA")) |&gt;
             filter(arr_delay &gt; 10 | dep_delay &gt; 10)
 ```
 
 ```
-## # A tibble: 106 x 19
+## # A tibble: 106 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     8    21       10           2359        11      350
@@ -178,17 +187,18 @@ flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;%
 ## 4  2013     8    21      555            600        -5      839
 ## 5  2013     8    21      558            600        -2      830
 ## 6  2013     8    21      625            600        25      903
-## # … with 100 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 100 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
-+ The previous example introduce the `%&gt;%` pipe operator. 
++ The previous example introduce the `|&gt;` pipe operator. 
 
 + The pipe operator allows us to chain together operations without the need to introduce auxiliary variables.
 
-+ The pipe operator maps `x %&gt;% f(y)` to `f(x,y)`.
++ The pipe operator maps `x |&gt; f(y)` to `f(x,y)`.
 
 ---
 #Missing values
@@ -278,7 +288,7 @@ filter(df, x &gt; 1)
 ```
 
 ```
-## # A tibble: 1 x 1
+## # A tibble: 1 × 1
 ##       x
 ##   &lt;dbl&gt;
 ## 1     3
@@ -289,7 +299,7 @@ filter(df, is.na(x) | x &gt; 1)
 ```
 
 ```
-## # A tibble: 2 x 1
+## # A tibble: 2 × 1
 ##       x
 ##   &lt;dbl&gt;
 ## 1    NA
@@ -305,7 +315,7 @@ arrange(flights_dest, dest, month, day)
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ##   dest   year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1 ABQ    2013     4    22     1712           1630        42     1946
@@ -314,10 +324,11 @@ arrange(flights_dest, dest, month, day)
 ## 4 ABQ    2013     4    25     2023           2025        -2     2339
 ## 5 ABQ    2013     4    26     2020           2025        -5     2318
 ## 6 ABQ    2013     4    27     2020           2025        -5     2245
-## # … with 336,770 more rows, and 11 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, air_time &lt;dbl&gt;,
-## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 11 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
@@ -328,7 +339,7 @@ arrange(flights_dest, desc(dest), month, day)
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ##   dest   year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1 XNA    2013     1     1      656            705        -9     1007
@@ -337,10 +348,11 @@ arrange(flights_dest, desc(dest), month, day)
 ## 4 XNA    2013     1     2      656            705        -9     1014
 ## 5 XNA    2013     1     2      905            822        43     1313
 ## 6 XNA    2013     1     2     1531           1530         1     1846
-## # … with 336,770 more rows, and 11 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, air_time &lt;dbl&gt;,
-## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 11 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;
 ```
 ---
 #select()
@@ -354,7 +366,7 @@ flights_sml
 ```
 
 ```
-## # A tibble: 336,776 x 7
+## # A tibble: 336,776 × 7
 ##    year month   day dep_time sched_dep_time arr_time sched_arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;    &lt;int&gt;          &lt;int&gt;
 ## 1  2013     1     1      517            515      830            819
@@ -363,7 +375,7 @@ flights_sml
 ## 4  2013     1     1      544            545     1004           1022
 ## 5  2013     1     1      554            600      812            837
 ## 6  2013     1     1      554            558      740            728
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 class: clear
@@ -399,7 +411,7 @@ rename(flights_sml,
 ```
 
 ```
-## # A tibble: 336,776 x 7
+## # A tibble: 336,776 × 7
 ##    year month   day departure_time sched_dep_time arrival_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;          &lt;int&gt;        &lt;int&gt;
 ## 1  2013     1     1            517            515          830
@@ -408,7 +420,8 @@ rename(flights_sml,
 ## 4  2013     1     1            544            545         1004
 ## 5  2013     1     1            554            600          812
 ## 6  2013     1     1            554            558          740
-## # … with 336,770 more rows, and 1 more variable: sched_arr_time &lt;int&gt;
+## # ℹ 336,770 more rows
+## # ℹ 1 more variable: sched_arr_time &lt;int&gt;
 ```
 ---
 class: clear
@@ -419,7 +432,7 @@ select(flights_sml, dep_time, everything())
 ```
 
 ```
-## # A tibble: 336,776 x 7
+## # A tibble: 336,776 × 7
 ##   dep_time  year month   day sched_dep_time arr_time sched_arr_time
 ##      &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;    &lt;int&gt;          &lt;int&gt;
 ## 1      517  2013     1     1            515      830            819
@@ -428,7 +441,7 @@ select(flights_sml, dep_time, everything())
 ## 4      544  2013     1     1            545     1004           1022
 ## 5      554  2013     1     1            600      812            837
 ## 6      554  2013     1     1            558      740            728
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 # mutate()
@@ -440,11 +453,11 @@ flights_sml &lt;- select(flights, year:day,ends_with("delay"),
 mutate(flights_sml, gain = arr_delay - dep_delay,
                     hours = air_time/60,
                     speed = distance/hours,
-                    gain_per_hour = gain/hours) %&gt;% select(-hours)
+                    gain_per_hour = gain/hours) |&gt; select(-hours)
 ```
 
 ```
-## # A tibble: 336,776 x 10
+## # A tibble: 336,776 × 10
 ##    year month   day dep_delay arr_delay distance air_time  gain speed
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  2013     1     1         2        11     1400      227     9  370.
@@ -453,7 +466,8 @@ mutate(flights_sml, gain = arr_delay - dep_delay,
 ## 4  2013     1     1        -1       -18     1576      183   -17  517.
 ## 5  2013     1     1        -6       -25      762      116   -19  394.
 ## 6  2013     1     1        -4        12      719      150    16  288.
-## # … with 336,770 more rows, and 1 more variable: gain_per_hour &lt;dbl&gt;
+## # ℹ 336,770 more rows
+## # ℹ 1 more variable: gain_per_hour &lt;dbl&gt;
 ```
 ---
 class: clear
@@ -466,7 +480,7 @@ transmute(flights, gain = arr_delay - dep_delay,
 ```
 
 ```
-## # A tibble: 336,776 x 3
+## # A tibble: 336,776 × 3
 ##    gain hours gain_per_hour
 ##   &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
 ## 1     9  3.78          2.38
@@ -475,7 +489,7 @@ transmute(flights, gain = arr_delay - dep_delay,
 ## 4   -17  3.05         -5.57
 ## 5   -19  1.93         -9.83
 ## 6    16  2.5           6.4 
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 #summarize()
@@ -486,7 +500,7 @@ summarize(flights, delay = mean(dep_delay)) ## oops! missing values
 ```
 
 ```
-## # A tibble: 1 x 1
+## # A tibble: 1 × 1
 ##   delay
 ##   &lt;dbl&gt;
 ## 1    NA
@@ -497,7 +511,7 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 ```
 
 ```
-## # A tibble: 1 x 1
+## # A tibble: 1 × 1
 ##   delay
 ##   &lt;dbl&gt;
 ## 1  12.6
@@ -507,11 +521,11 @@ class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 
 ```r
-flights %&gt;% group_by(year, month, day)
+flights |&gt; group_by(year, month, day)
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -521,22 +535,22 @@ flights %&gt;% group_by(year, month, day)
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
 
 ```r
-flights %&gt;% group_by(year, month, day) %&gt;%
+flights |&gt; group_by(year, month, day) |&gt;
 summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 
 ```
-## # A tibble: 365 x 4
+## # A tibble: 365 × 4
 ## # Groups:   year, month [12]
 ##    year month   day delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
@@ -546,24 +560,24 @@ summarize(delay = mean(dep_delay, na.rm = TRUE))
 ## 4  2013     1     4  8.95
 ## 5  2013     1     5  5.73
 ## 6  2013     1     6  7.15
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 A more involved example is to compute the average distance and delay for flights to all destinations (except Honolulu).
 
 ```r
-delays &lt;- flights %&gt;% group_by(dest) %&gt;% 
+delays &lt;- flights |&gt; group_by(dest) |&gt; 
   summarize(count = n(), 
             dist = mean(distance,na.rm = TRUE),
             avg_delay = mean(arr_delay + dep_delay,na.rm = TRUE)
-            ) %&gt;%
+            ) |&gt;
   filter(count &gt; 20, dest != "HNL")
 delays
 ```
 
 ```
-## # A tibble: 96 x 4
+## # A tibble: 96 × 4
 ##   dest  count  dist avg_delay
 ##   &lt;chr&gt; &lt;int&gt; &lt;dbl&gt;     &lt;dbl&gt;
 ## 1 ABQ     254 1826       18.1
@@ -572,7 +586,7 @@ delays
 ## 4 ATL   17215  757.      23.7
 ## 5 AUS    2439 1514.      19.0
 ## 6 AVL     275  584.      16.2
-## # … with 90 more rows
+## # ℹ 90 more rows
 ```
 ---
 class: clear
@@ -593,13 +607,13 @@ There are a large number of useful summary functions. See Section 5.6.4 of [R4DS
 ```r
 ## average arrival delay
 not_canceled &lt;- filter(flights, !is.na(dep_delay) &amp; !is.na(arr_delay))
-not_canceled %&gt;% group_by(year, month, day) %&gt;% 
+not_canceled |&gt; group_by(year, month, day) |&gt; 
   summarize(avg_delay = mean(arr_delay), 
             avg_positive_delay = mean(arr_delay[arr_delay &gt; 0]))
 ```
 
 ```
-## # A tibble: 365 x 5
+## # A tibble: 365 × 5
 ## # Groups:   year, month [12]
 ##    year month   day avg_delay avg_positive_delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;              &lt;dbl&gt;
@@ -609,18 +623,18 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     4     -1.93               28.3
 ## 5  2013     1     5     -1.53               22.6
 ## 6  2013     1     6      4.24               24.4
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(dest) %&gt;% 
-  summarize(dist_sd = sd(distance)) %&gt;% arrange(desc(dist_sd))
+not_canceled |&gt; group_by(dest) |&gt; 
+  summarize(dist_sd = sd(distance)) |&gt; arrange(desc(dist_sd))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  dist_sd
 ##   &lt;chr&gt;   &lt;dbl&gt;
 ## 1 EGE     10.5 
@@ -629,19 +643,19 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## 4 HNL     10.0 
 ## 5 SEA      9.98
 ## 6 LAS      9.91
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
 We note that *summarize* drops all variables except possibly those used to group the data and those variables introduced by the summary statistics. Contrasts the following two approaches
 
 ```r
-not_canceled %&gt;% group_by(year,month,day) %&gt;%
+not_canceled |&gt; group_by(year,month,day) |&gt;
   summarize(first_dep = first(dep_time), last_dep = last(dep_time))
 ```
 
 ```
-## # A tibble: 365 x 5
+## # A tibble: 365 × 5
 ## # Groups:   year, month [12]
 ##    year month   day first_dep last_dep
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;int&gt;    &lt;int&gt;
@@ -651,18 +665,18 @@ not_canceled %&gt;% group_by(year,month,day) %&gt;%
 ## 4  2013     1     4        25     2358
 ## 5  2013     1     5        14     2357
 ## 6  2013     1     6        16     2355
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(year, month, day) %&gt;%
-  mutate(r = min_rank(desc(dep_time))) %&gt;% filter(r %in% range(r))
+not_canceled |&gt; group_by(year, month, day) |&gt;
+  mutate(r = min_rank(desc(dep_time))) |&gt; filter(r %in% range(r))
 ```
 
 ```
-## # A tibble: 770 x 20
+## # A tibble: 770 × 20
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -672,21 +686,22 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     2     2354           2359        -5      413
 ## 5  2013     1     3       32           2359        33      504
 ## 6  2013     1     3     2349           2359       -10      434
-## # … with 764 more rows, and 13 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
+## # ℹ 764 more rows
+## # ℹ 13 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
 ```
 ---
 # More examples
 
 ```r
-not_canceled %&gt;% group_by(year, month, day) %&gt;%
+not_canceled |&gt; group_by(year, month, day) |&gt;
   summarize(n_early = sum(dep_time &lt; 500))
 ```
 
 ```
-## # A tibble: 365 x 4
+## # A tibble: 365 × 4
 ## # Groups:   year, month [12]
 ##    year month   day n_early
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
@@ -696,19 +711,19 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     4       3
 ## 5  2013     1     5       3
 ## 6  2013     1     6       2
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(dest) %&gt;%
-  summarize(long_delay_pct = mean(arr_delay &gt; 60)) %&gt;%
+not_canceled |&gt; group_by(dest) |&gt;
+  summarize(long_delay_pct = mean(arr_delay &gt; 60)) |&gt;
   arrange(desc(long_delay_pct))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  long_delay_pct
 ##   &lt;chr&gt;          &lt;dbl&gt;
 ## 1 CAE            0.255
@@ -717,7 +732,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## 4 TYS            0.206
 ## 5 BHM            0.171
 ## 6 DSM            0.170
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
@@ -729,7 +744,7 @@ daily
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ## # Groups:   dest, month, day [31,229]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
@@ -739,23 +754,23 @@ daily
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class:clear
 
 ```r
-daily %&gt;% summarize(flights = n()) %&gt;% 
-          summarize(flights = sum(flights)) %&gt;%
+daily |&gt; summarize(flights = n()) |&gt; 
+          summarize(flights = sum(flights)) |&gt;
           summarize(flights = sum(flights)) 
 ```
 
 ```
-## # A tibble: 105 x 2
+## # A tibble: 105 × 2
 ##   dest  flights
 ##   &lt;chr&gt;   &lt;int&gt;
 ## 1 ABQ       254
@@ -764,7 +779,7 @@ daily %&gt;% summarize(flights = n()) %&gt;%
 ## 4 ANC         8
 ## 5 ATL     17215
 ## 6 AUS      2439
-## # … with 99 more rows
+## # ℹ 99 more rows
 ```
 ---
 class: clear
@@ -774,13 +789,13 @@ Consider the following examples.
 
 
 ```r
-group_by(not_canceled, dest, month) %&gt;% 
-  summarize(air_time = mean(air_time)) %&gt;% 
+group_by(not_canceled, dest, month) |&gt; 
+  summarize(air_time = mean(air_time)) |&gt; 
   summarize(air_time = mean(air_time))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      250. 
@@ -789,18 +804,18 @@ group_by(not_canceled, dest, month) %&gt;%
 ## 4 ANC      413. 
 ## 5 ATL      113. 
 ## 6 AUS      214. 
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
 
 ```r
-group_by(not_canceled, dest) %&gt;% 
+group_by(not_canceled, dest) |&gt; 
   summarize(air_time = mean(air_time))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      249. 
@@ -809,19 +824,19 @@ group_by(not_canceled, dest) %&gt;%
 ## 4 ANC      413. 
 ## 5 ATL      113. 
 ## 6 AUS      213. 
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
 
 ```r
-group_by(not_canceled, dest, month) %&gt;% 
-  summarize(air_time = median(air_time)) %&gt;% 
+group_by(not_canceled, dest, month) |&gt; 
+  summarize(air_time = median(air_time)) |&gt; 
   summarize(air_time = median(air_time))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ      244  
@@ -830,18 +845,18 @@ group_by(not_canceled, dest, month) %&gt;%
 ## 4 ANC      415. 
 ## 5 ATL      110  
 ## 6 AUS      214. 
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
 
 ```r
-group_by(not_canceled, dest) %&gt;% 
+group_by(not_canceled, dest) |&gt; 
   summarize(air_time = median(air_time))
 ```
 
 ```
-## # A tibble: 104 x 2
+## # A tibble: 104 × 2
 ##   dest  air_time
 ##   &lt;chr&gt;    &lt;dbl&gt;
 ## 1 ABQ       246 
@@ -850,7 +865,7 @@ group_by(not_canceled, dest) %&gt;%
 ## 4 ANC       414.
 ## 5 ATL       112 
 ## 6 AUS       211 
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 #ungroup()
@@ -862,7 +877,7 @@ summarize(daily, flights = n())
 ```
 
 ```
-## # A tibble: 365 x 4
+## # A tibble: 365 × 4
 ## # Groups:   year, month [12]
 ##    year month   day flights
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
@@ -872,15 +887,15 @@ summarize(daily, flights = n())
 ## 4  2013     1     4     915
 ## 5  2013     1     5     720
 ## 6  2013     1     6     832
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 
 ```r
-daily %&gt;% ungroup() %&gt;% summarize(flights = n())
+daily |&gt; ungroup() |&gt; summarize(flights = n())
 ```
 
 ```
-## # A tibble: 1 x 1
+## # A tibble: 1 × 1
 ##   flights
 ##     &lt;int&gt;
 ## 1  336776
@@ -893,12 +908,12 @@ We can also do a number of very useful operations by combining `\(\mathrm{group\
 ## Find the worst flights with longest delay each day
 flights_sml &lt;- select(flights, year:day, ends_with("delay"),
                       distance, air_time)
-flights_sml %&gt;% group_by(year, month, day) %&gt;%
+flights_sml |&gt; group_by(year, month, day) |&gt;
   filter(rank(desc(arr_delay)) &lt;= 10)
 ```
 
 ```
-## # A tibble: 3,609 x 7
+## # A tibble: 3,609 × 7
 ## # Groups:   year, month, day [365]
 ##    year month   day dep_delay arr_delay distance air_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
@@ -908,21 +923,21 @@ flights_sml %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     1       155       166      277       68
 ## 5  2013     1     1       157       174      213       60
 ## 6  2013     1     1       216       222      708      121
-## # … with 3,603 more rows
+## # ℹ 3,603 more rows
 ```
 ---
 
 ```r
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
-flights %&gt;% group_by(dest) %&gt;%
-  filter(n() &gt; 365, arr_delay &gt; 0) %&gt;%
-  mutate(prop_delay = arr_delay/sum(arr_delay)) %&gt;%
+flights |&gt; group_by(dest) |&gt;
+  filter(n() &gt; 365, arr_delay &gt; 0) |&gt;
+  mutate(prop_delay = arr_delay/sum(arr_delay)) |&gt;
   select(year:day, dest, arr_delay, prop_delay)
 ```
 
 ```
-## # A tibble: 131,106 x 6
+## # A tibble: 131,106 × 6
 ## # Groups:   dest [77]
 ##    year month   day dest  arr_delay prop_delay
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt;      &lt;dbl&gt;
@@ -932,7 +947,7 @@ flights %&gt;% group_by(dest) %&gt;%
 ## 4  2013     1     1 ORD          12  0.0000424
 ## 5  2013     1     1 FLL          19  0.0000938
 ## 6  2013     1     1 ORD           8  0.0000283
-## # … with 131,100 more rows
+## # ℹ 131,100 more rows
 ```
 ---
 Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command `\(\mathrm{vignette("window-functions")}\)`. 
@@ -941,11 +956,11 @@ The following example is from [window functions](https://rpubs.com/hadley/window
 
 ```r
 library(Lahman)
-batting &lt;- Lahman::Batting %&gt;% as_tibble() %&gt;% 
-           select(playerID, yearID, teamID, G, AB, R, H) %&gt;%
-           arrange(playerID, yearID, teamID) %&gt;%
+batting &lt;- Lahman::Batting |&gt; as_tibble() |&gt; 
+           select(playerID, yearID, teamID, G, AB, R, H) |&gt;
+           arrange(playerID, yearID, teamID) |&gt;
            semi_join(Lahman::AwardsPlayers, by = "playerID")
-players &lt;- batting %&gt;% group_by(playerID)
+players &lt;- batting |&gt; group_by(playerID)
 ```
 ---
 Using this dataset, let us try a few `\(\mathrm{group\_mutate}\)` and `\(\mathrm{group\_filter}\)` operations. 
@@ -956,8 +971,8 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ```
 
 ```
-## # A tibble: 2,777 x 7
-## # Groups:   playerID [1,315]
+## # A tibble: 2,920 × 7
+## # Groups:   playerID [1,385]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1 aaronha01   1959 ML1      154   629   116   223
@@ -966,7 +981,7 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ## 4 abernte02   1955 WS1       40    26     1     4
 ## 5 abernte02   1957 WS1       26    24     3     4
 ## 6 abreubo01   1999 PHI      152   546   118   183
-## # … with 2,771 more rows
+## # ℹ 2,914 more rows
 ```
 ---
 class: clear
@@ -977,8 +992,8 @@ mutate(players, G_rank = min_rank(G))
 ```
 
 ```
-## # A tibble: 19,978 x 8
-## # Groups:   playerID [1,359]
+## # A tibble: 20,874 × 8
+## # Groups:   playerID [1,436]
 ##   playerID  yearID teamID     G    AB     R     H G_rank
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;int&gt;
 ## 1 aaronha01   1954 ML1      122   468    58   131      4
@@ -987,7 +1002,7 @@ mutate(players, G_rank = min_rank(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198     12
 ## 5 aaronha01   1958 ML1      153   601   109   196     13
 ## 6 aaronha01   1959 ML1      154   629   116   223     17
-## # … with 19,972 more rows
+## # ℹ 20,868 more rows
 ```
 ---
 class: clear
@@ -999,8 +1014,8 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ```
 
 ```
-## # A tibble: 7,945 x 7
-## # Groups:   playerID [1,291]
+## # A tibble: 8,232 × 7
+## # Groups:   playerID [1,354]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1 aaronha01   1955 ML1      153   602   105   189
@@ -1009,7 +1024,7 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ## 4 aaronha01   1959 ML1      154   629   116   223
 ## 5 aaronha01   1961 ML1      155   603   115   197
 ## 6 aaronha01   1964 ML1      145   570   103   187
-## # … with 7,939 more rows
+## # ℹ 8,226 more rows
 ```
 ---
 class: clear
@@ -1020,8 +1035,8 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ```
 
 ```
-## # A tibble: 19,978 x 8
-## # Groups:   playerID [1,359]
+## # A tibble: 20,874 × 8
+## # Groups:   playerID [1,436]
 ##   playerID  yearID teamID     G    AB     R     H    G_z
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;
 ## 1 aaronha01   1954 ML1      122   468    58   131 -1.16 
@@ -1030,24 +1045,24 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198  0.411
 ## 5 aaronha01   1958 ML1      153   601   109   196  0.519
 ## 6 aaronha01   1959 ML1      154   629   116   223  0.573
-## # … with 19,972 more rows
+## # ℹ 20,868 more rows
 ```
 ---
 class: clear
 The `\(\mathrm{ntile(x,m)}\)` function divides the (numeric) vector `\(x\)` into `\(m\)` evenly sized buckets. The next operation divides the team players into `\(4\)` coarse groups and calculate the batting average for each group.
 
 ```r
-batting %&gt;% group_by(teamID,playerID) %&gt;%
+batting |&gt; group_by(teamID,playerID) |&gt;
   summarise(total_hits = sum(H), total_ab = sum(AB), 
-            batting_avg = total_hits/total_ab) %&gt;%
-  filter(!is.na(batting_avg)) %&gt;%
-  mutate(quartile = ntile(batting_avg,4)) %&gt;%
-  group_by(teamID,quartile) %&gt;% 
+            batting_avg = total_hits/total_ab) |&gt;
+  filter(!is.na(batting_avg)) |&gt;
+  mutate(quartile = ntile(batting_avg,4)) |&gt;
+  group_by(teamID,quartile) |&gt; 
   summarise(batting_avg = sum(total_hits)/sum(total_ab))
 ```
 
 ```
-## # A tibble: 235 x 3
+## # A tibble: 235 × 3
 ## # Groups:   teamID [79]
 ##   teamID quartile batting_avg
 ##   &lt;fct&gt;     &lt;int&gt;       &lt;dbl&gt;
@@ -1055,9 +1070,9 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 ## 2 ANA           2       0.261
 ## 3 ANA           3       0.282
 ## 4 ANA           4       0.301
-## 5 ARI           1       0.157
-## 6 ARI           2       0.258
-## # … with 229 more rows
+## 5 ARI           1       0.153
+## 6 ARI           2       0.243
+## # ℹ 229 more rows
 ```
 
 ---
@@ -1073,35 +1088,35 @@ df
 ```
 
 ```
-## # A tibble: 100 x 3
-##        x       y     z
-##    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.0541 0.198   0.593
-## 2 0.889  0.00422 0.979
-## 3 0.317  0.920   0.805
-## 4 0.0734 0.929   0.499
-## 5 0.541  0.119   0.735
-## 6 0.776  0.843   0.758
-## # … with 94 more rows
+## # A tibble: 100 × 3
+##         x     y     z
+##     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.657   0.247 0.250
+## 2 0.763   0.374 0.772
+## 3 0.00677 0.697 0.706
+## 4 0.787   0.789 0.954
+## 5 0.581   0.690 0.578
+## 6 0.797   0.794 0.917
+## # ℹ 94 more rows
 ```
 ]
 .pull-right[
 
 ```r
-df %&gt;% summarize(
+df |&gt; summarize(
   across(c(x,y,z),mean))
 ```
 
 ```
-## # A tibble: 1 x 3
+## # A tibble: 1 × 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.504 0.514 0.523
+## 1 0.544 0.468 0.546
 ```
 
 ```r
 ## Equivalently
-## df %&gt;% summarize(
+## df |&gt; summarize(
 ##   across(everything(),mean))
 ```
 ]
@@ -1116,33 +1131,33 @@ With **across **you can also
 
 
 ```r
-df &lt;- df %&gt;% mutate(names = rep(letters,4)[1:100])
+df &lt;- df |&gt; mutate(names = rep(letters,4)[1:100])
 df
 ```
 
 ```
-## # A tibble: 100 x 4
-##        x       y     z names
-##    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 0.0541 0.198   0.593 a    
-## 2 0.889  0.00422 0.979 b    
-## 3 0.317  0.920   0.805 c    
-## 4 0.0734 0.929   0.499 d    
-## 5 0.541  0.119   0.735 e    
-## 6 0.776  0.843   0.758 f    
-## # … with 94 more rows
+## # A tibble: 100 × 4
+##         x     y     z names
+##     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 0.657   0.247 0.250 a    
+## 2 0.763   0.374 0.772 b    
+## 3 0.00677 0.697 0.706 c    
+## 4 0.787   0.789 0.954 d    
+## 5 0.581   0.690 0.578 e    
+## 6 0.797   0.794 0.917 f    
+## # ℹ 94 more rows
 ```
 
 ```r
-df %&gt;% summarize(across(where(is.numeric),
+df |&gt; summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = ~max(.)/min(.))))
 ```
 
 ```
-## # A tibble: 1 x 9
+## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.504 0.322    175.  0.514 0.317    237.  0.523 0.285    79.8
+## 1  0.544 0.306    321.  0.468 0.292  39109.  0.546 0.283    104.
 ```
 
 ---
@@ -1155,33 +1170,33 @@ The previous examples uses the `\(.\)` operator, which serves as a placeholder f
 max_min_ratio &lt;- function(x){
   max(x)/min(x)
 }
-df %&gt;% summarize(across(where(is.numeric),
+df |&gt; summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
 ```
-## # A tibble: 1 x 9
+## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.504 0.322    175.  0.514 0.317    237.  0.523 0.285    79.8
+## 1  0.544 0.306    321.  0.468 0.292  39109.  0.546 0.283    104.
 ```
 
 ```r
 # You can also combine multiple selection criteria
-df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
+df |&gt; summarize(across(where(is.numeric) &amp; c(-x),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
 ```
-## # A tibble: 1 x 6
+## # A tibble: 1 × 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.514 0.317    237.  0.523 0.285    79.8
+## 1  0.468 0.292  39109.  0.546 0.283    104.
 ```
 
 ```r
 ## Equivalently
-## df %&gt;% summarize(across(c(y,z), 
+## df |&gt; summarize(across(c(y,z), 
 ##     list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
@@ -1197,7 +1212,7 @@ penguins
 ```
 
 ```
-## # A tibble: 344 x 8
+## # A tibble: 344 × 8
 ##   species island    bill_length_mm bill_depth_mm flipper_length_mm
 ##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;             &lt;int&gt;
 ## 1 Adelie  Torgersen           39.1          18.7               181
@@ -1206,18 +1221,18 @@ penguins
 ## 4 Adelie  Torgersen           NA            NA                  NA
 ## 5 Adelie  Torgersen           36.7          19.3               193
 ## 6 Adelie  Torgersen           39.3          20.6               190
-## # … with 338 more rows, and 3 more variables: body_mass_g &lt;int&gt;,
-## #   sex &lt;fct&gt;, year &lt;int&gt;
+## # ℹ 338 more rows
+## # ℹ 3 more variables: body_mass_g &lt;int&gt;, sex &lt;fct&gt;, year &lt;int&gt;
 ```
 
 ```r
 ## Let us first count the number of species, number of island 
 ## and number of different sexes of the penguins
-penguins %&gt;% summarise(across(c(species, island, sex),n_distinct))
+penguins |&gt; summarise(across(c(species, island, sex),n_distinct))
 ```
 
 ```
-## # A tibble: 1 x 3
+## # A tibble: 1 × 3
 ##   species island   sex
 ##     &lt;int&gt;  &lt;int&gt; &lt;int&gt;
 ## 1       3      3     3
@@ -1228,15 +1243,15 @@ class: clear
 
 ```r
 ## Let us count the number of missing values in each columns
-penguins %&gt;% summarise(across(everything(),~sum(is.na(.))))
+penguins |&gt; summarise(across(everything(),~sum(is.na(.))))
 ```
 
 ```
-## # A tibble: 1 x 8
+## # A tibble: 1 × 8
 ##   species island bill_length_mm bill_depth_mm flipper_length_mm
 ##     &lt;int&gt;  &lt;int&gt;          &lt;int&gt;         &lt;int&gt;             &lt;int&gt;
 ## 1       0      0              2             2                 2
-## # … with 3 more variables: body_mass_g &lt;int&gt;, sex &lt;int&gt;, year &lt;int&gt;
+## # ℹ 3 more variables: body_mass_g &lt;int&gt;, sex &lt;int&gt;, year &lt;int&gt;
 ```
 
 ---
@@ -1246,43 +1261,45 @@ class: clear
 ## Replace missing values for the numerical variables by the 
 ## average value (computed within that specie and island).
 library(dplyr)
-penguins_imputed &lt;- penguins %&gt;%
-  group_by(species, island) %&gt;%
+penguins_imputed &lt;- penguins |&gt;
+  group_by(species, island) |&gt;
   mutate(imputed = if_any(where(is.numeric), is.na),
          across(where(is.numeric), 
                 ~if_else(condition = is.na(.), 
                          true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) %&gt;% ungroup() %&gt;% 
+                         false = as.numeric(.)))) |&gt; ungroup() |&gt; 
   select(imputed, everything())
 
 penguins_imputed
 ```
 
 ```
-## # A tibble: 344 x 9
-##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
-##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
-## 1 FALSE   Adelie  Torgersen           39.1          18.7             181 
-## 2 FALSE   Adelie  Torgersen           39.5          17.4             186 
-## 3 FALSE   Adelie  Torgersen           40.3          18               195 
-## 4 TRUE    Adelie  Torgersen           39.0          18.4             191.
-## 5 FALSE   Adelie  Torgersen           36.7          19.3             193 
-## 6 FALSE   Adelie  Torgersen           39.3          20.6             190 
-## # … with 338 more rows, and 3 more variables: body_mass_g &lt;dbl&gt;,
+## # A tibble: 344 × 9
+##   imputed species island    bill_length_mm bill_depth_mm
+##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
+## 1 FALSE   Adelie  Torgersen           39.1          18.7
+## 2 FALSE   Adelie  Torgersen           39.5          17.4
+## 3 FALSE   Adelie  Torgersen           40.3          18  
+## 4 TRUE    Adelie  Torgersen           39.0          18.4
+## 5 FALSE   Adelie  Torgersen           36.7          19.3
+## 6 FALSE   Adelie  Torgersen           39.3          20.6
+## # ℹ 338 more rows
+## # ℹ 4 more variables: flipper_length_mm &lt;dbl&gt;, body_mass_g &lt;dbl&gt;,
 ## #   sex &lt;fct&gt;, year &lt;dbl&gt;
 ```
 
 ```r
-penguins_imputed %&gt;% filter(imputed == TRUE)
+penguins_imputed |&gt; filter(imputed == TRUE)
 ```
 
 ```
-## # A tibble: 2 x 9
-##   imputed species island    bill_length_mm bill_depth_mm flipper_length_…
-##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;
-## 1 TRUE    Adelie  Torgersen           39.0          18.4             191.
-## 2 TRUE    Gentoo  Biscoe              47.5          15.0             217.
-## # … with 3 more variables: body_mass_g &lt;dbl&gt;, sex &lt;fct&gt;, year &lt;dbl&gt;
+## # A tibble: 2 × 9
+##   imputed species island    bill_length_mm bill_depth_mm
+##   &lt;lgl&gt;   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
+## 1 TRUE    Adelie  Torgersen           39.0          18.4
+## 2 TRUE    Gentoo  Biscoe              47.5          15.0
+## # ℹ 4 more variables: flipper_length_mm &lt;dbl&gt;, body_mass_g &lt;dbl&gt;,
+## #   sex &lt;fct&gt;, year &lt;dbl&gt;
 ```
 
 ---
@@ -1295,11 +1312,11 @@ The **filter** verb does not work with **across**; we instead use the helpers [i
 
 ```r
 ## Find all observations with at least one missing value
-flights %&gt;% filter(if_any(everything(), is.na))
+flights |&gt; filter(if_any(everything(), is.na))
 ```
 
 ```
-## # A tibble: 9,430 x 19
+## # A tibble: 9,430 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1     1525           1530        -5     1934
@@ -1308,11 +1325,11 @@ flights %&gt;% filter(if_any(everything(), is.na))
 ## 4  2013     1     1     1807           1738        29     2251
 ## 5  2013     1     1     1939           1840        59       29
 ## 6  2013     1     1     1952           1930        22     2358
-## # … with 9,424 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 9,424 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ---
@@ -1320,11 +1337,11 @@ class: clear
 
 ```r
 ## Find all flights with little delay
-flights %&gt;% filter(if_all(contains("delay"), ~ . &lt; 10))
+flights |&gt; filter(if_all(contains("delay"), ~ . &lt; 10))
 ```
 
 ```
-## # A tibble: 213,870 x 19
+## # A tibble: 213,870 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      544            545        -1     1004
@@ -1333,11 +1350,11 @@ flights %&gt;% filter(if_all(contains("delay"), ~ . &lt; 10))
 ## 4  2013     1     1      557            600        -3      838
 ## 5  2013     1     1      558            600        -2      753
 ## 6  2013     1     1      558            600        -2      849
-## # … with 213,864 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 213,864 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ---
@@ -1345,11 +1362,11 @@ flights %&gt;% filter(if_all(contains("delay"), ~ . &lt; 10))
 Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
 
 ```r
-flights %&gt;% select(arr_delay)
+flights |&gt; select(arr_delay)
 ```
 
 ```
-## # A tibble: 336,776 x 1
+## # A tibble: 336,776 × 1
 ##   arr_delay
 ##       &lt;dbl&gt;
 ## 1        11
@@ -1358,11 +1375,11 @@ flights %&gt;% select(arr_delay)
 ## 4       -18
 ## 5       -25
 ## 6        12
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 
 ```r
-class(flights %&gt;% select(arr_delay))
+class(flights |&gt; select(arr_delay))
 ```
 
 ```
@@ -1372,25 +1389,18 @@ class(flights %&gt;% select(arr_delay))
 class: clear
 
 ```r
-flights %&gt;% pull(arr_delay) %&gt;% head
+flights |&gt; pull(arr_delay) |&gt; head
+class(flights |&gt; pull(arr_delay))
 ```
 
 ```
-## [1]  11  20  33 -18 -25  12
-```
-
-```r
-class(flights %&gt;% pull(arr_delay))
-```
-
-```
-## [1] "numeric"
+## Error: The pipe operator requires a function call as RHS (&lt;text&gt;:1:31)
 ```
 --
 If we now extract the standard deviation from the above data frame/vector, we get
 
 ```r
-flights %&gt;% select(arr_delay) %&gt;% sd(na.rm = TRUE)
+flights |&gt; select(arr_delay) |&gt; sd(na.rm = TRUE)
 ```
 
 ```
@@ -1398,7 +1408,7 @@ flights %&gt;% select(arr_delay) %&gt;% sd(na.rm = TRUE)
 ```
 
 ```r
-flights %&gt;% pull(arr_delay) %&gt;% sd(na.rm = TRUE)
+flights |&gt; pull(arr_delay) |&gt; sd(na.rm = TRUE)
 ```
 
 ```
@@ -1412,14 +1422,24 @@ Continuing the above theme. Suppose we want to find the quantiles for `\(\mathrm
 We first try the following code.
 
 ```r
-pop_dest &lt;- flights %&gt;% 
-  group_by(dest) %&gt;% 
+pop_dest &lt;- flights |&gt; 
+  group_by(dest) |&gt; 
   filter(n() &gt; 365,!is.na(arr_delay))
-pop_dest %&gt;% summarise(delay_quantile = quantile(arr_delay))
+pop_dest |&gt; summarise(delay_quantile = quantile(arr_delay))
 ```
 
 ```
-## # A tibble: 385 x 2
+## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+## dplyr 1.1.0.
+## ℹ Please use `reframe()` instead.
+## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+##   always returns an ungrouped data frame and adjust accordingly.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+```
+
+```
+## # A tibble: 385 × 2
 ## # Groups:   dest [77]
 ##   dest  delay_quantile
 ##   &lt;chr&gt;          &lt;dbl&gt;
@@ -1429,7 +1449,7 @@ pop_dest %&gt;% summarise(delay_quantile = quantile(arr_delay))
 ## 4 ALB               28
 ## 5 ALB              328
 ## 6 ATL              -49
-## # … with 379 more rows
+## # ℹ 379 more rows
 ```
 ---
 class: clear
@@ -1438,12 +1458,22 @@ The code seems to give a vector of five numbers for each destination. However, i
 `\(\mathrm{arr\_delay}\)` for the **ungrouped** data.
 
 ```r
-pop_dest %&gt;% ungroup() %&gt;% 
+pop_dest |&gt; ungroup() |&gt; 
   summarise(delay_quantile = quantile(arr_delay))
 ```
 
 ```
-## # A tibble: 5 x 1
+## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+## dplyr 1.1.0.
+## ℹ Please use `reframe()` instead.
+## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+##   always returns an ungrouped data frame and adjust accordingly.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+```
+
+```
+## # A tibble: 5 × 1
 ##   delay_quantile
 ##            &lt;dbl&gt;
 ## 1            -86
@@ -1473,22 +1503,22 @@ my_quantile &lt;- function(x){
   names(z) &lt;- c("min","percentile25","median","percentile75","max")
   as_tibble_row(z)
 }
-pop_dest %&gt;% ungroup() %&gt;% summarise(my_quantile(arr_delay)) 
+pop_dest |&gt; ungroup() |&gt; summarise(my_quantile(arr_delay)) 
 ```
 
 ```
-## # A tibble: 1 x 5
+## # A tibble: 1 × 5
 ##     min percentile25 median percentile75   max
 ##   &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;
 ## 1   -86          -17     -5           14  1272
 ```
 
 ```r
-pop_dest %&gt;% summarise(my_quantile(arr_delay)) ### Yay!
+pop_dest |&gt; summarise(my_quantile(arr_delay)) ### Yay!
 ```
 
 ```
-## # A tibble: 77 x 6
+## # A tibble: 77 × 6
 ##   dest    min percentile25 median percentile75   max
 ##   &lt;chr&gt; &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;
 ## 1 ALB     -34        -17       -4         28     328
@@ -1497,7 +1527,7 @@ pop_dest %&gt;% summarise(my_quantile(arr_delay)) ### Yay!
 ## 4 BDL     -43        -18      -10         14     266
 ## 5 BGR     -43        -21.8     -9         19.8   238
 ## 6 BNA     -58        -15       -2         19     364
-## # … with 71 more rows
+## # ℹ 71 more rows
 ```
 ---
 class: clear, middle
@@ -1505,12 +1535,22 @@ class: clear, middle
 Finally, compare the previous output with the following
 
 ```r
-pop_dest %&gt;% 
+pop_dest |&gt; 
   summarise(val = quantile(arr_delay), q = c(0, 0.25, 0.5, 0.75,1))
 ```
 
 ```
-## # A tibble: 385 x 3
+## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+## dplyr 1.1.0.
+## ℹ Please use `reframe()` instead.
+## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+##   always returns an ungrouped data frame and adjust accordingly.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+```
+
+```
+## # A tibble: 385 × 3
 ## # Groups:   dest [77]
 ##   dest    val     q
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -1520,7 +1560,7 @@ pop_dest %&gt;%
 ## 4 ALB      28  0.75
 ## 5 ALB     328  1   
 ## 6 ATL     -49  0   
-## # … with 379 more rows
+## # ℹ 379 more rows
 ```
 
 
@@ -1528,20 +1568,20 @@ pop_dest %&gt;%
 &lt;!-- Finally, we present examples of `\(\mathrm{filter\_if}\)`, `\(\mathrm{filter\_at}\)` and `\(\mathrm{filter\_all}\)`. These verbs are often used in conjunction with `\(\mathrm{any\_vars}\)` or `\(\mathrm{all\_vars}\)`. --&gt;
 &lt;!-- ```{r} --&gt;
 &lt;!-- ## Find all observations with at least one missing value. --&gt;
-&lt;!-- flights %&gt;% filter_all(any_vars(is.na(.)))  --&gt;
+&lt;!-- flights |&gt; filter_all(any_vars(is.na(.)))  --&gt;
 &lt;!-- ``` --&gt;
 &lt;!-- --- --&gt;
 &lt;!-- class: clear --&gt;
 &lt;!-- ```{r} --&gt;
 &lt;!-- ## Find all flights with little delay --&gt;
-&lt;!-- flights %&gt;% filter_at(vars(contains("delay")), all_vars(. &lt; 10)) --&gt;
+&lt;!-- flights |&gt; filter_at(vars(contains("delay")), all_vars(. &lt; 10)) --&gt;
 &lt;!-- ``` --&gt;
 
 &lt;!-- --- --&gt;
 &lt;!-- class: clear, middle --&gt;
 &lt;!-- Let us now un-un-group the (grouped) data. --&gt;
 &lt;!-- ```{r error = TRUE} --&gt;
-&lt;!-- pop_dest %&gt;% my_quantile(variable = 'arr_delay') ### Oops! --&gt;
+&lt;!-- pop_dest |&gt; my_quantile(variable = 'arr_delay') ### Oops! --&gt;
 &lt;!-- ``` --&gt;
 &lt;!-- Our helper function `\(\mathrm{my\_quantile}\)` does not understand grouped vs ungrouped data. --&gt;
 &lt;!-- Luckily, since we "Think and do", after some thinking (googling?) --&gt;
@@ -1549,7 +1589,7 @@ pop_dest %&gt;%
 &lt;!-- class: clear --&gt;
 
 &lt;!-- ```{r error = TRUE} --&gt;
-&lt;!-- pop_dest %&gt;%  --&gt;
+&lt;!-- pop_dest |&gt;  --&gt;
 &lt;!--   do(my_quantile(.,variable = 'arr_delay')) --&gt;
 &lt;!-- ``` --&gt;
 
@@ -1609,6 +1649,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

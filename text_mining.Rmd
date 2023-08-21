@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Text processing with R"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -43,7 +43,6 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_text_color = "#006747",
    link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "belltower2.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -98,7 +97,7 @@ We will use the [unnest_tokens](https://www.rdocumentation.org/packages/tidytext
 library(tidytext) ## 
 library(stringr)
 library(tibble)
-text_lines <- text %>% str_split(pattern = boundary("sentence")) 
+text_lines <- text |> str_split(pattern = boundary("sentence")) 
 text_lines
 text_df <- tibble(lines = 1:length(text_lines[[1]]), text = text_lines[[1]])
 text_df
@@ -108,12 +107,12 @@ text_df
 class: clear, middle
 We can now tokenize the above two stanzas into words.
 ```{r}
-tokens <- text_df %>% unnest_tokens(words, text)
+tokens <- text_df |> unnest_tokens(words, text)
 tokens
 ```
 Other tokenization are also possible, e.g.,
 ```{r}
-text_df %>% unnest_tokens(ngrams, text, token = "ngrams", n = 3)
+text_df |> unnest_tokens(ngrams, text, token = "ngrams", n = 3)
 ```
 
 ---
@@ -123,7 +122,7 @@ The following is an abridged presentation of Chapter 1 of [Text Mining with R](h
 library(janeaustenr) ## The package contains the text of 6 Jane Austen's novels.
 library(dplyr)
 austen_books()
-austen_books() %>% dplyr::select(book) %>% unique() %>% pull()
+austen_books() |> dplyr::select(book) |> unique() |> pull()
 ```
 
 ---
@@ -134,13 +133,12 @@ library(janeaustenr)
 library(dplyr)
 library(stringr)
 
-original_books <- austen_books() %>%
-  group_by(book) %>%
+original_books <- austen_books() |>
   mutate(linenumber = row_number(),
          chapter = cumsum(str_detect(text, 
-                                     regex("^chapter [\\divxlc]",
-                                           ignore_case = TRUE)))) %>%
-  ungroup()
+                                     regex("^chapter [\\divxlc]", 
+                                           ignore_case = TRUE))), 
+         .by = book)
 
 original_books
 ```
@@ -149,20 +147,20 @@ class: clear
 We next tokenize the text into words and remove the common stop words.
 ```{r}
 data(stop_words) ## Part of the tidytext package.
-jausten_tokenized <- original_books %>% unnest_tokens(word, text) %>% 
+jausten_tokenized <- original_books |> unnest_tokens(word, text) |> 
   anti_join(stop_words)
 jausten_tokenized
 ```
 ---
 Given this tidy representation, it is easy to do some data exploration. For example, what are the most common words ?
 ```{r}
-words_freq <- jausten_tokenized %>% count(word, sort = TRUE)
+words_freq <- jausten_tokenized |> count(word, sort = TRUE)
 words_freq
 ```
 Which book is most verbose ?
 ```{r}
-jausten_tokenized %>% group_by(book) %>% 
-  summarize(no_words = n()) %>% 
+jausten_tokenized |> group_by(book) |> 
+  summarize(no_words = n()) |> 
   arrange(desc(no_words))
 ```
 ---
@@ -177,7 +175,7 @@ wordcloud(words = words_freq$word, freq = words_freq$n, min.freq = 500,
 Is a word cloud better than a bar plot or a dot plot ?
 ```{r fig.show = "hold", out.width="90%"}
 library(ggplot2)
-p <- words_freq %>% filter(n > 500) %>% mutate(word = reorder(word,n)) %>% 
+p <- words_freq |> filter(n > 500) |> mutate(word = reorder(word,n)) |> 
   ggplot(aes(n, word)) + labs(y = NULL)
 p1 <- p + geom_col()
 p2 <- p + geom_point()
@@ -192,12 +190,12 @@ Let us now compare the word distributions of Jane Austen against other authors l
 ## First download the data.
 library(gutenbergr)
 hgwells <- gutenberg_download(c(35, 36, 5230, 159))
-tidy_hgwells <- hgwells %>%
-  unnest_tokens(word, text) %>%
+tidy_hgwells <- hgwells |>
+  unnest_tokens(word, text) |>
   anti_join(stop_words)
 bronte <- gutenberg_download(c(1260, 768, 969, 9182, 767))
-tidy_bronte <- bronte %>%
-  unnest_tokens(word, text) %>%
+tidy_bronte <- bronte |>
+  unnest_tokens(word, text) |>
   anti_join(stop_words)
 ```
 
@@ -209,7 +207,7 @@ tidy_austen <- jausten_tokenized
 ## Let us now create a data frame with these words and their authors
 frequency <- bind_rows(mutate(tidy_bronte, author = "Bronte sisters"),
                        mutate(tidy_hgwells, author = "H.G. Wells"),
-                       mutate(tidy_austen, author = "Jane Austen")) %>%
+                       mutate(tidy_austen, author = "Jane Austen")) |>
   mutate(word = str_extract(word, "[a-z']+"))
 ```
 
@@ -217,9 +215,9 @@ frequency <- bind_rows(mutate(tidy_bronte, author = "Bronte sisters"),
 We now see, for each author, how likely a specific word is used
 ```{r}
 library(tidyr)
-frequency <- frequency %>% group_by(author, word) %>% summarise(n = n()) %>%
-  mutate(proportion = n/sum(n))%>%  ## grouped mutate! 
-  select(-n) %>% pivot_wider(names_from = author, values_from = proportion)
+frequency <- frequency |> group_by(author, word) |> summarise(n = n()) |>
+  mutate(proportion = n/sum(n))|>  ## grouped mutate! 
+  select(-n) |> pivot_wider(names_from = author, values_from = proportion)
 frequency
 ```
 
@@ -256,4 +254,308 @@ p1
 ---
 ```{r out.width="70%", fig.asp = 1, warning = FALSE}
 p2
+```
+---
+We can also provide a **rough** measure of the (pairwise) similiarities between the authors.
+```{r}
+cor.test(frequency$`Bronte sisters`, frequency$`Jane Austen`)
+cor.test(frequency$`H.G. Wells`, frequency$`Jane Austen`)
+```
+---
+```{r}
+cor.test(frequency$`H.G. Wells`, frequency$`Bronte sisters`)
+```
+
+---
+#Sentiment analysis
+
+Given a section of text, one common task is to determine whether the text is **positive**, **negative**, or **neutral**. 
+
+The simplest approach to sentiment analysis is to assign each word a sentiment value (say positive or negative). 
+The sentiment of a section of text is then the sum of the sentiment values of all the words in that section. 
+
+For example, if *love* and *sunshine* have sentiment values of $10$, and *rainy* has sentiment of $-5$, with all other words neutral, then
+
++ *I love sunshine* has positive sentiment.
++ *I love rainy days* also has positive sentiment.
++ *It is rainy today* has negative sentiment.
+---
+Some sentiment **lexicons** are provided with the `textdata` library.
+
+```{r}
+library(tidytext)
+library(textdata)
+get_sentiments("afinn") ## can also be bing, nrc, and loughran
+```
+
+---
+```{r echo = -c(1,2)}
+library(stringr)
+text <- str_c("Tread lightly, she is near\r\n",
+"\tUnder the snow\r\n",
+"Speak gently, she can hear\r\n",
+"\tThe daisies grow.\r\n",
+"All her bright golden hair\r\n",
+"\tTarnished with rust\r\n",
+"She that was young and fair\r\n",
+"\tFallen to dust.", collapse = "")
+cat(text)
+text_lines <- text |> str_split(pattern = boundary("sentence"))
+text_df <- tibble(text = text_lines[[1]]) |> 
+  unnest_tokens(word, text)
+text_df |> inner_join(get_sentiments("afinn"))
+ 
+```
+---
+```{r}
+text_df |> inner_join(get_sentiments("bing")) |> print(n=7)
+```
+
+---
+#Guy Fieri Food Review
+
+We now try another example based on the following [NYT restaurant review](https://www.nytimes.com/2012/11/14/dining/reviews/restaurant-review-guys-american-kitchen-bar-in-times-square.html).
+
+```{r}
+txt_df <- tibble(txt = readLines("guy_fieri.txt")) |> 
+  filter(txt != "") |> unnest_tokens(word, txt)
+txt_df |> inner_join(get_sentiments("bing"))
+txt_df |> inner_join(get_sentiments("bing")) |> 
+  summarize(positive = sum(sentiment == "positive")/n())
+```
+---
+```{r}
+txt_df |> inner_join(get_sentiments("afinn"))
+txt_df |> inner_join(get_sentiments("afinn")) |> 
+  summarize(sentiment = sum(value)/n())
+```
+We see that sentiment analysis using only unigrams is too simplistic and cannot recognize sarcastic tones.
+
+---
+#Pride & Prejudice
+
+We now follow an example from Chapter 2 of [Text Mining with R](https://www.tidytextmining.com/sentiment).
+
+```{r}
+## First, subset the data
+pride_prejudice <- jausten_tokenized |> filter(book == "Pride & Prejudice")
+pride_prejudice
+```
+---
+Now compute the AFINN sentiments for each segment of text
+```{r}
+afinn <- pride_prejudice |> inner_join(get_sentiments("afinn"))
+afinn
+afinn <- afinn |>
+  group_by(index = linenumber %/% 80) |>
+  summarise(sentiment = sum(value)) |> mutate(method = "AFINN")
+afinn
+```
+
+---
+Next calculate the sentiments based on Bing lexicon
+```{r}
+bing <- pride_prejudice |> 
+  inner_join(get_sentiments("bing")) |>
+  count(index = linenumber %/% 80, sentiment)
+bing
+bing <- bing |> 
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(sentiment = positive - negative)
+bing
+```
+
+---
+Finally we do the same for the NRC lexicon.
+```{r}
+nrc <- pride_prejudice |> 
+  inner_join(get_sentiments("nrc"), relationship="many-to-many")
+nrc
+## We filter only the positive and negative sentiments from NRC
+nrc <- nrc |> filter(sentiment %in% c("positive","negative")) |>
+  count(index = linenumber %/% 80, sentiment) |>  
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) |>
+  mutate(sentiment = positive - negative)
+nrc
+```
+---
+Combine the three lexicons and plot the result.
+```{r}
+bing <- bing |> select(index,sentiment) |> mutate(method = "bing")
+nrc <- nrc |> select(index, sentiment) |> mutate(method = "nrc")
+p <- bind_rows(afinn,bing,nrc) |> 
+  ggplot(aes(index, sentiment, fill = method)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~method, ncol = 1, scales = "free_y")
+p
+```
+---
+#TF-IDF
+
+Given a collection of documents or text, how do we determine which words or topics is important in each document ?
+
+One simple measure is via term-frequency vs inverse document frequency, or TF-IDF.
+
++ Term frequency $\mathrm{TF}(t,d)$ counts how often a term/word $t$ appears in a **single** document $d$.
++ Inverse document frequency $\mathrm{IDF}(t,\mathcal{D})$ weights a term $t$ inversely to its frequency among all documents $\mathcal{D}$.
+
+\begin{gather*}
+\mathrm{TF}(t,d) = \frac{\mathrm{freq}(t,d)}{\sum_{t' \in d} \mathrm{freq}(t',d)} \\
+\mathrm{IDF}(t,\mathcal{D}) = \log \frac{|\mathcal{D}|}{|\{d \in\mathcal{D} \colon t \in d\}|}
+\end{gather*}
+The TF-IDF measure of a term $t$ for a document $d$ is then $\mathrm{TF}(t,d) \times \mathrm{IDF}(t,\mathcal{D})$.
+
+---
+Let us now look at the TF-IDF for Jane Austen's novels.
+
+```{r}
+library(dplyr)
+library(janeaustenr)
+library(tidytext)
+jausten_words <- austen_books() |> unnest_tokens(word,text) |> 
+  filter(str_detect(word,"^[a-zA-Z']+$"))
+jausten_words  
+book_words <- jausten_words |> count(word,book, sort = TRUE)
+book_words
+```
+---
+```{r}
+total_words <- book_words |> group_by(book) |> summarize(total = sum(n))
+book_words <- left_join(book_words, total_words)
+book_words
+```
+
+---
+```{r warning = FALSE}
+## The term frequency is simply n/total in the book_words df.
+ggplot(book_words, aes(n/total, fill = book)) +
+  geom_histogram(show.legend = FALSE) + xlab("TF") +
+  facet_wrap(~book, ncol = 3, scales = "free_y") + xlim(NA, 0.0009)
+```
+
+---
+We next compute the IDF
+```{r}
+doc_frequency <- jausten_words |> group_by(word) |> 
+  summarize(n = length(unique(book)))
+doc_frequency
+N <- length(levels(jausten_words$book))
+doc_frequency <- doc_frequency |> mutate(idf = log(N/n))
+doc_frequency
+```
+---
+The TF-IDF is then simply
+```{r}
+tf_idf <- book_words |> mutate(tf = n/total) |> 
+  select(word, book, tf) |> 
+  left_join(doc_frequency) |> 
+  mutate(tf_idf = tf*idf)
+tf_idf
+tf_idf <- tf_idf |> filter(tf_idf > 0) |> arrange(desc(tf_idf))
+tf_idf
+```
+---
+Equivalently, we can use the `bind_tf_idf` function.
+```{r}
+tf_idf <- book_words |> bind_tf_idf(word,book,n) |> filter(tf_idf > 0)
+tf_idf |> arrange(desc(tf_idf))
+```
+---
+Finally, let us try visualizing all the important words in each document.
+```{r}
+library(forcats)
+tf_idf |>
+  slice_max(tf_idf, n = 15, by = book) |>
+  ggplot(aes(tf_idf, fct_reorder(word, tf_idf), fill = book)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~book, ncol = 3, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
+```
+---
+# TF-IDF for Physics
+We next follow another example from Section 3.4 of [Text Mining with R](https://www.tidytextmining.com/tfidf).
+
+```{r}
+library(gutenbergr)
+physics <- gutenberg_download(c(37729, 14725, 13476, 30155), 
+                              meta_fields = "author")
+physics_words <- physics |>
+  unnest_tokens(word, text) |>
+  count(author, word, sort = TRUE)
+
+physics_words
+```
+
+---
+```{r}
+plot_physics <- physics_words |> bind_tf_idf(word, author, n) |>
+  mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                            "Huygens, Christiaan", 
+                                            "Tesla, Nikola",
+                                            "Einstein, Albert")))
+plot_physics |> slice_max(tf_idf, n = 15, by = author) |> 
+  mutate(word = reorder(word, tf_idf)) |>
+  ggplot(aes(tf_idf, word, fill = author)) + geom_col(show.legend = FALSE) +
+  labs(x = "tf-idf", y = NULL) + facet_wrap(~author, ncol = 2, scales = "free")
+```
+
+---
+It turns out that there are quite a few weird words and notations. We therefore need to do some pre-processing before computing the tf-idf scores.
+```{r}
+mystopwords <- tibble(word = c("eq", "co", "rc", "ac", "ak", "bn", 
+                                   "fig", "file", "cg", "cb", "cm",
+                               "ab", "_k", "_k_", "_x"))
+
+physics_words <- anti_join(physics_words, mystopwords, 
+                           by = "word")
+
+plot_physics <- physics_words |>
+  bind_tf_idf(word, author, n) |>
+  mutate(word = str_remove_all(word, "_")) |>
+  slice_max(tf_idf, n = 15, by = author) |>
+  mutate(word = fct_reorder(word, tf_idf)) |>
+  mutate(author = factor(author, levels = c("Galilei, Galileo",
+                                            "Huygens, Christiaan",
+                                            "Tesla, Nikola",
+                                            "Einstein, Albert")))
+```
+---
+```{r}
+ggplot(plot_physics, aes(tf_idf, word, fill = author)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~author, ncol = 2, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
+```
+---
+Finally, another useful representation of terms vs document is via a document term matrix (DTM) or term document matrix (TDM)
+```{r}
+physics_dtm <- physics_words |> cast_dtm(author,word,n)
+physics_dtm
+library(tm)
+inspect(physics_dtm[,1:10])
+```
+---
+```{r}
+inspect(physics_dtm[,11:20])
+```
+These representations will be useful in our subsequent discussion of topic modeling.
+---
+#Topic Modeling
+
+The idea behind topic modeling is that (1) each document is a mixture of topics and (2) every topic is a collection of words.
+
+For example, a news article can be $90\%$ about the "technology" topic and $10\%$ about "celebrity" topic. The "technology" topic contains words like "Twitter, cloud, autonomous, vehicles, ..." while "celebrity" contains words like "paparazzi, influence, Twitter, movie, star".
+
+The mathematics behind topic modeling is reasonably complicated so we will only present topic modeling through some examples.
+
+```{r}
+library(topicmodels)
+data("AssociatedPress")
+AssociatedPress
+```
+---
+Let us first model the collection of AP news article (there are 2246 articles) using a topic models with two topics.
+```{r}
+ap_lda <- LDA(AssociatedPress, k = 2, contorl = list(seed = 1234))
+ap_lda
 ```

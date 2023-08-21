@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Strings, text processing, and regexp"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -64,7 +64,7 @@ For more documentation on **stringr**, see
 
 + The [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
 
-+ Chapter 14 of [R for data science](https://r4ds.had.co.nz/strings.html)
++ Chapters 15 and 16 of [R for data science](https://r4ds.had.co.nz/strings.html)
 
 + Chapter 24 of [Introduction to data science](https://rafalab.github.io/dsbook/string-processing.html)
 
@@ -266,7 +266,7 @@ class: clear
 
 For more on regular expressions, see 
 
-+ Section 14.3 of [R for Data Science](https://r4ds.had.co.nz/strings.html)
++ Chapter 16 of [R for Data Science](https://r4ds.had.co.nz/strings.html)
 
 + The regexp [cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
 
