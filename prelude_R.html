@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -21,17 +21,23 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## R Fundamentals
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -55,7 +61,7 @@ class: center, middle, inverse, title-slide
 
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
 
-+ [Ask Miao Yu, your TA](https://statistics.sciences.ncsu.edu/people/myu12/); Office hours: 12:30--2:30pm, Tuesday.
++ [Ask Yujing, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/); Office hours: 3:30pm -- 5:30pm on Tuesday.
 
 ---
 class: middle
@@ -105,7 +111,7 @@ f(1)
 ## function(y){
 ##     x + y
 ##   }
-## &lt;environment: 0x56414b0f1a58&gt;
+## &lt;environment: 0x55da2e0b4820&gt;
 ```
 
 ```r
@@ -124,8 +130,8 @@ f(2)
 ## function(y){
 ##     x + y
 ##   }
-## &lt;bytecode: 0x564148fc50f8&gt;
-## &lt;environment: 0x5641492df700&gt;
+## &lt;bytecode: 0x55da2da17ef0&gt;
+## &lt;environment: 0x55da3057fbd0&gt;
 ```
 
 ```r
@@ -164,6 +170,50 @@ f(45)
 ```
 ## Error in f(45): argument "b" is missing, with no default
 ```
+
+```r
+b &lt;- 5
+f(45)
+```
+
+```
+## Error in f(45): argument "b" is missing, with no default
+```
+---
+
+```r
+b &lt;- 5
+f &lt;- function(a){
+  a+2*b
+}
+f(45)
+```
+
+```
+## [1] 55
+```
+
+```r
+x &lt;- 10
+f &lt;- function(x) {
+  x &lt;- x*2;
+  x
+}
+f(x)
+```
+
+```
+## [1] 20
+```
+
+```r
+x
+```
+
+```
+## [1] 10
+```
+
 + For more gory details on functions in **R**, see [here](https://adv-r.hadley.nz/functions.html).
 
 ---
@@ -1221,6 +1271,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

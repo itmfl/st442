@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "R Fundamentals"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -43,7 +43,6 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_text_color = "#006747",
    link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "belltower2.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -69,7 +68,7 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
 
-+ [Ask Yunshu, your TA](https://statistics.sciences.ncsu.edu/people/yzhan234/); Office hours: 3pm--4pm Monday and 2pm --3pm, Tuesday.
++ [Ask Yujing, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/); Office hours: 3:30pm -- 5:30pm on Tuesday.
 
 ---
 class: middle
@@ -123,7 +122,27 @@ f <- function(a,b){
   a + 2*b
 }
 f(45)
+b <- 5
+f(45)
 ```
+---
+```{r}
+b <- 5
+f <- function(a){
+  a+2*b
+}
+f(45)
+
+
+x <- 10
+f <- function(x) {
+  x <- x*2;
+  x
+}
+f(x)
+x
+```
+
 + For more gory details on functions in **R**, see [here](https://adv-r.hadley.nz/functions.html).
 
 ---
