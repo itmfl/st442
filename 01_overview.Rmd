@@ -156,8 +156,6 @@ knitr::include_graphics("figures/datascientist_meme.jpg")
 knitr::include_graphics("https://bit.ly/2Mmu7lW")
 ```
 ---
-
----
 # Many Venns of data science
 
 .pull-left[
