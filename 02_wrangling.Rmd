@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Data wrangling with dplyr"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
