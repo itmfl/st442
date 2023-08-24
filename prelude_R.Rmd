@@ -516,3 +516,127 @@ class: clear
 ```{r}
 attributes(mtcars)
 ```
+
+---
+# Conditional Expressions
+
+The standard construct for conditional in **R** is `if else`. Two templates are
+
+```{r eval = FALSE}
+## If statement only
+if(condition){
+  # do something
+}
+## If and else statements
+if(condition){
+  # do something
+} else { ## The else clause should be on the same line as the }
+  # do something else
+}
+```
+
+For example
+```{r}
+a <- 0
+
+if(a!=0){
+  print(1/a)
+} else { 
+  print("No reciprocal for 0.")
+}
+```
+---
+Some slightly more complicated examples
+```{r}
+a <- 1
+## Here && denotes AND
+if(a > 0 && a < 10^6){ 
+  print(sqrt(a))
+} else{
+  print("I don't care")
+}
+a <- 1
+## Here || denotes OR
+if(a < 0 || a > 2){
+  print(1/(2-a))
+} else {
+  print("I don't care")
+}
+```
+---
+The **condition** in the `if else` statement in **R** should always evaluate to a logical vector of **length 1**. 
+```{r error = TRUE}
+a <- c(1,2,3)
+if(a > 0){ 
+  print(sqrt(a))
+} else{
+  print("I don't care")
+}
+```
+
+To fix the above example, we need to use the **vectorized** [ifelse](https://stat.ethz.ch/R-manual/R-devel/library/base/html/ifelse.html) or [if_else](https://dplyr.tidyverse.org/reference/if_else.html)
+
+```{r}
+a <- c(1,2,3)
+ifelse(a > 0, sqrt(a), "I don't care")
+
+b <- c(0, 1, 4, 0, 2)
+ifelse(b!=0, 1/b, NA)
+```
+---
+However, with the vectorized version, you should always use `&` and `|` not `&&` and `||`.
+
+```{r error = TRUE}
+b <- c(NA, 0, 1, 4, 2)
+ifelse(b!=0 & !is.na(b), 1/b, NA)
+ifelse(b!=0 && !is.na(b), 1/b, NA)
+b <- 1
+ifelse(b!=0 & !is.na(b), 1/b, NA)
+ifelse(b!=0 && !is.na(b), 1/b, NA)
+```
+---
+# Loops and Hula Hoop
+
+For loops in **R** follow the template
+```{r eval = FALSE}
+for(index in range){
+  # do something
+}
+```
+For example
+```{r}
+x <- 1:10
+for(i in 1:length(x)){
+  x[i] <- sqrt(x[i])
+}
+x
+## Equivalently
+x <- 1:10
+for(i in seq_along(x)){
+  x[i] <- sqrt(x[i])
+}
+x
+```
+---
+However, as many operations in **R** are **vectorized**, for loops are usually not the best way to do iterations in **R**.
+```{r}
+x <- 1:10
+sqrt(x)
+```
+
+In later lectures we will also introduce the family of [apply](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) functions which is generally more elegant than writing for loops. Indeed, consider the following code chunk.
+
+```{r}
+df <- list(
+  a = rnorm(100),
+  b = rnorm(100),
+  c = rnorm(100)
+)
+output <- numeric(length(df))
+for(i in seq_along(df)){
+  output[i] <- median(df[[i]])
+}
+output
+output <- sapply(df, median)
+output
+```

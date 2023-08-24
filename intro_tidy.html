@@ -10,15 +10,15 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <script src="libs/clipboard/clipboard.min.js"></script>
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <script src="libs/kePrint/kePrint.js"></script>
     <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
@@ -27,9 +27,15 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Tidyr and relational data
+]
+.date[
 ### Fall 2021
+]
 
 ---
 
@@ -437,7 +443,7 @@ stocks
 ```
 
 ```
-## # A tibble: 7 x 3
+## # A tibble: 7 × 3
 ##    year quarter return
 ##   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
 ## 1  2015       1   1.88
@@ -465,7 +471,7 @@ stocks_wide
 ```
 
 ```
-## # A tibble: 4 x 3
+## # A tibble: 4 × 3
 ##   quarter `2015` `2016`
 ##     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
 ## 1       1   1.88  NA   
@@ -485,7 +491,7 @@ stocks_wide %&gt;%
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   quarter year  return
 ##     &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
 ## 1       1 2015    1.88
@@ -531,7 +537,7 @@ treatment %&gt;% fill(person,treatment)
 ```
 
 ```
-## # A tibble: 4 x 3
+## # A tibble: 4 × 3
 ##   person treatment response
 ##   &lt;chr&gt;      &lt;dbl&gt;    &lt;dbl&gt;
 ## 1 Luigi          0        7
@@ -551,7 +557,7 @@ table1
 ```
 
 ```
-## # A tibble: 6 x 4
+## # A tibble: 6 × 4
 ##   country      year  cases population
 ##   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
 ## 1 Afghanistan  1999    745   19987071
@@ -569,7 +575,7 @@ table3
 ```
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   country      year rate             
 ##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
 ## 1 Afghanistan  1999 745/19987071     
@@ -601,7 +607,7 @@ table3 %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 4
+## # A tibble: 6 × 4
 ##   country      year cases  population
 ##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     
 ## 1 Afghanistan  1999 745    19987071  
@@ -624,7 +630,7 @@ table3 %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 4
+## # A tibble: 6 × 4
 ##   country      year  cases population
 ##   &lt;chr&gt;       &lt;dbl&gt;  &lt;int&gt;      &lt;int&gt;
 ## 1 Afghanistan  1999    745   19987071
@@ -647,7 +653,7 @@ table1 %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   country      year rate             
 ##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
 ## 1 Afghanistan  1999 745_19987071     
@@ -668,7 +674,7 @@ table1 %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   country      year rate             
 ##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;            
 ## 1 Afghanistan  1999 745/19987071     
@@ -689,22 +695,22 @@ who
 ```
 
 ```
-## # A tibble: 7,240 x 60
+## # A tibble: 7,240 × 60
 ##   country     iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
-##   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+##   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;
 ## 1 Afghanistan AF    AFG    1980          NA           NA           NA
 ## 2 Afghanistan AF    AFG    1981          NA           NA           NA
 ## 3 Afghanistan AF    AFG    1982          NA           NA           NA
 ## 4 Afghanistan AF    AFG    1983          NA           NA           NA
 ## 5 Afghanistan AF    AFG    1984          NA           NA           NA
 ## 6 Afghanistan AF    AFG    1985          NA           NA           NA
-## # … with 7,234 more rows, and 53 more variables: new_sp_m3544 &lt;int&gt;,
-## #   new_sp_m4554 &lt;int&gt;, new_sp_m5564 &lt;int&gt;, new_sp_m65 &lt;int&gt;,
-## #   new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;, new_sp_f2534 &lt;int&gt;,
-## #   new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;, new_sp_f5564 &lt;int&gt;,
-## #   new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;, new_sn_m1524 &lt;int&gt;,
-## #   new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;, new_sn_m4554 &lt;int&gt;,
-## #   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;, …
+## # ℹ 7,234 more rows
+## # ℹ 53 more variables: new_sp_m3544 &lt;dbl&gt;, new_sp_m4554 &lt;dbl&gt;,
+## #   new_sp_m5564 &lt;dbl&gt;, new_sp_m65 &lt;dbl&gt;, new_sp_f014 &lt;dbl&gt;,
+## #   new_sp_f1524 &lt;dbl&gt;, new_sp_f2534 &lt;dbl&gt;, new_sp_f3544 &lt;dbl&gt;,
+## #   new_sp_f4554 &lt;dbl&gt;, new_sp_f5564 &lt;dbl&gt;, new_sp_f65 &lt;dbl&gt;,
+## #   new_sn_m014 &lt;dbl&gt;, new_sn_m1524 &lt;dbl&gt;, new_sn_m2534 &lt;dbl&gt;,
+## #   new_sn_m3544 &lt;dbl&gt;, new_sn_m4554 &lt;dbl&gt;, new_sn_m5564 &lt;dbl&gt;, …
 ```
 ---
 class: clear
@@ -723,16 +729,16 @@ who1
 ```
 
 ```
-## # A tibble: 76,046 x 4
+## # A tibble: 76,046 × 4
 ##   country      year code         cases
-##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;        &lt;int&gt;
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
 ## 1 Afghanistan  1997 new_sp_m014      0
 ## 2 Afghanistan  1997 new_sp_m1524    10
 ## 3 Afghanistan  1997 new_sp_m2534     6
 ## 4 Afghanistan  1997 new_sp_m3544     3
 ## 5 Afghanistan  1997 new_sp_m4554     5
 ## 6 Afghanistan  1997 new_sp_m5564     2
-## # … with 76,040 more rows
+## # ℹ 76,040 more rows
 ```
 ---
 class: clear
@@ -792,16 +798,16 @@ who2
 ```
 
 ```
-## # A tibble: 76,046 x 7
+## # A tibble: 76,046 × 7
 ##   country      year type  sex   age   cases key         
-##   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt;       
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;       
 ## 1 Afghanistan  1997 sp    m     014       0 new_sp_m014 
 ## 2 Afghanistan  1997 sp    m     1524     10 new_sp_m1524
 ## 3 Afghanistan  1997 sp    m     2534      6 new_sp_m2534
 ## 4 Afghanistan  1997 sp    m     3544      3 new_sp_m3544
 ## 5 Afghanistan  1997 sp    m     4554      5 new_sp_m4554
 ## 6 Afghanistan  1997 sp    m     5564      2 new_sp_m5564
-## # … with 76,040 more rows
+## # ℹ 76,040 more rows
 ```
 
 The data is now in a tidy format. In summary, we did
@@ -827,7 +833,7 @@ babynames
 ```
 
 ```
-## # A tibble: 1,924,665 x 5
+## # A tibble: 1,924,665 × 5
 ##    year sex   name          n   prop
 ##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;
 ## 1  1880 F     Mary       7065 0.0724
@@ -836,7 +842,7 @@ babynames
 ## 4  1880 F     Elizabeth  1939 0.0199
 ## 5  1880 F     Minnie     1746 0.0179
 ## 6  1880 F     Margaret   1578 0.0162
-## # … with 1,924,659 more rows
+## # ℹ 1,924,659 more rows
 ```
 ---
 class: clear
@@ -851,7 +857,7 @@ babynames %&gt;%
 ```
 
 ```
-## # A tibble: 2 x 3
+## # A tibble: 2 × 3
 ##   name  sex    total
 ##   &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;
 ## 1 Sue   F     144465
@@ -870,7 +876,7 @@ babynames %&gt;%
 ```
 
 ```
-## # A tibble: 2 x 3
+## # A tibble: 2 × 3
 ##   name  sex    total
 ##   &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;
 ## 1 Robin F     289395
@@ -896,7 +902,7 @@ babynames %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 6 × 3
 ##   name   sex    total
 ##   &lt;chr&gt;  &lt;chr&gt;  &lt;int&gt;
 ## 1 Leslie F     266474
@@ -922,7 +928,7 @@ babynames %&gt;%
 ```
 
 ```
-## # A tibble: 3 x 3
+## # A tibble: 3 × 3
 ##   name        F      M
 ##   &lt;chr&gt;   &lt;int&gt;  &lt;int&gt;
 ## 1 Leslie 266474 112689
@@ -950,7 +956,7 @@ babynames_wide %&gt;% filter(M &gt; 50000, F &gt; 50000) %&gt;%
 ```
 
 ```
-## # A tibble: 6 x 4
+## # A tibble: 6 × 4
 ##   name        F      M ratio
 ##   &lt;chr&gt;   &lt;int&gt;  &lt;int&gt; &lt;dbl&gt;
 ## 1 Riley  100881  92789 0.920
@@ -1189,7 +1195,7 @@ table4a.long %&gt;% left_join(table4b.long)
 ```
 
 ```
-## Joining, by = c("country", "year", "cases")
+## Joining with `by = join_by(country, year, cases)`
 ```
 
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1289,17 +1295,17 @@ flights
 ```
 
 ```
-## # A tibble: 336,776 x 19
+## # A tibble: 336,776 × 19
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      517            515         2      830
 ## 2  2013     1     1      533            529         4      850
 ## 3  2013     1     1      542            540         2      923
-## # … with 336,773 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,773 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
@@ -1309,13 +1315,13 @@ airlines
 ```
 
 ```
-## # A tibble: 16 x 2
+## # A tibble: 16 × 2
 ##   carrier name                  
 ##   &lt;chr&gt;   &lt;chr&gt;                 
 ## 1 9E      Endeavor Air Inc.     
 ## 2 AA      American Airlines Inc.
 ## 3 AS      Alaska Airlines Inc.  
-## # … with 13 more rows
+## # ℹ 13 more rows
 ```
 
 ```r
@@ -1323,13 +1329,13 @@ airports
 ```
 
 ```
-## # A tibble: 1,458 x 8
-##   faa   name                   lat   lon   alt    tz dst   tzone      
-##   &lt;chr&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      
-## 1 04G   Lansdowne Airport     41.1 -80.6  1044    -5 A     America/Ne…
-## 2 06A   Moton Field Municip…  32.5 -85.7   264    -6 A     America/Ch…
-## 3 06C   Schaumburg Regional   42.0 -88.1   801    -6 A     America/Ch…
-## # … with 1,455 more rows
+## # A tibble: 1,458 × 8
+##   faa   name                         lat   lon   alt    tz dst   tzone
+##   &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 04G   Lansdowne Airport           41.1 -80.6  1044    -5 A     Amer…
+## 2 06A   Moton Field Municipal Air…  32.5 -85.7   264    -6 A     Amer…
+## 3 06C   Schaumburg Regional         42.0 -88.1   801    -6 A     Amer…
+## # ℹ 1,455 more rows
 ```
 ---
 class: clear
@@ -1339,13 +1345,13 @@ planes
 ```
 
 ```
-## # A tibble: 3,322 x 9
-##   tailnum  year type    manufacturer  model engines seats speed engine
-##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; 
-## 1 N10156   2004 Fixed … EMBRAER       EMB-…       2    55    NA Turbo…
-## 2 N102UW   1998 Fixed … AIRBUS INDUS… A320…       2   182    NA Turbo…
-## 3 N103US   1999 Fixed … AIRBUS INDUS… A320…       2   182    NA Turbo…
-## # … with 3,319 more rows
+## # A tibble: 3,322 × 9
+##   tailnum  year type     manufacturer model engines seats speed engine
+##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;        &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt; 
+## 1 N10156   2004 Fixed w… EMBRAER      EMB-…       2    55    NA Turbo…
+## 2 N102UW   1998 Fixed w… AIRBUS INDU… A320…       2   182    NA Turbo…
+## 3 N103US   1999 Fixed w… AIRBUS INDU… A320…       2   182    NA Turbo…
+## # ℹ 3,319 more rows
 ```
 
 ```r
@@ -1353,14 +1359,15 @@ weather
 ```
 
 ```
-## # A tibble: 26,115 x 15
+## # A tibble: 26,115 × 15
 ##   origin  year month   day  hour  temp  dewp humid wind_dir wind_speed
 ##   &lt;chr&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
 ## 1 EWR     2013     1     1     1  39.0  26.1  59.4      270      10.4 
 ## 2 EWR     2013     1     1     2  39.0  27.0  61.6      250       8.06
 ## 3 EWR     2013     1     1     3  39.0  28.0  64.4      240      11.5 
-## # … with 26,112 more rows, and 5 more variables: wind_gust &lt;dbl&gt;,
-## #   precip &lt;dbl&gt;, pressure &lt;dbl&gt;, visib &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 26,112 more rows
+## # ℹ 5 more variables: wind_gust &lt;dbl&gt;, precip &lt;dbl&gt;, pressure &lt;dbl&gt;,
+## #   visib &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
@@ -1372,13 +1379,13 @@ flights.sml
 ```
 
 ```
-## # A tibble: 336,776 x 7
+## # A tibble: 336,776 × 7
 ##    year month   day dep_time tailnum carrier dest 
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;
 ## 1  2013     1     1      517 N14228  UA      IAH  
 ## 2  2013     1     1      533 N24211  UA      IAH  
 ## 3  2013     1     1      542 N619AA  AA      MIA  
-## # … with 336,773 more rows
+## # ℹ 336,773 more rows
 ```
 
 ```r
@@ -1386,17 +1393,17 @@ flights.sml %&gt;% inner_join(airlines)
 ```
 
 ```
-## Joining, by = "carrier"
+## Joining with `by = join_by(carrier)`
 ```
 
 ```
-## # A tibble: 336,776 x 8
+## # A tibble: 336,776 × 8
 ##    year month   day dep_time tailnum carrier dest  name               
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;              
 ## 1  2013     1     1      517 N14228  UA      IAH   United Air Lines I…
 ## 2  2013     1     1      533 N24211  UA      IAH   United Air Lines I…
 ## 3  2013     1     1      542 N619AA  AA      MIA   American Airlines …
-## # … with 336,773 more rows
+## # ℹ 336,773 more rows
 ```
 ---
 class: clear
@@ -1408,18 +1415,19 @@ flights.sml %&gt;% inner_join(planes)
 ```
 
 ```
-## Joining, by = c("year", "tailnum")
+## Joining with `by = join_by(year, tailnum)`
 ```
 
 ```
-## # A tibble: 4,630 x 14
+## # A tibble: 4,630 × 14
 ##    year month   day dep_time tailnum carrier dest  type   manufacturer
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;       
 ## 1  2013     1    18     1846 N37465  UA      FLL   Fixed… BOEING      
 ## 2  2013    10     1      647 N355JB  B6      BOS   Fixed… EMBRAER     
 ## 3  2013    10     1      652 N37471  UA      LAX   Fixed… BOEING      
-## # … with 4,627 more rows, and 5 more variables: model &lt;chr&gt;,
-## #   engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
+## # ℹ 4,627 more rows
+## # ℹ 5 more variables: model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;,
+## #   speed &lt;int&gt;, engine &lt;chr&gt;
 ```
 
 ```r
@@ -1427,15 +1435,15 @@ flights.sml %&gt;% inner_join(planes, by = "tailnum")
 ```
 
 ```
-## # A tibble: 284,170 x 15
+## # A tibble: 284,170 × 15
 ##   year.x month   day dep_time tailnum carrier dest  year.y type       
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
 ## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
 ## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
 ## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
-## # … with 284,167 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
-## #   engine &lt;chr&gt;
+## # ℹ 284,167 more rows
+## # ℹ 6 more variables: manufacturer &lt;chr&gt;, model &lt;chr&gt;, engines &lt;int&gt;,
+## #   seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
 ```
 ---
 class: clear
@@ -1450,15 +1458,15 @@ flights.sml %&gt;% left_join(planes, by = "tailnum")
 ```
 
 ```
-## # A tibble: 336,776 x 15
+## # A tibble: 336,776 × 15
 ##   year.x month   day dep_time tailnum carrier dest  year.y type       
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
 ## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
 ## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
 ## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
-## # … with 336,773 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
-## #   engine &lt;chr&gt;
+## # ℹ 336,773 more rows
+## # ℹ 6 more variables: manufacturer &lt;chr&gt;, model &lt;chr&gt;, engines &lt;int&gt;,
+## #   seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
 ```
 
 ```r
@@ -1466,15 +1474,15 @@ flights.sml %&gt;% inner_join(planes, by = "tailnum")
 ```
 
 ```
-## # A tibble: 284,170 x 15
+## # A tibble: 284,170 × 15
 ##   year.x month   day dep_time tailnum carrier dest  year.y type       
 ##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;      
 ## 1   2013     1     1      517 N14228  UA      IAH     1999 Fixed wing…
 ## 2   2013     1     1      533 N24211  UA      IAH     1998 Fixed wing…
 ## 3   2013     1     1      542 N619AA  AA      MIA     1990 Fixed wing…
-## # … with 284,167 more rows, and 6 more variables: manufacturer &lt;chr&gt;,
-## #   model &lt;chr&gt;, engines &lt;int&gt;, seats &lt;int&gt;, speed &lt;int&gt;,
-## #   engine &lt;chr&gt;
+## # ℹ 284,167 more rows
+## # ℹ 6 more variables: manufacturer &lt;chr&gt;, model &lt;chr&gt;, engines &lt;int&gt;,
+## #   seats &lt;int&gt;, speed &lt;int&gt;, engine &lt;chr&gt;
 ```
 ---
 class: clear
@@ -1485,13 +1493,13 @@ airports
 ```
 
 ```
-## # A tibble: 1,458 x 8
-##   faa   name                   lat   lon   alt    tz dst   tzone      
-##   &lt;chr&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      
-## 1 04G   Lansdowne Airport     41.1 -80.6  1044    -5 A     America/Ne…
-## 2 06A   Moton Field Municip…  32.5 -85.7   264    -6 A     America/Ch…
-## 3 06C   Schaumburg Regional   42.0 -88.1   801    -6 A     America/Ch…
-## # … with 1,455 more rows
+## # A tibble: 1,458 × 8
+##   faa   name                         lat   lon   alt    tz dst   tzone
+##   &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 04G   Lansdowne Airport           41.1 -80.6  1044    -5 A     Amer…
+## 2 06A   Moton Field Municipal Air…  32.5 -85.7   264    -6 A     Amer…
+## 3 06C   Schaumburg Regional         42.0 -88.1   801    -6 A     Amer…
+## # ℹ 1,455 more rows
 ```
 
 ```r
@@ -1499,14 +1507,14 @@ flights.sml %&gt;% left_join(airports, by = c("dest" = "faa"))
 ```
 
 ```
-## # A tibble: 336,776 x 14
+## # A tibble: 336,776 × 14
 ##    year month   day dep_time tailnum carrier dest  name      lat   lon
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
 ## 1  2013     1     1      517 N14228  UA      IAH   George…  30.0 -95.3
 ## 2  2013     1     1      533 N24211  UA      IAH   George…  30.0 -95.3
 ## 3  2013     1     1      542 N619AA  AA      MIA   Miami …  25.8 -80.3
-## # … with 336,773 more rows, and 4 more variables: alt &lt;dbl&gt;,
-## #   tz &lt;dbl&gt;, dst &lt;chr&gt;, tzone &lt;chr&gt;
+## # ℹ 336,773 more rows
+## # ℹ 4 more variables: alt &lt;dbl&gt;, tz &lt;dbl&gt;, dst &lt;chr&gt;, tzone &lt;chr&gt;
 ```
 ---
 #Filtering joins
@@ -1533,13 +1541,13 @@ flights %&gt;%
 ```
 
 ```
-## # A tibble: 141,145 x 4
+## # A tibble: 141,145 × 4
 ##    year month   day dest 
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;
 ## 1  2013     1     1 MIA  
 ## 2  2013     1     1 ATL  
 ## 3  2013     1     1 ORD  
-## # … with 141,142 more rows
+## # ℹ 141,142 more rows
 ```
 ]
 .pull-right[
@@ -1550,13 +1558,13 @@ flights %&gt;% semi_join(top_dest) %&gt;%
 ```
 
 ```
-## # A tibble: 141,145 x 4
+## # A tibble: 141,145 × 4
 ##    year month   day dest 
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;
 ## 1  2013     1     1 MIA  
 ## 2  2013     1     1 ATL  
 ## 3  2013     1     1 ORD  
-## # … with 141,142 more rows
+## # ℹ 141,142 more rows
 ```
 ]
 ---
@@ -1571,13 +1579,13 @@ flights %&gt;% anti_join(planes, by = "tailnum") %&gt;%
 ```
 
 ```
-## # A tibble: 722 x 2
+## # A tibble: 722 × 2
 ##   tailnum     n
 ##   &lt;chr&gt;   &lt;int&gt;
 ## 1 &lt;NA&gt;     2512
 ## 2 N725MQ    575
 ## 3 N722MQ    513
-## # … with 719 more rows
+## # ℹ 719 more rows
 ```
 ---
 # Example 3: US Healthcare
@@ -1615,15 +1623,10 @@ coverage &lt;- read_csv(file = "https://bit.ly/2YLGiyx",
 ```
 
 ```
-## Warning: 26 parsing failures.
-## row col   expected    actual                     file
-##  53  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
-##  54  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
-##  55  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
-##  56  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
-##  57  -- 29 columns 1 columns 'https://bit.ly/2YLGiyx'
-## ... ... .......... ......... ........................
-## See problems(...) for more details.
+## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat &lt;- vroom(...)
+##   problems(dat)
 ```
 
 ```r
@@ -1631,19 +1634,19 @@ coverage[53:nrow(coverage),]
 ```
 
 ```
-## # A tibble: 26 x 29
-##   Location          `2013__Employer` `2013__Non-Grou… `2013__Medicaid`
-##   &lt;chr&gt;                        &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
-## 1 Notes                           NA               NA               NA
-## 2 The majority of …               NA               NA               NA
-## 3 &lt;NA&gt;                            NA               NA               NA
-## # … with 23 more rows, and 25 more variables: 2013__Medicare &lt;dbl&gt;,
-## #   2013__Other Public &lt;chr&gt;, 2013__Uninsured &lt;dbl&gt;,
-## #   2013__Total &lt;dbl&gt;, 2014__Employer &lt;dbl&gt;, 2014__Non-Group &lt;dbl&gt;,
-## #   2014__Medicaid &lt;dbl&gt;, 2014__Medicare &lt;dbl&gt;,
-## #   2014__Other Public &lt;chr&gt;, 2014__Uninsured &lt;dbl&gt;,
-## #   2014__Total &lt;dbl&gt;, 2015__Employer &lt;dbl&gt;, 2015__Non-Group &lt;dbl&gt;,
-## #   2015__Medicaid &lt;dbl&gt;, 2015__Medicare &lt;dbl&gt;, …
+## # A tibble: 26 × 29
+##   Location         `2013__Employer` `2013__Non-Group` `2013__Medicaid`
+##   &lt;chr&gt;                       &lt;dbl&gt;             &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Notes                          NA                NA               NA
+## 2 The majority of…               NA                NA               NA
+## 3 &lt;NA&gt;                           NA                NA               NA
+## # ℹ 23 more rows
+## # ℹ 25 more variables: `2013__Medicare` &lt;dbl&gt;,
+## #   `2013__Other Public` &lt;chr&gt;, `2013__Uninsured` &lt;dbl&gt;,
+## #   `2013__Total` &lt;dbl&gt;, `2014__Employer` &lt;dbl&gt;,
+## #   `2014__Non-Group` &lt;dbl&gt;, `2014__Medicaid` &lt;dbl&gt;,
+## #   `2014__Medicare` &lt;dbl&gt;, `2014__Other Public` &lt;chr&gt;,
+## #   `2014__Uninsured` &lt;dbl&gt;, `2014__Total` &lt;dbl&gt;, …
 ```
 ---
 class: clear
@@ -1716,7 +1719,8 @@ coverage_long &lt;- coverage %&gt;%
 ```
 
 ```
-## Error: Can't combine `2013__Employer` &lt;double&gt; and `2013__Other Public` &lt;character&gt;.
+## Error in `pivot_longer()`:
+## ! Can't combine `2013__Employer` &lt;double&gt; and `2013__Other Public` &lt;character&gt;.
 ```
 Hmm, this is annoying. It turns out that the variables like `2013__Other Public` contains missing values which are coded as "N/A" and not `NA`. 
 
@@ -1775,13 +1779,13 @@ coverage_long
 ```
 
 ```
-## # A tibble: 1,456 x 3
+## # A tibble: 1,456 × 3
 ##   Location      year_type       tot_coverage
 ##   &lt;chr&gt;         &lt;chr&gt;                  &lt;dbl&gt;
 ## 1 United States 2013__Employer     155696900
 ## 2 United States 2013__Non-Group     13816000
 ## 3 United States 2013__Medicaid      54919100
-## # … with 1,453 more rows
+## # ℹ 1,453 more rows
 ```
 
 The spending data is also untidy. More pivoting
@@ -1794,13 +1798,13 @@ spending_long
 ```
 
 ```
-## # A tibble: 1,248 x 3
+## # A tibble: 1,248 × 3
 ##   Location      year                        tot_spending
 ##   &lt;chr&gt;         &lt;chr&gt;                              &lt;dbl&gt;
 ## 1 United States 1991__Total Health Spending       675896
 ## 2 United States 1992__Total Health Spending       731455
 ## 3 United States 1993__Total Health Spending       778684
-## # … with 1,245 more rows
+## # ℹ 1,245 more rows
 ```
 ---
 class: clear
@@ -1814,13 +1818,13 @@ spending_long
 ```
 
 ```
-## # A tibble: 1,248 x 3
+## # A tibble: 1,248 × 3
 ##   Location       year tot_spending
 ##   &lt;chr&gt;         &lt;int&gt;        &lt;dbl&gt;
 ## 1 United States  1991       675896
 ## 2 United States  1992       731455
 ## 3 United States  1993       778684
-## # … with 1,245 more rows
+## # ℹ 1,245 more rows
 ```
 
 ```r
@@ -1830,13 +1834,13 @@ coverage_long
 ```
 
 ```
-## # A tibble: 1,456 x 4
+## # A tibble: 1,456 × 4
 ##   Location       year type      tot_coverage
 ##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt;
 ## 1 United States  2013 Employer     155696900
 ## 2 United States  2013 Non-Group     13816000
 ## 3 United States  2013 Medicaid      54919100
-## # … with 1,453 more rows
+## # ℹ 1,453 more rows
 ```
 ---
 class: clear
@@ -1864,13 +1868,13 @@ coverage_long
 ```
 
 ```
-## # A tibble: 1,456 x 6
+## # A tibble: 1,456 × 6
 ##   Location       year type      tot_coverage state.abb state.region
 ##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;     &lt;fct&gt;       
 ## 1 United States  2013 Employer     155696900 &lt;NA&gt;      &lt;NA&gt;        
 ## 2 United States  2013 Non-Group     13816000 &lt;NA&gt;      &lt;NA&gt;        
 ## 3 United States  2013 Medicaid      54919100 &lt;NA&gt;      &lt;NA&gt;        
-## # … with 1,453 more rows
+## # ℹ 1,453 more rows
 ```
 ---
 class: clear
@@ -1884,11 +1888,8 @@ hc &lt;- coverage_long %&gt;%
 ```
 
 ```
-## Joining, by = c("Location", "year")
-```
-
-```
-## Joining, by = "Location"
+## Joining with `by = join_by(Location, year)`
+## Joining with `by = join_by(Location)`
 ```
 
 ```r
@@ -1896,14 +1897,14 @@ hc
 ```
 
 ```
-## # A tibble: 728 x 8
+## # A tibble: 728 × 8
 ##   Location       year type      tot_coverage state.abb state.region
 ##   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;     &lt;fct&gt;       
 ## 1 United States  2013 Employer     155696900 &lt;NA&gt;      &lt;NA&gt;        
 ## 2 United States  2013 Non-Group     13816000 &lt;NA&gt;      &lt;NA&gt;        
 ## 3 United States  2013 Medicaid      54919100 &lt;NA&gt;      &lt;NA&gt;        
-## # … with 725 more rows, and 2 more variables: tot_spending &lt;dbl&gt;,
-## #   life_exp_years &lt;dbl&gt;
+## # ℹ 725 more rows
+## # ℹ 2 more variables: tot_spending &lt;dbl&gt;, life_exp_years &lt;dbl&gt;
 ```
 ---
 class: clear
@@ -1922,14 +1923,15 @@ hc
 ```
 
 ```
-## # A tibble: 612 x 9
+## # A tibble: 612 × 9
 ##   Location  year type      tot_population tot_coverage state.abb
 ##   &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;    
 ## 1 Alabama   2013 Employer         4763900      2126500 AL       
 ## 2 Alabama   2013 Non-Group        4763900       174200 AL       
 ## 3 Alabama   2013 Medicaid         4763900       869700 AL       
-## # … with 609 more rows, and 3 more variables: state.region &lt;fct&gt;,
-## #   tot_spending &lt;dbl&gt;, life_exp_years &lt;dbl&gt;
+## # ℹ 609 more rows
+## # ℹ 3 more variables: state.region &lt;fct&gt;, tot_spending &lt;dbl&gt;,
+## #   life_exp_years &lt;dbl&gt;
 ```
 ---
 class: clear
@@ -1971,7 +1973,7 @@ output
 ```
 
 ```
-## [1]  0.0338 -0.1550  0.0328  0.0326
+## [1]  0.2961  0.1521 -0.0841 -0.1102
 ```
 
 ```r
@@ -1980,7 +1982,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-##  0.0338 -0.1550  0.0328  0.0326
+##  0.2961  0.1521 -0.0841 -0.1102
 ```
 ]
 
@@ -1992,16 +1994,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.0338
+## [1] 0.296
 ## 
 ## $b
-## [1] -0.155
+## [1] 0.152
 ## 
 ## $c
-## [1] 0.0328
+## [1] -0.0841
 ## 
 ## $d
-## [1] 0.0326
+## [1] -0.11
 ```
 
 ```r
@@ -2010,7 +2012,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-##  0.0338 -0.1550  0.0328  0.0326
+##  0.2961  0.1521 -0.0841 -0.1102
 ```
 ]
 ---
@@ -2031,10 +2033,10 @@ output2
 ```
 
 ```
-##         [,1]   [,2]    [,3]    [,4]
-## [1,] -0.7319 -0.661 -0.6750 -0.8362
-## [2,]  0.0338 -0.155  0.0328  0.0326
-## [3,]  1.0034  0.734  0.6547  0.6663
+##        [,1]   [,2]    [,3]   [,4]
+## [1,] -0.544 -0.670 -0.6408 -0.580
+## [2,]  0.296  0.152 -0.0841 -0.110
+## [3,]  0.874  1.088  0.4050  0.631
 ```
 ]
 
@@ -2045,10 +2047,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##           a      b       c       d
-## 25% -0.7319 -0.661 -0.6750 -0.8362
-## 50%  0.0338 -0.155  0.0328  0.0326
-## 75%  1.0034  0.734  0.6547  0.6663
+##          a      b       c      d
+## 25% -0.544 -0.670 -0.6408 -0.580
+## 50%  0.296  0.152 -0.0841 -0.110
+## 75%  0.874  1.088  0.4050  0.631
 ```
 
 ```r
@@ -2056,10 +2058,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##           a      b       c       d
-## 25% -0.7319 -0.661 -0.6750 -0.8362
-## 50%  0.0338 -0.155  0.0328  0.0326
-## 75%  1.0034  0.734  0.6547  0.6663
+##          a      b       c      d
+## 25% -0.544 -0.670 -0.6408 -0.580
+## 50%  0.296  0.152 -0.0841 -0.110
+## 75%  0.874  1.088  0.4050  0.631
 ```
 ]
 ---
@@ -2118,7 +2120,7 @@ head(mtcars)
 ```
 
 ```
-## # A tibble: 6 x 11
+## # A tibble: 6 × 11
 ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4
@@ -2338,7 +2340,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2355,7 +2357,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2395,7 +2397,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6d8d78&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eb04570&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2412,7 +2414,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6d8d78&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eb04570&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2452,7 +2454,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca712fe8&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645ec25a80&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2469,7 +2471,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca712fe8&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645ec25a80&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2505,7 +2507,7 @@ str(summary(models[[1]]))
 ##   .. ..- attr(*, "order")= int 1
 ##   .. ..- attr(*, "intercept")= int 1
 ##   .. ..- attr(*, "response")= int 1
-##   .. ..- attr(*, ".Environment")=&lt;environment: 0x55daca6994e8&gt; 
+##   .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
 ##   .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2590,10 +2592,10 @@ mapply(rnorm, mean, sd, 3) ## Oops
 ## numeric(0)
 ## 
 ## [[2]]
-## [1] -3.01
+## [1] 3.34
 ## 
 ## [[3]]
-## [1] -1.84 -0.14
+## [1] 0.309 3.869
 ```
 
 ```r
@@ -2602,10 +2604,10 @@ mapply(rnorm, mean = mean,
 ```
 
 ```
-##        [,1]  [,2]  [,3]
-## [1,]  0.678 0.257  2.56
-## [2,] -0.608 0.608  5.21
-## [3,]  0.887 4.499 -1.81
+##        [,1] [,2]  [,3]
+## [1,] -1.182 3.64 0.187
+## [2,]  0.113 4.26 7.872
+## [3,] -0.600 4.00 5.792
 ```
 ]
 
@@ -2617,12 +2619,12 @@ pmap_dfc(list(mean = mean,sd = sd),
 ```
 
 ```
-## # A tibble: 3 x 3
-##     ...1  ...2  ...3
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 -0.251 -1.39 -4.51
-## 2  0.501 -1.59  4.68
-## 3 -1.11   1.82  4.20
+## # A tibble: 3 × 3
+##     ...1     ...2  ...3
+##    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+## 1  0.584 -1.70     1.03
+## 2  0.873  0.00460  5.35
+## 3 -0.951  0.759    6.95
 ```
 ]
 
@@ -2653,24 +2655,24 @@ invoke_map(f,
 
 ```
 ## [[1]]
-## [1] 0.755
+## [1] -0.932
 ## 
 ## [[2]]
-## [1] 0.682
+## [1] -5.04
 ## 
 ## [[3]]
-## [1] 7
+## [1] 1
 ```
 
 ```
 ## [[1]]
-## [1] -0.00247 -0.38898
+## [1] -0.313  0.214
 ## 
 ## [[2]]
-## [1]  2.44 -3.88  4.44
+## [1] -5.20  9.68 -6.29
 ## 
 ## [[3]]
-## [1] 5 3 6 7
+## [1] 5 4 2 5
 ```
 ]
 
@@ -2702,13 +2704,13 @@ TeamRuns
 ```
 
 ```
-## # A tibble: 2,925 x 6
+## # A tibble: 3,015 × 6
 ##   yearID teamID lgID   wpct hat.wpct run_ratio
 ##    &lt;int&gt; &lt;fct&gt;  &lt;fct&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 ## 1   1871 BS1    NA    0.667    0.637     1.32 
 ## 2   1871 CH1    NA    0.679    0.611     1.25 
 ## 3   1871 CL1    NA    0.345    0.348     0.730
-## # … with 2,922 more rows
+## # ℹ 3,012 more rows
 ```
 ---
 class: clear
@@ -2744,7 +2746,7 @@ glimpse(mse)
 ```
 
 ```
-##  Named num [1:201] 0.00502 0.00495 0.00489 0.00482 0.00476 ...
+##  Named num [1:201] 0.005 0.00493 0.00487 0.00481 0.00474 ...
 ##  - attr(*, "names")= chr [1:201] "0.5" "0.51" "0.52" "0.53" ...
 ```
 
@@ -2753,8 +2755,8 @@ which.min(mse)
 ```
 
 ```
-## 1.87 
-##  138
+## 1.86 
+##  137
 ```
 
 We see that the optimal `\(k\)` for this data is roughly `\(1.87\)`.
@@ -2779,16 +2781,13 @@ kstar
 ```
 
 ```
-## # A tibble: 15 x 1
+## # A tibble: 16 × 1
 ##       k
 ##   &lt;dbl&gt;
 ## 1  1.95
 ## 2  1.82
 ## 3  2.02
-## 4  1.75
-## 5  1.91
-## 6  1.91
-## # … with 9 more rows
+## # ℹ 13 more rows
 ```
 ---
 class: clear
@@ -2809,16 +2808,13 @@ hr_leaders
 ```
 
 ```
-## # A tibble: 282 x 4
+## # A tibble: 288 × 4
 ##   yearID lgID  teamID    HR
 ##    &lt;int&gt; &lt;fct&gt; &lt;fct&gt;  &lt;int&gt;
 ## 1   1871 NA    CH1       10
 ## 2   1872 NA    BL1       14
 ## 3   1873 NA    BS1       13
-## 4   1874 NA    BS1       17
-## 5   1875 NA    BS1       15
-## 6   1876 NL    BSN        9
-## # … with 276 more rows
+## # ℹ 285 more rows
 ```
 ---
 class: clear
@@ -2882,6 +2878,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable
