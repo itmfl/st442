@@ -17,8 +17,8 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -32,7 +32,7 @@ class: center, middle, inverse, title-slide
 ## Visualizing data with ggplot2
 ]
 .date[
-### Fall 2022
+### Fall 2023
 ]
 
 ---
@@ -92,7 +92,7 @@ dplyr::select(mpg, -fl, -class)
 ## 4 audi         a4      2    2008     4 auto(av)   f        21    30
 ## 5 audi         a4      2.8  1999     6 auto(l5)   f        16    26
 ## 6 audi         a4      2.8  1999     6 manual(m5) f        18    26
-## # … with 228 more rows
+## # ℹ 228 more rows
 ```
 ---
 
@@ -232,16 +232,16 @@ SAT_2010
 
 ```
 ## # A tibble: 50 × 9
-##   state      expendit…¹ pupil…² salary  read  math write total sat_pct
-##   &lt;fct&gt;           &lt;int&gt;   &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
-## 1 Alabama            10    15.3  49948   556   550   544  1650       8
-## 2 Alaska             17    16.2  62654   518   515   491  1524      52
-## 3 Arizona             9    21.4  49298   519   525   500  1544      28
-## 4 Arkansas           10    14.1  49033   566   566   552  1684       5
-## 5 California         10    24.1  71611   501   516   500  1517      53
-## 6 Colorado           10    17.4  51660   568   572   555  1695      19
-## # … with 44 more rows, and abbreviated variable names ¹​expenditure,
-## #   ²​pupil_teacher_ratio
+##   state expenditure pupil_teacher_ratio salary  read  math write total
+##   &lt;fct&gt;       &lt;int&gt;               &lt;dbl&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1 Alab…          10                15.3  49948   556   550   544  1650
+## 2 Alas…          17                16.2  62654   518   515   491  1524
+## 3 Ariz…           9                21.4  49298   519   525   500  1544
+## 4 Arka…          10                14.1  49033   566   566   552  1684
+## 5 Cali…          10                24.1  71611   501   516   500  1517
+## 6 Colo…          10                17.4  51660   568   572   555  1695
+## # ℹ 44 more rows
+## # ℹ 1 more variable: sat_pct &lt;int&gt;
 ```
 ---
 class: clear
@@ -259,8 +259,8 @@ Compare the following two plots. For more details, see the section for computed 
 
 ```r
 p1 &lt;- ggplot(SAT_2010, aes(x = math)) + geom_histogram(binwidth = 10)
-p2 &lt;- ggplot(SAT_2010, aes(x = math)) + 
-  geom_histogram(aes(y = ..density..),binwidth=10)
+p2 &lt;- ggplot(SAT_2010, aes(x = math, after_stat(density))) + 
+  geom_histogram(binwidth=10)
 grid.arrange(p1,p2,ncol = 2)
 ```
 
@@ -271,23 +271,24 @@ Compare the following codes.
 
 
 ```r
-ggplot(data = head(SAT_2010,10), aes(x = state)) + xlab("") + 
+ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") + 
   geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+```
+## Error in `geom_bar()`:
+## ! Problem while computing stat.
+## ℹ Error occurred in the 1st layer.
+## Caused by error in `setup_params()`:
+## ! `stat_count()` must only have an x or y aesthetic.
+```
 
 ```r
 ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") +
-  geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  geom_col() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-```
-## Error in `f()`:
-## ! stat_count() can only have an x or y aesthetic.
-```
-
-&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-2.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="03_visualization_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -297,10 +298,10 @@ Now compare the following codes.
 ```r
 p &lt;- ggplot(data = head(SAT_2010,10), aes(x = state)) + 
   xlab("") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p1 &lt;- p + geom_bar(aes(y = math), stat = "identity")
+p1 &lt;- p + geom_col(aes(y = math))
 p &lt;- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math))) + 
   xlab("") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p2 &lt;- p + geom_bar(aes(y = math), stat = "identity")
+p2 &lt;- p + geom_col(aes(y = math))
 grid.arrange(p1,p2,ncol = 2)
 ```
 
@@ -392,7 +393,7 @@ climate_sub
 ## 4 Berkeley  1903        NA        NA     -0.199  0.104 FALSE
 ## 5 Berkeley  1904        NA        NA     -0.223  0.105 FALSE
 ## 6 Berkeley  1905        NA        NA     -0.241  0.107 FALSE
-## # … with 99 more rows
+## # ℹ 99 more rows
 ```
 ---
 class: clear
@@ -414,8 +415,12 @@ p + geom_col(colour = "black", size = 0.25) +
 ```
 
 ```
-## Warning: It is deprecated to specify `guide = FALSE` to remove a guide. Please
-## use `guide = "none"` instead.
+## Warning: The `guide` argument in `scale_*()` cannot be `FALSE`. This was deprecated in
+## ggplot2 3.3.4.
+## ℹ Please use "none" instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
 ```
 
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-24-1.png" width="70%" style="display: block; margin: auto;" /&gt;
@@ -441,7 +446,7 @@ murders
 ## 4 Arkansas   AR    South     2915918    93
 ## 5 California CA    West     37253956  1257
 ## 6 Colorado   CO    West      5029196    65
-## # … with 45 more rows
+## # ℹ 45 more rows
 ```
 ---
 class: clear, middle
@@ -531,16 +536,15 @@ head(BabyNamesDist)
 
 ```
 ## # A tibble: 6 × 9
-##    year sex   name          n   prop alive_p…¹ count…² age_t…³ est_a…⁴
-##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
-## 1  1900 F     Mary      16706 0.0526         0   16.7      114       0
-## 2  1900 F     Helen      6343 0.0200         0    6.34     114       0
-## 3  1900 F     Anna       6114 0.0192         0    6.11     114       0
-## 4  1900 F     Margaret   5304 0.0167         0    5.30     114       0
-## 5  1900 F     Ruth       4765 0.0150         0    4.76     114       0
-## 6  1900 F     Elizabeth  4096 0.0129         0    4.10     114       0
-## # … with abbreviated variable names ¹​alive_prob, ²​count_thousands,
-## #   ³​age_today, ⁴​est_alive_today
+##    year sex   name       n   prop alive_prob count_thousands age_today
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;  &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+## 1  1900 F     Mary   16706 0.0526          0           16.7        114
+## 2  1900 F     Helen   6343 0.0200          0            6.34       114
+## 3  1900 F     Anna    6114 0.0192          0            6.11       114
+## 4  1900 F     Marga…  5304 0.0167          0            5.30       114
+## 5  1900 F     Ruth    4765 0.0150          0            4.76       114
+## 6  1900 F     Eliza…  4096 0.0129          0            4.10       114
+## # ℹ 1 more variable: est_alive_today &lt;dbl&gt;
 ```
 ---
 class: clear, middle
@@ -713,6 +717,16 @@ p &lt;- ggplot(data = com_fem,
 ```
 ---
 # Example 3: Weather trends
+
+```
+## Warning: 4 parsing failures.
+##  row col  expected    actual                                                                           file
+## 4623  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 4979  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 5016  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+## 5213  -- 4 columns 5 columns 'http://academic.udayton.edu/kissock/http/Weather/gsod95-current/OHDAYTON.txt'
+```
+
 &lt;img src="03_visualization_files/figure-html/unnamed-chunk-45-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
@@ -723,6 +737,18 @@ The data for this graphic is available as a white-space separated file. We first
 ```r
 library(readr)
 DAY &lt;- read_table("https://bit.ly/2NGLI7N", col_names = FALSE)
+```
+
+```
+## Warning: 4 parsing failures.
+##  row col  expected    actual                     file
+## 4623  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 4979  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 5016  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+## 5213  -- 4 columns 5 columns 'https://bit.ly/2NGLI7N'
+```
+
+```r
 names(DAY) &lt;- c("Month", "Day", "Year", "Temp")
 DAY &lt;- select(DAY, "Year", "Month", "Day", "Temp")
 DAY
@@ -738,7 +764,7 @@ DAY
 ## 4  1995     1     4  11.3
 ## 5  1995     1     5   6.8
 ## 6  1995     1     6  23  
-## # … with 9,259 more rows
+## # ℹ 9,259 more rows
 ```
 ---
 class: clear
@@ -779,7 +805,8 @@ Past
 ## 4  1995     1     4  11.3      4  59.2   7.1  31.6  2.79      37.5
 ## 5  1995     1     5   6.8      5  56.5   0    28.1  2.84      34.1
 ## 6  1995     1     6  23        6  56.3   2.4  28.8  2.58      34.2
-## # … with 8,878 more rows, and 1 more variable: avg_lower &lt;dbl&gt;
+## # ℹ 8,878 more rows
+## # ℹ 1 more variable: avg_lower &lt;dbl&gt;
 ```
 
 ```r
@@ -796,7 +823,8 @@ filter(Past, newDay == 1)
 ## 4  1998     1     1  20.3      1  50.8  -0.3  31.4  2.39      36.5
 ## 5  1999     1     1  10        1  50.8  -0.3  31.4  2.39      36.5
 ## 6  2000     1     1  39.3      1  50.8  -0.3  31.4  2.39      36.5
-## # … with 19 more rows, and 1 more variable: avg_lower &lt;dbl&gt;
+## # ℹ 19 more rows
+## # ℹ 1 more variable: avg_lower &lt;dbl&gt;
 ```
 ---
 class: clear

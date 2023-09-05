@@ -482,26 +482,27 @@ penguins |> summarise(across(c(species, island, sex),n_distinct))
 
 ---
 class: clear
-```{r}
+```{r penguins}
 ## Let us count the number of missing values in each columns
 penguins |> summarise(across(everything(),~sum(is.na(.))))
-```
 
----
-class: clear
-```{r penguins}
-## Replace missing values for the numerical variables by the 
+## We now replace missing values for the numerical variables by the 
 ## average value (computed within that specie and island).
 library(dplyr)
+mean_impute <- function(x){
+  if_else(is.na(x), 
+          mean(x, na.rm = TRUE), 
+          as.numeric(x))
+}
+
 penguins_imputed <- penguins |>
   group_by(species, island) |>
   mutate(imputed = if_any(where(is.numeric), is.na),
-         across(where(is.numeric), 
-                ~if_else(condition = is.na(.), 
-                         true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) |> ungroup() |> 
+         across(where(is.numeric), mean_impute)) |> ungroup() |> 
   select(imputed, everything())
-
+```
+---
+```{r}
 penguins_imputed
 penguins_imputed |> filter(imputed == TRUE)
 ```
@@ -556,6 +557,13 @@ pop_dest <- flights |>
   filter(n() > 365,!is.na(arr_delay))
 pop_dest |> summarise(delay_quantile = quantile(arr_delay))
 ```
+
+---
+The warning message suggests that we use the [reframe](https://dplyr.tidyverse.org/reference/reframe.html) function.
+```{r}
+pop_dest |> reframe(delay_quantile = quantile(arr_delay))
+```
+
 ---
 class: clear
 
@@ -563,7 +571,7 @@ The code seems to give a vector of five numbers for each destination. However, i
 $\mathrm{arr\_delay}$ for the **ungrouped** data.
 ```{r error = TRUE}
 pop_dest |> ungroup() |> 
-  summarise(delay_quantile = quantile(arr_delay))
+  reframe(delay_quantile = quantile(arr_delay))
 quantile(pop_dest$arr_delay,na.rm = TRUE)
 ```
 After some thought (googling?), we realize that **dplyr** verbs takes as input a data frame and outputs another data frame. The output of $\mathrm{quantile}$ is a vector not a data frame. Helper functions to the rescue.
@@ -586,7 +594,7 @@ class: clear, middle
 Finally, compare the previous output with the following
 ```{r}
 pop_dest |> 
-  summarise(val = quantile(arr_delay), q = c(0, 0.25, 0.5, 0.75,1))
+  reframe(val = quantile(arr_delay), q = c(0, 0.25, 0.5, 0.75,1))
 
 ```
 

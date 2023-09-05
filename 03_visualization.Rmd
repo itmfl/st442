@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Visualizing data with ggplot2"
-date: "Fall 2022"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -224,8 +224,8 @@ class: clear
 Compare the following two plots. For more details, see the section for computed variables in $\mathrm{?geom\_histogram()}$.
 ```{r cache = TRUE, out.width = "80%", fig.asp = 0.5}
 p1 <- ggplot(SAT_2010, aes(x = math)) + geom_histogram(binwidth = 10)
-p2 <- ggplot(SAT_2010, aes(x = math)) + 
-  geom_histogram(aes(y = ..density..),binwidth=10)
+p2 <- ggplot(SAT_2010, aes(x = math, after_stat(density))) + 
+  geom_histogram(binwidth=10)
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---
@@ -234,11 +234,11 @@ Compare the following codes.
 
 ```{r cache = TRUE, out.width="70%", error = TRUE, fig.asp = 0.5}
 
-ggplot(data = head(SAT_2010,10), aes(x = state)) + xlab("") + 
+ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") + 
   geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ggplot(data = head(SAT_2010,10), aes(x = state, y = math)) + xlab("") +
-  geom_bar() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  geom_col() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 ]
 ---
@@ -248,10 +248,10 @@ Now compare the following codes.
 ```{r cache = TRUE, out.width="70%", fig.asp = 0.5}
 p <- ggplot(data = head(SAT_2010,10), aes(x = state)) + 
   xlab("") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p1 <- p + geom_bar(aes(y = math), stat = "identity")
+p1 <- p + geom_col(aes(y = math))
 p <- ggplot(data = head(SAT_2010,10), aes(x = reorder(state, math))) + 
   xlab("") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-p2 <- p + geom_bar(aes(y = math), stat = "identity")
+p2 <- p + geom_col(aes(y = math))
 grid.arrange(p1,p2,ncol = 2)
 ```
 ---

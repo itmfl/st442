@@ -1091,12 +1091,12 @@ df
 ## # A tibble: 100 × 3
 ##        x     y      z
 ##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 0.249  0.717 0.903 
-## 2 0.923  0.119 0.310 
-## 3 0.0364 0.231 0.842 
-## 4 0.0195 0.380 0.980 
-## 5 0.337  0.267 0.403 
-## 6 0.865  0.838 0.0700
+## 1 0.454  0.833 0.289 
+## 2 0.851  0.237 0.246 
+## 3 0.876  0.113 0.0739
+## 4 0.993  0.686 0.932 
+## 5 0.484  0.515 0.867 
+## 6 0.0717 0.794 0.803 
 ## # ℹ 94 more rows
 ```
 ]
@@ -1111,7 +1111,7 @@ df |&gt; summarize(
 ## # A tibble: 1 × 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.445 0.482 0.525
+## 1 0.454 0.512 0.486
 ```
 
 ```r
@@ -1139,12 +1139,12 @@ df
 ## # A tibble: 100 × 4
 ##        x     y      z names
 ##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
-## 1 0.249  0.717 0.903  a    
-## 2 0.923  0.119 0.310  b    
-## 3 0.0364 0.231 0.842  c    
-## 4 0.0195 0.380 0.980  d    
-## 5 0.337  0.267 0.403  e    
-## 6 0.865  0.838 0.0700 f    
+## 1 0.454  0.833 0.289  a    
+## 2 0.851  0.237 0.246  b    
+## 3 0.876  0.113 0.0739 c    
+## 4 0.993  0.686 0.932  d    
+## 5 0.484  0.515 0.867  e    
+## 6 0.0717 0.794 0.803  f    
 ## # ℹ 94 more rows
 ```
 
@@ -1157,7 +1157,7 @@ df |&gt; summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.445 0.282    533.  0.482 0.285    578.  0.525 0.286    73.2
+## 1  0.454 0.292    284.  0.512 0.276    201.  0.486 0.297    468.
 ```
 
 ---
@@ -1178,7 +1178,7 @@ df |&gt; summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.445 0.282    533.  0.482 0.285    578.  0.525 0.286    73.2
+## 1  0.454 0.292    284.  0.512 0.276    201.  0.486 0.297    468.
 ```
 
 ```r
@@ -1191,7 +1191,7 @@ df |&gt; summarize(across(where(is.numeric) &amp; c(-x),
 ## # A tibble: 1 × 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.482 0.285    578.  0.525 0.286    73.2
+## 1  0.512 0.276    201.  0.486 0.297    468.
 ```
 
 ```r
@@ -1254,22 +1254,25 @@ penguins |&gt; summarise(across(everything(),~sum(is.na(.))))
 ## # ℹ 3 more variables: body_mass_g &lt;int&gt;, sex &lt;int&gt;, year &lt;int&gt;
 ```
 
----
-class: clear
-
 ```r
-## Replace missing values for the numerical variables by the 
+## We now replace missing values for the numerical variables by the 
 ## average value (computed within that specie and island).
 library(dplyr)
+mean_impute &lt;- function(x){
+  if_else(is.na(x), 
+          mean(x, na.rm = TRUE), 
+          as.numeric(x))
+}
+
 penguins_imputed &lt;- penguins |&gt;
   group_by(species, island) |&gt;
   mutate(imputed = if_any(where(is.numeric), is.na),
-         across(where(is.numeric), 
-                ~if_else(condition = is.na(.), 
-                         true = mean(., na.rm = T), 
-                         false = as.numeric(.)))) |&gt; ungroup() |&gt; 
+         across(where(is.numeric), mean_impute)) |&gt; ungroup() |&gt; 
   select(imputed, everything())
+```
+---
 
+```r
 penguins_imputed
 ```
 
@@ -1451,6 +1454,27 @@ pop_dest |&gt; summarise(delay_quantile = quantile(arr_delay))
 ## 6 ATL              -49
 ## # ℹ 379 more rows
 ```
+
+---
+The warning message suggests that we use the [reframe](https://dplyr.tidyverse.org/reference/reframe.html) function.
+
+```r
+pop_dest |&gt; reframe(delay_quantile = quantile(arr_delay))
+```
+
+```
+## # A tibble: 385 × 2
+##   dest  delay_quantile
+##   &lt;chr&gt;          &lt;dbl&gt;
+## 1 ALB              -34
+## 2 ALB              -17
+## 3 ALB               -4
+## 4 ALB               28
+## 5 ALB              328
+## 6 ATL              -49
+## # ℹ 379 more rows
+```
+
 ---
 class: clear
 
@@ -1459,17 +1483,7 @@ The code seems to give a vector of five numbers for each destination. However, i
 
 ```r
 pop_dest |&gt; ungroup() |&gt; 
-  summarise(delay_quantile = quantile(arr_delay))
-```
-
-```
-## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-## dplyr 1.1.0.
-## ℹ Please use `reframe()` instead.
-## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-##   always returns an ungrouped data frame and adjust accordingly.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
+  reframe(delay_quantile = quantile(arr_delay))
 ```
 
 ```
@@ -1536,22 +1550,11 @@ Finally, compare the previous output with the following
 
 ```r
 pop_dest |&gt; 
-  summarise(val = quantile(arr_delay), q = c(0, 0.25, 0.5, 0.75,1))
-```
-
-```
-## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-## dplyr 1.1.0.
-## ℹ Please use `reframe()` instead.
-## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-##   always returns an ungrouped data frame and adjust accordingly.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
+  reframe(val = quantile(arr_delay), q = c(0, 0.25, 0.5, 0.75,1))
 ```
 
 ```
 ## # A tibble: 385 × 3
-## # Groups:   dest [77]
 ##   dest    val     q
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1 ALB     -34  0   
