@@ -3,7 +3,6 @@
   <head>
     <title>Introduction to Data Science</title>
     <meta charset="utf-8" />
-    <meta name="date" content="2021-09-07" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
@@ -11,24 +10,30 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
     <script src="libs/clipboard/clipboard.min.js"></script>
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## ggplot, maps, and other tidbits
-### 2021-09-07
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -47,7 +52,7 @@ gapminder
 ```
 
 ```
-## # A tibble: 1,704 x 6
+## # A tibble: 1,704 × 6
 ##   country     continent  year lifeExp      pop gdpPercap
 ##   &lt;fct&gt;       &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
 ## 1 Afghanistan Asia       1952    28.8  8425333      779.
@@ -56,7 +61,7 @@ gapminder
 ## 4 Afghanistan Asia       1967    34.0 11537966      836.
 ## 5 Afghanistan Asia       1972    36.1 13079460      740.
 ## 6 Afghanistan Asia       1977    38.4 14880372      786.
-## # … with 1,698 more rows
+## # ℹ 1,698 more rows
 ```
 ---
 class: normal
@@ -141,7 +146,7 @@ df
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   x         y z    
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
 ## 1 a         1 A    
@@ -177,7 +182,7 @@ df
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   x         y z    
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
 ## 1 a         1 A    
@@ -212,7 +217,7 @@ df
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   x         y z    
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
 ## 1 a         1 A    
@@ -248,7 +253,7 @@ df
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   x         y z    
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
 ## 1 a         1 A    
@@ -284,7 +289,7 @@ df
 ```
 
 ```
-## # A tibble: 8 x 3
+## # A tibble: 8 × 3
 ##   x         y z    
 ##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
 ## 1 a         1 A    
@@ -320,7 +325,7 @@ BOD
 ```
 
 ```
-## # A tibble: 6 x 2
+## # A tibble: 6 × 2
 ##    Time demand
 ##   &lt;dbl&gt;  &lt;dbl&gt;
 ## 1     1    8.3
@@ -354,7 +359,7 @@ BOD
 ```
 
 ```
-## # A tibble: 6 x 2
+## # A tibble: 6 × 2
 ##   Time  demand
 ##   &lt;fct&gt;  &lt;dbl&gt;
 ## 1 1        8.3
@@ -374,9 +379,10 @@ BOD %&gt;% ggplot( aes(x = Time,
 ```
 
 ```
-## geom_path: Each group consists of only
-one observation. Do you need to adjust
-## the group aesthetic?
+## `geom_line()`: Each group consists of
+only one observation.
+## ℹ Do you need to adjust the group
+aesthetic?
 ```
 
 &lt;img src="04_maps_files/figure-html/unnamed-chunk-18-1.png" width="90%" style="display: block; margin: auto;" /&gt;
@@ -393,7 +399,7 @@ BOD
 ```
 
 ```
-## # A tibble: 6 x 2
+## # A tibble: 6 × 2
 ##   Time  demand
 ##   &lt;fct&gt;  &lt;dbl&gt;
 ## 1 1        8.3
@@ -425,7 +431,7 @@ nlme::Oxboys
 ```
 
 ```
-## # A tibble: 234 x 4
+## # A tibble: 234 × 4
 ##   Subject     age height Occasion
 ##   &lt;ord&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;ord&gt;   
 ## 1 1       -1        140. 1       
@@ -434,7 +440,7 @@ nlme::Oxboys
 ## 4 1       -0.164    147. 4       
 ## 5 1       -0.0027   148. 5       
 ## 6 1        0.247    150. 6       
-## # … with 228 more rows
+## # ℹ 228 more rows
 ```
 &gt; These data are described in Goldstein (1987) as data on the height of 
 &gt; a selection of 24 boys from Oxford, England versus a standardized age.
@@ -527,7 +533,7 @@ mpg
 ```
 
 ```
-## # A tibble: 234 x 11
+## # A tibble: 234 × 11
 ##   manufacturer model displ  year   cyl trans   drv     cty   hwy fl   
 ##   &lt;chr&gt;        &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;
 ## 1 audi         a4      1.8  1999     4 auto(l… f        18    29 p    
@@ -536,7 +542,8 @@ mpg
 ## 4 audi         a4      2    2008     4 auto(a… f        21    30 p    
 ## 5 audi         a4      2.8  1999     6 auto(l… f        16    26 p    
 ## 6 audi         a4      2.8  1999     6 manual… f        18    26 p    
-## # … with 228 more rows, and 1 more variable: class &lt;chr&gt;
+## # ℹ 228 more rows
+## # ℹ 1 more variable: class &lt;chr&gt;
 ```
 
 We recall our previous discussion of grouping
@@ -581,213 +588,6 @@ g3
 &lt;img src="04_maps_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 
-# Groupings &amp; collective geoms
-.pull-left[
-
-```r
-df &lt;- dplyr::tibble(
-  x = c("a", "a", "a", "a", 
-        "b", "b", "b", "b"),
-  y = c(1,2,3,4,4,3,2,1),
-  z = c("A", "A", "B", "B", 
-        "B", "B", "A", "A"))
-df
-```
-
-```
-## # A tibble: 8 x 3
-##   x         y z    
-##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 a         1 A    
-## 2 a         2 A    
-## 3 a         3 B    
-## 4 a         4 B    
-## 5 b         4 B    
-## 6 b         3 B    
-## 7 b         2 A    
-## 8 b         1 A
-```
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot( aes(x = x, y = y, 
-                   color = z)) + 
-  geom_point(size=3) + 
-  geom_line()
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-31-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-
-
----
-class: clear
-
-In the previous plot the **geom_point** and the **geom_line** are each 
-divided into four groups due to interaction between the implicit grouping
-due to `\(x\)` and the explicit grouping due to `\(\mathrm{color}\)` being set to `\(z\)`. 
-
-.pull-left[
-
-```r
-df
-```
-
-```
-## # A tibble: 8 x 3
-##   x         y z    
-##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 a         1 A    
-## 2 a         2 A    
-## 3 a         3 B    
-## 4 a         4 B    
-## 5 b         4 B    
-## 6 b         3 B    
-## 7 b         2 A    
-## 8 b         1 A
-```
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = z))
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-33-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-Here the *geom_point* and the *geom_line*
-are both divided into two groups. 
-]
----
-class: clear
-.pull-left[
-
-```r
-df
-```
-
-```
-## # A tibble: 8 x 3
-##   x         y z    
-##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 a         1 A    
-## 2 a         2 A    
-## 3 a         3 B    
-## 4 a         4 B    
-## 5 b         4 B    
-## 6 b         3 B    
-## 7 b         2 A    
-## 8 b         1 A
-```
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1))
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-35-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-Here the *geom_point* has two groups while the *geom_line* has one group.
-However, the *geom_line* now consists of two segments with different colors.
-]
----
-class: clear
-.pull-left[
-
-```r
-df
-```
-
-```
-## # A tibble: 8 x 3
-##   x         y z    
-##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 a         1 A    
-## 2 a         2 A    
-## 3 a         3 B    
-## 4 a         4 B    
-## 5 b         4 B    
-## 6 b         3 B    
-## 7 b         2 A    
-## 8 b         1 A
-```
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1),
-                color="black") 
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-37-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-Here the *geom_point* has two groups while the *geom_line* has one group and only
-one segment.
-]
----
-class: clear
-
-Finally, compare the following two outputs using different **geom** objects.
-
-.pull-left[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = z))
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-38-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_polygon(aes(group = z),
-               fill="gray80")
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-39-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
----
-class: clear
-
-Finally, compare the following two outputs using different **geom** objects.
-.pull-left[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1))
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-40-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
-.pull-right[
-
-```r
-df %&gt;% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_polygon(aes(group = 1),
-               fill="gray80")
-```
-
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-41-1.png" width="120%" style="display: block; margin: auto;" /&gt;
-]
----
 
 # Time to move on
 &lt;img src="04_maps_files/figure-html/us_states-1.png" width="120%" style="display: block; margin: auto;" /&gt;
@@ -805,7 +605,7 @@ us_states
 ```
 
 ```
-## # A tibble: 15,537 x 6
+## # A tibble: 15,537 × 6
 ##    long   lat group order region  subregion
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;    
 ## 1 -87.5  30.4     1     1 alabama &lt;NA&gt;     
@@ -814,7 +614,7 @@ us_states
 ## 4 -87.5  30.3     1     4 alabama &lt;NA&gt;     
 ## 5 -87.6  30.3     1     5 alabama &lt;NA&gt;     
 ## 6 -87.6  30.3     1     6 alabama &lt;NA&gt;     
-## # … with 15,531 more rows
+## # ℹ 15,531 more rows
 ```
 ---
 class: clear, middle
@@ -824,7 +624,7 @@ us_counties
 ```
 
 ```
-## # A tibble: 87,949 x 6
+## # A tibble: 87,949 × 6
 ##    long   lat group order region  subregion
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;    
 ## 1 -86.5  32.3     1     1 alabama autauga  
@@ -833,7 +633,7 @@ us_counties
 ## 4 -86.6  32.4     1     4 alabama autauga  
 ## 5 -86.6  32.4     1     5 alabama autauga  
 ## 6 -86.6  32.4     1     6 alabama autauga  
-## # … with 87,943 more rows
+## # ℹ 87,943 more rows
 ```
 
 ---
@@ -843,7 +643,7 @@ class: clear
 map("county", 'north carolina', fill = TRUE, col = palette())
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-44-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-33-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ```r
 nc &lt;- map_data('county', 'north carolina')
@@ -859,7 +659,7 @@ ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) +
     geom_ellipse(aes(x0 = -76, y0 = 35, a = 2, b = 3, 
                      angle = -pi / 3, m1 = 3), size = 3, col = "red") + ...
 ```
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-46-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-35-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -870,7 +670,7 @@ p &lt;- us_states %&gt;% ggplot(aes(x = long, y = lat, group = group))
 p + geom_polygon(fill = "white", color = "black")
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-47-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-36-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 Maps are by default plotted using the Mercartor projection which does not look too good if you are 
 drawing only a particular region of the world.
 ---
@@ -885,7 +685,7 @@ p &lt;- p + geom_polygon(color = "gray90", size = 0.1) +
 p
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-48-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-37-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 
@@ -895,21 +695,21 @@ election
 ```
 
 ```
-## # A tibble: 51 x 23
-##   state st     fips total_vote vote_margin winner party pct_margin
-##   &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
-## 1 Alab… AL        1    2123372      588708 Trump  Repu…     0.277 
-## 2 Alas… AK        2     318608       46933 Trump  Repu…     0.147 
-## 3 Ariz… AZ        4    2604657       91234 Trump  Repu…     0.035 
-## 4 Arka… AR        5    1130635      304378 Trump  Repu…     0.269 
-## 5 Cali… CA        6   14237893     4269978 Clint… Demo…     0.300 
-## 6 Colo… CO        8    2780247      136386 Clint… Demo…     0.0491
-## # … with 45 more rows, and 15 more variables: r_points &lt;dbl&gt;,
-## #   d_points &lt;dbl&gt;, pct_clinton &lt;dbl&gt;, pct_trump &lt;dbl&gt;,
-## #   pct_johnson &lt;dbl&gt;, pct_other &lt;dbl&gt;, clinton_vote &lt;dbl&gt;,
-## #   trump_vote &lt;dbl&gt;, johnson_vote &lt;dbl&gt;, other_vote &lt;dbl&gt;,
-## #   ev_dem &lt;dbl&gt;, ev_rep &lt;dbl&gt;, ev_oth &lt;dbl&gt;, census &lt;chr&gt;,
-## #   region &lt;chr&gt;
+## # A tibble: 51 × 23
+##   state     st     fips total_vote vote_margin winner party pct_margin
+##   &lt;chr&gt;     &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
+## 1 Alabama   AL        1    2123372      588708 Trump  Repu…     0.277 
+## 2 Alaska    AK        2     318608       46933 Trump  Repu…     0.147 
+## 3 Arizona   AZ        4    2604657       91234 Trump  Repu…     0.035 
+## 4 Arkansas  AR        5    1130635      304378 Trump  Repu…     0.269 
+## 5 Californ… CA        6   14237893     4269978 Clint… Demo…     0.300 
+## 6 Colorado  CO        8    2780247      136386 Clint… Demo…     0.0491
+## # ℹ 45 more rows
+## # ℹ 15 more variables: r_points &lt;dbl&gt;, d_points &lt;dbl&gt;,
+## #   pct_clinton &lt;dbl&gt;, pct_trump &lt;dbl&gt;, pct_johnson &lt;dbl&gt;,
+## #   pct_other &lt;dbl&gt;, clinton_vote &lt;dbl&gt;, trump_vote &lt;dbl&gt;,
+## #   johnson_vote &lt;dbl&gt;, other_vote &lt;dbl&gt;, ev_dem &lt;dbl&gt;, ev_rep &lt;dbl&gt;,
+## #   ev_oth &lt;dbl&gt;, census &lt;chr&gt;, region &lt;chr&gt;
 ```
 
 ```r
@@ -952,7 +752,7 @@ p1 &lt;- p0 + geom_polygon(color = "gray90", size = 0.1) +
 p1
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-50-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-39-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 .pull-right[
 
@@ -962,7 +762,7 @@ p1 +
                       high = "#CB454A")
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-51-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-40-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 ---
 class: clear
@@ -993,7 +793,7 @@ thereby skewing the color scale on the previous map. We thus subset the data.
 p2 %+% subset(us_states_elec, region %nin% "district of columbia") 
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-52-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-41-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 ---
 
 # Counties map
@@ -1004,7 +804,7 @@ Time to get a cup of joe. This could take a while.
 us_counties_elec &lt;- us_counties %&gt;% 
   filter(region %nin% 'district of columbia') %&gt;%
   left_join(election)
-*p2 %+% us_counties_elec
+p2 %+% us_counties_elec #&lt;&lt;
 ```
 
 &lt;img src="04_maps_files/figure-html/us_counties_elec-1.png" width="70%" style="display: block; margin: auto;" /&gt;
@@ -1030,7 +830,7 @@ class: clear
 p3 + facet_wrap(~ census, nrow = 2) + guides(color = FALSE)
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-54-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-43-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 
@@ -1040,7 +840,7 @@ p3 + facet_wrap(~ census, nrow = 2, scales = "free_y") +
   guides(color = FALSE)
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-55-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-44-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 
 # USA choropleth
@@ -1061,7 +861,7 @@ county_map
 ```
 
 ```
-## # A tibble: 191,382 x 7
+## # A tibble: 191,382 × 7
 ##       long       lat order hole  piece group            id   
 ##      &lt;dbl&gt;     &lt;dbl&gt; &lt;int&gt; &lt;lgl&gt; &lt;fct&gt; &lt;fct&gt;            &lt;chr&gt;
 ## 1 1225889. -1275020.     1 FALSE 1     0500000US01001.1 01001
@@ -1070,7 +870,7 @@ county_map
 ## 4 1244129. -1267515.     4 FALSE 1     0500000US01001.1 01001
 ## 5 1272010. -1262889.     5 FALSE 1     0500000US01001.1 01001
 ## 6 1276797. -1295514.     6 FALSE 1     0500000US01001.1 01001
-## # … with 191,376 more rows
+## # ℹ 191,376 more rows
 ```
 ---
 class: clear
@@ -1080,22 +880,22 @@ county_data ## From the US Census Bureau
 ```
 
 ```
-## # A tibble: 3,195 x 32
-##   id    name           state census_region pop_dens pop_dens4 pop_dens6
-##   &lt;chr&gt; &lt;chr&gt;          &lt;fct&gt; &lt;fct&gt;         &lt;fct&gt;    &lt;fct&gt;     &lt;fct&gt;    
-## 1 0     &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;          [   50,… [ 45,  1… [ 82,  2…
-## 2 01000 1              AL    South         [   50,… [ 45,  1… [ 82,  2…
-## 3 01001 Autauga County AL    South         [   50,… [ 45,  1… [ 82,  2…
-## 4 01003 Baldwin County AL    South         [  100,… [118,716… [ 82,  2…
-## 5 01005 Barbour County AL    South         [   10,… [ 17,   … [ 25,   …
-## 6 01007 Bibb County    AL    South         [   10,… [ 17,   … [ 25,   …
-## # … with 3,189 more rows, and 25 more variables: pct_black &lt;fct&gt;,
-## #   pop &lt;int&gt;, female &lt;dbl&gt;, white &lt;dbl&gt;, black &lt;dbl&gt;,
-## #   travel_time &lt;dbl&gt;, land_area &lt;dbl&gt;, hh_income &lt;int&gt;,
-## #   su_gun4 &lt;fct&gt;, su_gun6 &lt;fct&gt;, fips &lt;dbl&gt;, votes_dem_2016 &lt;int&gt;,
-## #   votes_gop_2016 &lt;int&gt;, total_votes_2016 &lt;int&gt;, per_dem_2016 &lt;dbl&gt;,
-## #   per_gop_2016 &lt;dbl&gt;, diff_2016 &lt;int&gt;, per_dem_2012 &lt;dbl&gt;,
-## #   per_gop_2012 &lt;dbl&gt;, diff_2012 &lt;int&gt;, winner &lt;chr&gt;, …
+## # A tibble: 3,195 × 32
+##   id    name          state census_region pop_dens pop_dens4 pop_dens6
+##   &lt;chr&gt; &lt;chr&gt;         &lt;fct&gt; &lt;fct&gt;         &lt;fct&gt;    &lt;fct&gt;     &lt;fct&gt;    
+## 1 0     &lt;NA&gt;          &lt;NA&gt;  &lt;NA&gt;          [   50,… [ 45,  1… [ 82,  2…
+## 2 01000 1             AL    South         [   50,… [ 45,  1… [ 82,  2…
+## 3 01001 Autauga Coun… AL    South         [   50,… [ 45,  1… [ 82,  2…
+## 4 01003 Baldwin Coun… AL    South         [  100,… [118,716… [ 82,  2…
+## 5 01005 Barbour Coun… AL    South         [   10,… [ 17,   … [ 25,   …
+## 6 01007 Bibb County   AL    South         [   10,… [ 17,   … [ 25,   …
+## # ℹ 3,189 more rows
+## # ℹ 25 more variables: pct_black &lt;fct&gt;, pop &lt;int&gt;, female &lt;dbl&gt;,
+## #   white &lt;dbl&gt;, black &lt;dbl&gt;, travel_time &lt;dbl&gt;, land_area &lt;dbl&gt;,
+## #   hh_income &lt;int&gt;, su_gun4 &lt;fct&gt;, su_gun6 &lt;fct&gt;, fips &lt;dbl&gt;,
+## #   votes_dem_2016 &lt;int&gt;, votes_gop_2016 &lt;int&gt;,
+## #   total_votes_2016 &lt;int&gt;, per_dem_2016 &lt;dbl&gt;, per_gop_2016 &lt;dbl&gt;,
+## #   diff_2016 &lt;int&gt;, per_dem_2012 &lt;dbl&gt;, per_gop_2012 &lt;dbl&gt;, …
 ```
 ---
 class: clear
@@ -1122,7 +922,7 @@ p2 + scale_fill_brewer(palette="Blues",
                                   "500-1,000", "1,000-5,000", "&gt;5,000"))
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-58-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-47-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 Let us create a plot depicting the number of firearm-related suicide rates during `\(1999\)` to `\(2015\)` and compare it against the population map per counties.  
@@ -1151,7 +951,7 @@ pop_p3 &lt;- pop_p2 + labs(title = "Reverse-coded Population Density",
 ```
 ---
 class: clear
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-59-1.png" width="65%" style="display: block; margin: auto;" /&gt;&lt;img src="04_maps_files/figure-html/unnamed-chunk-59-2.png" width="65%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-48-1.png" width="65%" style="display: block; margin: auto;" /&gt;&lt;img src="04_maps_files/figure-html/unnamed-chunk-48-2.png" width="65%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 
@@ -1168,16 +968,16 @@ opiates %&gt;% select(-crude, -fips, -adjusted_se)
 ```
 
 ```
-## # A tibble: 800 x 8
-##    year state   deaths population adjusted region abbr  division_name 
-##   &lt;int&gt; &lt;chr&gt;    &lt;int&gt;      &lt;int&gt;    &lt;dbl&gt; &lt;ord&gt;  &lt;chr&gt; &lt;chr&gt;         
-## 1  1999 Alabama     37    4430141      0.8 South  AL    East South Ce…
-## 2  1999 Alaska      27     624779      4   West   AK    Pacific       
-## 3  1999 Arizona    229    5023823      4.7 West   AZ    Mountain      
-## 4  1999 Arkans…     28    2651860      1.1 South  AR    West South Ce…
-## 5  1999 Califo…   1474   33499204      4.5 West   CA    Pacific       
-## 6  1999 Colora…    164    4226018      3.7 West   CO    Mountain      
-## # … with 794 more rows
+## # A tibble: 800 × 8
+##    year state    deaths population adjusted region abbr  division_name
+##   &lt;int&gt; &lt;chr&gt;     &lt;int&gt;      &lt;int&gt;    &lt;dbl&gt; &lt;ord&gt;  &lt;chr&gt; &lt;chr&gt;        
+## 1  1999 Alabama      37    4430141      0.8 South  AL    East South C…
+## 2  1999 Alaska       27     624779      4   West   AK    Pacific      
+## 3  1999 Arizona     229    5023823      4.7 West   AZ    Mountain     
+## 4  1999 Arkansas     28    2651860      1.1 South  AR    West South C…
+## 5  1999 Califor…   1474   33499204      4.5 West   CA    Pacific      
+## 6  1999 Colorado    164    4226018      3.7 West   CO    Mountain     
+## # ℹ 794 more rows
 ```
 
 ```r
@@ -1202,12 +1002,12 @@ p2 + theme_map() +
      facet_wrap(~ year, ncol = 2)
 ```
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-60-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-49-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 Compare the previous figure with 
 
-&lt;img src="04_maps_files/figure-html/unnamed-chunk-61-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="04_maps_files/figure-html/unnamed-chunk-50-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear, middle
 The code for the previous figure is given below.
@@ -1220,7 +1020,7 @@ p0 &lt;- ggplot(data = filter(opiates, !is.na(division_name)),
 p1 &lt;- p0 + geom_line(color = "gray70", aes(group = state)) + 
            geom_smooth(aes(group = division_name), se = FALSE)
 
-*opiates_subset &lt;- filter(opiates, year == max(year), abbr!= "DC")
+opiates_subset &lt;- filter(opiates, year == max(year), abbr!= "DC") #&lt;&lt;
 p2 &lt;- p1 + geom_text_repel(data = opiates_subset,
                            aes(x = year, y = adjusted, label = abbr),
                            size = 1.8, segment.color = NA, nudge_x = 30) +
@@ -1278,6 +1078,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

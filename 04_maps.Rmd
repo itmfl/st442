@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "ggplot, maps, and other tidbits"
-date: "`r Sys.Date()`"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -61,7 +61,6 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
   code_font_size = "0.8rem",
   link_color = "#03A696",
   header_font_google = google_font("Josefin Sans"),
-  title_slide_background_image = "belltower2.jpg",
   #title_slide_background_size = "600px",
   #title_slide_background_position = "bottom",
  # text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -398,130 +397,6 @@ g3
 ```
 ---
 
-# Groupings & collective geoms
-.pull-left[
-```{r df_example2}
-df <- dplyr::tibble(
-  x = c("a", "a", "a", "a", 
-        "b", "b", "b", "b"),
-  y = c(1,2,3,4,4,3,2,1),
-  z = c("A", "A", "B", "B", 
-        "B", "B", "A", "A"))
-df
-```
-]
-.pull-right[
-```{r}
-df %>% ggplot( aes(x = x, y = y, 
-                   color = z)) + 
-  geom_point(size=3) + 
-  geom_line()
-```
-]
-
-
----
-class: clear
-
-In the previous plot the **geom_point** and the **geom_line** are each 
-divided into four groups due to interaction between the implicit grouping
-due to $x$ and the explicit grouping due to $\mathrm{color}$ being set to $z$. 
-
-.pull-left[
-```{r}
-df
-```
-]
-.pull-right[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = z))
-```
-Here the *geom_point* and the *geom_line*
-are both divided into two groups. 
-]
----
-class: clear
-.pull-left[
-```{r}
-df
-```
-]
-.pull-right[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1))
-```
-Here the *geom_point* has two groups while the *geom_line* has one group.
-However, the *geom_line* now consists of two segments with different colors.
-]
----
-class: clear
-.pull-left[
-```{r}
-df
-```
-]
-.pull-right[
-```{r}
-
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1),
-                color="black") 
-```
-Here the *geom_point* has two groups while the *geom_line* has one group and only
-one segment.
-]
----
-class: clear
-
-Finally, compare the following two outputs using different **geom** objects.
-
-.pull-left[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = z))
-```
-]
-.pull-right[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_polygon(aes(group = z),
-               fill="gray80")
-```
-]
----
-class: clear
-
-Finally, compare the following two outputs using different **geom** objects.
-.pull-left[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_line(aes(group = 1))
-```
-]
-.pull-right[
-```{r}
-df %>% ggplot(aes(x = x, y = y, 
-                  color = z)) + 
-  geom_point(size=3) + 
-  geom_polygon(aes(group = 1),
-               fill="gray80")
-```
-]
----
 
 # Time to move on
 ```{r us_states, cache = TRUE, echo = FALSE}
@@ -588,7 +463,7 @@ ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) +
                size = 3, col = "red") + 
   geom_ellipse(aes(x0 = -76, y0 = 35, a = 0.5, b = 0.8, angle = -pi / 3, m1 = 3), 
                size = 3, col = "red") +
-  ggtitle('Dorian is coming!!! OMGWTFBBQ11')
+  ggtitle('Storm is coming!!! OMGWTFBBQ11')
 ```
 
 ---
