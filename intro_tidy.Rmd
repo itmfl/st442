@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Tidyr and relational data"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -92,22 +92,22 @@ table1 <- tribble(
 )
 
 table2 <- pivot_longer(data = table1, cols = c("cases", "population"), 
-                       names_to = "type", values_to = "value") %>% arrange(country, year)
-table3 <- table1 %>% unite(rate, cases, population, sep = "/")
-table4a <- table1 %>% select(-population) %>% pivot_wider(names_from = "year", values_from = "cases")
-table4b <- table1 %>% select(-cases) %>% pivot_wider(names_from = "year", values_from = "population")
+                       names_to = "type", values_to = "value") |> arrange(country, year)
+table3 <- table1 |> unite(rate, cases, population, sep = "/")
+table4a <- table1 |> select(-population) |> pivot_wider(names_from = "year", values_from = "cases")
+table4b <- table1 |> select(-cases) |> pivot_wider(names_from = "year", values_from = "population")
 ```
 .pull-left[
 ```{r echo = FALSE}
 library(kableExtra)
-knitr::kable(table1, caption = "Table 1") %>% 
+knitr::kable(table1, caption = "Table 1") |> 
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
 ```{r echo = FALSE}
 library(kableExtra)
-knitr::kable(table2, caption = "Table 2") %>% 
+knitr::kable(table2, caption = "Table 2") |> 
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
@@ -115,16 +115,16 @@ knitr::kable(table2, caption = "Table 2") %>%
 class: clear, middle
 .pull-left[
 ```{r echo = FALSE}
-knitr::kable(table3, caption = "Table 3") %>% 
+knitr::kable(table3, caption = "Table 3") |> 
   kable_styling(bootstrap_options = "striped", font_size = 14)
 
 ```
 ]
 .pull-right[
 ```{r echo = FALSE}
-knitr::kable(table4a, caption = "Table 4a") %>% 
+knitr::kable(table4a, caption = "Table 4a") |> 
   kable_styling(bootstrap_options = "striped", font_size = 14)
-knitr::kable(table4b, caption = "Table 4b") %>% 
+knitr::kable(table4b, caption = "Table 4b") |> 
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
@@ -182,26 +182,26 @@ class: clear
 As another example, consider the following two representations of table $4a$.
 .pull-left[
 ```{r echo = FALSE}
-knitr::kable(table4a, caption = "table4a") %>% 
+knitr::kable(table4a, caption = "table4a") |>
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
 ```{r echo = FALSE}
-knitr::kable(table4a %>% pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") %>% 
-  arrange(country, year), caption = "table4a_new") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4a |> pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") |>
+  arrange(country, year), caption = "table4a_new") |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 
 <br>
 To go from the first representation to the second representation, we do
 ```{r eval = FALSE}
-table4a_new <- table4a %>% pivot_longer(cols = c("1999","2000"), 
+table4a_new <- table4a |> pivot_longer(cols = c("1999","2000"), 
                                         names_to = "year", values_to = "cases")
 ```
 and to go from the second representation to the first, we do
 ```{r eval = FALSE}
-table4a_new %>% pivot_wider(names_from = "year", values_from = "cases") 
+table4a_new |> pivot_wider(names_from = "year", values_from = "cases") 
 ```
 ---
 # Missing data and pivoting.
@@ -227,7 +227,7 @@ class: clear
 **pivot_longer** the `stocks` dataset and then **pivot_wider** the resulting data yields
 .pull-left[
 ```{r}
-stocks_wide <- stocks %>% 
+stocks_wide <- stocks |> 
   pivot_wider(names_from = "year", 
               values_from = "return")
 stocks_wide
@@ -235,7 +235,7 @@ stocks_wide
 ]
 .pull-right[
 ```{r}
-stocks_wide %>% 
+stocks_wide |> 
   pivot_longer(cols = c("2015",
                         "2016"),
                names_to = "year",
@@ -270,7 +270,7 @@ treatment <- tribble(
 ]
 .pull-right[
 ```{r}
-treatment %>% fill(person,treatment)
+treatment |> fill(person,treatment)
 ```
 ]
 ---
@@ -308,7 +308,7 @@ To go from Table $3$ to Table $1$, we do either
 
 .pull-left[
 ```{r}
-table3 %>% 
+table3 |> 
   separate(rate, 
           into=c("cases",
                  "population"), 
@@ -318,7 +318,7 @@ table3 %>%
 
 .pull-right[
 ```{r}
-table3 %>% 
+table3 |> 
   separate(rate, 
            into=c("cases",
                   "population"), 
@@ -331,14 +331,14 @@ The inverse of [separate](https://tidyr.tidyverse.org/reference/separate.html) i
 <br>
 .pull-left[
 ```{r}
-table1 %>% 
+table1 |> 
   unite(rate, cases, population)
 ```
 ]
 
 .pull-right[
 ```{r}
-table1 %>% 
+table1 |> 
   unite(rate, cases, population,
         sep = "/")
 ```
@@ -358,8 +358,8 @@ Also, the numerous columns whose names start with `new` indicate that these colu
 
 We thus start by pivoting the data to a longer format.
 ```{r}
-who1 <- who %>% 
-  select(-iso2,-iso3) %>%
+who1 <- who |> 
+  select(-iso2,-iso3) |>
   pivot_longer(col = -c("country","year"), names_to = "code", 
                values_to = "cases", values_drop_na = TRUE)
 who1
@@ -367,7 +367,7 @@ who1
 ---
 class: clear
 ```{r}
-who1 %>% count(code) %>% select(code) %>% pull()
+who1 |> count(code) |> select(code) |> pull()
 ```
 
 --
@@ -391,10 +391,10 @@ We thus rename `newrel` to `new_rel` and then separate the `code` column into fo
 
 Note that we call **separate** twice; the second separate splits at a specified location in the string.
 ```{r}
-who2 <- who1 %>% 
-  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) %>%
-  separate(code, into = c("new", "type", "sexage")) %>%
-  select(-new) %>%
+who2 <- who1 |> 
+  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) |>
+  separate(code, into = c("new", "type", "sexage")) |>
+  select(-new) |>
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
@@ -405,12 +405,12 @@ who2
 
 The data is now in a tidy format. In summary, we did
 ```{r eval = FALSE}
-who_tidy <- who %>% 
+who_tidy <- who |> 
   pivot_longer(cols = 5:60, names_to = "code", 
-               values_to = "cases", values_drop_na = TRUE) %>%
-  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) %>%
-  separate(code, into = c("new", "type", "sexage")) %>% 
-  select(-new, -iso2, -iso3) %>%
+               values_to = "cases", values_drop_na = TRUE) |>
+  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) |>
+  separate(code, into = c("new", "type", "sexage")) |> 
+  select(-new, -iso2, -iso3) |>
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
@@ -427,9 +427,9 @@ class: clear
 .pull-left[
 ```{r}
 library(babynames)
-babynames %>% 
-  filter(name == "Sue") %>%
-  group_by(name, sex) %>% 
+babynames |> 
+  filter(name == "Sue") |>
+  group_by(name, sex) |> 
   summarise(total = sum(n))
 ```
 ]
@@ -437,9 +437,9 @@ babynames %>%
 .pull-right[
 ```{r}
 library(babynames)
-babynames %>% 
-  filter(name == "Robin") %>%
-  group_by(name, sex) %>% 
+babynames |> 
+  filter(name == "Robin") |>
+  group_by(name, sex) |> 
   summarise(total = sum(n))
 ```
 ]
@@ -454,9 +454,9 @@ If we now take a collection of names, and look at the number of people with thes
 .pull-left[
 ```{r}
 names <- c("Sue", "Robin", "Leslie")
-babynames %>% 
-  filter(name %in% names) %>%
-  group_by(name, sex) %>%
+babynames |> 
+  filter(name %in% names) |>
+  group_by(name, sex) |>
   summarise(total = sum(n))
 ```
 ]
@@ -465,10 +465,10 @@ babynames %>%
 
 ```{r}
 names <- c("Sue", "Robin", "Leslie")
-babynames %>% 
-  filter(name %in% names) %>%
-  group_by(name, sex) %>%
-  summarise(total = sum(n)) %>%
+babynames |> 
+  filter(name %in% names) |>
+  group_by(name, sex) |>
+  summarise(total = sum(n)) |>
   pivot_wider(names_from = "sex", 
               values_from = "total")
 ```
@@ -480,14 +480,14 @@ We see that the use of **pivot_wider()** yield a representation of the data that
 class: clear
 We can now determine the most gender-neutral names for the whole babynames dataset.
 ```{r}
-babynames_wide <- babynames %>%
-  group_by(sex, name) %>%
-  summarise(total = sum(n)) %>%
+babynames_wide <- babynames |>
+  group_by(sex, name) |>
+  summarise(total = sum(n)) |>
   ## set missing values in wide table to 0
   pivot_wider(names_from = "sex", values_from = "total", values_fill = 0)
-babynames_wide %>% filter(M > 50000, F > 50000) %>%
-  mutate(ratio = pmin(F/M, M/F)) %>% ## parallel min
-  arrange(desc(ratio)) %>%
+babynames_wide |> filter(M > 50000, F > 50000) |>
+  mutate(ratio = pmin(F/M, M/F)) |> ## parallel min
+  arrange(desc(ratio)) |>
   head(6)
 ```
 ---
@@ -496,18 +496,18 @@ We recall the following tables
 
 .pull-left[
 ```{r echo = FALSE}
-knitr::kable(table1, caption = "table1") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table1, caption = "table1") |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 
 .pull-right[
 ```{r echo = FALSE}
-knitr::kable(table4a, capton = "table4a") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4a, capton = "table4a") |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 <br>
 <br>
 ```{r echo = FALSE}
-knitr::kable(table4b, caption = "table4b") %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+knitr::kable(table4b, caption = "table4b") |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
@@ -515,54 +515,54 @@ class: clear
 To go from table $4a$ and $4b$ to Table $1$, we need to reshape them into long tables and then combine columns. More specifically
 .pull-left[
 ```{r eval = FALSE}
-table4a.long <- table4a %>% 
+table4a.long <- table4a |> 
   pivot_longer(
     cols = c("1999","2000"),
     names_to = "year", 
-    values_to = "cases") %>% 
+    values_to = "cases") |> 
   arrange(year)
 ```
 ```{r echo = FALSE}
-knitr::kable(table4a  %>%
+knitr::kable(table4a  |>
              pivot_longer(cols = c("1999","2000"),
                names_to = "year", 
-               values_to = "cases") %>% 
-  arrange(year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+               values_to = "cases") |> 
+  arrange(year)) |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 .pull-right[
 ```{r eval = FALSE}
-table4b.long <- table4b %>% 
+table4b.long <- table4b |> 
   pivot_longer(
     cols = c("1999","2000"),
     names_to = "year", 
-    values_to = "cases") %>% 
+    values_to = "cases") |> 
   arrange(year)
 ```
 ```{r echo = FALSE}
 
-knitr::kable(table4b  %>%
+knitr::kable(table4b  |>
              pivot_longer(cols = c("1999","2000"),
                names_to = "year", 
-               values_to = "cases") %>% 
-  arrange(year)) %>% kable_styling(bootstrap_options = "striped", font_size = 14)
+               values_to = "cases") |> 
+  arrange(year)) |> kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ]
 ---
 class: clear
 We then **join** the columns of the **reshaped** table $4b$ to that of the **reshaped** table $4a$. The join operation we are doing is termed a [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html).
 ```{r eval=FALSE}
-table4a.long %>% left_join(table4b.long)
+table4a.long |> left_join(table4b.long)
 ```
 ```{r echo = FALSE, message = TRUE}
-table4a.long <- table4a %>% 
-  pivot_longer(cols = c("1999","2000"),names_to = "year", values_to = "cases") %>% 
+table4a.long <- table4a |> 
+  pivot_longer(cols = c("1999","2000"),names_to = "year", values_to = "cases") |> 
   arrange(year)
-table4b.long <- table4b %>% 
-  pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") %>% 
+table4b.long <- table4b |> 
+  pivot_longer(cols = c("1999","2000"), names_to = "year", values_to = "cases") |> 
   arrange(year)
-table.joined <- table4a.long %>% left_join(table4b.long)
-knitr::kable(table.joined) %>%
+table.joined <- table4a.long |> left_join(table4b.long)
+knitr::kable(table.joined) |>
   kable_styling(bootstrap_options = "striped", font_size = 14)
 ```
 ---
@@ -636,7 +636,7 @@ Suppose we now want to get the full airlines name for each flights (as opposed t
 options(tibble.print_max = 3, tibble.print_min=3)
 flights.sml <- select(flights, year:day, dep_time, tailnum, carrier, dest)
 flights.sml
-flights.sml %>% inner_join(airlines)
+flights.sml |> inner_join(airlines)
 ```
 ---
 class: clear
@@ -644,8 +644,8 @@ Suppose that we want to get detailed information about the airplanes used in the
 In this case, we want to match the observations in both table using the *tailnum* column.
 ```{r echo = -1, message = TRUE}
 options(tibble.print_max = 3, tibble.print_min=3)
-flights.sml %>% inner_join(planes)
-flights.sml %>% inner_join(planes, by = "tailnum")
+flights.sml |> inner_join(planes)
+flights.sml |> inner_join(planes, by = "tailnum")
 ```
 ---
 class: clear
@@ -655,15 +655,15 @@ that do not appear in the **planes** table.
 We thus need to be careful when using **inner_join()** as it can silently remove observations.
 
 ```{r message = TRUE}
-flights.sml %>% left_join(planes, by = "tailnum")
-flights.sml %>% inner_join(planes, by = "tailnum")
+flights.sml |> left_join(planes, by = "tailnum")
+flights.sml |> inner_join(planes, by = "tailnum")
 ```
 ---
 class: clear
 When the identifying key of one table is different from the other table, we use `by = c("a" = "b")`, e.g.,
 ```{r}
 airports
-flights.sml %>% left_join(airports, by = c("dest" = "faa"))
+flights.sml |> left_join(airports, by = c("dest" = "faa"))
 ```
 ---
 #Filtering joins
@@ -675,21 +675,21 @@ These operations match observations in the same way as `left_join(x,y)`, but ins
 For example, suppose we are interested in all flights that go to the top ten most popular destinations. We first find these destinations and then filter flights to these destinations.
 
 ```{r}
-top_dest <- flights %>% group_by(dest) %>% summarise(count = n()) %>% 
-  arrange(desc(count)) %>% head(10)
+top_dest <- flights |> group_by(dest) |> summarise(count = n()) |> 
+  arrange(desc(count)) |> head(10)
 ```
 ---
 class: clear
 .pull-left[
 ```{r}
-flights %>% 
-  filter(dest %in% top_dest$dest) %>%
+flights |> 
+  filter(dest %in% top_dest$dest) |>
   select(year:day, dest)
 ```
 ]
 .pull-right[
 ```{r}
-flights %>% semi_join(top_dest) %>%
+flights |> semi_join(top_dest) |>
   select(year:day, dest)
 ```
 ]
@@ -699,8 +699,8 @@ As another example of filtering joins, we noted that not all the tailnum associa
 
 We might want to count how many flights are associated with each of these tailnum.
 ```{r}
-flights %>% anti_join(planes, by = "tailnum") %>%
-  group_by(tailnum) %>% summarise(n = n()) %>% arrange(desc(n))
+flights |> anti_join(planes, by = "tailnum") |>
+  group_by(tailnum) |> summarise(n = n()) |> arrange(desc(n))
 ```
 ---
 # Example 3: US Healthcare
@@ -733,16 +733,16 @@ The first $52$ lines appear fine. The $53$-rd line onwards appear to be notes/an
 ```{r}
 coverage <- coverage[1:(which(coverage$Location == "Notes") - 1),]
 ## Equivalently
-## coverage %>% filter(cumall(Location != "Notes"))
+## coverage |> filter(cumall(Location != "Notes"))
 ```
 The structure of the remaining two files recording health spending and life expectancy are similar. Hence
 ```{r}
 spending <- read_csv(file = "https://bit.ly/33j3fZm", 
                      skip = 2,  col_names = TRUE)
-spending <- spending %>% filter(cumall(Location != "Notes"))
+spending <- spending |> filter(cumall(Location != "Notes"))
 life_exp <- read_csv(file = "https://bit.ly/2MK13Es", 
                      skip = 2, col_names = TRUE)
-life_exp <- life_exp %>% filter(cumall(Location != "Sources"))
+life_exp <- life_exp |> filter(cumall(Location != "Sources"))
 ```
 ---
 class: clear
@@ -754,7 +754,7 @@ glimpse(coverage)
 class: clear
 The data is **untidy** and needs a bit of pivoting
 ```{r error = TRUE}
-coverage_long <- coverage %>%  
+coverage_long <- coverage |>  
   pivot_longer(cols = -c("Location"), 
                names_to  = "year_type", values_to = "tot_coverage")
 
@@ -766,14 +766,14 @@ class: clear
 
 Luckily enough, tis is but a scratch.
 ```{r}
-coverage <- coverage %>% mutate(across(contains("Public"),as.numeric))
+coverage <- coverage |> mutate(across(contains("Public"),as.numeric))
 glimpse(coverage)
 ```
 
 ---
 class: clear
 ```{r}
-coverage_long <- coverage %>%  
+coverage_long <- coverage |>  
   pivot_longer(cols = -c("Location"), 
                names_to  = "year_type", values_to = "tot_coverage")
 coverage_long
@@ -781,7 +781,7 @@ coverage_long
 
 The spending data is also untidy. More pivoting
 ```{r}
-spending_long <- spending %>% 
+spending_long <- spending |> 
   pivot_longer(cols = -c("Location"), 
                names_to = "year", values_to = "tot_spending")
 spending_long
@@ -790,11 +790,11 @@ spending_long
 class: clear
 We now separate the `year` column for the **spending** data and the `year_type` column for the **coverage** data
 ```{r}
-spending_long <- spending_long %>% 
-  separate(year, sep = "__", into = c("year", "name"), convert = TRUE) %>%
+spending_long <- spending_long |> 
+  separate(year, sep = "__", into = c("year", "name"), convert = TRUE) |>
   select(-name)
 spending_long
-coverage_long <- coverage_long %>%
+coverage_long <- coverage_long |>
   separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE)
 coverage_long
 ```
@@ -802,7 +802,7 @@ coverage_long
 class: clear
 We also clean up the column names of the **life_exp** data frame.
 ```{r}
-life_exp <- life_exp %>% 
+life_exp <- life_exp |> 
   rename(life_exp_years = `Life Expectancy at Birth (years)`)
 ```
 
@@ -816,7 +816,7 @@ states.df <- tibble(
   state.name = c(state.name, "District of Columbia"),
   state.abb =  c(state.abb, "DC"),
   state.region = as.factor(c(as.character(state.region), "South")))
-coverage_long <- coverage_long %>% 
+coverage_long <- coverage_long |> 
   left_join(states.df, by = c("Location" = "state.name"))
 coverage_long
 ```
@@ -825,8 +825,8 @@ class: clear
 
 We now merge the **coverage**, **spending** and **life_exp** data frames together. The **coverage** data frame records span $2013$ to $2016$ while the **spending** data frame records span $1991$ to $2014$. In this case we wants to include only the years $2013$ and $2014$ in the merged datasets.
 ```{r message = TRUE}
-hc <- coverage_long %>% 
-  inner_join(spending_long) %>%
+hc <- coverage_long |> 
+  inner_join(spending_long) |>
   inner_join(life_exp)
 hc
 ```
@@ -835,13 +835,13 @@ class: clear
 Our data is now in a reasonable format for visualization and further analysis. One problem remains in that "Total" is not a valid type of healthcare coverage. Rather, a row for which `type = "Total"` 
 is a record of the total number of people in that state. We remedy this issue via
 ```{r messages = TRUE}
-pop <- hc %>% 
-  filter(type == "Total") %>%
-  select(Location, year, tot_coverage) %>%
+pop <- hc |> 
+  filter(type == "Total") |>
+  select(Location, year, tot_coverage) |>
   rename(tot_population = tot_coverage)
-hc <- hc %>%
-  filter(Location != "United States", type != "Total") %>%
-  left_join(pop) %>% select(Location, year, type, tot_population, everything())
+hc <- hc |>
+  filter(Location != "United States", type != "Total") |>
+  left_join(pop) |> select(Location, year, type, tot_population, everything())
 hc
 ```
 ---
@@ -851,12 +851,12 @@ Let us now try to answer the following question of "Is there a relationship betw
 ```{r out.width = "120%", fig.asp = 0.3, echo = FALSE}
 library(gridExtra)
 theme_set(theme_classic())
-df <- hc %>% filter(type == "Employer", year == "2013")
-p1 <- df %>% ggplot(aes(x = tot_spending, y = tot_coverage)) + 
+df <- hc |> filter(type == "Employer", year == "2013")
+p1 <- df |> ggplot(aes(x = tot_spending, y = tot_coverage)) + 
   geom_point() + xlab("spending") + ylab("coverage")
-p2 <- df %>% ggplot(aes(x = tot_population, y = tot_spending)) + 
+p2 <- df |> ggplot(aes(x = tot_population, y = tot_spending)) + 
   geom_point() + xlab("population") + ylab("spending")
-p3 <- df %>% ggplot(aes(x = tot_population, y = tot_coverage)) + 
+p3 <- df |> ggplot(aes(x = tot_population, y = tot_coverage)) + 
   geom_point() + xlab("population") + ylab("coverage")
 grid.arrange(p1,p2,p3,ncol = 3)
 ```
@@ -864,10 +864,10 @@ grid.arrange(p1,p2,p3,ncol = 3)
 class: clear
 If we remove the effect of population, the relationship between spending and coverage becomes much weaker. 
 ```{r out.width = "70%"}
-hc <- hc %>%
+hc <- hc |>
   mutate(spending_capita = (tot_spending*10^6)/tot_population,
          prop_coverage = tot_coverage/tot_population)
-hc %>% filter(type == "Employer", year == "2013") %>%
+hc |> filter(type == "Employer", year == "2013") |>
   ggplot(aes(x = spending_capita, y = prop_coverage)) +
   geom_point() + xlab("spending per capita") + 
   ylab("proportion of Employer coverage") + geom_smooth(method = "lm")
@@ -1006,27 +1006,27 @@ For example (here we use the **dplyr** verb $\mathrm{group\_split}$ to split a d
 
 .pull-left[
 ```{r}
-models <- mtcars %>% 
-  group_split(cyl) %>% 
+models <- mtcars |> 
+  group_split(cyl) |> 
   map(function(df) 
     lm(mpg ~ wt, data = df))
 
-models %>% map(summary) %>% 
+models |> map(summary) |> 
   map_dbl(function(x) x$r.squared)
 ```
 ]
 
 .pull-right[
 ```{r}
-models <- mtcars %>% 
-  group_split(cyl) %>%
+models <- mtcars |> 
+  group_split(cyl) |>
   map(~ lm(mpg ~ wt, data = .))
 
-models %>% map(summary) %>% 
+models |> map(summary) |> 
   map_dbl(~ .$r.squared)
 
 ## Equivalently
-models %>% map(summary) %>%
+models |> map(summary) |>
   map_dbl("r.squared")
 ```
 ]
@@ -1048,9 +1048,9 @@ class: clear
 ```{r}
 x <- list(list(1,2,3), list(4,5,6), list(7,8,9))
 ## Extract 2nd element from each list
-x %>% sapply('[[',2) 
-x %>% sapply('[' ,2) ## this does not work
-x %>% map_dbl(2)
+x |> sapply('[[',2) 
+x |> sapply('[' ,2) ## this does not work
+x |> map_dbl(2)
 ```
 ---
 class: clear
@@ -1118,10 +1118,10 @@ exp_wpct <- function(x, k = 2) {
   return(1/(1 + (1/x)^k))
 }
 library(Lahman)
-TeamRuns <- Teams %>% 
-  rename(RS = R) %>% 
+TeamRuns <- Teams |> 
+  rename(RS = R) |> 
   mutate(wpct = W / (W + L), run_ratio = RS/RA, 
-         hat.wpct = exp_wpct(run_ratio)) %>%
+         hat.wpct = exp_wpct(run_ratio)) |>
   select(yearID, teamID, lgID, wpct, hat.wpct, run_ratio) 
 TeamRuns
 ```
@@ -1170,8 +1170,8 @@ fit.k <- function(df,
   return(tibble(k = kseq[idx]))
 }
 kseq <- seq(from = 0.5, to = 2.5, by = 0.01)
-kstar <- TeamRuns %>% mutate(decade = yearID %/%10 * 10) %>%
-  group_split(decade) %>% map_df(fit.k, name1 = "run_ratio", name2 = "wpct")
+kstar <- TeamRuns |> mutate(decade = yearID %/%10 * 10) |>
+  group_split(decade) |> map_df(fit.k, name1 = "run_ratio", name2 = "wpct")
 kstar
 ```
 ---
@@ -1182,11 +1182,11 @@ Continuing in the same vein, let us identify, for each season, the team that led
 + We then split our data in groups based on $\mathrm{yearID}$ and $\mathrm{lgID}$ and apply our helper function to each group.
 ```{r}
 hr_leader <- function(x){
-  x %>% select(yearID, lgID, teamID, HR) %>%
-    arrange(desc(HR)) %>% head(n = 1)
+  x |> select(yearID, lgID, teamID, HR) |>
+    arrange(desc(HR)) |> head(n = 1)
 }
 library(Lahman)
-hr_leaders <- Teams %>% group_split(yearID, lgID) %>%
+hr_leaders <- Teams |> group_split(yearID, lgID) |>
   map_df(hr_leader)
 hr_leaders
 ```
@@ -1194,8 +1194,8 @@ hr_leaders
 class: clear
 We then visualize how the number of home runs of the top hitting teams change over time.
 ```{r out.width="80%"}
-hr_leaders %>% 
-  filter(yearID >= 1916) %>%
+hr_leaders |> 
+  filter(yearID >= 1916) |>
   ggplot(aes(x = yearID, y = HR, color = lgID)) + geom_line() + 
     geom_point() + geom_smooth(se = 0) + geom_vline(xintercept = 1973) + 
     annotate("text", x = 1974, y = 25, 

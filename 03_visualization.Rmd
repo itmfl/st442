@@ -602,7 +602,7 @@ p <- ggplot(data = com_fem,
 ```
 ---
 # Example 3: Weather trends
-```{r cache = TRUE, echo = FALSE, out.width="80%"}
+```{r cache = TRUE, echo = FALSE, out.width="80%", message = FALSE}
 source("R_scripts/daytona.R")
 p <- daytona_plot()
 print(p)
@@ -623,7 +623,7 @@ DAY
 class: clear
 We then create a data frame of the historical data from $1995$ to $2013$.
 
-```{r cache = TRUE}
+```{r cache = TRUE, message = FALSE}
 NEWDAY <- DAY %>% 
   group_by(Year) %>%
   mutate(newDay = seq(1, length(Day))) %>% 

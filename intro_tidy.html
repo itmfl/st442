@@ -34,7 +34,7 @@ class: center, middle, inverse, title-slide
 ## Tidyr and relational data
 ]
 .date[
-### Fall 2021
+### Fall 2023
 ]
 
 ---
@@ -424,13 +424,13 @@ As another example, consider the following two representations of table `\(4a\)`
 To go from the first representation to the second representation, we do
 
 ```r
-table4a_new &lt;- table4a %&gt;% pivot_longer(cols = c("1999","2000"), 
+table4a_new &lt;- table4a |&gt; pivot_longer(cols = c("1999","2000"), 
                                         names_to = "year", values_to = "cases")
 ```
 and to go from the second representation to the first, we do
 
 ```r
-table4a_new %&gt;% pivot_wider(names_from = "year", values_from = "cases") 
+table4a_new |&gt; pivot_wider(names_from = "year", values_from = "cases") 
 ```
 ---
 # Missing data and pivoting.
@@ -464,7 +464,7 @@ class: clear
 .pull-left[
 
 ```r
-stocks_wide &lt;- stocks %&gt;% 
+stocks_wide &lt;- stocks |&gt; 
   pivot_wider(names_from = "year", 
               values_from = "return")
 stocks_wide
@@ -483,7 +483,7 @@ stocks_wide
 .pull-right[
 
 ```r
-stocks_wide %&gt;% 
+stocks_wide |&gt; 
   pivot_longer(cols = c("2015",
                         "2016"),
                names_to = "year",
@@ -533,7 +533,7 @@ treatment &lt;- tribble(
 .pull-right[
 
 ```r
-treatment %&gt;% fill(person,treatment)
+treatment |&gt; fill(person,treatment)
 ```
 
 ```
@@ -599,7 +599,7 @@ To go from Table `\(3\)` to Table `\(1\)`, we do either
 .pull-left[
 
 ```r
-table3 %&gt;% 
+table3 |&gt; 
   separate(rate, 
           into=c("cases",
                  "population"), 
@@ -622,7 +622,7 @@ table3 %&gt;%
 .pull-right[
 
 ```r
-table3 %&gt;% 
+table3 |&gt; 
   separate(rate, 
            into=c("cases",
                   "population"), 
@@ -648,7 +648,7 @@ The inverse of [separate](https://tidyr.tidyverse.org/reference/separate.html) i
 .pull-left[
 
 ```r
-table1 %&gt;% 
+table1 |&gt; 
   unite(rate, cases, population)
 ```
 
@@ -668,7 +668,7 @@ table1 %&gt;%
 .pull-right[
 
 ```r
-table1 %&gt;% 
+table1 |&gt; 
   unite(rate, cases, population,
         sep = "/")
 ```
@@ -721,8 +721,8 @@ Also, the numerous columns whose names start with `new` indicate that these colu
 We thus start by pivoting the data to a longer format.
 
 ```r
-who1 &lt;- who %&gt;% 
-  select(-iso2,-iso3) %&gt;%
+who1 &lt;- who |&gt; 
+  select(-iso2,-iso3) |&gt;
   pivot_longer(col = -c("country","year"), names_to = "code", 
                values_to = "cases", values_drop_na = TRUE)
 who1
@@ -744,7 +744,7 @@ who1
 class: clear
 
 ```r
-who1 %&gt;% count(code) %&gt;% select(code) %&gt;% pull()
+who1 |&gt; count(code) |&gt; select(code) |&gt; pull()
 ```
 
 ```
@@ -784,10 +784,10 @@ We thus rename `newrel` to `new_rel` and then separate the `code` column into fo
 Note that we call **separate** twice; the second separate splits at a specified location in the string.
 
 ```r
-who2 &lt;- who1 %&gt;% 
-  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) %&gt;%
-  separate(code, into = c("new", "type", "sexage")) %&gt;%
-  select(-new) %&gt;%
+who2 &lt;- who1 |&gt; 
+  mutate(key = stringr::str_replace(code, "newrel", "new_rel")) |&gt;
+  separate(code, into = c("new", "type", "sexage")) |&gt;
+  select(-new) |&gt;
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
@@ -813,12 +813,12 @@ who2
 The data is now in a tidy format. In summary, we did
 
 ```r
-who_tidy &lt;- who %&gt;% 
+who_tidy &lt;- who |&gt; 
   pivot_longer(cols = 5:60, names_to = "code", 
-               values_to = "cases", values_drop_na = TRUE) %&gt;%
-  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) %&gt;%
-  separate(code, into = c("new", "type", "sexage")) %&gt;% 
-  select(-new, -iso2, -iso3) %&gt;%
+               values_to = "cases", values_drop_na = TRUE) |&gt;
+  mutate(code = stringr::str_replace(key, "newrel", "new_rel")) |&gt;
+  separate(code, into = c("new", "type", "sexage")) |&gt; 
+  select(-new, -iso2, -iso3) |&gt;
   separate(sexage, into = c("sex", "age"), sep = 1)
 ```
 ---
@@ -850,9 +850,9 @@ class: clear
 
 ```r
 library(babynames)
-babynames %&gt;% 
-  filter(name == "Sue") %&gt;%
-  group_by(name, sex) %&gt;% 
+babynames |&gt; 
+  filter(name == "Sue") |&gt;
+  group_by(name, sex) |&gt; 
   summarise(total = sum(n))
 ```
 
@@ -869,9 +869,9 @@ babynames %&gt;%
 
 ```r
 library(babynames)
-babynames %&gt;% 
-  filter(name == "Robin") %&gt;%
-  group_by(name, sex) %&gt;% 
+babynames |&gt; 
+  filter(name == "Robin") |&gt;
+  group_by(name, sex) |&gt; 
   summarise(total = sum(n))
 ```
 
@@ -895,9 +895,9 @@ If we now take a collection of names, and look at the number of people with thes
 
 ```r
 names &lt;- c("Sue", "Robin", "Leslie")
-babynames %&gt;% 
-  filter(name %in% names) %&gt;%
-  group_by(name, sex) %&gt;%
+babynames |&gt; 
+  filter(name %in% names) |&gt;
+  group_by(name, sex) |&gt;
   summarise(total = sum(n))
 ```
 
@@ -919,10 +919,10 @@ babynames %&gt;%
 
 ```r
 names &lt;- c("Sue", "Robin", "Leslie")
-babynames %&gt;% 
-  filter(name %in% names) %&gt;%
-  group_by(name, sex) %&gt;%
-  summarise(total = sum(n)) %&gt;%
+babynames |&gt; 
+  filter(name %in% names) |&gt;
+  group_by(name, sex) |&gt;
+  summarise(total = sum(n)) |&gt;
   pivot_wider(names_from = "sex", 
               values_from = "total")
 ```
@@ -944,14 +944,14 @@ class: clear
 We can now determine the most gender-neutral names for the whole babynames dataset.
 
 ```r
-babynames_wide &lt;- babynames %&gt;%
-  group_by(sex, name) %&gt;%
-  summarise(total = sum(n)) %&gt;%
+babynames_wide &lt;- babynames |&gt;
+  group_by(sex, name) |&gt;
+  summarise(total = sum(n)) |&gt;
   ## set missing values in wide table to 0
   pivot_wider(names_from = "sex", values_from = "total", values_fill = 0)
-babynames_wide %&gt;% filter(M &gt; 50000, F &gt; 50000) %&gt;%
-  mutate(ratio = pmin(F/M, M/F)) %&gt;% ## parallel min
-  arrange(desc(ratio)) %&gt;%
+babynames_wide |&gt; filter(M &gt; 50000, F &gt; 50000) |&gt;
+  mutate(ratio = pmin(F/M, M/F)) |&gt; ## parallel min
+  arrange(desc(ratio)) |&gt;
   head(6)
 ```
 
@@ -1085,11 +1085,11 @@ To go from table `\(4a\)` and `\(4b\)` to Table `\(1\)`, we need to reshape them
 .pull-left[
 
 ```r
-table4a.long &lt;- table4a %&gt;% 
+table4a.long &lt;- table4a |&gt; 
   pivot_longer(
     cols = c("1999","2000"),
     names_to = "year", 
-    values_to = "cases") %&gt;% 
+    values_to = "cases") |&gt; 
   arrange(year)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1137,11 +1137,11 @@ table4a.long &lt;- table4a %&gt;%
 .pull-right[
 
 ```r
-table4b.long &lt;- table4b %&gt;% 
+table4b.long &lt;- table4b |&gt; 
   pivot_longer(
     cols = c("1999","2000"),
     names_to = "year", 
-    values_to = "cases") %&gt;% 
+    values_to = "cases") |&gt; 
   arrange(year)
 ```
 &lt;table class="table table-striped" style="font-size: 14px; margin-left: auto; margin-right: auto;"&gt;
@@ -1191,7 +1191,7 @@ class: clear
 We then **join** the columns of the **reshaped** table `\(4b\)` to that of the **reshaped** table `\(4a\)`. The join operation we are doing is termed a [mutating join](https://dplyr.tidyverse.org/reference/mutate-joins.html).
 
 ```r
-table4a.long %&gt;% left_join(table4b.long)
+table4a.long |&gt; left_join(table4b.long)
 ```
 
 ```
@@ -1389,7 +1389,7 @@ flights.sml
 ```
 
 ```r
-flights.sml %&gt;% inner_join(airlines)
+flights.sml |&gt; inner_join(airlines)
 ```
 
 ```
@@ -1411,7 +1411,7 @@ Suppose that we want to get detailed information about the airplanes used in the
 In this case, we want to match the observations in both table using the *tailnum* column.
 
 ```r
-flights.sml %&gt;% inner_join(planes)
+flights.sml |&gt; inner_join(planes)
 ```
 
 ```
@@ -1431,7 +1431,7 @@ flights.sml %&gt;% inner_join(planes)
 ```
 
 ```r
-flights.sml %&gt;% inner_join(planes, by = "tailnum")
+flights.sml |&gt; inner_join(planes, by = "tailnum")
 ```
 
 ```
@@ -1454,7 +1454,7 @@ We thus need to be careful when using **inner_join()** as it can silently remove
 
 
 ```r
-flights.sml %&gt;% left_join(planes, by = "tailnum")
+flights.sml |&gt; left_join(planes, by = "tailnum")
 ```
 
 ```
@@ -1470,7 +1470,7 @@ flights.sml %&gt;% left_join(planes, by = "tailnum")
 ```
 
 ```r
-flights.sml %&gt;% inner_join(planes, by = "tailnum")
+flights.sml |&gt; inner_join(planes, by = "tailnum")
 ```
 
 ```
@@ -1503,7 +1503,7 @@ airports
 ```
 
 ```r
-flights.sml %&gt;% left_join(airports, by = c("dest" = "faa"))
+flights.sml |&gt; left_join(airports, by = c("dest" = "faa"))
 ```
 
 ```
@@ -1527,16 +1527,16 @@ For example, suppose we are interested in all flights that go to the top ten mos
 
 
 ```r
-top_dest &lt;- flights %&gt;% group_by(dest) %&gt;% summarise(count = n()) %&gt;% 
-  arrange(desc(count)) %&gt;% head(10)
+top_dest &lt;- flights |&gt; group_by(dest) |&gt; summarise(count = n()) |&gt; 
+  arrange(desc(count)) |&gt; head(10)
 ```
 ---
 class: clear
 .pull-left[
 
 ```r
-flights %&gt;% 
-  filter(dest %in% top_dest$dest) %&gt;%
+flights |&gt; 
+  filter(dest %in% top_dest$dest) |&gt;
   select(year:day, dest)
 ```
 
@@ -1553,7 +1553,7 @@ flights %&gt;%
 .pull-right[
 
 ```r
-flights %&gt;% semi_join(top_dest) %&gt;%
+flights |&gt; semi_join(top_dest) |&gt;
   select(year:day, dest)
 ```
 
@@ -1574,8 +1574,8 @@ As another example of filtering joins, we noted that not all the tailnum associa
 We might want to count how many flights are associated with each of these tailnum.
 
 ```r
-flights %&gt;% anti_join(planes, by = "tailnum") %&gt;%
-  group_by(tailnum) %&gt;% summarise(n = n()) %&gt;% arrange(desc(n))
+flights |&gt; anti_join(planes, by = "tailnum") |&gt;
+  group_by(tailnum) |&gt; summarise(n = n()) |&gt; arrange(desc(n))
 ```
 
 ```
@@ -1655,17 +1655,17 @@ The first `\(52\)` lines appear fine. The `\(53\)`-rd line onwards appear to be 
 ```r
 coverage &lt;- coverage[1:(which(coverage$Location == "Notes") - 1),]
 ## Equivalently
-## coverage %&gt;% filter(cumall(Location != "Notes"))
+## coverage |&gt; filter(cumall(Location != "Notes"))
 ```
 The structure of the remaining two files recording health spending and life expectancy are similar. Hence
 
 ```r
 spending &lt;- read_csv(file = "https://bit.ly/33j3fZm", 
                      skip = 2,  col_names = TRUE)
-spending &lt;- spending %&gt;% filter(cumall(Location != "Notes"))
+spending &lt;- spending |&gt; filter(cumall(Location != "Notes"))
 life_exp &lt;- read_csv(file = "https://bit.ly/2MK13Es", 
                      skip = 2, col_names = TRUE)
-life_exp &lt;- life_exp %&gt;% filter(cumall(Location != "Sources"))
+life_exp &lt;- life_exp |&gt; filter(cumall(Location != "Sources"))
 ```
 ---
 class: clear
@@ -1713,7 +1713,7 @@ class: clear
 The data is **untidy** and needs a bit of pivoting
 
 ```r
-coverage_long &lt;- coverage %&gt;%  
+coverage_long &lt;- coverage |&gt;  
   pivot_longer(cols = -c("Location"), 
                names_to  = "year_type", values_to = "tot_coverage")
 ```
@@ -1730,7 +1730,7 @@ class: clear
 Luckily enough, tis is but a scratch.
 
 ```r
-coverage &lt;- coverage %&gt;% mutate(across(contains("Public"),as.numeric))
+coverage &lt;- coverage |&gt; mutate(across(contains("Public"),as.numeric))
 glimpse(coverage)
 ```
 
@@ -1772,7 +1772,7 @@ glimpse(coverage)
 class: clear
 
 ```r
-coverage_long &lt;- coverage %&gt;%  
+coverage_long &lt;- coverage |&gt;  
   pivot_longer(cols = -c("Location"), 
                names_to  = "year_type", values_to = "tot_coverage")
 coverage_long
@@ -1791,7 +1791,7 @@ coverage_long
 The spending data is also untidy. More pivoting
 
 ```r
-spending_long &lt;- spending %&gt;% 
+spending_long &lt;- spending |&gt; 
   pivot_longer(cols = -c("Location"), 
                names_to = "year", values_to = "tot_spending")
 spending_long
@@ -1811,8 +1811,8 @@ class: clear
 We now separate the `year` column for the **spending** data and the `year_type` column for the **coverage** data
 
 ```r
-spending_long &lt;- spending_long %&gt;% 
-  separate(year, sep = "__", into = c("year", "name"), convert = TRUE) %&gt;%
+spending_long &lt;- spending_long |&gt; 
+  separate(year, sep = "__", into = c("year", "name"), convert = TRUE) |&gt;
   select(-name)
 spending_long
 ```
@@ -1828,7 +1828,7 @@ spending_long
 ```
 
 ```r
-coverage_long &lt;- coverage_long %&gt;%
+coverage_long &lt;- coverage_long |&gt;
   separate(year_type, sep = "__", into = c("year", "type"), convert = TRUE)
 coverage_long
 ```
@@ -1847,7 +1847,7 @@ class: clear
 We also clean up the column names of the **life_exp** data frame.
 
 ```r
-life_exp &lt;- life_exp %&gt;% 
+life_exp &lt;- life_exp |&gt; 
   rename(life_exp_years = `Life Expectancy at Birth (years)`)
 ```
 
@@ -1862,7 +1862,7 @@ states.df &lt;- tibble(
   state.name = c(state.name, "District of Columbia"),
   state.abb =  c(state.abb, "DC"),
   state.region = as.factor(c(as.character(state.region), "South")))
-coverage_long &lt;- coverage_long %&gt;% 
+coverage_long &lt;- coverage_long |&gt; 
   left_join(states.df, by = c("Location" = "state.name"))
 coverage_long
 ```
@@ -1882,8 +1882,8 @@ class: clear
 We now merge the **coverage**, **spending** and **life_exp** data frames together. The **coverage** data frame records span `\(2013\)` to `\(2016\)` while the **spending** data frame records span `\(1991\)` to `\(2014\)`. In this case we wants to include only the years `\(2013\)` and `\(2014\)` in the merged datasets.
 
 ```r
-hc &lt;- coverage_long %&gt;% 
-  inner_join(spending_long) %&gt;%
+hc &lt;- coverage_long |&gt; 
+  inner_join(spending_long) |&gt;
   inner_join(life_exp)
 ```
 
@@ -1912,13 +1912,13 @@ Our data is now in a reasonable format for visualization and further analysis. O
 is a record of the total number of people in that state. We remedy this issue via
 
 ```r
-pop &lt;- hc %&gt;% 
-  filter(type == "Total") %&gt;%
-  select(Location, year, tot_coverage) %&gt;%
+pop &lt;- hc |&gt; 
+  filter(type == "Total") |&gt;
+  select(Location, year, tot_coverage) |&gt;
   rename(tot_population = tot_coverage)
-hc &lt;- hc %&gt;%
-  filter(Location != "United States", type != "Total") %&gt;%
-  left_join(pop) %&gt;% select(Location, year, type, tot_population, everything())
+hc &lt;- hc |&gt;
+  filter(Location != "United States", type != "Total") |&gt;
+  left_join(pop) |&gt; select(Location, year, type, tot_population, everything())
 hc
 ```
 
@@ -1943,10 +1943,10 @@ class: clear
 If we remove the effect of population, the relationship between spending and coverage becomes much weaker. 
 
 ```r
-hc &lt;- hc %&gt;%
+hc &lt;- hc |&gt;
   mutate(spending_capita = (tot_spending*10^6)/tot_population,
          prop_coverage = tot_coverage/tot_population)
-hc %&gt;% filter(type == "Employer", year == "2013") %&gt;%
+hc |&gt; filter(type == "Employer", year == "2013") |&gt;
   ggplot(aes(x = spending_capita, y = prop_coverage)) +
   geom_point() + xlab("spending per capita") + 
   ylab("proportion of Employer coverage") + geom_smooth(method = "lm")
@@ -1973,7 +1973,7 @@ output
 ```
 
 ```
-## [1]  0.2961  0.1521 -0.0841 -0.1102
+## [1]  0.0259 -0.0988  0.1181 -0.0750
 ```
 
 ```r
@@ -1982,7 +1982,7 @@ apply(df,2,median)
 
 ```
 ##       a       b       c       d 
-##  0.2961  0.1521 -0.0841 -0.1102
+##  0.0259 -0.0988  0.1181 -0.0750
 ```
 ]
 
@@ -1994,16 +1994,16 @@ lapply(df,median)
 
 ```
 ## $a
-## [1] 0.296
+## [1] 0.0259
 ## 
 ## $b
-## [1] 0.152
+## [1] -0.0988
 ## 
 ## $c
-## [1] -0.0841
+## [1] 0.118
 ## 
 ## $d
-## [1] -0.11
+## [1] -0.075
 ```
 
 ```r
@@ -2012,7 +2012,7 @@ sapply(df,median)
 
 ```
 ##       a       b       c       d 
-##  0.2961  0.1521 -0.0841 -0.1102
+##  0.0259 -0.0988  0.1181 -0.0750
 ```
 ]
 ---
@@ -2033,10 +2033,10 @@ output2
 ```
 
 ```
-##        [,1]   [,2]    [,3]   [,4]
-## [1,] -0.544 -0.670 -0.6408 -0.580
-## [2,]  0.296  0.152 -0.0841 -0.110
-## [3,]  0.874  1.088  0.4050  0.631
+##         [,1]    [,2]   [,3]   [,4]
+## [1,] -0.7527 -0.7521 -0.790 -0.751
+## [2,]  0.0259 -0.0988  0.118 -0.075
+## [3,]  0.8676  0.5548  0.784  0.683
 ```
 ]
 
@@ -2047,10 +2047,10 @@ apply(df, 2, quantile, probs)
 ```
 
 ```
-##          a      b       c      d
-## 25% -0.544 -0.670 -0.6408 -0.580
-## 50%  0.296  0.152 -0.0841 -0.110
-## 75%  0.874  1.088  0.4050  0.631
+##           a       b      c      d
+## 25% -0.7527 -0.7521 -0.790 -0.751
+## 50%  0.0259 -0.0988  0.118 -0.075
+## 75%  0.8676  0.5548  0.784  0.683
 ```
 
 ```r
@@ -2058,10 +2058,10 @@ sapply(df, quantile, probs)
 ```
 
 ```
-##          a      b       c      d
-## 25% -0.544 -0.670 -0.6408 -0.580
-## 50%  0.296  0.152 -0.0841 -0.110
-## 75%  0.874  1.088  0.4050  0.631
+##           a       b      c      d
+## 25% -0.7527 -0.7521 -0.790 -0.751
+## 50%  0.0259 -0.0988  0.118 -0.075
+## 75%  0.8676  0.5548  0.784  0.683
 ```
 ]
 ---
@@ -2256,12 +2256,12 @@ For example (here we use the **dplyr** verb `\(\mathrm{group\_split}\)` to split
 .pull-left[
 
 ```r
-models &lt;- mtcars %&gt;% 
-  group_split(cyl) %&gt;% 
+models &lt;- mtcars |&gt; 
+  group_split(cyl) |&gt; 
   map(function(df) 
     lm(mpg ~ wt, data = df))
 
-models %&gt;% map(summary) %&gt;% 
+models |&gt; map(summary) |&gt; 
   map_dbl(function(x) x$r.squared)
 ```
 
@@ -2273,11 +2273,11 @@ models %&gt;% map(summary) %&gt;%
 .pull-right[
 
 ```r
-models &lt;- mtcars %&gt;% 
-  group_split(cyl) %&gt;%
+models &lt;- mtcars |&gt; 
+  group_split(cyl) |&gt;
   map(~ lm(mpg ~ wt, data = .))
 
-models %&gt;% map(summary) %&gt;% 
+models |&gt; map(summary) |&gt; 
   map_dbl(~ .$r.squared)
 ```
 
@@ -2287,7 +2287,7 @@ models %&gt;% map(summary) %&gt;%
 
 ```r
 ## Equivalently
-models %&gt;% map(summary) %&gt;%
+models |&gt; map(summary) |&gt;
   map_dbl("r.squared")
 ```
 
@@ -2340,7 +2340,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f1977d08&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2357,7 +2357,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f1977d08&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2397,7 +2397,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eb04570&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f19b5ca0&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2414,7 +2414,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eb04570&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f19b5ca0&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2454,7 +2454,7 @@ str(models)
 ##   .. .. ..- attr(*, "order")= int 1
 ##   .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. ..- attr(*, "response")= int 1
-##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645ec25a80&gt; 
+##   .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f1ada768&gt; 
 ##   .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2471,7 +2471,7 @@ str(models)
 ##   .. .. .. ..- attr(*, "order")= int 1
 ##   .. .. .. ..- attr(*, "intercept")= int 1
 ##   .. .. .. ..- attr(*, "response")= int 1
-##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x55645ec25a80&gt; 
+##   .. .. .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f1ada768&gt; 
 ##   .. .. .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. .. .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2507,7 +2507,7 @@ str(summary(models[[1]]))
 ##   .. ..- attr(*, "order")= int 1
 ##   .. ..- attr(*, "intercept")= int 1
 ##   .. ..- attr(*, "response")= int 1
-##   .. ..- attr(*, ".Environment")=&lt;environment: 0x55645eace988&gt; 
+##   .. ..- attr(*, ".Environment")=&lt;environment: 0x5629f1977d08&gt; 
 ##   .. ..- attr(*, "predvars")= language list(mpg, wt)
 ##   .. ..- attr(*, "dataClasses")= Named chr [1:2] "numeric" "numeric"
 ##   .. .. ..- attr(*, "names")= chr [1:2] "mpg" "wt"
@@ -2547,7 +2547,7 @@ class: clear
 ```r
 x &lt;- list(list(1,2,3), list(4,5,6), list(7,8,9))
 ## Extract 2nd element from each list
-x %&gt;% sapply('[[',2) 
+x |&gt; sapply('[[',2) 
 ```
 
 ```
@@ -2555,7 +2555,7 @@ x %&gt;% sapply('[[',2)
 ```
 
 ```r
-x %&gt;% sapply('[' ,2) ## this does not work
+x |&gt; sapply('[' ,2) ## this does not work
 ```
 
 ```
@@ -2570,7 +2570,7 @@ x %&gt;% sapply('[' ,2) ## this does not work
 ```
 
 ```r
-x %&gt;% map_dbl(2)
+x |&gt; map_dbl(2)
 ```
 
 ```
@@ -2592,10 +2592,10 @@ mapply(rnorm, mean, sd, 3) ## Oops
 ## numeric(0)
 ## 
 ## [[2]]
-## [1] 3.34
+## [1] 4.25
 ## 
 ## [[3]]
-## [1] 0.309 3.869
+## [1] 2.55 2.16
 ```
 
 ```r
@@ -2604,10 +2604,10 @@ mapply(rnorm, mean = mean,
 ```
 
 ```
-##        [,1] [,2]  [,3]
-## [1,] -1.182 3.64 0.187
-## [2,]  0.113 4.26 7.872
-## [3,] -0.600 4.00 5.792
+##        [,1] [,2] [,3]
+## [1,] -1.346 2.01 3.94
+## [2,]  0.843 5.28 3.89
+## [3,] -2.702 1.08 1.64
 ```
 ]
 
@@ -2620,11 +2620,11 @@ pmap_dfc(list(mean = mean,sd = sd),
 
 ```
 ## # A tibble: 3 × 3
-##     ...1     ...2  ...3
-##    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
-## 1  0.584 -1.70     1.03
-## 2  0.873  0.00460  5.35
-## 3 -0.951  0.759    6.95
+##      ...1  ...2   ...3
+##     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 -1.47   1.68   6.10 
+## 2  0.0192 0.907 -0.433
+## 3  1.28   4.01   0.429
 ```
 ]
 
@@ -2655,24 +2655,24 @@ invoke_map(f,
 
 ```
 ## [[1]]
-## [1] -0.932
+## [1] 0.869
 ## 
 ## [[2]]
-## [1] -5.04
+## [1] -3.18
 ## 
 ## [[3]]
-## [1] 1
+## [1] 7
 ```
 
 ```
 ## [[1]]
-## [1] -0.313  0.214
+## [1] -0.993 -0.723
 ## 
 ## [[2]]
-## [1] -5.20  9.68 -6.29
+## [1] -3.18 -3.96 -0.58
 ## 
 ## [[3]]
-## [1] 5 4 2 5
+## [1] 4 3 6 7
 ```
 ]
 
@@ -2695,10 +2695,10 @@ exp_wpct &lt;- function(x, k = 2) {
   return(1/(1 + (1/x)^k))
 }
 library(Lahman)
-TeamRuns &lt;- Teams %&gt;% 
-  rename(RS = R) %&gt;% 
+TeamRuns &lt;- Teams |&gt; 
+  rename(RS = R) |&gt; 
   mutate(wpct = W / (W + L), run_ratio = RS/RA, 
-         hat.wpct = exp_wpct(run_ratio)) %&gt;%
+         hat.wpct = exp_wpct(run_ratio)) |&gt;
   select(yearID, teamID, lgID, wpct, hat.wpct, run_ratio) 
 TeamRuns
 ```
@@ -2775,8 +2775,8 @@ fit.k &lt;- function(df,
   return(tibble(k = kseq[idx]))
 }
 kseq &lt;- seq(from = 0.5, to = 2.5, by = 0.01)
-kstar &lt;- TeamRuns %&gt;% mutate(decade = yearID %/%10 * 10) %&gt;%
-  group_split(decade) %&gt;% map_df(fit.k, name1 = "run_ratio", name2 = "wpct")
+kstar &lt;- TeamRuns |&gt; mutate(decade = yearID %/%10 * 10) |&gt;
+  group_split(decade) |&gt; map_df(fit.k, name1 = "run_ratio", name2 = "wpct")
 kstar
 ```
 
@@ -2798,11 +2798,11 @@ Continuing in the same vein, let us identify, for each season, the team that led
 
 ```r
 hr_leader &lt;- function(x){
-  x %&gt;% select(yearID, lgID, teamID, HR) %&gt;%
-    arrange(desc(HR)) %&gt;% head(n = 1)
+  x |&gt; select(yearID, lgID, teamID, HR) |&gt;
+    arrange(desc(HR)) |&gt; head(n = 1)
 }
 library(Lahman)
-hr_leaders &lt;- Teams %&gt;% group_split(yearID, lgID) %&gt;%
+hr_leaders &lt;- Teams |&gt; group_split(yearID, lgID) |&gt;
   map_df(hr_leader)
 hr_leaders
 ```
@@ -2821,8 +2821,8 @@ class: clear
 We then visualize how the number of home runs of the top hitting teams change over time.
 
 ```r
-hr_leaders %&gt;% 
-  filter(yearID &gt;= 1916) %&gt;%
+hr_leaders |&gt; 
+  filter(yearID &gt;= 1916) |&gt;
   ggplot(aes(x = yearID, y = HR, color = lgID)) + geom_line() + 
     geom_point() + geom_smooth(se = 0) + geom_vline(xintercept = 1973) + 
     annotate("text", x = 1974, y = 25, 
