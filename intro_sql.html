@@ -3,6 +3,7 @@
   <head>
     <title>Introduction to Data Science</title>
     <meta charset="utf-8" />
+    <meta name="author" content="" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
@@ -10,7 +11,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -22,18 +23,26 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Intermezzo: SQL and R through dbplyr
+]
+.author[
 ### 
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -95,6 +104,7 @@ library(mdsr)
 library(RMySQL)
 library(dbplyr)
 library(dplyr)
+library(purrr)
 ## This creates a connection to a SQL server at Smith College
 ## This SQL server was created to accompany the book Modern Data Science with R.
 db &lt;- dbConnect_scidb(dbname = "airlines") 
@@ -102,9 +112,9 @@ class(db)
 ```
 
 ```
-## [1] "MySQLConnection"
+## [1] "MariaDBConnection"
 ## attr(,"package")
-## [1] "RMySQL"
+## [1] "RMariaDB"
 ```
 
 ```r
@@ -122,7 +132,7 @@ class: clear
 tables &lt;- c("flights", "planes", "airports", "carriers")
 ##dbGetQuery sends SQL Select Queries to the SQL server
 nrow.tables &lt;- map_int(tables, function(x) 
-  as.integer(db %&gt;% dbGetQuery(paste0("SELECT COUNT(*) FROM ", x))))
+  as.integer(db |&gt; dbGetQuery(paste0("SELECT COUNT(*) FROM ", x)) |&gt; pull()))
 names(nrow.tables) &lt;- tables
 nrow.tables
 ```
@@ -136,14 +146,13 @@ nrow.tables
 class: clear
 
 ```r
-flights_db &lt;- db %&gt;% tbl("flights")
+flights_db &lt;- db |&gt; tbl("flights")
 flights_db
 ```
 
 ```
 ## # Source:   table&lt;flights&gt; [?? x 21]
-## # Database: mysql 5.7.33-log
-## #   [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:/airlines]
+## # Database: mysql  [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:NA/airlines]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;int&gt;    &lt;int&gt;
 ## 1  2010    10     1        1           2100       181      159
@@ -152,11 +161,11 @@ flights_db
 ## 4  2010    10     1        5           2200       125       41
 ## 5  2010    10     1        7           2245        82      104
 ## 6  2010    10     1        7             10        -3      451
-## # … with more rows, and 14 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;int&gt;, carrier &lt;chr&gt;, tailnum &lt;chr&gt;, flight &lt;int&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;int&gt;, distance &lt;int&gt;,
-## #   cancelled &lt;int&gt;, diverted &lt;int&gt;, hour &lt;int&gt;, minute &lt;int&gt;,
-## #   time_hour &lt;chr&gt;
+## # ℹ more rows
+## # ℹ 14 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;int&gt;,
+## #   carrier &lt;chr&gt;, tailnum &lt;chr&gt;, flight &lt;int&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;int&gt;, distance &lt;int&gt;, cancelled &lt;int&gt;,
+## #   diverted &lt;int&gt;, hour &lt;int&gt;, minute &lt;int&gt;, time_hour &lt;dttm&gt;
 ```
 
 ---
@@ -166,44 +175,42 @@ This could take a WHILEEEEEEEEE......
 
 
 ```r
-tailnum_delay_db &lt;- flights_db %&gt;% 
-  group_by(tailnum) %&gt;%
+tailnum_delay_db &lt;- flights_db |&gt; 
+  group_by(tailnum) |&gt;
   summarise(
     delay = mean(arr_delay),
     n = n()
-  ) %&gt;% 
+  ) |&gt; 
   filter(n &gt; 100)
-tailnum_delay_db %&gt;% head()
+tailnum_delay_db |&gt; head()
 ```
 
 ```
-## # Source:   lazy query [?? x 3]
-## # Database: mysql 5.7.33-log
-## #   [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:/airlines]
-##   tailnum delay     n
-##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
-## 1 (null)   0      190
-## 2 21139E  14.8   1795
-## 3 21199E  11.2   1907
-## 4 7819A    3.88  1196
-## 5 7820L    2.30   520
-## 6 80009E   1.36  1840
+## # Source:   SQL [6 x 3]
+## # Database: mysql  [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:NA/airlines]
+##   tailnum delay       n
+##   &lt;chr&gt;   &lt;dbl&gt; &lt;int64&gt;
+## 1 (null)   0        190
+## 2 21139E  14.8     1795
+## 3 21199E  11.2     1907
+## 4 7819A    3.88    1196
+## 5 7820L    2.30     520
+## 6 80009E   1.36    1840
 ```
 ---
 class: clear
 
 ```r
 ## This allows us to automatically translate a query in dplyr into SQL syntax.
-tailnum_delay_db %&gt;% show_query()
+tailnum_delay_db |&gt; show_query()
 ```
 
 ```
 ## &lt;SQL&gt;
-## SELECT *
-## FROM (SELECT `tailnum`, AVG(`arr_delay`) AS `delay`, COUNT(*) AS `n`
+## SELECT `tailnum`, AVG(`arr_delay`) AS `delay`, COUNT(*) AS `n`
 ## FROM `flights`
-## GROUP BY `tailnum`) `q01`
-## WHERE (`n` &gt; 100.0)
+## GROUP BY `tailnum`
+## HAVING (COUNT(*) &gt; 100.0)
 ```
 
 ---
@@ -213,7 +220,7 @@ If you want to collect the results, use [collect](https://dplyr.tidyverse.org/re
 
 
 ```r
-tailnum_delay &lt;- tailnum_delay_db %&gt;% collect()
+tailnum_delay &lt;- tailnum_delay_db |&gt; collect()
 glimpse(tailnum_delay)
 ```
 
@@ -222,7 +229,7 @@ glimpse(tailnum_delay)
 ## Columns: 3
 ## $ tailnum &lt;chr&gt; "(null)", "21139E", "21199E", "7819A", "7820L", "800…
 ## $ delay   &lt;dbl&gt; 0.0000, 14.8379, 11.2213, 3.8846, 2.2981, 1.3625, 2.…
-## $ n       &lt;dbl&gt; 190, 1795, 1907, 1196, 520, 1840, 1838, 1847, 1904, …
+## $ n       &lt;int64&gt; 190, 1795, 1907, 1196, 520, 1840, 1838, 1847, 1904…
 ```
 
 ---
@@ -233,42 +240,43 @@ Finally, note that your queries to the database are **lazily evaluated** and can
 
 ```r
 db &lt;- dbConnect_scidb(dbname = "airlines") 
-tailnum_db2 &lt;- tailnum_delay_db %&gt;% mutate(total_delay = delay*n)
-tailnum_db2 %&gt;% show_query()
+tailnum_db2 &lt;- tailnum_delay_db |&gt; mutate(total_delay = delay*n)
+tailnum_db2 |&gt; show_query()
 ```
 
 ```
 ## &lt;SQL&gt;
-## SELECT `tailnum`, `delay`, `n`, `delay` * `n` AS `total_delay`
-## FROM (SELECT `tailnum`, AVG(`arr_delay`) AS `delay`, COUNT(*) AS `n`
-## FROM `flights`
-## GROUP BY `tailnum`) `q01`
-## WHERE (`n` &gt; 100.0)
+## SELECT *, `delay` * `n` AS `total_delay`
+## FROM (
+##   SELECT `tailnum`, AVG(`arr_delay`) AS `delay`, COUNT(*) AS `n`
+##   FROM `flights`
+##   GROUP BY `tailnum`
+##   HAVING (COUNT(*) &gt; 100.0)
+## ) `q01`
 ```
 
 ```r
-tailnum_db2 %&gt;% head()
+tailnum_db2 |&gt; head()
 ```
 
 ```
-## # Source:   lazy query [?? x 4]
-## # Database: mysql 5.7.33-log
-## #   [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:/airlines]
-##   tailnum delay     n total_delay
-##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;
-## 1 (null)   0      190          0 
-## 2 21139E  14.8   1795      26634.
-## 3 21199E  11.2   1907      21399.
-## 4 7819A    3.88  1196       4646.
-## 5 7820L    2.30   520       1195.
-## 6 80009E   1.36  1840       2507
+## # Source:   SQL [6 x 4]
+## # Database: mysql  [mdsr_public@mdsr.cdc7tgkkqd0n.us-east-1.rds.amazonaws.com:NA/airlines]
+##   tailnum delay       n total_delay
+##   &lt;chr&gt;   &lt;dbl&gt; &lt;int64&gt;       &lt;dbl&gt;
+## 1 (null)   0        190          0 
+## 2 21139E  14.8     1795      26634.
+## 3 21199E  11.2     1907      21399.
+## 4 7819A    3.88    1196       4646.
+## 5 7820L    2.30     520       1195.
+## 6 80009E   1.36    1840       2507
 ```
 
 ---
 class: clear
 
 ```r
-tailnum_delay %&gt;% show_query()
+tailnum_delay |&gt; show_query()
 ```
 
 ```
@@ -276,19 +284,19 @@ tailnum_delay %&gt;% show_query()
 ```
 
 ```r
-tailnum_delay %&gt;% mutate(total_delay = delay*n) %&gt;% head()
+tailnum_delay |&gt; mutate(total_delay = delay*n) |&gt; head()
 ```
 
 ```
 ## # A tibble: 6 × 4
-##   tailnum delay     n total_delay
-##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;
-## 1 (null)   0      190          0 
-## 2 21139E  14.8   1795      26634.
-## 3 21199E  11.2   1907      21399.
-## 4 7819A    3.88  1196       4646.
-## 5 7820L    2.30   520       1195.
-## 6 80009E   1.36  1840       2507
+##   tailnum delay       n total_delay
+##   &lt;chr&gt;   &lt;dbl&gt; &lt;int64&gt;     &lt;int64&gt;
+## 1 (null)   0        190           0
+## 2 21139E  14.8     1795       25130
+## 3 21199E  11.2     1907       20977
+## 4 7819A    3.88    1196        3588
+## 5 7820L    2.30     520        1040
+## 6 80009E   1.36    1840        1840
 ```
 
 ---
@@ -355,14 +363,13 @@ library(DBI)
 library(RSQLite)
 library(dplyr)
 con_sqlite &lt;- dbConnect(RSQLite::SQLite(),"tmp_sqlite")
-flights &lt;- con_sqlite %&gt;% tbl("flights")
+flights &lt;- con_sqlite |&gt; tbl("flights")
 flights
 ```
 
 ```
 ## # Source:   table&lt;flights&gt; [?? x 19]
-## # Database: sqlite 3.36.0
-## #   [/home/mtang8/Work/classes/st442/tmp_sqlite]
+## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      517            515         2      830
@@ -371,10 +378,11 @@ flights
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dbl&gt;
+## # ℹ more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dbl&gt;
 ```
 
 ---
@@ -382,48 +390,45 @@ class: clear
 
 ```r
 library(dplyr)
-airports &lt;- con_sqlite %&gt;% tbl("airports")
+airports &lt;- con_sqlite |&gt; tbl("airports")
 airports
 ```
 
 ```
 ## # Source:   table&lt;airports&gt; [?? x 8]
-## # Database: sqlite 3.36.0
-## #   [/home/mtang8/Work/classes/st442/tmp_sqlite]
-##   faa   name                   lat   lon   alt    tz dst   tzone      
-##   &lt;chr&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      
-## 1 04G   Lansdowne Airport     41.1 -80.6  1044    -5 A     America/Ne…
-## 2 06A   Moton Field Municip…  32.5 -85.7   264    -6 A     America/Ch…
-## 3 06C   Schaumburg Regional   42.0 -88.1   801    -6 A     America/Ch…
-## 4 06N   Randall Airport       41.4 -74.4   523    -5 A     America/Ne…
-## 5 09J   Jekyll Island Airpo…  31.1 -81.4    11    -5 A     America/Ne…
-## 6 0A9   Elizabethton Munici…  36.4 -82.2  1593    -5 A     America/Ne…
-## # … with more rows
+## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+##   faa   name                         lat   lon   alt    tz dst   tzone
+##   &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 04G   Lansdowne Airport           41.1 -80.6  1044    -5 A     Amer…
+## 2 06A   Moton Field Municipal Air…  32.5 -85.7   264    -6 A     Amer…
+## 3 06C   Schaumburg Regional         42.0 -88.1   801    -6 A     Amer…
+## 4 06N   Randall Airport             41.4 -74.4   523    -5 A     Amer…
+## 5 09J   Jekyll Island Airport       31.1 -81.4    11    -5 A     Amer…
+## 6 0A9   Elizabethton Municipal Ai…  36.4 -82.2  1593    -5 A     Amer…
+## # ℹ more rows
 ```
 ---
 class: clear
 
 ```r
-query1 &lt;- flights %&gt;% group_by(dest) %&gt;% summarize(count = n()) %&gt;% 
-  slice_max(count, n = 20) %&gt;%
+query1 &lt;- flights |&gt; group_by(dest) |&gt; summarize(count = n()) |&gt; 
+  slice_max(count, n = 20) |&gt;
   left_join(airports, by = c("dest" = "faa"))
 query1
 ```
 
 ```
-## # Source:     lazy query [?? x 9]
-## # Database:   sqlite 3.36.0
-## #   [/home/mtang8/Work/classes/st442/tmp_sqlite]
-## # Ordered by: desc(count)
-##   dest  count name              lat    lon   alt    tz dst   tzone    
-##   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    
-## 1 ORD   17283 Chicago Ohare …  42.0  -87.9   668    -6 A     America/…
-## 2 ATL   17215 Hartsfield Jac…  33.6  -84.4  1026    -5 A     America/…
-## 3 LAX   16174 Los Angeles In…  33.9 -118.    126    -8 A     America/…
-## 4 BOS   15508 General Edward…  42.4  -71.0    19    -5 A     America/…
-## 5 MCO   14082 Orlando Intl     28.4  -81.3    96    -5 A     America/…
-## 6 CLT   14064 Charlotte Doug…  35.2  -80.9   748    -5 A     America/…
-## # … with more rows
+## # Source:   SQL [?? x 9]
+## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+##   dest  count name                  lat    lon   alt    tz dst   tzone
+##   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+## 1 ORD   17283 Chicago Ohare Intl   42.0  -87.9   668    -6 A     Amer…
+## 2 ATL   17215 Hartsfield Jackson…  33.6  -84.4  1026    -5 A     Amer…
+## 3 LAX   16174 Los Angeles Intl     33.9 -118.    126    -8 A     Amer…
+## 4 BOS   15508 General Edward Law…  42.4  -71.0    19    -5 A     Amer…
+## 5 MCO   14082 Orlando Intl         28.4  -81.3    96    -5 A     Amer…
+## 6 CLT   14064 Charlotte Douglas …  35.2  -80.9   748    -5 A     Amer…
+## # ℹ more rows
 ```
 
 ---
@@ -431,24 +436,30 @@ class: clear
 
 
 ```r
-query1 %&gt;% show_query()
+query1 |&gt; show_query()
 ```
 
 ```
 ## &lt;SQL&gt;
-## SELECT `dest`, `count`, `name`, `lat`, `lon`, `alt`, `tz`, `dst`, `tzone`
-## FROM (SELECT `dest`, `count`
-## FROM (SELECT `dest`, `count`, RANK() OVER (ORDER BY `count` DESC) AS `q01`
-## FROM (SELECT `dest`, COUNT(*) AS `count`
-## FROM `flights`
-## GROUP BY `dest`))
-## WHERE (`q01` &lt;= 20)) AS `LHS`
-## LEFT JOIN `airports` AS `RHS`
-## ON (`LHS`.`dest` = `RHS`.`faa`)
+## SELECT `LHS`.*, `name`, `lat`, `lon`, `alt`, `tz`, `dst`, `tzone`
+## FROM (
+##   SELECT `dest`, `count`
+##   FROM (
+##     SELECT *, RANK() OVER (ORDER BY `count` DESC) AS `q01`
+##     FROM (
+##       SELECT `dest`, COUNT(*) AS `count`
+##       FROM `flights`
+##       GROUP BY `dest`
+##     )
+##   )
+##   WHERE (`q01` &lt;= 20)
+## ) AS `LHS`
+## LEFT JOIN `airports`
+##   ON (`LHS`.`dest` = `airports`.`faa`)
 ```
 
 ```r
-pop_dest &lt;- query1 %&gt;% collect()
+pop_dest &lt;- query1 |&gt; collect()
 glimpse(pop_dest)
 ```
 
@@ -474,7 +485,7 @@ Finally, if we want, we can send SQL code directly to the database through [DBI:
 
 
 ```r
-query2a &lt;- con_sqlite %&gt;% dbGetQuery('SELECT
+query2a &lt;- con_sqlite |&gt; dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay &lt; 15, 1.0, 0.0))/count(*) as ontimePct,
   SUM(IIF(arr_delay &lt; 0, 1.0, 0.0))/count(*) as earlyPct,
@@ -500,7 +511,7 @@ The same code, when written using **dplyr** and **dbplyr** is quite similar.
 
 
 ```r
-query2b &lt;- flights %&gt;% summarize(
+query2b &lt;- flights |&gt; summarize(
   numFlights = n(), 
   ontimePct = sum(if_else(arr_delay &lt; 15, 1, 0))/n(),
   earlyPct = sum(if_else(arr_delay &lt; 0, 1, 0))/n(),
@@ -512,9 +523,8 @@ query2b
 ```
 
 ```
-## # Source:   lazy query [?? x 6]
-## # Database: sqlite 3.36.0
-## #   [/home/mtang8/Work/classes/st442/tmp_sqlite]
+## # Source:   SQL [1 x 6]
+## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
 ##   numFlights ontimePct earlyPct netMinLate minLate minEarly
 ##        &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
 ## 1     336776     0.734    0.561       2.26    5.37    -3.11
@@ -527,7 +537,7 @@ This code however doesn't seem to work as expected.
 
 
 ```r
-query2c &lt;- con_sqlite %&gt;% dbGetQuery('SELECT
+query2c &lt;- con_sqlite |&gt; dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay &lt; 15, 1, 0))/count(*) as ontimePct,
   SUM(IIF(arr_delay &lt; 0, 1, 0))/count(*) as earlyPct,
@@ -616,6 +626,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable

@@ -200,7 +200,7 @@ str_c("Alice", "Bob", "Charles", sep = ",")
 ```
 
 ```r
-str_c("Alice", "Bob", "Charles", sep = "\t") %&gt;% writeLines()
+str_c("Alice", "Bob", "Charles", sep = "\t") |&gt; writeLines()
 ```
 
 ```
@@ -268,7 +268,7 @@ str_glue("The value of two to the power of {x} is {f(x)}")
 
 ```r
 x &lt;- as.character(c(5,20, 80, 320, 1280, 27607, 111111))
-x %&gt;% str_trunc(5) %&gt;% str_pad(5, side = "left", pad = "0")
+x |&gt; str_trunc(5) |&gt; str_pad(5, side = "left", pad = "0")
 ```
 
 ```
@@ -276,7 +276,7 @@ x %&gt;% str_trunc(5) %&gt;% str_pad(5, side = "left", pad = "0")
 ```
 
 ```r
-x %&gt;% str_trunc(5, ellipsis = "") %&gt;% str_pad(5, side = "left", pad = "0")
+x |&gt; str_trunc(5, ellipsis = "") |&gt; str_pad(5, side = "left", pad = "0")
 ```
 
 ```
@@ -318,7 +318,7 @@ class: middle
 ```r
 x &lt;- c("winner winner", "chicken dinner", 
        "cherry blossom", "eager beaver") 
-x %&gt;% str_sort()
+x |&gt; str_sort()
 ```
 
 ```
@@ -326,7 +326,7 @@ x %&gt;% str_sort()
 ```
 
 ```r
-x %&gt;% str_sort(locale = "haw") ## Hawaiian's don't speak English!
+x |&gt; str_sort(locale = "haw") ## Hawaiian's don't speak English!
 ```
 
 ```
@@ -424,7 +424,7 @@ class: clear
 + `str_replace` and `str_replace_all` for search and replace.
 
 ```r
-fruit %&gt;% head ## A character vector of fruits contained in the stringr package.
+fruit |&gt; head() ## A character vector of fruits contained in the stringr package.
 ```
 
 ```
@@ -433,7 +433,7 @@ fruit %&gt;% head ## A character vector of fruits contained in the stringr packa
 ```
 
 ```r
-fruit %&gt;% str_replace("a", "z") %&gt;% head
+fruit |&gt; str_replace("a", "z") |&gt; head()
 ```
 
 ```
@@ -442,7 +442,7 @@ fruit %&gt;% str_replace("a", "z") %&gt;% head
 ```
 
 ```r
-fruit %&gt;% str_replace_all(c("a" = "z", "b" = "y")) %&gt;% head
+fruit |&gt; str_replace_all(c("a" = "z", "b" = "y")) |&gt; head()
 ```
 
 ```
@@ -453,7 +453,7 @@ fruit %&gt;% str_replace_all(c("a" = "z", "b" = "y")) %&gt;% head
 + `str_extract` and `str_match` to extract matching patterns from a string. These functions are, however, only useful when used in combination with **regular expressions**.
 
 ```r
-fruit %&gt;% str_extract("pp") %&gt;% head
+fruit |&gt; str_extract("pp") |&gt; head()
 ```
 
 ```
@@ -483,7 +483,7 @@ Regexps provide a powerful tool for describing patterns in strings.
 
 ```r
 ## which fruits' names contain at least two consecutive vowels ?
-fruit %&gt;% str_subset("[aeiou]{2,}") %&gt;% head(4)
+fruit |&gt; str_subset("[aeiou]{2,}") |&gt; head(4)
 ```
 
 ```
@@ -492,7 +492,7 @@ fruit %&gt;% str_subset("[aeiou]{2,}") %&gt;% head(4)
 
 ```r
 ## which fruits' names contain the letter y but is not a berry ?
-fruit %&gt;% str_subset("[^y]$") %&gt;% str_subset("y") %&gt;% head(4)
+fruit |&gt; str_subset("[^y]$") |&gt; str_subset("y") |&gt; head(4)
 ```
 
 ```
@@ -501,7 +501,7 @@ fruit %&gt;% str_subset("[^y]$") %&gt;% str_subset("y") %&gt;% head(4)
 
 ```r
 ## which fruits' names has the same letter appearing consecutively 
-fruit %&gt;% str_subset("(.)\\1") %&gt;% head(4)
+fruit |&gt; str_subset("(.)\\1") |&gt; head(4)
 ```
 
 ```
@@ -510,7 +510,7 @@ fruit %&gt;% str_subset("(.)\\1") %&gt;% head(4)
 
 ```r
 ## which fruits' names has the same two letters appearing consecutively 
-fruit %&gt;% str_subset("(..)\\1") %&gt;% head(4)
+fruit |&gt; str_subset("(..)\\1") |&gt; head(4)
 ```
 
 ```
@@ -523,7 +523,7 @@ We can now see the difference between `str_match` and `str_extract`
 
 ```r
 regexp1 &lt;- "(..)\\1"
-fruit %&gt;% str_extract(regexp1) %&gt;% head(4)
+fruit |&gt; str_extract(regexp1) |&gt; head(4)
 ```
 
 ```
@@ -531,7 +531,7 @@ fruit %&gt;% str_extract(regexp1) %&gt;% head(4)
 ```
 
 ```r
-fruit %&gt;% str_match(regexp1) %&gt;% head(4)
+fruit |&gt; str_match(regexp1) |&gt; head(4)
 ```
 
 ```
@@ -545,7 +545,7 @@ fruit %&gt;% str_match(regexp1) %&gt;% head(4)
 ```r
 bands &lt;- c("ABBA", "Pink Floyd", "Nirvana", "Eagles")
 regexp2 &lt;- "(.)(.)\\2\\1"
-bands %&gt;% str_extract(regexp2)
+bands |&gt; str_extract(regexp2)
 ```
 
 ```
@@ -553,7 +553,7 @@ bands %&gt;% str_extract(regexp2)
 ```
 
 ```r
-bands %&gt;% str_match(regexp2)
+bands |&gt; str_match(regexp2)
 ```
 
 ```
@@ -569,7 +569,7 @@ class: clear
 
 For more on regular expressions, see 
 
-+ Section 14.3 of [R for Data Science](https://r4ds.had.co.nz/strings.html)
++ Chapter 16 of [R for Data Science](https://r4ds.had.co.nz/strings.html)
 
 + The regexp [cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
 
@@ -603,7 +603,7 @@ str(Macbeth_raw)
 The data is representated as a single string. We first split this string into multiple lines.
 
 ```r
-macbeth_split &lt;- Macbeth_raw %&gt;% str_split("\r\n")
+macbeth_split &lt;- Macbeth_raw |&gt; str_split("\r\n")
 macbeth &lt;- macbeth_split[[1]]
 length(macbeth)
 ```
@@ -640,7 +640,7 @@ class: middle
 We can now count how many times a particular character speaks.
 
 ```r
-thus_spoke_macbeth &lt;- macbeth %&gt;% str_subset("^\\s+MACBETH")
+thus_spoke_macbeth &lt;- macbeth |&gt; str_subset("^\\s+MACBETH")
 length(thus_spoke_macbeth)
 ```
 
@@ -660,7 +660,7 @@ head(thus_spoke_macbeth, 4)
 ```
 
 ```r
-macbeth %&gt;% str_subset("^\\s+MAC(BETH|DUFF)") %&gt;% length()
+macbeth |&gt; str_subset("^\\s+MAC(BETH|DUFF)") |&gt; length()
 ```
 
 ```
@@ -679,7 +679,7 @@ macbeth_chars &lt;- tribble(
   "MACBETH", "^\\s+MACBETH",
   "LADY MACBETH", "^\\s+LADY MACBETH",
   "BANQUO", "^\\s+BANQUO",
-  "DUNCAN", "^\\s+DUNCAN") %&gt;% 
+  "DUNCAN", "^\\s+DUNCAN") |&gt; 
   mutate(speaks = purrr::map(regexp, str_detect, string = macbeth)) 
 macbeth_chars ## Oh hey, list columns!!
 ```
@@ -709,7 +709,7 @@ Let us now **tidy** up this data by first unnesting the list column.
 
 ```r
 library(tidyr)
-macbeth_chars &lt;- macbeth_chars %&gt;% unnest(speaks)
+macbeth_chars &lt;- macbeth_chars |&gt; unnest(speaks)
 macbeth_chars
 ```
 
@@ -729,8 +729,8 @@ macbeth_chars
 Next, let us add in the line numbers for each sentence and also remove the unimportant header lines.
 
 ```r
-macbeth_chars &lt;- macbeth_chars %&gt;% 
-  mutate(lineno = rep(1:length(macbeth),4)) %&gt;% 
+macbeth_chars &lt;- macbeth_chars |&gt; 
+  mutate(lineno = rep(1:length(macbeth),4)) |&gt; 
   filter(lineno &gt; 218, lineno &lt; 3172)
 glimpse(macbeth_chars)
 ```
@@ -753,7 +753,7 @@ The following is one, somewhat hackish, approach.
 
 ```r
 library(ggplot2)
-p &lt;- macbeth_chars %&gt;% ggplot(aes(x = lineno, y = as.numeric(speaks))) + 
+p &lt;- macbeth_chars |&gt; ggplot(aes(x = lineno, y = as.numeric(speaks))) + 
   geom_smooth(aes(color = name), method = "loess", se = FALSE, span = 0.4) + 
   xlab("Line number") + ylab("Frequency of speaking") + ylim(c(0,NA))
 p
@@ -786,7 +786,7 @@ Our next example is from Chapter 24.3 of [Introduction to Data Science](https://
 ```r
 library(dslabs)
 data(reported_heights)
-reported_heights &lt;- reported_heights %&gt;%
+reported_heights &lt;- reported_heights |&gt;
   mutate(new_height = as.numeric(height))
 ```
 
@@ -798,7 +798,7 @@ reported_heights &lt;- reported_heights %&gt;%
 ```
 
 ```r
-reported_heights %&gt;% filter(is.na(new_height)) %&gt;% summarise(n())
+reported_heights |&gt; filter(is.na(new_height)) |&gt; summarise(n())
 ```
 
 ```
@@ -815,24 +815,28 @@ not_inches &lt;- function(x, smallest = 50, tallest = 84){
   !ind
 }
 ## First remove extraneous spaces
-reported_heights &lt;- reported_heights %&gt;% mutate(height = str_trim(height, side = "both")) 
-reported_heights %&gt;% filter(not_inches(height)) %&gt;% 
-  pull(height) %&gt;% sample(60)
+reported_heights &lt;- reported_heights |&gt; 
+  mutate(height = str_trim(height, side = "both")) 
+reported_heights |&gt; filter(not_inches(height)) |&gt; 
+  pull(height) |&gt; sample(60)
 ```
 
 ```
-##  [1] "5.1"          "170"          "25"           "6*12"         "5.75"        
-##  [6] "6.2"          "1,70"         "6.1"          "179"          "174"         
-## [11] "5.11"         "5.7"          "22"           "5.5"          "5'7"         
-## [16] "5'5"          "120"          "19"           "5.5"          "5'3\""       
-## [21] "5'6''"        "5'8\""        "5'5\""        "173"          "1.6"         
-## [26] "5'6"          "172"          "180"          "69\""         "185"         
-## [31] "5.6"          "5ft 9 inches" "5'10"         "34"           "5.5"         
-## [36] "5'7\""        "12"           "180"          "5"            "174"         
-## [41] "175"          "5.1"          "162"          "157"          "87"          
-## [46] "5'5''"        "100"          "160"          "5'6"          "173"         
-## [51] "5.7"          "174"          "5.9"          "6"            "164"         
-## [56] "1"            "5'2"          "5.8"          "172"          "161"
+##  [1] "5'5\""         "180"           "23"            "5'6"          
+##  [5] "1"             "5.9"           "89"            "5.2"          
+##  [9] "170"           "5'2\""         "5.6"           "5'11"         
+## [13] "157"           "5,3"           "728,346"       "186"          
+## [17] "170"           "12"            "6"             "5'3\""        
+## [21] "5.5"           "5'9"           "5'6"           "6.5"          
+## [25] "5.9"           "174"           "5.11"          "5.9"          
+## [29] "5'4"           "612"           "185"           "5'7\""        
+## [33] "174"           "5 ft 9 inches" "5.25"          "5'8"          
+## [37] "5.7"           "5'7.5''"       "174"           "0"            
+## [41] "5.8"           "5.11"          "5'7"           "190"          
+## [45] "184"           "180"           "120"           "5.2"          
+## [49] "6'1\""         "69\""          "5"             "172"          
+## [53] "163"           "177"           "162"           "5'10"         
+## [57] "175"           "178"           "6.2"           "6"
 ```
 
 ---
@@ -840,8 +844,8 @@ We first try to do some search and replace to convert the simple issues like `5'
 We start by creating a pattern to search for these issues. 
 
 ```r
-problems &lt;- reported_heights %&gt;% 
-  filter(not_inches(height)) %&gt;% pull(height) 
+problems &lt;- reported_heights |&gt; 
+  filter(not_inches(height)) |&gt; pull(height) 
 length(problems) 
 ```
 
@@ -851,7 +855,7 @@ length(problems)
 
 ```r
 pattern1 &lt;- "^([4-7])'\\s*(\\d+)\"?" 
-problems %&gt;% str_subset(pattern1)
+problems |&gt; str_subset(pattern1)
 ```
 
 ```
@@ -871,7 +875,7 @@ class: clear
 We then extract the feet and inches from entries matching this pattern.
 
 ```r
-problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1) %&gt;% head
+problems |&gt; str_subset(pattern1) |&gt; str_match(pattern1) |&gt; head()
 ```
 
 ```
@@ -886,7 +890,7 @@ problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1) %&gt;% head
 We now fixed these problematic entries.
 
 ```r
-first_issue &lt;- problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1)
+first_issue &lt;- problems |&gt; str_subset(pattern1) |&gt; str_match(pattern1)
 first_issue_new_height &lt;- as.character(
   as.numeric(first_issue[,2])*12 + as.numeric(first_issue[,3]))
 problems[str_which(problems, pattern1)] &lt;- first_issue_new_height
@@ -902,7 +906,7 @@ We next consider the issue of heights reported in centimeters.
 
 ```r
 pattern2 &lt;- "^([12]\\d{2})\\s*(cm)?$"
-second_issue &lt;- problems %&gt;% str_subset(pattern2)
+second_issue &lt;- problems |&gt; str_subset(pattern2)
 second_issue
 ```
 
@@ -924,7 +928,7 @@ second_issue
 
 ```r
 ## Remove cm and trim white space
-second_issue &lt;- str_replace(second_issue,"cm","") %&gt;% str_trim(side = "right")
+second_issue &lt;- str_replace(second_issue,"cm","") |&gt; str_trim(side = "right")
 ## Convert from cm to inches
 second_issue_new_height &lt;- as.character(round(as.numeric(second_issue)/2.54))
 problems[str_which(problems, pattern2)] &lt;- second_issue_new_height
@@ -939,138 +943,42 @@ length(problems[not_inches(problems)])
 Let us now take a look at a sample of the remaining issues
 
 ```r
-problems[not_inches(problems)] %&gt;% sample(60)
+problems[not_inches(problems)] |&gt; sample(60)
 ```
 
 ```
-##  [1] "Five foot eight inches" "0"                      "5.2"                   
-##  [4] "5 feet 6 inches"        "649,606"                "6"                     
-##  [7] "5.8"                    "7,283,465"              "1"                     
-## [10] "5.5"                    "5.1"                    "5"                     
-## [13] "5 feet 7inches"         "10000"                  "6"                     
-## [16] "39"                     "86"                     "7"                     
-## [19] "5.1"                    "6.2"                    "87"                    
-## [22] "6"                      "0.7"                    "103.2"                 
-## [25] "5.9"                    "5.9"                    "5.7"                   
-## [28] "5.11"                   "5.75"                   "5.9"                   
-## [31] "5.7"                    "5 feet and 8.11 inches" "5"                     
-## [34] "6"                      "6.1"                    "5ft 9 inches"          
-## [37] "5.25"                   "5.5"                    "6.5"                   
-## [40] "5.9"                    "5.5"                    "6.3"                   
-## [43] "5.4"                    "6"                      "5.8"                   
-## [46] "5.5"                    "5.1"                    "5,4"                   
-## [49] "5.57"                   "5.7"                    "34"                    
-## [52] "728,346"                "5.25"                   "5.5"                   
-## [55] "5.6"                    "5.69"                   "6.5"                   
-## [58] "6"                      "5.5"                    "6"
+##  [1] "6"                      "1.6"                    "5.7"                   
+##  [4] "6"                      "0"                      "5.2"                   
+##  [7] "5.9"                    "6.5"                    "1"                     
+## [10] "2'33"                   "12"                     "6"                     
+## [13] "2"                      "6'"                     "23"                    
+## [16] "5.7"                    "88"                     "5.5"                   
+## [19] "10000"                  "6"                      "5,8"                   
+## [22] "5.6"                    "5.2"                    "5.25"                  
+## [25] "5.8"                    "7"                      "0.7"                   
+## [28] "6"                      "47"                     "5.4"                   
+## [31] "7,283,465"              "5.69"                   "22"                    
+## [34] "5.1"                    "300"                    "6.1"                   
+## [37] "6"                      "5.5"                    "5"                     
+## [40] "Five foot eight inches" "6.5"                    "89"                    
+## [43] "5.2"                    "103.2"                  "5.5"                   
+## [46] "1.7"                    "6.2"                    "6"                     
+## [49] "5.5"                    "5.1"                    "5.4"                   
+## [52] "5 feet 6 inches"        "728,346"                "6,8"                   
+## [55] "39"                     "5.6"                    "5,3"                   
+## [58] "5.3"                    "511"                    "5,4"
 ```
 ---
 The third issue could be adding `ft` or `feet` or `inches` to the reported heights.
 We can easily fix this by first doing a `str_replace` and then using our `pattern1` above.
 
 ```r
-str_subset(problems,"(ft)|(feet)|(inches)|")
+str_subset(problems,"(ft)|(feet)|(inches)")
 ```
 
 ```
-##   [1] "6"                      "64"                     "5.3"                   
-##   [4] "65"                     "511"                    "6"                     
-##   [7] "2"                      "67"                     "&gt;9000"                 
-##  [10] "67"                     "63"                     "5 feet and 8.11 inches"
-##  [13] "5.25"                   "71"                     "5.5"                   
-##  [16] "11111"                  "69"                     "6"                     
-##  [19] "6.5"                    "59"                     "70"                    
-##  [22] "103.2"                  "5.8"                    "19"                    
-##  [25] "5"                      "5.6"                    "69"                    
-##  [28] "70"                     "300"                    "5,3"                   
-##  [31] "6'"                     "6"                      "5.9"                   
-##  [34] "6,8"                    "70"                     "5.5"                   
-##  [37] "70"                     "64"                     "6.2"                   
-##  [40] "69"                     "Five foot eight inches" "6.2"                   
-##  [43] "5.8"                    "5.1"                    "70"                    
-##  [46] "65"                     "5.11"                   "65"                    
-##  [49] "65"                     "71"                     "62"                    
-##  [52] "5.75"                   "67"                     "5,4"                   
-##  [55] "7"                      "5.4"                    "62"                    
-##  [58] "6.1"                    "67"                     "63"                    
-##  [61] "5.6"                    "84"                     "72"                    
-##  [64] "5.6"                    "6"                      "64"                    
-##  [67] "70"                     "71"                     "70"                    
-##  [70] "67"                     "63"                     "70"                    
-##  [73] "0.7"                    "75"                     "5.4"                   
-##  [76] "72"                     "67"                     "5.9"                   
-##  [79] "72"                     "5.6"                    "5.6"                   
-##  [82] "72"                     "6"                      "66"                    
-##  [85] "2'33"                   "71"                     "63"                    
-##  [88] "5.5"                    "5.2"                    "71"                    
-##  [91] "5.5"                    "5.5"                    "6.5"                   
-##  [94] "5,8"                    "71"                     "72"                    
-##  [97] "67"                     "66"                     "68"                    
-## [100] "612"                    "5.11"                   "66"                    
-## [103] "64"                     "1,70"                   "68"                    
-## [106] "87"                     "5.5"                    "69"                    
-## [109] "67"                     "67"                     "44"                    
-## [112] "62"                     "68"                     "69"                    
-## [115] "69"                     "69"                     "67"                    
-## [118] "6.7"                    "12"                     "6"                     
-## [121] "5.1"                    "5.6"                    "5.5"                   
-## [124] "yyy"                    "5.2"                    "65"                    
-## [127] "68"                     "66"                     "5 feet 7inches"        
-## [130] "89"                     "5.6"                    "5.7"                   
-## [133] "72"                     "68"                     "34"                    
-## [136] "25"                     "6"                      "5.9"                   
-## [139] "66"                     "6.5"                    "67"                    
-## [142] "69"                     "6"                      "22"                    
-## [145] "5.11"                   "684"                    "6"                     
-## [148] "1"                      "1"                      "6*12"                  
-## [151] "5 .11"                  "87"                     "64"                    
-## [154] "65"                     "72"                     "6"                     
-## [157] "68"                     "1.6"                    "68"                    
-## [160] "67"                     "5.7"                    "5.5"                   
-## [163] "69"                     "67"                     "63"                    
-## [166] "47"                     "47"                     "23"                    
-## [169] "76"                     "5 11"                   "66"                    
-## [172] "59"                     "1.7"                    "69"                    
-## [175] "5.8"                    "6"                      "64"                    
-## [178] "68"                     "65"                     "5.8"                   
-## [181] "5.1"                    "5.11"                   "5.7"                   
-## [184] "67"                     "66"                     "71"                    
-## [187] "67"                     "67"                     "68"                    
-## [190] "68"                     "71"                     "71"                    
-## [193] "5"                      "71"                     "71"                    
-## [196] "73"                     "5.9"                    "5.2"                   
-## [199] "5.5"                    "69\""                   "67"                    
-## [202] "70"                     "5.51"                   "70"                    
-## [205] "70"                     "5ft 9 inches"           "5 ft 9 inches"         
-## [208] "62"                     "71"                     "5.8"                   
-## [211] "5.7"                    "66"                     "66"                    
-## [214] "6"                      "6.1"                    "71"                    
-## [217] "5.69"                   "70"                     "72"                    
-## [220] "65"                     "68"                     "73"                    
-## [223] "6"                      "86"                     "5.7"                   
-## [226] "708,661"                "5.25"                   "5.5"                   
-## [229] "5 feet 6 inches"        "70"                     "68"                    
-## [232] "6"                      "68"                     "63"                    
-## [235] "75"                     "649,606"                "10000"                 
-## [238] "5.1"                    "60"                     "1"                     
-## [241] "71"                     "728,346"                "69"                    
-## [244] "62"                     "68"                     "65"                    
-## [247] "6 04"                   "67"                     "0"                     
-## [250] "73"                     "66"                     "69"                    
-## [253] "67"                     "65"                     "69"                    
-## [256] "6.3"                    "70"                     "67"                    
-## [259] "5.5"                    "6"                      "6"                     
-## [262] "67"                     "6"                      "68"                    
-## [265] "62"                     "39"                     "63"                    
-## [268] "75"                     "5.7"                    "67"                    
-## [271] "62"                     "76"                     "71"                    
-## [274] "5.57"                   "64"                     "83"                    
-## [277] "88"                     "6"                      "64"                    
-## [280] "67"                     "5.7"                    "67"                    
-## [283] "62"                     "73"                     "67"                    
-## [286] "7,283,465"              "5"                      "5"                     
-## [289] "34"                     "63"                     "66"                    
-## [292] "66"
+## [1] "5 feet and 8.11 inches" "Five foot eight inches" "5 feet 7inches"        
+## [4] "5ft 9 inches"           "5 ft 9 inches"          "5 feet 6 inches"
 ```
 
 ```r
@@ -1079,7 +987,7 @@ problems &lt;- str_replace(problems,"(inches)","\"")
 problems &lt;- str_replace_all(problems,"\\s","") ## Also remove spaces
 problems &lt;- str_replace(problems,"and","")
 pattern1 &lt;- "^([4-7])'\\s*([\\d\\.]+)\"?"
-first_issue &lt;- problems %&gt;% str_subset(pattern1) %&gt;% str_match(pattern1)
+first_issue &lt;- problems |&gt; str_subset(pattern1) |&gt; str_match(pattern1)
 first_issue_new_height &lt;- as.character(
   round(as.numeric(first_issue[,2])*12 + as.numeric(first_issue[,3])))
 problems[str_which(problems, pattern1)] &lt;- first_issue_new_height
@@ -1096,7 +1004,7 @@ This can be fixed using a `str_match`
 
 ```r
 pattern3 &lt;- "^([4-7])[\\.,]([\\d\\.]+)"
-fourth_issue &lt;- problems %&gt;% str_subset(pattern3) %&gt;% str_match(pattern3)
+fourth_issue &lt;- problems |&gt; str_subset(pattern3) |&gt; str_match(pattern3)
 fourth_issue_new_height &lt;- as.character(
   round(as.numeric(fourth_issue[,2])*12 + as.numeric(fourth_issue[,3])))
 problems[str_which(problems, pattern3)] &lt;- fourth_issue_new_height
@@ -1137,9 +1045,9 @@ problems[not_inches(problems)]
 Finally we see that there are a few remaining issues such as (1) using `,` or `.` in centimeters and (2) including `"` in the inches measurement. These are also relatively easy to fix.
 
 ```r
-problems &lt;- problems %&gt;% str_replace("\"$","")
+problems &lt;- problems |&gt; str_replace("\"$","")
 pattern2 &lt;- "^([12])[\\,\\.]?(\\d{1,2})$"
-sixth_issue &lt;- problems %&gt;% str_subset(pattern2) %&gt;% str_match(pattern2)
+sixth_issue &lt;- problems |&gt; str_subset(pattern2) |&gt; str_match(pattern2)
 ## First get the centimeters
 sixth_issue_heights_cm &lt;- as.numeric(sixth_issue[,2])*100 + 
   as.numeric(str_pad(sixth_issue[,3],width=2,pad="0",side = "right"))
@@ -1165,9 +1073,9 @@ The remaining issues are unlikely to be fixable automatically. We will have to i
 We update our data frame to have a new height column.
 
 ```r
-reported_heights &lt;- reported_heights %&gt;% mutate(new_height = height) %&gt;% 
-  filter(not_inches(height)) %&gt;% mutate(new_height = problems) 
-reported_heights %&gt;% filter(!not_inches(new_height)) %&gt;% head(10)
+reported_heights &lt;- reported_heights |&gt; mutate(new_height = height) |&gt; 
+  filter(not_inches(height)) |&gt; mutate(new_height = problems) 
+reported_heights |&gt; filter(!not_inches(new_height)) |&gt; head(10)
 ```
 
 ```

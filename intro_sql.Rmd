@@ -2,7 +2,7 @@
 title: "Introduction to Data Science"
 subtitle: "Intermezzo: SQL and R through dbplyr"
 author: ""
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -43,7 +43,6 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_text_color = "#006747",
    link_color = "#03A696",
    header_font_google = google_font("Josefin Sans"),
-   title_slide_background_image = "belltower2.jpg",
    #title_slide_background_size = "600px",
    #title_slide_background_position = "bottom",
    text_font_google   = google_font("Montserrat", "300", "300i"),
@@ -110,6 +109,7 @@ library(mdsr)
 library(RMySQL)
 library(dbplyr)
 library(dplyr)
+library(purrr)
 ## This creates a connection to a SQL server at Smith College
 ## This SQL server was created to accompany the book Modern Data Science with R.
 db <- dbConnect_scidb(dbname = "airlines") 
@@ -123,7 +123,7 @@ class: clear
 tables <- c("flights", "planes", "airports", "carriers")
 ##dbGetQuery sends SQL Select Queries to the SQL server
 nrow.tables <- map_int(tables, function(x) 
-  as.integer(db %>% dbGetQuery(paste0("SELECT COUNT(*) FROM ", x))))
+  as.integer(db |> dbGetQuery(paste0("SELECT COUNT(*) FROM ", x)) |> pull()))
 names(nrow.tables) <- tables
 nrow.tables
 ```
@@ -131,7 +131,7 @@ nrow.tables
 ---
 class: clear
 ```{r chunk3, dependson="chunk2", cache = TRUE}
-flights_db <- db %>% tbl("flights")
+flights_db <- db |> tbl("flights")
 flights_db
 ```
 
@@ -141,20 +141,20 @@ class: clear
 This could take a WHILEEEEEEEEE......
 
 ```{r chunk4, dependson="chunk3", cache = TRUE}
-tailnum_delay_db <- flights_db %>% 
-  group_by(tailnum) %>%
+tailnum_delay_db <- flights_db |> 
+  group_by(tailnum) |>
   summarise(
     delay = mean(arr_delay),
     n = n()
-  ) %>% 
+  ) |> 
   filter(n > 100)
-tailnum_delay_db %>% head()
+tailnum_delay_db |> head()
 ```
 ---
 class: clear
 ```{r chunk5, dependson="chunk4", cache = TRUE}
 ## This allows us to automatically translate a query in dplyr into SQL syntax.
-tailnum_delay_db %>% show_query()
+tailnum_delay_db |> show_query()
 ```
 
 ---
@@ -163,7 +163,7 @@ class: clear
 If you want to collect the results, use [collect](https://dplyr.tidyverse.org/reference/compute.html).
 
 ```{r chunk6, dependson="chunk5", cache = TRUE}
-tailnum_delay <- tailnum_delay_db %>% collect()
+tailnum_delay <- tailnum_delay_db |> collect()
 glimpse(tailnum_delay)
 ```
 
@@ -174,16 +174,16 @@ Finally, note that your queries to the database are **lazily evaluated** and can
 
 ```{r chunk7, dependson="chunk6", cache = TRUE}
 db <- dbConnect_scidb(dbname = "airlines") 
-tailnum_db2 <- tailnum_delay_db %>% mutate(total_delay = delay*n)
-tailnum_db2 %>% show_query()
-tailnum_db2 %>% head()
+tailnum_db2 <- tailnum_delay_db |> mutate(total_delay = delay*n)
+tailnum_db2 |> show_query()
+tailnum_db2 |> head()
 ```
 
 ---
 class: clear
 ```{r chunks8, dependson="chunk7", cache = TRUE, error = TRUE}
-tailnum_delay %>% show_query()
-tailnum_delay %>% mutate(total_delay = delay*n) %>% head()
+tailnum_delay |> show_query()
+tailnum_delay |> mutate(total_delay = delay*n) |> head()
 ```
 
 ---
@@ -226,7 +226,7 @@ library(DBI)
 library(RSQLite)
 library(dplyr)
 con_sqlite <- dbConnect(RSQLite::SQLite(),"tmp_sqlite")
-flights <- con_sqlite %>% tbl("flights")
+flights <- con_sqlite |> tbl("flights")
 flights
 ```
 
@@ -234,14 +234,14 @@ flights
 class: clear
 ```{r}
 library(dplyr)
-airports <- con_sqlite %>% tbl("airports")
+airports <- con_sqlite |> tbl("airports")
 airports
 ```
 ---
 class: clear
 ```{r}
-query1 <- flights %>% group_by(dest) %>% summarize(count = n()) %>% 
-  slice_max(count, n = 20) %>%
+query1 <- flights |> group_by(dest) |> summarize(count = n()) |> 
+  slice_max(count, n = 20) |>
   left_join(airports, by = c("dest" = "faa"))
 query1
 ```
@@ -250,8 +250,8 @@ query1
 class: clear
 
 ```{r}
-query1 %>% show_query()
-pop_dest <- query1 %>% collect()
+query1 |> show_query()
+pop_dest <- query1 |> collect()
 glimpse(pop_dest)
 ```
 
@@ -262,7 +262,7 @@ As we saw, most operations that we can do using **dplyr** on normal data frames,
 Finally, if we want, we can send SQL code directly to the database through [DBI::dbGetQuery](https://dbi.r-dbi.org/reference/dbgetquery).
 
 ```{r}
-query2a <- con_sqlite %>% dbGetQuery('SELECT
+query2a <- con_sqlite |> dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay < 15, 1.0, 0.0))/count(*) as ontimePct,
   SUM(IIF(arr_delay < 0, 1.0, 0.0))/count(*) as earlyPct,
@@ -282,7 +282,7 @@ class: clear
 The same code, when written using **dplyr** and **dbplyr** is quite similar.
 
 ```{r}
-query2b <- flights %>% summarize(
+query2b <- flights |> summarize(
   numFlights = n(), 
   ontimePct = sum(if_else(arr_delay < 15, 1, 0))/n(),
   earlyPct = sum(if_else(arr_delay < 0, 1, 0))/n(),
@@ -299,7 +299,7 @@ class: clear
 This code however doesn't seem to work as expected.
 
 ```{r}
-query2c <- con_sqlite %>% dbGetQuery('SELECT
+query2c <- con_sqlite |> dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay < 15, 1, 0))/count(*) as ontimePct,
   SUM(IIF(arr_delay < 0, 1, 0))/count(*) as earlyPct,
