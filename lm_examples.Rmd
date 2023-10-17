@@ -2,6 +2,23 @@
 title: "Brief vignette on linear models."
 output: html_document
 ---
+```{r echo = FALSE}
+# save the built-in output hook
+hook_output <- knitr::knit_hooks$get("output")
+
+# set a new output hook to truncate text output
+knitr::knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    x <- xfun::split_lines(x)
+    if (length(x) > n) {
+      # truncate the output
+      x <- c(head(x, n), "....\n")
+    }
+    x <- paste(x, collapse = "\n")
+  }
+  hook_output(x, options)
+})
+```
 
 ## Multivariate normals and linear transformations.
 
@@ -42,7 +59,151 @@ ggplot(q.samp, aes(x=s.1, y=s.2)) +
 
 We see that the points are transformed accordingly and furthermore, the **contours** for the transformed data are now concentric **ellipses**.
 
-## Ames housing dataset.
+## Example 1. SAT and spending
+```{r message=FALSE}
+library(faraway)
+library(dplyr)
+library(tibble)
+data(sat)
+sat$state <- rownames(sat)
+sat <- as_tibble(sat)
+sat <- sat |> select(state,everything())
+sat
+```
+This dataset contains the school expenditure and test scores for 50 USA states in 1994-95.
+We first fit two linear models to the data
+```{r}
+mod1 <- lm(math ~ expend, data = sat)
+mod2 <- lm(math ~ expend + salary + ratio, data = sat)
+```
+The following summary output of `mod2` contains a bunch of information. The coefficients estimates are listed along with their estimated standard deviations, and the associated p-values for testing the marginal 
+null hypothesis $\mathbb{H}_0 \colon \beta_j = 0, \quad \text{other coefficients arbitrary}$. The F-test statistic is for testing the null hypothesis $\mathbb{H}_0 \colon \beta_{\mathrm{expend}} = \beta_{\mathrm{salary}} = \beta_{\mathrm{ratio}} = 0$ against the alternative hypothesis that at least one of these coefficients is non-zero. We view all of these p-values as descriptive statistics (since the null hypothesis is quite artificial) in the sense that if the p-value we obtained is “unexpected” (for example suggesting no relationship between some subset of predictor variables and the response variable when we expect a relationship) 
+then we will want to know why.
+
+```{r}
+summary(mod2)
+```
+
+The following code compares model `mod1` against model `mod2`. As `mod1` is nested in `mod2`, this comparison is equivalent to testing the null hypothesis that $\beta_{\mathrm{salary}} = \beta_{\mathrm{ratio}} = 0$
+against the alternative hypothesis that at least one of these coefficients is non-zero.
+
+```{r}
+summary(mod1)
+anova(mod1, mod2)
+```
+We see that the above comparison suggests that the two models are comparable. This is quite suprising/counter-intuitive as it suggests that increasing expenditure is associated with decreasing math scores. The following output indicates that this is due to confounding variable; in particular adding `takers` as a predictor variable decreases the MSE considerably and also make the coefficient for more intuitive.
+```{r}
+mod3 <- lm(math ~ expend + takers, data = sat)
+summary(mod3)
+```
+We now compare mod3 against a “full” model that includes all the predictor variables. We see that mod3 is comparable to this “full” model.
+```{r}
+mod_full <- lm(math ~ expend + takers + ratio + salary, data = sat)
+summary(mod_full)
+anova(mod3, mod_full)
+```
+In summary, using model mod3, the estimated/confidence interval for the math SAT scores for the 50 US states is visualized below. The $\sqrt{\mathrm{MSE}}$ is $18.441$, 
+and looking at the confidence intervals, suggest that the posited relationship between expenditure and math SAT score is reasonably accurate.
+```{r}
+library(ggplot2)
+df <- cbind(sat, predict(mod3, sat, level = 0.95, interval = "confidence")) 
+df <- df |> mutate(abb = state.abb)
+  
+ggplot(df, aes(reorder(x = abb, math), y = math)) + geom_point(color = "red", size = 3) + 
+  geom_point(aes(y = fit),color = "blue") + 
+  geom_errorbar(aes(ymin = lwr, ymax = upr)) + xlab("State") +
+  coord_flip() + theme_bw()
+```
+
+## Example 2: Outliers and linear regression
+Linear regression using least square estimation can be highly non-robust in the presence of outliers. 
+An outlier is, roughly speaking, any point that is “different” from most of the remaining points.
+```{r}
+library(faraway)
+library(ggplot2)   
+data(star)
+ggplot(star, aes(x = temp, y = light)) + 
+  xlab("log(Temperature") + ylab("log(Light Intensity)") + geom_smooth(method = "lm") + 
+  geom_point(aes(color = (temp < 3.6)))
+```
+The above plot is a plot of the light intensity and surface temperatures of 47 stars. The data is available from the `faraway` package. 
+The red colored points correspond to ``outliers’’ as detected by eye-balling the plot. The dashed line is the least square regression line.
+
+If we now remove the eye-balled “outliers” and recompute the least square regression, we get the above plot. It is not always easy to automatically detect outliers when they occur in clusters such as in this example. What happens if the data include 3 or more predictor variables ?
+```{r}
+library(dplyr)
+ggplot(star, aes(x = temp, y = light)) + 
+  xlab("log(Temperature") + ylab("log(Light Intensity)") + 
+  geom_smooth(data = filter(star, temp > 3.6), method = "lm") + 
+  geom_point(aes(color = (temp < 3.6)))
+```
+
+## Example 3: Life Expectancy in Gapminder
+```{r}
+library(gapminder)
+gapminder
+```
+Suppose we want to model the life expectancy of the countries in terms of the year and the `gdpPercap`. Let us try a few models. 
+```{r}
+mod1 <- lm(lifeExp ~ year + gdpPercap, data = gapminder)
+summary(mod1)
+```
+The previous model output looks ok, except that the coefficients are not particularly meaningful since the year goes from 1952 to 2007, which renders the intercept coefficient irrelevant (as $year=0$ 
+is never included in the model). We therefore subtract `1952` from all the years. Similarly, the `gdpPercap` unit here is in dollars, and most countries have `gdpPercap` 
+in a wide-range of values. This suggest looking at a logarithmic transform of the `gdpPercap`.
+
+
+```{r}
+mod1_alt <- lm(lifeExp ~ I(year - 1952) + log(gdpPercap), data = gapminder)
+summary(mod1_alt)
+```
+We see that the coefficients values are now more interpretable. Furthermore, the mean square error decreases substantially.
+
+### Adding qualitative predictor variables for year
+Let us now change the year to be a factor, i.e., the model is now 
+
+$$\mathrm{lifeExp}_i = \beta_0 + \beta_1 \log(\mathrm{gdpPercap}) + \beta_2 \mathbb{I}\{\mathrm{year}_i == 1952\} + \beta_3 \mathbb{I}\{\mathrm{year}_i == 1957\} + \dots + \epsilon_i$$
+```{r out.lines = 20}
+mod2 <- lm(lifeExp ~ log(gdpPercap) + as.factor(year), data = gapminder)
+summary(mod2)$sigma
+```
+The above is an example of using a qualitative predictor variable (in this case converting into a factor). The default category is now the year 1952.
+
+### Adding qualitative predictor variables for country
+We revert to making as a numeric variable but now introduce country as a qualitative predictor variable. The default country is Afghanistan. The model is thus 
+
+$$\mathrm{lifeExp}_i = \beta_0 + \beta_1(\mathrm{year}_i - 1952) + \beta_2 \log(\mathrm{gdpPercap}) + \beta_3 \mathbb{I}\{\mathrm{country}_i == "Albania"\} + \beta_4 \mathbb{I}\{\mathrm{country}_i == "Algeria"\} + \dots + \epsilon_i$$
+```{r out.lines = 20}
+mod3 <- lm(lifeExp ~ I(year - 1952) + log(gdpPercap) + country, data = gapminder)
+summary(mod3)
+summary(mod3)$sigma
+anova(mod1_alt, mod3)
+```
+For this model, different countries have different intercepts. We see that this model fits the data substantially better than our initial model. However, this model now has 144 parameters.
+
+### Adding iteractions between variables
+We now add interactions between country and year. The default country is still Afghanistan. The model is thus 
+$$\mathrm{lifeExp}_i = \beta_0 + \beta_1 \log(\mathrm{gdpPercap}) + \beta_2 \mathbb{I}\{\mathrm{year}_i == 1952\} + \beta_3 \mathbb{I}\{\mathrm{country}_i == "Albania"\} + \beta_4 \mathbb{I}\{\mathrm{country}_i == "Algeria"\} \times (\mathrm{year}_i - 1952) + \dots + \epsilon_i$$
+```{r out.lines = 20}
+mod4 <- lm(lifeExp ~ log(gdpPercap) + I(year - 1952)*country, data = gapminder)
+summary(mod4)
+summary(mod4)$sigma
+anova(mod3, mod4)
+```
+For this model, different countries have possibly distinct intercepts and distinct slopes. We see that this model fits the data substantially better than our model where each country have possibly distinct intercepts. However, this model now has 285 parameters.
+
+### Visualizing the result
+Let us now take model mod3. This model has 144 parameters, and the estimated standard error σ is 3.529, and so the average error for estimating the life expectancy using model mod3 is 3.529 years, a reasonable number. Let us now visualize this result for a few countries.
+```{r}
+gapminder.fitted <- cbind(gapminder, predict(mod3, gapminder, level = 0.95, interval = "confidence")) 
+set.seed(123)
+gapminder.small <- gapminder.fitted %>% filter(country %in% sample(country, 15))
+ggplot(gapminder.small, aes(x = year)) + geom_point(aes(y = lifeExp), color = "black") + 
+  geom_line(aes(y = fit, group = country),color = "blue") + 
+  geom_ribbon(aes(ymin = lwr, ymax = upr, group = country), alpha = 0.4) + facet_wrap(~ country, ncol = 3) 
+```
+
+## Example 4. Ames housing dataset.
 
 We now provide a more detailed example of regression analysis using the [Ames housing dataset](https://cran.r-project.org/web/packages/AmesHousing/index.html). The data was collected by Dean De Cock of Truman State University. See this [article](http://jse.amstat.org/v19n3/decock.pdf) in the Journal of Statistical Education describing the data.
 
@@ -128,7 +289,7 @@ mae_mod1
 
 Let us now continue to add more variables. Looking at the variable list, we can maybe try adding the variables for type of foundation, overall quality of the house, overall condition, house type, and building type, and proximity to various conditions.
 
-```{r}
+```{r out.lines = 20}
 mod2 <- update(mod1, . ~ . + Foundation + Overall_Qual + Overall_Cond + Condition_1 + Condition_2 + Bldg_Type + House_Style)
 summary(mod2)
 mae_mod2 <- mean(abs(ames_subset$Sale_Price - mod2$fitted.values))
@@ -137,7 +298,7 @@ mae_mod2
 
 Looking through the coefficients, it suggest that we can try to remove the variable `Condition_2` without increasing the error much. Let us try that
 
-```{r}
+```{r out.lines = 20}
 mod3 <- update(mod2, . ~ . - Condition_2)
 summary(mod3)
 mae_mod3 <- mean(abs(ames_subset$Sale_Price - mod3$fitted.values))
@@ -146,7 +307,7 @@ mae_mod3
 
 Let us now try to add in the neighborhood information as each neighborhood could have quite different price points. We may also want to allow for interaction between the neighborhood and the size of the house in each neighborhood.
 
-```{r}
+```{r out.lines = 20}
 mod4 <- update(mod3, . ~ . + Neighborhood + Neighborhood*Gr_Liv_Area)
 summary(mod4)
 mae_mod4 <- mean(abs(ames_subset$Sale_Price - mod4$fitted.values))
