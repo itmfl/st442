@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Hitchhiker guide to linear models"
-date: "Fall 2021"
+date: "Fall 2023"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -110,16 +110,6 @@ knitr::include_graphics("figures/linear_regression_screenshot.png")
 class: clear
 ```{r echo = FALSE, out.width="70%", fig.cap= "750K articles on PubMed"}
 knitr::include_graphics("figures/pubmed_regression.png")
-```
----
-class: clear
-```{r echo = FALSE, warning = FALSE, fig.cap = "Even your exam scores exhibit regression to the mean"}
-library(faraway)
-library(ggplot2)
-data(stat500)
-stat500 <- data.frame(scale(stat500))
-ggplot(data = stat500, aes(x = midterm, y = final)) +
-  geom_point() +  geom_smooth(method = "lm", se = FALSE)
 ```
 
 ---
@@ -284,9 +274,9 @@ A1. Cannot be use for new data. Is useless for summarizing/understanding existin
 
 --
 
-Q2. But isn't there an infinite number of possible $f$!
+Q2. But isn't there an infinite number of possible $f$ !?
 
-A2. Ah, but is there a countable or uncountable number of possible $f$ ?
+A2. Sure! But we only need to find one "good" $f$.
 
 
 ---
@@ -806,7 +796,7 @@ Recall the linear model $\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \bolds
 Under these assumptions, we have
 
 + $\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}$ is an **estimate** (hence a random variable) of $\boldsymbol{\beta}$ and satisfies
-$$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\boldsymbol{\epsilon}] \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$
+$$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$
 
 + The fitted value $\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}$ satisfies
 $$\begin{gather*} \mathbb{E}[\hat{Y}_i] = Y_i; \quad \mathrm{Var}[\hat{Y}_i] = \sigma^2 \boldsymbol{x}_i^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_i = \sigma^2 h_{ii}; \\ \mathrm{Var}[\hat{\boldsymbol{y}}] = \sigma^2 \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \end{gather*}.$$
@@ -842,21 +832,6 @@ summary(mod)$sigma^2* summary(mod)$cov.unscaled
 X <- model.matrix(mod)
 summary(mod)$sigma^2 * solve(t(X) %*% X)
 ```
-
----
-class: clear
-```{r output.lines = 8}
-influence(mod)$hat ## Give the diagonal entries of the hat matrix H.
-```
-
-+ The diagonal entries of $\mathbf{H} = \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}$ are always $\leq 1$. 
-
-+ The **fitted** values are therefore "optimistic" (has variance less than the true variance). 
-
-+ Indeed, because the fitted value $\hat{Y}_i$ are the **estimates** of the **expected** value $\mathbb{E}[Y_i]$. This is a feature not a bug. 
-
-+ In general, as $n$ increases, the diagonal entries $h_{ii}$ decreases to $0$.
-
 ---
 # Quadratic forms
 
@@ -878,7 +853,7 @@ $$\boldsymbol{x}^{\top} \mathbf{M} \boldsymbol{x} = u^2 + 4 uv + 6uw + 4v^2 + 2 
 >
 > Gabriel Lippman
 
-We recall that a random variable $Z$ is said to have the *normal* or
+A random variable $Z$ is said to have the *normal* or
   *Gaussian* distribution with mean $\mu$ and variance $\sigma^2 > 0$ if its probability density function is
 $$\frac{1}{\sqrt{2 \pi \sigma^2}} \exp\Bigl( - \frac{(z - \mu)^2}{2\sigma^2}\Bigr).$$
 We denote this as $Z \sim N(\mu, \sigma^2)$.
@@ -911,23 +886,26 @@ $$(2 \pi)^{-n/2} \mathrm{det}(\boldsymbol{\Sigma})^{-1/2} \exp\Bigl(-\frac{1}{2}
 
 ---
 ## Normal error and linear models
-The previous assumption, while sufficient for estimating the variability of $\hat{\boldsymbol{\beta}}$, does not yield the **sampling** distribution of $\hat{\boldsymbol{\beta}}$. For this we need distributional assumption for $\boldsymbol{\epsilon}$. 
+The previous assumption, while sufficient for estimating the variability of $\hat{\boldsymbol{\beta}}$, do not yield the **sampling** distribution of $\hat{\boldsymbol{\beta}}$. 
+For this we need distributional assumption for $\boldsymbol{\epsilon}$. 
 
-+ The most widely used assumption is that the $\epsilon_i$ are independent and identically distributed (i.i.d.) normal/Gaussian random variables with mean $0$ and variance $\sigma^2$. This implies the model 
-$$ \boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I}).$$
++ The most widely used assumption is that the $\epsilon_i$ are independent and identically distributed (i.i.d.) normal/Gaussian random variables with mean $0$ and variance $\sigma^2$. 
 
 + If the model is true, then the estimated coefficients $\hat{\boldsymbol{\beta}}$ are **linear combinations** of independent normally distributed random variables and
 $$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}).$$
 
 
 + If the model is true, then the fitted values are also **linear combinations** of independent normally distributed random variables and
-$$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathcal{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*).$$
+\begin{gather*}
+\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \\ 
+\hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathcal{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*).
+\end{gather*}
 ---
 class: clear
 
 These facts form the basis for inference in linear models with normal errors. 
 
-+ For example, the $(1 - \alpha) \times 100\%$ confidence interval for a **single** coefficent $\beta_j$ is 
++ The $(1 - \alpha) \times 100\%$ confidence interval for a **single** coefficient $\beta_j$ is 
 $$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$
 where $\mathrm{s}^2\{\hat{\beta}_j\}$ is the corresponding diagonal element of the matrix $\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]$ and $c_{1 - \alpha/2}$ is the appropriate percentile value, i.e., the $(1 - \alpha/2) \times 100\%$ percentile of Student's $t$-distribution with $n - p$ degrees of freedom.
 
@@ -1132,9 +1110,4 @@ where $f(\mathbf{D}) = \mathrm{diag}(f(d_{1}), f(d_{2}), \dots, f(d_{n}))$.
 
 As a corollary, for any positive semidefinite (psd) matrix $\mathbf{A}$ and any positive number $r > 0$, there exists a matrix $\mathbf{B}$ such that
 $\mathbf{B}^{r} = \mathbf{A}$; we can take $\mathbf{B}$ to also be (psd). Specifically, any positive definite (pd) matrix $\mathbf{A}$ has a pd square root $\mathbf{A}^{1/2}$.
-
-**Important**: Using this construction, we can now derive the pdf for a multivariate normal in full generality. Let $\boldsymbol{\Sigma}$ be a invertible covariance matrix. Then $\boldsymbol{\Sigma}$ is positive definite and hence there exists a pd matrix $\mathbf{A}$ with $\mathbf{A}^2 = \boldsymbol{\Sigma}$. Therefore, 
-
-$$\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) \,\, \boldsymbol{\Sigma} \,\, \text{invertible} \Leftrightarrow
-\boldsymbol{\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})} \sim \mathrm{MVN}(0, \mathbf{I}) \,\, \text{for all} \,\, \mathbf{A}^2 = \boldsymbol{\Sigma}$$
 

@@ -10,7 +10,7 @@
     <script src="libs/fabric/fabric.min.js"></script>
     <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-scribble/scribble.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30}) })</script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
     <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
     <script src="libs/mark.js/mark.min.js"></script>
     <link href="libs/xaringanExtra-search/search.css" rel="stylesheet" />
@@ -22,17 +22,23 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
+.title[
 # Introduction to Data Science
+]
+.subtitle[
 ## Hitchhiker guide to linear models
-### Fall 2021
+]
+.date[
+### Fall 2023
+]
 
 ---
 
@@ -57,17 +63,11 @@ class: clear
 &lt;img src="figures/pubmed_regression.png" alt="750K articles on PubMed" width="70%" /&gt;
 &lt;p class="caption"&gt;750K articles on PubMed&lt;/p&gt;
 &lt;/div&gt;
----
-class: clear
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-4-1.png" alt="Even your exam scores exhibit regression to the mean" width="120%" /&gt;
-&lt;p class="caption"&gt;Even your exam scores exhibit regression to the mean&lt;/p&gt;
-&lt;/div&gt;
 
 ---
 #Prelude: curve fitting
 
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-5-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-4-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: clear
@@ -80,7 +80,7 @@ p + geom_hline(
   yintercept = 0, color="blue")
 ```
 
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-5-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 
 --
@@ -93,7 +93,7 @@ p + geom_hline(
   color = "blue")
 ```
 
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-7-1.png" width="120%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-6-1.png" width="120%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -107,7 +107,7 @@ p + geom_smooth(
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-8-1.png" alt="Simple linear regression line" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-7-1.png" alt="Simple linear regression line" width="120%" /&gt;
 &lt;p class="caption"&gt;Simple linear regression line&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -123,7 +123,7 @@ p + geom_smooth(method = "lm",
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-9-1.png" alt="Quadratic regression line" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-8-1.png" alt="Quadratic regression line" width="120%" /&gt;
 &lt;p class="caption"&gt;Quadratic regression line&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -141,7 +141,7 @@ p + geom_smooth(method = "lm",
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-10-1.png" alt="Quartic regression line" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-9-1.png" alt="Quartic regression line" width="120%" /&gt;
 &lt;p class="caption"&gt;Quartic regression line&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -156,7 +156,7 @@ p + geom_smooth(method = "loess",
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-11-1.png" alt="Loess smoothing" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-10-1.png" alt="Loess smoothing" width="120%" /&gt;
 &lt;p class="caption"&gt;Loess smoothing&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -178,7 +178,7 @@ p + geom_line(data = df.interpolate,
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-12-1.png" alt="Linear Interpolation" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-11-1.png" alt="Linear Interpolation" width="120%" /&gt;
 &lt;p class="caption"&gt;Linear Interpolation&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -200,7 +200,7 @@ p + geom_line(data = df.interpolate,
 ```
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-13-1.png" alt="Cubic splines interpolation" width="120%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-12-1.png" alt="Cubic splines interpolation" width="120%" /&gt;
 &lt;p class="caption"&gt;Cubic splines interpolation&lt;/p&gt;
 &lt;/div&gt;
 ]
@@ -239,7 +239,7 @@ p + geom_smooth(method = "lm", se = FALSE,
              color = "red")
 ```
 
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: clear
@@ -247,7 +247,7 @@ In this case the true data is generated as
 $$ (Y | X = x) \sim \exp(x) + 2x^2 + N(0, .25) $$
 and among the various ways of fitting a curve to the data described above, the "most appropriate" one is
 $$ \hat{f}(x) = 0.98 + 1.3372x + 2.5 x^2. $$
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-14-1.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
 # A simple regression problem.
@@ -260,9 +260,9 @@ A1. Cannot be use for new data. Is useless for summarizing/understanding existin
 
 --
 
-Q2. But isn't there an infinite number of possible `\(f\)`!
+Q2. But isn't there an infinite number of possible `\(f\)` !?
 
-A2. Ah, but is there a countable or uncountable number of possible `\(f\)` ?
+A2. Sure! But we only need to find one "good" `\(f\)`.
 
 
 ---
@@ -751,7 +751,7 @@ sat
 ## 4 Arkansas     4.46  17.1   28.9      6    482   523  1005
 ## 5 California   4.99  24     41.1     45    417   485   902
 ## 6 Colorado     5.44  18.4   34.6     29    462   518   980
-## # … with 44 more rows
+## # ℹ 44 more rows
 ```
 
 ---
@@ -887,8 +887,8 @@ beta.hat
 ## 4    58     3  1007     0     6     1    24   964   1.5     0   2  
 ## 5    64     3  1100     1     7     0    50  1099   1.5     1   1.5
 ## 6    44     4   897     0     7     0    25   960   2       0   1  
-## # … with 20 more rows, and 3 more variables: CDN &lt;dbl&gt;, L1 &lt;dbl&gt;,
-## #   L2 &lt;dbl&gt;
+## # ℹ 20 more rows
+## # ℹ 3 more variables: CDN &lt;dbl&gt;, L1 &lt;dbl&gt;, L2 &lt;dbl&gt;
 ```
  The housing price dataset from the **R** library [SenSrivastava](https://cran.r-project.org/web/packages/SenSrivastava/). The dataset
   contains information about the selling price of
@@ -1052,7 +1052,7 @@ Recall the linear model `\(\boldsymbol{y} = \mathbf{X} \boldsymbol{\beta} + \bol
 Under these assumptions, we have
 
 + `\(\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \boldsymbol{y}\)` is an **estimate** (hence a random variable) of `\(\boldsymbol{\beta}\)` and satisfies
-`$$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \mathrm{Var}[\boldsymbol{\epsilon}] \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$`
+`$$\mathbb{E}[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}; \quad \mathrm{Var}[\hat{\boldsymbol{\beta}}] = \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}.$$`
 
 + The fitted value `\(\hat{\boldsymbol{y}} = \mathbf{X} \hat{\boldsymbol{\beta}}\)` satisfies
 `$$\begin{gather*} \mathbb{E}[\hat{Y}_i] = Y_i; \quad \mathrm{Var}[\hat{Y}_i] = \sigma^2 \boldsymbol{x}_i^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_i = \sigma^2 h_{ii}; \\ \mathrm{Var}[\hat{\boldsymbol{y}}] = \sigma^2 \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top} \end{gather*}.$$`
@@ -1119,34 +1119,6 @@ summary(mod)$sigma^2 * solve(t(X) %*% X)
 ## ratio            -182.2   32.4   12.80  -6.45
 ## salary             50.2  -29.0   -6.45   6.60
 ```
-
----
-class: clear
-
-```r
-influence(mod)$hat ## Give the diagonal entries of the hat matrix H.
-```
-
-```
-##        Alabama         Alaska        Arizona       Arkansas     California 
-##         0.0773         0.1597         0.0481         0.0452         0.2790 
-##       Colorado    Connecticut       Delaware        Florida        Georgia 
-##         0.0300         0.2240         0.0357         0.1022         0.0362 
-##         Hawaii          Idaho       Illinois        Indiana           Iowa 
-##         0.0435         0.0584         0.0688         0.0348         0.0308 
-##         Kansas       Kentucky      Louisiana          Maine       Maryland 
-##         0.0526         0.0260         0.0875         0.0794         0.0442 
-...
-```
-
-+ The diagonal entries of `\(\mathbf{H} = \mathbf{X} (\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}\)` are always `\(\leq 1\)`. 
-
-+ The **fitted** values are therefore "optimistic" (has variance less than the true variance). 
-
-+ Indeed, because the fitted value `\(\hat{Y}_i\)` are the **estimates** of the **expected** value `\(\mathbb{E}[Y_i]\)`. This is a feature not a bug. 
-
-+ In general, as `\(n\)` increases, the diagonal entries `\(h_{ii}\)` decreases to `\(0\)`.
-
 ---
 # Quadratic forms
 
@@ -1168,7 +1140,7 @@ Then for `\(\boldsymbol{x} = (u,v,w) \in \mathbb{R}^{3}\)`,
 &gt;
 &gt; Gabriel Lippman
 
-We recall that a random variable `\(Z\)` is said to have the *normal* or
+A random variable `\(Z\)` is said to have the *normal* or
   *Gaussian* distribution with mean `\(\mu\)` and variance `\(\sigma^2 &gt; 0\)` if its probability density function is
 `$$\frac{1}{\sqrt{2 \pi \sigma^2}} \exp\Bigl( - \frac{(z - \mu)^2}{2\sigma^2}\Bigr).$$`
 We denote this as `\(Z \sim N(\mu, \sigma^2)\)`.
@@ -1201,23 +1173,26 @@ class: clear
 
 ---
 ## Normal error and linear models
-The previous assumption, while sufficient for estimating the variability of `\(\hat{\boldsymbol{\beta}}\)`, does not yield the **sampling** distribution of `\(\hat{\boldsymbol{\beta}}\)`. For this we need distributional assumption for `\(\boldsymbol{\epsilon}\)`. 
+The previous assumption, while sufficient for estimating the variability of `\(\hat{\boldsymbol{\beta}}\)`, do not yield the **sampling** distribution of `\(\hat{\boldsymbol{\beta}}\)`. 
+For this we need distributional assumption for `\(\boldsymbol{\epsilon}\)`. 
 
-+ The most widely used assumption is that the `\(\epsilon_i\)` are independent and identically distributed (i.i.d.) normal/Gaussian random variables with mean `\(0\)` and variance `\(\sigma^2\)`. This implies the model 
-$$ \boldsymbol{y} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I}).$$
++ The most widely used assumption is that the `\(\epsilon_i\)` are independent and identically distributed (i.i.d.) normal/Gaussian random variables with mean `\(0\)` and variance `\(\sigma^2\)`. 
 
 + If the model is true, then the estimated coefficients `\(\hat{\boldsymbol{\beta}}\)` are **linear combinations** of independent normally distributed random variables and
 `$$\hat{\boldsymbol{\beta}} \sim \mathrm{MVN}(\boldsymbol{\beta}, \sigma^2 (\mathbf{X}^{\top} \mathbf{X})^{-1}).$$`
 
 
 + If the model is true, then the fitted values are also **linear combinations** of independent normally distributed random variables and
-`$$\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}); \quad \hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathcal{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*).$$`
+`\begin{gather*}
+\hat{\boldsymbol{y}} \sim \mathrm{MVN}(\mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{X}(\mathbf{X}^{\top} \mathbf{X})^{-1} \mathbf{X}^{\top}) \\ 
+\hat{Y}_* = \boldsymbol{x}_* \hat{\boldsymbol{\beta}} \sim \mathcal{N}(\mathbb{E}[Y_*], \sigma^2 \boldsymbol{x}_*^{\top} (\mathbf{X}^{\top} \mathbf{X})^{-1} \boldsymbol{x}_*).
+\end{gather*}`
 ---
 class: clear
 
 These facts form the basis for inference in linear models with normal errors. 
 
-+ For example, the `\((1 - \alpha) \times 100\%\)` confidence interval for a **single** coefficent `\(\beta_j\)` is 
++ The `\((1 - \alpha) \times 100\%\)` confidence interval for a **single** coefficient `\(\beta_j\)` is 
 `$$\hat{\beta}_j \pm c_{1 - \alpha/2} \times \mathrm{s}\{\hat{\beta}_j\}$$`
 where `\(\mathrm{s}^2\{\hat{\beta}_j\}\)` is the corresponding diagonal element of the matrix `\(\widehat{\mathrm{Var}}[\hat{\boldsymbol{\beta}}]\)` and `\(c_{1 - \alpha/2}\)` is the appropriate percentile value, i.e., the `\((1 - \alpha/2) \times 100\%\)` percentile of Student's `\(t\)`-distribution with `\(n - p\)` degrees of freedom.
 
@@ -1324,7 +1299,7 @@ class: clear
 Q. What about confidence regions for two or more coefficients ?
 
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-36-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
+&lt;img src="intro_lm_2021_files/figure-html/unnamed-chunk-34-1.png" alt="Confidence ellipse and individual confidence intervals" width="80%" /&gt;
 &lt;p class="caption"&gt;Confidence ellipse and individual confidence intervals&lt;/p&gt;
 &lt;/div&gt;
 
@@ -1471,11 +1446,6 @@ where `\(f(\mathbf{D}) = \mathrm{diag}(f(d_{1}), f(d_{2}), \dots, f(d_{n}))\)`.
 As a corollary, for any positive semidefinite (psd) matrix `\(\mathbf{A}\)` and any positive number `\(r &gt; 0\)`, there exists a matrix `\(\mathbf{B}\)` such that
 `\(\mathbf{B}^{r} = \mathbf{A}\)`; we can take `\(\mathbf{B}\)` to also be (psd). Specifically, any positive definite (pd) matrix `\(\mathbf{A}\)` has a pd square root `\(\mathbf{A}^{1/2}\)`.
 
-**Important**: Using this construction, we can now derive the pdf for a multivariate normal in full generality. Let `\(\boldsymbol{\Sigma}\)` be a invertible covariance matrix. Then `\(\boldsymbol{\Sigma}\)` is positive definite and hence there exists a pd matrix `\(\mathbf{A}\)` with `\(\mathbf{A}^2 = \boldsymbol{\Sigma}\)`. Therefore, 
-
-`$$\boldsymbol{x} \sim \mathrm{MVN}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) \,\, \boldsymbol{\Sigma} \,\, \text{invertible} \Leftrightarrow
-\boldsymbol{\mathbf{A}^{-1}(\boldsymbol{x} - \boldsymbol{\mu})} \sim \mathrm{MVN}(0, \mathbf{I}) \,\, \text{for all} \,\, \mathbf{A}^2 = \boldsymbol{\Sigma}$$`
-
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
@@ -1522,6 +1492,19 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     deleted = true;
   });
 })();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
 (function() {
   "use strict"
   // Replace <script> tags in slides area to make them executable
