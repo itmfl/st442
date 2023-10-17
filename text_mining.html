@@ -1178,12 +1178,341 @@ AssociatedPress
 Let us first model the collection of AP news article (there are 2246 articles) using a topic models with two topics.
 
 ```r
-ap_lda &lt;- LDA(AssociatedPress, k = 2, contorl = list(seed = 1234))
+ap_lda &lt;- LDA(AssociatedPress, k = 2, control = list(seed = 1234))
 ap_lda
 ```
 
 ```
 ## A LDA_VEM topic model with 2 topics.
+```
+We can now take a look at the per-topic-per-world probabilities (termed as `\(\beta\)`) from the above model.
+
+```r
+library(tidytext)
+ap_topics &lt;- tidy(ap_lda, matrix = "beta")
+ap_topics
+```
+
+```
+## # A tibble: 20,946 × 3
+##   topic term          beta
+##   &lt;int&gt; &lt;chr&gt;        &lt;dbl&gt;
+## 1     1 aaron     1.69e-12
+## 2     2 aaron     3.90e- 5
+## 3     1 abandon   2.65e- 5
+## 4     2 abandon   3.99e- 5
+## 5     1 abandoned 1.39e- 4
+## 6     2 abandoned 5.88e- 5
+## # ℹ 20,940 more rows
+```
+In the above table, the probability that the word `aaron` is generated from topic `\(1\)` is roughly `\(1.7 \times 10^{-12}\)` and the probability that the word is generated from topic `\(2\)` is roughly `\(3.9 \times 10^{-5}\)`. 
+---
+
+
+```r
+library(dplyr)
+## Sanity check that the probabilities of the words sum up to 1.
+ap_topics |&gt; group_by(topic) |&gt; summarize(total = sum(beta)) 
+```
+
+```
+## # A tibble: 2 × 2
+##   topic total
+##   &lt;int&gt; &lt;dbl&gt;
+## 1     1  1.00
+## 2     2  1.00
+```
+---
+
+Let us now find the words with the highest probabilities of being generated from each topic.
+
+```r
+library(ggplot2)
+ap_top_terms &lt;- ap_topics |&gt; 
+  group_by(topic) |&gt;
+  slice_max(beta, n = 10) |&gt;
+  ungroup() |&gt; arrange(topic, -beta)
+ap_top_terms |&gt; mutate(term = reorder_within(term, beta, topic)) |&gt;
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+```
+
+&lt;img src="text_mining_files/figure-html/topicmodels4-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+---
+We can now find the words with the greatest difference between the two topics
+
+```r
+library(tidyr)
+beta_wide &lt;- ap_topics |&gt;
+  mutate(topic = paste0("topic", topic)) |&gt;
+  pivot_wider(names_from = topic, values_from = beta) |&gt; 
+  filter(topic1 &gt; .001 | topic2 &gt; .001) |&gt;
+  mutate(log_ratio = log2(topic2 / topic1)) |&gt;
+  arrange(abs(log_ratio))
+beta_wide
+```
+
+```
+## # A tibble: 198 × 4
+##   term       topic1  topic2 log_ratio
+##   &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
+## 1 two       0.00360 0.00361   0.00396
+## 2 west      0.00124 0.00124   0.00418
+## 3 money     0.00105 0.00103  -0.0224 
+## 4 five      0.00109 0.00107  -0.0250 
+## 5 get       0.00118 0.00121   0.0262 
+## 6 wednesday 0.00161 0.00149  -0.108  
+## # ℹ 192 more rows
+```
+---
+
+```r
+beta_wide |&gt; 
+  slice_max(abs(log_ratio), n = 20) |&gt;
+  ggplot(aes(x = reorder(term, log_ratio), 
+             y = log_ratio, fill = log_ratio &gt; 0)) + 
+  geom_col() + xlab("term") + ylab("log_ratio") + 
+  coord_flip() + theme(legend.position = "none")
+```
+
+&lt;img src="text_mining_files/figure-html/unnamed-chunk-45-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+---
+We can also look at the distribution of topics in each document.
+
+```r
+ap_documents &lt;- tidy(ap_lda, matrix = "gamma")
+ap_documents |&gt; arrange(document)
+```
+
+```
+## # A tibble: 4,492 × 3
+##   document topic gamma
+##      &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1        1     1 0.248
+## 2        1     2 0.752
+## 3        2     1 0.362
+## 4        2     2 0.638
+## 5        3     1 0.527
+## 6        3     2 0.473
+## # ℹ 4,486 more rows
+```
+
+---
+# Word Embeddings
+
+The idea of word embeddings is to represent a collection of words `\(\{w_1, w_2, \dots, w_N\}\)` as a collection of vectors `\(\{v_1, v_2, \dots, v_N\}\)` where 
+`\(v_i in \mathbb{R}^{d}\)` for some fixed choice of `\(d\)`.
+
+The main aim is to allow for "algebraic" operations between words.
+
+For example, `$$\texttt{king} - \texttt{man} + \texttt{woman} \approx \texttt{queen}$$`
+
+There are several algorithms for doing word embeddings. The two most popular are 
+[word2vec](https://arxiv.org/pdf/1310.4546.pdf) and [GlovE](https://nlp.stanford.edu/projects/glove/). These algorithms are implemented as part of the 
+[word2vec](https://cran.r-project.org/web/packages/word2vec/index.html) and [text2vec](https://text2vec.org/).
+
+
+---
+We now discuss (in very limited details) the ideas behind the [Glove](https://nlp.stanford.edu/projects/glove/). 
+
+Given a **long** document, we can define a **co-occurrence** matrix `\(X\)` such that `\(X_{ij}\)` is the number of times word `\(i\)` appeared in the **context** of word `\(j\)`. 
+
+The **context** of a word `\(w\)` can refer to any words that appeared within a window of length `\(L\)` centered around word `\(w\)` within the document. 
+
+Given a choice of dimension `\(d\)`, the **Glove** procedure tries to find a collection of vectors `\(\{v_1, v_2, \dots, v_N\}\)` and `\(\{\tilde{v}_1, \dots, \tilde{v}_N\}\)` (and scalars `\(\{b_1, \dots, b_N\}\)`, `\(\{\tilde{b}_1, \dots, \tilde{b}_N\}\)` which minimize the objective
+`$$J = \sum_{i=1}^{N} \sum_{j=1}^{N} f(X_{ij}) \Bigl(v_i^{\top} \tilde{v}_j + b_i + \tilde{b}_j - \log(X_{ij}\Bigr)^2$$`
+Here `\(f(X_{ij})\)` is a **weighting** function. One typical example is `\(f(x) = (x/x_{\max})^{\alpha}\)` for `\(x \geq x_{\max}\)` and `\(f(x) = 0\)` otherwise.
+
+The minimization of `\(J\)` is usually done using **stochastic gradient descent** (the details are omitted).
+
+---
+# Glove Example
+
+We follow the presentation from the [text2vec](http://text2vec.org/glove.html) package.
+
+
+```r
+library(text2vec)
+text8_file &lt;- "~/text8"
+if (!file.exists(text8_file)) {
+  download.file("http://mattmahoney.net/dc/text8.zip", "~/text8.zip")
+  unzip ("~/text8.zip", files = "text8", exdir = "~/")
+}
+wiki &lt;- readLines(text8_file, n = 1, warn = FALSE)
+```
+The above code chunk downloads a subset of the wikipedia articles and read it into the variable `wiki`.
+
+---
+
+```r
+# Create iterator over tokens
+tokens = space_tokenizer(wiki)
+# Create vocabulary. Terms will be unigrams (simple words).
+it = itoken(tokens, progressbar = FALSE)
+vocab = create_vocabulary(it)
+vocab = prune_vocabulary(vocab, term_count_min = 5L) ## Now prune the vocabulary
+vocab
+```
+
+```
+## Number of docs: 1 
+## 0 stopwords:  ... 
+## ngram_min = 1; ngram_max = 1 
+## Vocabulary: 
+##            term term_count doc_count
+##     1:    aapke          5         1
+##     2:   ababda          5         1
+##     3: abakumov          5         1
+##     4: abalones          5         1
+##     5:    abano          5         1
+##    ---                              
+## 71286:       in     372201         1
+## 71287:      one     411764         1
+## 71288:      and     416629         1
+## 71289:       of     593677         1
+## 71290:      the    1061396         1
+```
+
+---
+
+```r
+# Use our filtered vocabulary
+vectorizer = vocab_vectorizer(vocab)
+# use window of 5 for context words
+tcm = create_tcm(it, vectorizer, skip_grams_window = 5L)
+str(tcm)
+```
+
+```
+## Formal class 'dgTMatrix' [package "Matrix"] with 6 slots
+##   ..@ i       : int [1:13945001] 57300 43042 43042 43042 64698 64698 68842 68489 41875 41875 ...
+##   ..@ j       : int [1:13945001] 67321 71277 71286 69529 70376 68489 70376 68842 70860 68842 ...
+##   ..@ Dim     : int [1:2] 71290 71290
+##   ..@ Dimnames:List of 2
+##   .. ..$ : chr [1:71290] "aapke" "ababda" "abakumov" "abalones" ...
+##   .. ..$ : chr [1:71290] "aapke" "ababda" "abakumov" "abalones" ...
+##   ..@ x       : num [1:13945001] 1 0.2 0.25 0.5 0.333 ...
+##   ..@ factors : list()
+##   ..$ word_count: int [1:71290] 5 5 5 5 5 5 5 5 5 5 ...
+```
+The variable `tcm` now stores a **sparse** matrix of dimension `\(71290\)` rows by `\(71290\)` columns.
+---
+We now try to estimate the word embedding vectors `\(\{v_1, \dots, v_N\}\)` from this `tcm` matrix.
+
+```r
+glove = GlobalVectors$new(rank = 50, x_max = 10)
+wv_main = glove$fit_transform(tcm, n_iter = 10, 
+                              convergence_tol = 0.01, n_threads = 8)
+```
+
+```
+## INFO  [22:08:23.740] epoch 1, loss 0.1752
+## INFO  [22:08:31.577] epoch 2, loss 0.1221
+## INFO  [22:08:39.961] epoch 3, loss 0.1078
+## INFO  [22:08:51.983] epoch 4, loss 0.0999
+## INFO  [22:09:04.857] epoch 5, loss 0.0949
+## INFO  [22:09:17.702] epoch 6, loss 0.0914
+## INFO  [22:09:30.215] epoch 7, loss 0.0886
+## INFO  [22:09:43.163] epoch 8, loss 0.0865
+## INFO  [22:09:55.101] epoch 9, loss 0.0848
+## INFO  [22:10:07.389] epoch 10, loss 0.0834
+```
+
+```r
+dim(wv_main)
+```
+
+```
+## [1] 71290    50
+```
+
+```r
+wv_context = glove$components
+dim(wv_context)
+```
+
+```
+## [1]    50 71290
+```
+
+```r
+word_vectors = wv_main + t(wv_context)
+```
+
+---
+We can now try out a few examples of word embeddings
+
+
+```r
+library(text2vec)
+most_similar_words &lt;- function(query, k = 5){
+  ## The sim2 function is part of the text2vec package
+  cos_sim = sim2(x = word_vectors, y = query, method = "cosine", norm = "l2") 
+  ## Return the k closest match to query
+  head(sort(cos_sim[,1], decreasing = TRUE), k) 
+}
+
+query1 = word_vectors["paris", , drop = FALSE] - 
+  word_vectors["france", , drop = FALSE] + 
+  word_vectors["germany",, drop = FALSE]
+most_similar_words(query1)
+```
+
+```
+##   paris  vienna  berlin  munich germany 
+##   0.777   0.738   0.738   0.691   0.660
+```
+
+```r
+query2 = word_vectors["university",, drop = FALSE] -
+  word_vectors["history",, drop = FALSE] + 
+  word_vectors["bank",,drop = FALSE]
+most_similar_words(query2)
+```
+
+```
+## university   illinois     bruges       ohio    college 
+##      0.704      0.683      0.610      0.599      0.596
+```
+
+---
+More silly examples
+
+```r
+query3 &lt;- word_vectors["king",,drop=FALSE] - 
+  word_vectors["man",,drop=FALSE] +
+  word_vectors["woman",,drop=FALSE]
+most_similar_words(query3)
+```
+
+```
+##    king   henry     son  philip charles 
+##   0.893   0.767   0.738   0.729   0.706
+```
+
+```r
+query4 &lt;- word_vectors["belgium",,drop=FALSE] + 
+  word_vectors["government",,drop=FALSE]
+most_similar_words(query4)
+```
+
+```
+## government     united     france    germany      union 
+##      0.863      0.810      0.784      0.778      0.773
+```
+
+```r
+query5 &lt;- word_vectors["italy",,drop=FALSE] - 
+  word_vectors["pizza",,drop=FALSE] - 
+  word_vectors["spaghetti",,drop=FALSE]
+most_similar_words(query5)
+```
+
+```
+##    rome   until germany   italy   since 
+##   0.704   0.674   0.655   0.651   0.629
 ```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
