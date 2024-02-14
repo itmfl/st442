@@ -21,8 +21,8 @@
     <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
     <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
-    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
-    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -36,7 +36,7 @@ class: center, middle, inverse, title-slide
 ## A used car salesman perspective
 ]
 .date[
-### Fall 2022
+### Spring 2024
 ]
 
 ---
@@ -47,17 +47,20 @@ class: center, middle, inverse, title-slide
 
 #Brief self-introduction
 + Name: Minh Tang. 
-+ Birthplace: Vietnam.
+
 + Degrees: 
     + BS in Computer Science in Thailand. (Prolog, Pascal, Java, C, C++)
     + MS in Computer Science @ U. Wisconsin Milwaukee. (Ruby, Perl, Lisp, Tcl/Tk, More C++)
     + PhD in Computer Science @ Indiana University. (Python, Scheme, OCamL, Haskell, R)
+
 + Current Affiliation: Department of Statistics @ NCSU.
+
 + Favorite Quote:
-   &gt; Three minutes thought would suffice to find this out but thought is irksome 
-   &gt; and three  minutes is a long time.
+  
+   &gt; Wisdom too often never comes, and so one ought not to 
+   &gt; reject it merely because it comes late.
    &gt; 
-   &gt;                     A. E. Houseman
+   &gt;                     Felix Frankfurter
 
 
 ---
@@ -74,11 +77,10 @@ class: center, middle, inverse, title-slide
 # The R environment
 R is an integrated suite of software facilities for data manipulation, calculation and graphical display. It includes
 + an effective data handling and storage facility,
-+ a suite of operators for calculations on arrays, in particular matrices,
 + a large, coherent, integrated collection of intermediate tools for data analysis,
 + graphical facilities for data analysis and display.
 + a well-developed, simple and effective programming language.
-+ effective tools for **literate programming**, e.g., creating a report that seamlessly weave code/data together with formulas, texts, documentation. In fact, these slides are written in *Rmarkdown*.
++ effective tools for **literate programming**, e.g., creating a report that seamlessly weave code/data together with formulas, texts, documentation. In fact, these slides are written in [Rmarkdown](https://rmarkdown.rstudio.com/).
 
 
 + The term "environment" is intended to characterize it as a fully planned and coherent system, rather than an incremental accretion of very specific and inflexible tools, as is frequently the case with other data analysis software. R can be extended (easily) via packages. 
@@ -97,13 +99,11 @@ are available through the [CRAN](https://cran.r-project.org/) repositories.
 
 + [JHU Coursera](https://www.coursera.org/learn/r-programming)
 
-+ Yihui Xie, J. Allaire and Garrett Grolemund [Rmarkdown definitive guide](https://bookdown.org/yihui/rmarkdown/)
++ Long and Teetor [R Cookbook, 2nd edition](https://rc2e.com/)
 
-+ Long and Teetor [R Cookbook](https://rc2e.com/)
++ Garrett Grolemund and Hadley Wickham, [R for Data Science, 2nd edition](https://r4ds.hadley.nz/)
 
-+ Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.had.co.nz)
-
-+ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R](https://beanumber.github.io/mdsr2e/)
++ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://beanumber.github.io/mdsr2e/)
 
 --
 + `?` in **R**
@@ -302,27 +302,9 @@ typeof(x); length(x)
 ```
 ## [1] 3
 ```
----
-class: clear
 
 + The types are, from least to most general, 
 $$ \mathtt{logical} \rightarrow \underbrace{\mathtt{integer} \rightarrow \mathtt{double}}_{\mathtt{numeric}} \rightarrow  \mathtt{character} $$
-+ Explicit coercion is via: `\(\mathtt{as.logical()}\)`, `\(\mathtt{as.numeric()}\)`, `\(\mathtt{as.integer()}\)`, `\(\mathtt{as.double()}\)`, `\(\mathtt{as.character()}\)`. 
-
-+ Implicit coercion: `\(\mathtt{TRUE}\)` and `\(\mathtt{FALSE}\)` are coerced to `\(1\mathrm{L}\)` and `\(0\mathrm{L}\)`. On occasions, positive integer is coerced to `\(\mathtt{TRUE}\)` and `\(0\)` is coerced to `\(\mathtt{FALSE}\)`
-
-```r
-x &lt;- 3
-if(length(x)){
-  x &lt;- rep(x, 2)
-}
-x
-```
-
-```
-## [1] 3 3
-```
-
 ---
 class: clear
 
@@ -364,14 +346,6 @@ x &lt;- 1:10; x
 ```
 
 ```r
-x + 1
-```
-
-```
-##  [1]  2  3  4  5  6  7  8  9 10 11
-```
-
-```r
 x*2
 ```
 
@@ -387,9 +361,6 @@ x^2
 ##  [1]   1   4   9  16  25  36  49  64  81 100
 ```
 
----
-class: clear
-
 ```r
 sqrt(x)
 ```
@@ -397,6 +368,9 @@ sqrt(x)
 ```
 ##  [1] 1.00 1.41 1.73 2.00 2.24 2.45 2.65 2.83 3.00 3.16
 ```
+
+---
+class: clear
 
 ```r
 x + 1:2
@@ -586,34 +560,7 @@ w[c("x","z","z","x")]
 ## x z z x 
 ## 1 3 3 1
 ```
----
-class: clear
-+ Finally, you can extract all the elements with `[]` or a single element with `[[]]`, e.g.,
 
-```r
-x &lt;- 1:10
-x[]
-```
-
-```
-##  [1]  1  2  3  4  5  6  7  8  9 10
-```
-
-```r
-x[[1]]
-```
-
-```
-## [1] 1
-```
-
-```r
-x[[c(1,2)]]
-```
-
-```
-## Error in x[[c(1, 2)]]: attempt to select more than one element in vectorIndex
-```
 ---
 #Recursive vectors (lists)
 Lists are non-atomic vectors whose elements are themselves possibly other lists. Thus, the elements of a list could have different type, e.g.,
@@ -768,15 +715,7 @@ str(a[[4]])
 ```
 
 ```r
-a[[c(4,1)]]
-```
-
-```
-## [1] -1
-```
-
-```r
-a[[4]][[1]] ## Equivalent to the above
+a[[4]][[1]] 
 ```
 
 ```
@@ -1109,11 +1048,11 @@ flights
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 #filter()
@@ -1133,10 +1072,11 @@ filter(flights, month == 8, day == 21)
 ## 4  2013     8    21      453            500        -7      634
 ## 5  2013     8    21      528            530        -2      757
 ## 6  2013     8    21      536            545        -9      808
-## # … with 984 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 984 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ```r
@@ -1161,10 +1101,11 @@ filter(august21, origin == 'JFK' | origin == 'LGA')
 ## 4  2013     8    21      536            545        -9      808
 ## 5  2013     8    21      540            540         0      837
 ## 6  2013     8    21      544            545        -1      911
-## # … with 631 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 631 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
 ```r
@@ -1189,18 +1130,19 @@ filter(august21_jfk_lga, arr_delay &gt; 10 | dep_delay &gt; 10)
 ## 4  2013     8    21      555            600        -5      839
 ## 5  2013     8    21      558            600        -2      830
 ## 6  2013     8    21      625            600        25      903
-## # … with 100 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 100 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
 We can do all of the above filtering using a single chain sequence as follows
 
 ```r
-flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;% 
-            filter(origin %in% c("JFK","LGA")) %&gt;%
+flights |&gt; filter(month == 8 &amp; day == 21) |&gt; 
+            filter(origin %in% c("JFK","LGA")) |&gt;
             filter(arr_delay &gt; 10 | dep_delay &gt; 10)
 ```
 
@@ -1214,17 +1156,18 @@ flights %&gt;% filter(month == 8 &amp; day == 21) %&gt;%
 ## 4  2013     8    21      555            600        -5      839
 ## 5  2013     8    21      558            600        -2      830
 ## 6  2013     8    21      625            600        25      903
-## # … with 100 more rows, and 12 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 100 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 
-+ The previous example introduce the `%&gt;%` pipe operator. 
++ The previous example introduce the `|&gt;` pipe operator. 
 
 + The pipe operator allows us to chain together operations without the need to introduce auxiliary variables.
 
-+ The pipe operator maps `x %&gt;% f(y)` to `f(x,y)`.
++ The pipe operator maps `x |&gt; f(y)` to `f(x,y)`.
 
 ---
 #Missing values
@@ -1255,17 +1198,6 @@ NA + 10
 ```
 
 ```r
-2*NA
-```
-
-```
-## [1] NA
-```
----
-class: clear
-Further examples include
-
-```r
 NA == NA
 ```
 
@@ -1273,37 +1205,6 @@ NA == NA
 ## [1] NA
 ```
 
-```r
-0*NA
-```
-
-```
-## [1] NA
-```
-
-```r
-NA^0
-```
-
-```
-## [1] 1
-```
-
-```r
-NA | TRUE
-```
-
-```
-## [1] TRUE
-```
-
-```r
-FALSE &amp; NA
-```
-
-```
-## [1] FALSE
-```
 ---
 class: clear
 **filter** only includes rows where the condition is `\(\mathrm{TRUE}\)`, i.e., it excludes rows with both `\(\mathrm{FALSE}\)` and `\(\mathrm{NA}\)` values. To preserve missing values, we have to ask for them explicitly, e.g.,
@@ -1350,10 +1251,11 @@ arrange(flights_dest, dest, month, day)
 ## 4 ABQ    2013     4    25     2023           2025        -2     2339
 ## 5 ABQ    2013     4    26     2020           2025        -5     2318
 ## 6 ABQ    2013     4    27     2020           2025        -5     2245
-## # … with 336,770 more rows, and 11 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, air_time &lt;dbl&gt;,
-## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 11 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
@@ -1373,10 +1275,11 @@ arrange(flights_dest, desc(dest), month, day)
 ## 4 XNA    2013     1     2      656            705        -9     1014
 ## 5 XNA    2013     1     2      905            822        43     1313
 ## 6 XNA    2013     1     2     1531           1530         1     1846
-## # … with 336,770 more rows, and 11 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, air_time &lt;dbl&gt;,
-## #   distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 11 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
+## #   time_hour &lt;dttm&gt;
 ```
 ---
 #select()
@@ -1399,7 +1302,7 @@ flights_sml
 ## 4  2013     1     1      544            545     1004           1022
 ## 5  2013     1     1      554            600      812            837
 ## 6  2013     1     1      554            558      740            728
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 class: clear
@@ -1444,7 +1347,8 @@ rename(flights_sml,
 ## 4  2013     1     1            544            545         1004
 ## 5  2013     1     1            554            600          812
 ## 6  2013     1     1            554            558          740
-## # … with 336,770 more rows, and 1 more variable: sched_arr_time &lt;int&gt;
+## # ℹ 336,770 more rows
+## # ℹ 1 more variable: sched_arr_time &lt;int&gt;
 ```
 ---
 class: clear
@@ -1464,7 +1368,7 @@ select(flights_sml, dep_time, everything())
 ## 4      544  2013     1     1            545     1004           1022
 ## 5      554  2013     1     1            600      812            837
 ## 6      554  2013     1     1            558      740            728
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 # mutate()
@@ -1476,7 +1380,7 @@ flights_sml &lt;- select(flights, year:day,ends_with("delay"),
 mutate(flights_sml, gain = arr_delay - dep_delay,
                     hours = air_time/60,
                     speed = distance/hours,
-                    gain_per_hour = gain/hours) %&gt;% select(-hours)
+                    gain_per_hour = gain/hours) |&gt; select(-hours)
 ```
 
 ```
@@ -1489,16 +1393,17 @@ mutate(flights_sml, gain = arr_delay - dep_delay,
 ## 4  2013     1     1        -1       -18     1576      183   -17  517.
 ## 5  2013     1     1        -6       -25      762      116   -19  394.
 ## 6  2013     1     1        -4        12      719      150    16  288.
-## # … with 336,770 more rows, and 1 more variable: gain_per_hour &lt;dbl&gt;
+## # ℹ 336,770 more rows
+## # ℹ 1 more variable: gain_per_hour &lt;dbl&gt;
 ```
 ---
 class: clear
-A variant of *mutate* is *transmute*, which drops all variables except the newly created variables, e.g.,
+You can use mutate with the `.keep="none"` option to drops all variables except the newly created variables, e.g.,
 
 ```r
-transmute(flights, gain = arr_delay - dep_delay, 
+mutate(flights, gain = arr_delay - dep_delay, 
                    hours = air_time/60, 
-                   gain_per_hour = gain/hours)
+                   gain_per_hour = gain/hours, .keep="none")
 ```
 
 ```
@@ -1511,7 +1416,7 @@ transmute(flights, gain = arr_delay - dep_delay,
 ## 4   -17  3.05         -5.57
 ## 5   -19  1.93         -9.83
 ## 6    16  2.5           6.4 
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 ---
 #summarize()
@@ -1543,7 +1448,7 @@ class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 
 ```r
-flights %&gt;% group_by(year, month, day)
+flights |&gt; group_by(year, month, day)
 ```
 
 ```
@@ -1557,17 +1462,17 @@ flights %&gt;% group_by(year, month, day)
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class: clear
 
 ```r
-flights %&gt;% group_by(year, month, day) %&gt;%
+flights |&gt; group_by(year, month, day) |&gt;
 summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 
@@ -1582,18 +1487,18 @@ summarize(delay = mean(dep_delay, na.rm = TRUE))
 ## 4  2013     1     4  8.95
 ## 5  2013     1     5  5.73
 ## 6  2013     1     6  7.15
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 A more involved example is to compute the average distance and delay for flights to all destinations (except Honolulu).
 
 ```r
-delays &lt;- flights %&gt;% group_by(dest) %&gt;% 
+delays &lt;- flights |&gt; group_by(dest) |&gt; 
   summarize(count = n(), 
             dist = mean(distance,na.rm = TRUE),
             avg_delay = mean(arr_delay + dep_delay,na.rm = TRUE)
-            ) %&gt;%
+            ) |&gt;
   filter(count &gt; 20, dest != "HNL")
 delays
 ```
@@ -1608,7 +1513,7 @@ delays
 ## 4 ATL   17215  757.      23.7
 ## 5 AUS    2439 1514.      19.0
 ## 6 AVL     275  584.      16.2
-## # … with 90 more rows
+## # ℹ 90 more rows
 ```
 ---
 class: clear
@@ -1621,7 +1526,7 @@ ggplot(delays, aes(x = dist, y  = avg_delay)) +
   geom_smooth(se = FALSE) + ylab("average delay") + theme_bw()
 ```
 
-&lt;img src="intro_R_files/figure-html/unnamed-chunk-60-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="intro_R_files/figure-html/unnamed-chunk-57-1.png" width="80%" style="display: block; margin: auto;" /&gt;
 ---
 class: clear
 There are a large number of useful summary functions. See Section 5.6.4 of [R4DS](https://r4ds.had.co.nz/transform.html#summarise-funs). We provide a few more examples.
@@ -1629,7 +1534,7 @@ There are a large number of useful summary functions. See Section 5.6.4 of [R4DS
 ```r
 ## average arrival delay
 not_canceled &lt;- filter(flights, !is.na(dep_delay) &amp; !is.na(arr_delay))
-not_canceled %&gt;% group_by(year, month, day) %&gt;% 
+not_canceled |&gt; group_by(year, month, day) |&gt; 
   summarize(avg_delay = mean(arr_delay), 
             avg_positive_delay = mean(arr_delay[arr_delay &gt; 0]))
 ```
@@ -1645,14 +1550,14 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     4     -1.93               28.3
 ## 5  2013     1     5     -1.53               22.6
 ## 6  2013     1     6      4.24               24.4
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(dest) %&gt;% 
-  summarize(dist_sd = sd(distance)) %&gt;% arrange(desc(dist_sd))
+not_canceled |&gt; group_by(dest) |&gt; 
+  summarize(dist_sd = sd(distance)) |&gt; arrange(desc(dist_sd))
 ```
 
 ```
@@ -1665,14 +1570,14 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## 4 HNL     10.0 
 ## 5 SEA      9.98
 ## 6 LAS      9.91
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
 We note that *summarize* drops all variables except possibly those used to group the data and those variables introduced by the summary statistics. Contrasts the following two approaches
 
 ```r
-not_canceled %&gt;% group_by(year,month,day) %&gt;%
+not_canceled |&gt; group_by(year,month,day) |&gt;
   summarize(first_dep = first(dep_time), last_dep = last(dep_time))
 ```
 
@@ -1687,14 +1592,14 @@ not_canceled %&gt;% group_by(year,month,day) %&gt;%
 ## 4  2013     1     4        25     2358
 ## 5  2013     1     5        14     2357
 ## 6  2013     1     6        16     2355
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(year, month, day) %&gt;%
-  mutate(r = min_rank(desc(dep_time))) %&gt;% filter(r %in% range(r))
+not_canceled |&gt; group_by(year, month, day) |&gt;
+  mutate(r = min_rank(desc(dep_time))) |&gt; filter(r %in% range(r))
 ```
 
 ```
@@ -1708,16 +1613,17 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     2     2354           2359        -5      413
 ## 5  2013     1     3       32           2359        33      504
 ## 6  2013     1     3     2349           2359       -10      434
-## # … with 764 more rows, and 13 more variables: sched_arr_time &lt;int&gt;,
-## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
-## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
-## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
+## # ℹ 764 more rows
+## # ℹ 13 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;, r &lt;int&gt;
 ```
 ---
 # More examples
 
 ```r
-not_canceled %&gt;% group_by(year, month, day) %&gt;%
+not_canceled |&gt; group_by(year, month, day) |&gt;
   summarize(n_early = sum(dep_time &lt; 500))
 ```
 
@@ -1732,14 +1638,14 @@ not_canceled %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     4       3
 ## 5  2013     1     5       3
 ## 6  2013     1     6       2
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 ---
 class: clear
 
 ```r
-not_canceled %&gt;% group_by(dest) %&gt;%
-  summarize(long_delay_pct = mean(arr_delay &gt; 60)) %&gt;%
+not_canceled |&gt; group_by(dest) |&gt;
+  summarize(long_delay_pct = mean(arr_delay &gt; 60)) |&gt;
   arrange(desc(long_delay_pct))
 ```
 
@@ -1753,7 +1659,7 @@ not_canceled %&gt;% group_by(dest) %&gt;%
 ## 4 TYS            0.206
 ## 5 BHM            0.171
 ## 6 DSM            0.170
-## # … with 98 more rows
+## # ℹ 98 more rows
 ```
 ---
 class: clear
@@ -1775,18 +1681,18 @@ daily
 ## 4  2013     1     1      544            545        -1     1004
 ## 5  2013     1     1      554            600        -6      812
 ## 6  2013     1     1      554            558        -4      740
-## # … with 336,770 more rows, and 12 more variables:
-## #   sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;,
-## #   flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;,
-## #   air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;, minute &lt;dbl&gt;,
-## #   time_hour &lt;dttm&gt;
+## # ℹ 336,770 more rows
+## # ℹ 12 more variables: sched_arr_time &lt;int&gt;, arr_delay &lt;dbl&gt;,
+## #   carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;, origin &lt;chr&gt;,
+## #   dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
+## #   minute &lt;dbl&gt;, time_hour &lt;dttm&gt;
 ```
 ---
 class:clear
 
 ```r
-daily %&gt;% summarize(flights = n()) %&gt;% 
-          summarize(flights = sum(flights)) %&gt;%
+daily |&gt; summarize(flights = n()) |&gt; 
+          summarize(flights = sum(flights)) |&gt;
           summarize(flights = sum(flights)) 
 ```
 
@@ -1800,52 +1706,7 @@ daily %&gt;% summarize(flights = n()) %&gt;%
 ## 4 ANC         8
 ## 5 ATL     17215
 ## 6 AUS      2439
-## # … with 99 more rows
-```
----
-class: clear
-Be careful when peeling off nested groupings using a sequence of `\(\mathrm{summarize}\)`. 
-
-Consider the following examples.
-
-
-```r
-group_by(not_canceled, dest, month) %&gt;% 
-  summarize(air_time = mean(air_time)) %&gt;% 
-  summarize(air_time = mean(air_time))
-```
-
-```
-## # A tibble: 104 × 2
-##   dest  air_time
-##   &lt;chr&gt;    &lt;dbl&gt;
-## 1 ABQ      250. 
-## 2 ACK       41.9
-## 3 ALB       31.8
-## 4 ANC      413. 
-## 5 ATL      113. 
-## 6 AUS      214. 
-## # … with 98 more rows
-```
----
-class: clear
-
-```r
-group_by(not_canceled, dest) %&gt;% 
-  summarize(air_time = mean(air_time))
-```
-
-```
-## # A tibble: 104 × 2
-##   dest  air_time
-##   &lt;chr&gt;    &lt;dbl&gt;
-## 1 ABQ      249. 
-## 2 ACK       42.1
-## 3 ALB       31.8
-## 4 ANC      413. 
-## 5 ATL      113. 
-## 6 AUS      213. 
-## # … with 98 more rows
+## # ℹ 99 more rows
 ```
 ---
 #ungroup()
@@ -1867,11 +1728,11 @@ summarize(daily, flights = n())
 ## 4  2013     1     4     915
 ## 5  2013     1     5     720
 ## 6  2013     1     6     832
-## # … with 359 more rows
+## # ℹ 359 more rows
 ```
 
 ```r
-daily %&gt;% ungroup() %&gt;% summarize(flights = n())
+daily |&gt; ungroup() |&gt; summarize(flights = n())
 ```
 
 ```
@@ -1888,7 +1749,7 @@ We can also do a number of very useful operations by combining `\(\mathrm{group\
 ## Find the worst flights with longest delay each day
 flights_sml &lt;- select(flights, year:day, ends_with("delay"),
                       distance, air_time)
-flights_sml %&gt;% group_by(year, month, day) %&gt;%
+flights_sml |&gt; group_by(year, month, day) |&gt;
   filter(rank(desc(arr_delay)) &lt;= 10)
 ```
 
@@ -1903,16 +1764,16 @@ flights_sml %&gt;% group_by(year, month, day) %&gt;%
 ## 4  2013     1     1       155       166      277       68
 ## 5  2013     1     1       157       174      213       60
 ## 6  2013     1     1       216       222      708      121
-## # … with 3,603 more rows
+## # ℹ 3,603 more rows
 ```
 ---
 
 ```r
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
-flights %&gt;% group_by(dest) %&gt;%
-  filter(n() &gt; 365, arr_delay &gt; 0) %&gt;%
-  mutate(prop_delay = arr_delay/sum(arr_delay)) %&gt;%
+flights |&gt; group_by(dest) |&gt;
+  filter(n() &gt; 365, arr_delay &gt; 0) |&gt;
+  mutate(prop_delay = arr_delay/sum(arr_delay)) |&gt;
   select(year:day, dest, arr_delay, prop_delay)
 ```
 
@@ -1927,7 +1788,7 @@ flights %&gt;% group_by(dest) %&gt;%
 ## 4  2013     1     1 ORD          12  0.0000424
 ## 5  2013     1     1 FLL          19  0.0000938
 ## 6  2013     1     1 ORD           8  0.0000283
-## # … with 131,100 more rows
+## # ℹ 131,100 more rows
 ```
 ---
 Functions that work most naturally in grouped mutates and grouped filters are [window functions](https://rpubs.com/hadley/window) (see the **R** command `\(\mathrm{vignette("window-functions")}\)`. 
@@ -1936,11 +1797,11 @@ The following example is from [window functions](https://rpubs.com/hadley/window
 
 ```r
 library(Lahman)
-batting &lt;- Lahman::Batting %&gt;% as_tibble() %&gt;% 
-           select(playerID, yearID, teamID, G, AB, R, H) %&gt;%
-           arrange(playerID, yearID, teamID) %&gt;%
+batting &lt;- Lahman::Batting |&gt; as_tibble() |&gt; 
+           select(playerID, yearID, teamID, G, AB, R, H) |&gt;
+           arrange(playerID, yearID, teamID) |&gt;
            semi_join(Lahman::AwardsPlayers, by = "playerID")
-players &lt;- batting %&gt;% group_by(playerID)
+players &lt;- batting |&gt; group_by(playerID)
 ```
 ---
 Using this dataset, let us try a few `\(\mathrm{group\_mutate}\)` and `\(\mathrm{group\_filter}\)` operations. 
@@ -1951,7 +1812,7 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ```
 
 ```
-## # A tibble: 2,917 × 7
+## # A tibble: 2,920 × 7
 ## # Groups:   playerID [1,385]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
@@ -1961,7 +1822,7 @@ filter(players, min_rank(desc(H)) &lt;= 2 &amp; H &gt; 0)
 ## 4 abernte02   1955 WS1       40    26     1     4
 ## 5 abernte02   1957 WS1       26    24     3     4
 ## 6 abreubo01   1999 PHI      152   546   118   183
-## # … with 2,911 more rows
+## # ℹ 2,914 more rows
 ```
 ---
 class: clear
@@ -1972,7 +1833,7 @@ mutate(players, G_rank = min_rank(G))
 ```
 
 ```
-## # A tibble: 20,706 × 8
+## # A tibble: 20,874 × 8
 ## # Groups:   playerID [1,436]
 ##   playerID  yearID teamID     G    AB     R     H G_rank
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;int&gt;
@@ -1982,7 +1843,7 @@ mutate(players, G_rank = min_rank(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198     12
 ## 5 aaronha01   1958 ML1      153   601   109   196     13
 ## 6 aaronha01   1959 ML1      154   629   116   223     17
-## # … with 20,700 more rows
+## # ℹ 20,868 more rows
 ```
 ---
 class: clear
@@ -1994,8 +1855,8 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ```
 
 ```
-## # A tibble: 8,180 × 7
-## # Groups:   playerID [1,353]
+## # A tibble: 8,232 × 7
+## # Groups:   playerID [1,354]
 ##   playerID  yearID teamID     G    AB     R     H
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1 aaronha01   1955 ML1      153   602   105   189
@@ -2004,7 +1865,7 @@ filter(players, AB &gt; 0, lag(AB) &gt; 0, H/AB &gt; lag(H)/lag(AB))
 ## 4 aaronha01   1959 ML1      154   629   116   223
 ## 5 aaronha01   1961 ML1      155   603   115   197
 ## 6 aaronha01   1964 ML1      145   570   103   187
-## # … with 8,174 more rows
+## # ℹ 8,226 more rows
 ```
 ---
 class: clear
@@ -2015,7 +1876,7 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ```
 
 ```
-## # A tibble: 20,706 × 8
+## # A tibble: 20,874 × 8
 ## # Groups:   playerID [1,436]
 ##   playerID  yearID teamID     G    AB     R     H    G_z
 ##   &lt;chr&gt;      &lt;int&gt; &lt;fct&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;
@@ -2025,19 +1886,19 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 ## 4 aaronha01   1957 ML1      151   615   118   198  0.411
 ## 5 aaronha01   1958 ML1      153   601   109   196  0.519
 ## 6 aaronha01   1959 ML1      154   629   116   223  0.573
-## # … with 20,700 more rows
+## # ℹ 20,868 more rows
 ```
 ---
 class: clear
 The `\(\mathrm{ntile(x,m)}\)` function divides the (numeric) vector `\(x\)` into `\(m\)` evenly sized buckets. The next operation divides the team players into `\(4\)` coarse groups and calculate the batting average for each group.
 
 ```r
-batting %&gt;% group_by(teamID,playerID) %&gt;%
+batting |&gt; group_by(teamID,playerID) |&gt;
   summarise(total_hits = sum(H), total_ab = sum(AB), 
-            batting_avg = total_hits/total_ab) %&gt;%
-  filter(!is.na(batting_avg)) %&gt;%
-  mutate(quartile = ntile(batting_avg,4)) %&gt;%
-  group_by(teamID,quartile) %&gt;% 
+            batting_avg = total_hits/total_ab) |&gt;
+  filter(!is.na(batting_avg)) |&gt;
+  mutate(quartile = ntile(batting_avg,4)) |&gt;
+  group_by(teamID,quartile) |&gt; 
   summarise(batting_avg = sum(total_hits)/sum(total_ab))
 ```
 
@@ -2052,7 +1913,7 @@ batting %&gt;% group_by(teamID,playerID) %&gt;%
 ## 4 ANA           4       0.301
 ## 5 ARI           1       0.153
 ## 6 ARI           2       0.243
-## # … with 229 more rows
+## # ℹ 229 more rows
 ```
 
 ---
@@ -2069,21 +1930,21 @@ df
 
 ```
 ## # A tibble: 100 × 3
-##        x     y     z
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.245  0.356 0.391
-## 2 0.568  0.622 0.980
-## 3 0.537  0.462 0.961
-## 4 0.0150 0.617 0.466
-## 5 0.0866 0.582 0.407
-## 6 0.315  0.300 0.188
-## # … with 94 more rows
+##       x     y     z
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 0.837 0.493 0.617
+## 2 0.809 0.418 0.123
+## 3 0.811 0.510 0.968
+## 4 0.711 0.569 0.280
+## 5 0.420 0.961 0.542
+## 6 0.793 0.790 0.777
+## # ℹ 94 more rows
 ```
 ]
 .pull-right[
 
 ```r
-df %&gt;% summarize(
+df |&gt; summarize(
   across(c(x,y,z),mean))
 ```
 
@@ -2091,12 +1952,12 @@ df %&gt;% summarize(
 ## # A tibble: 1 × 3
 ##       x     y     z
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1 0.535 0.514 0.470
+## 1 0.484 0.479 0.493
 ```
 
 ```r
 ## Equivalently
-## df %&gt;% summarize(
+## df |&gt; summarize(
 ##   across(everything(),mean))
 ```
 ]
@@ -2111,25 +1972,25 @@ With **across **you can also
 
 
 ```r
-df &lt;- df %&gt;% mutate(names = rep(letters,4)[1:100])
+df &lt;- df |&gt; mutate(names = rep(letters,4)[1:100])
 df
 ```
 
 ```
 ## # A tibble: 100 × 4
-##        x     y     z names
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
-## 1 0.245  0.356 0.391 a    
-## 2 0.568  0.622 0.980 b    
-## 3 0.537  0.462 0.961 c    
-## 4 0.0150 0.617 0.466 d    
-## 5 0.0866 0.582 0.407 e    
-## 6 0.315  0.300 0.188 f    
-## # … with 94 more rows
+##       x     y     z names
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+## 1 0.837 0.493 0.617 a    
+## 2 0.809 0.418 0.123 b    
+## 3 0.811 0.510 0.968 c    
+## 4 0.711 0.569 0.280 d    
+## 5 0.420 0.961 0.542 e    
+## 6 0.793 0.790 0.777 f    
+## # ℹ 94 more rows
 ```
 
 ```r
-df %&gt;% summarize(across(where(is.numeric),
+df |&gt; summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = ~max(.)/min(.))))
 ```
 
@@ -2137,20 +1998,22 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.535 0.281    66.6  0.514 0.274    31.6  0.470 0.268    77.3
+## 1  0.484 0.302    112.  0.479 0.291    166.  0.493 0.299    185.
 ```
 
 ---
 class: clear
 
-The previous examples uses the `\(.\)` operator, which serves as a placeholder for the variable/data of interest. See also the documentation for the [magrittr library](https://github.com/tidyverse/magrittr). It is, however, generally cleaner (syntax wise), to define and use a named function as opposed to an anonymous function.
+The previous examples uses the `\(.\)` operator, which serves as a placeholder for the variable/data of interest. 
+
+It is, however, generally cleaner (syntax wise), to define and use a named function as opposed to an anonymous function.
 
 
 ```r
 max_min_ratio &lt;- function(x){
   max(x)/min(x)
 }
-df %&gt;% summarize(across(where(is.numeric),
+df |&gt; summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
@@ -2158,12 +2021,12 @@ df %&gt;% summarize(across(where(is.numeric),
 ## # A tibble: 1 × 9
 ##   x_mean  x_sd x_ratio y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.535 0.281    66.6  0.514 0.274    31.6  0.470 0.268    77.3
+## 1  0.484 0.302    112.  0.479 0.291    166.  0.493 0.299    185.
 ```
 
 ```r
 # You can also combine multiple selection criteria
-df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
+df |&gt; summarize(across(where(is.numeric) &amp; c(-x),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
@@ -2171,12 +2034,12 @@ df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
 ## # A tibble: 1 × 6
 ##   y_mean  y_sd y_ratio z_mean  z_sd z_ratio
 ##    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-## 1  0.514 0.274    31.6  0.470 0.268    77.3
+## 1  0.479 0.291    166.  0.493 0.299    185.
 ```
 
 ```r
 ## Equivalently
-## df %&gt;% summarize(across(c(y,z), 
+## df |&gt; summarize(across(c(y,z), 
 ##     list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
@@ -2185,7 +2048,8 @@ df %&gt;% summarize(across(where(is.numeric) &amp; c(-x),
 Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
 
 ```r
-flights %&gt;% select(arr_delay)
+library(dplyr)
+flights |&gt; select(arr_delay)
 ```
 
 ```
@@ -2198,11 +2062,11 @@ flights %&gt;% select(arr_delay)
 ## 4       -18
 ## 5       -25
 ## 6        12
-## # … with 336,770 more rows
+## # ℹ 336,770 more rows
 ```
 
 ```r
-class(flights %&gt;% select(arr_delay))
+flights |&gt; select(arr_delay) |&gt; class()
 ```
 
 ```
@@ -2212,7 +2076,8 @@ class(flights %&gt;% select(arr_delay))
 class: clear
 
 ```r
-flights %&gt;% pull(arr_delay) %&gt;% head
+library(dplyr)
+flights |&gt; dplyr::pull(arr_delay) |&gt; head()
 ```
 
 ```
@@ -2220,7 +2085,7 @@ flights %&gt;% pull(arr_delay) %&gt;% head
 ```
 
 ```r
-class(flights %&gt;% pull(arr_delay))
+flights |&gt; pull(arr_delay) |&gt; class()
 ```
 
 ```
@@ -2230,7 +2095,7 @@ class(flights %&gt;% pull(arr_delay))
 If we now extract the standard deviation from the above data frame/vector, we get
 
 ```r
-flights %&gt;% select(arr_delay) %&gt;% sd(na.rm = TRUE)
+flights |&gt; select(arr_delay) |&gt; sd(na.rm = TRUE)
 ```
 
 ```
@@ -2238,7 +2103,7 @@ flights %&gt;% select(arr_delay) %&gt;% sd(na.rm = TRUE)
 ```
 
 ```r
-flights %&gt;% pull(arr_delay) %&gt;% sd(na.rm = TRUE)
+flights |&gt; pull(arr_delay) |&gt; sd(na.rm = TRUE)
 ```
 
 ```

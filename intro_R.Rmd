@@ -1,7 +1,7 @@
 ---
 title: "Introduction to R"
 subtitle: "A used car salesman perspective"
-date: "Fall 2022"
+date: "Spring 2024"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -56,17 +56,20 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 
 #Brief self-introduction
 + Name: Minh Tang. 
-+ Birthplace: Vietnam.
+
 + Degrees: 
     + BS in Computer Science in Thailand. (Prolog, Pascal, Java, C, C++)
     + MS in Computer Science @ U. Wisconsin Milwaukee. (Ruby, Perl, Lisp, Tcl/Tk, More C++)
     + PhD in Computer Science @ Indiana University. (Python, Scheme, OCamL, Haskell, R)
+
 + Current Affiliation: Department of Statistics @ NCSU.
+
 + Favorite Quote:
-   > Three minutes thought would suffice to find this out but thought is irksome 
-   > and three  minutes is a long time.
+  
+   > Wisdom too often never comes, and so one ought not to 
+   > reject it merely because it comes late.
    > 
-   >                     A. E. Houseman
+   >                     Felix Frankfurter
 
 
 ---
@@ -83,11 +86,10 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 # The R environment
 R is an integrated suite of software facilities for data manipulation, calculation and graphical display. It includes
 + an effective data handling and storage facility,
-+ a suite of operators for calculations on arrays, in particular matrices,
 + a large, coherent, integrated collection of intermediate tools for data analysis,
 + graphical facilities for data analysis and display.
 + a well-developed, simple and effective programming language.
-+ effective tools for **literate programming**, e.g., creating a report that seamlessly weave code/data together with formulas, texts, documentation. In fact, these slides are written in *Rmarkdown*.
++ effective tools for **literate programming**, e.g., creating a report that seamlessly weave code/data together with formulas, texts, documentation. In fact, these slides are written in [Rmarkdown](https://rmarkdown.rstudio.com/).
 
 
 + The term "environment" is intended to characterize it as a fully planned and coherent system, rather than an incremental accretion of very specific and inflexible tools, as is frequently the case with other data analysis software. R can be extended (easily) via packages. 
@@ -106,13 +108,11 @@ are available through the [CRAN](https://cran.r-project.org/) repositories.
 
 + [JHU Coursera](https://www.coursera.org/learn/r-programming)
 
-+ Yihui Xie, J. Allaire and Garrett Grolemund [Rmarkdown definitive guide](https://bookdown.org/yihui/rmarkdown/)
++ Long and Teetor [R Cookbook, 2nd edition](https://rc2e.com/)
 
-+ Long and Teetor [R Cookbook](https://rc2e.com/)
++ Garrett Grolemund and Hadley Wickham, [R for Data Science, 2nd edition](https://r4ds.hadley.nz/)
 
-+ Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.had.co.nz)
-
-+ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R](https://beanumber.github.io/mdsr2e/)
++ Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://beanumber.github.io/mdsr2e/)
 
 --
 + `?` in **R**
@@ -213,22 +213,9 @@ x <- c("A string","A longer string", "Even longer string")
 typeof(x); length(x)
 
 ```
----
-class: clear
 
 + The types are, from least to most general, 
 $$ \mathtt{logical} \rightarrow \underbrace{\mathtt{integer} \rightarrow \mathtt{double}}_{\mathtt{numeric}} \rightarrow  \mathtt{character} $$
-+ Explicit coercion is via: $\mathtt{as.logical()}$, $\mathtt{as.numeric()}$, $\mathtt{as.integer()}$, $\mathtt{as.double()}$, $\mathtt{as.character()}$. 
-
-+ Implicit coercion: $\mathtt{TRUE}$ and $\mathtt{FALSE}$ are coerced to $1\mathrm{L}$ and $0\mathrm{L}$. On occasions, positive integer is coerced to $\mathtt{TRUE}$ and $0$ is coerced to $\mathtt{FALSE}$
-```{r}
-x <- 3
-if(length(x)){
-  x <- rep(x, 2)
-}
-x
-```
-
 ---
 class: clear
 
@@ -243,16 +230,14 @@ typeof(c("1",1))
 Basic mathematical operations are **vectorized** in **R**. In the case where the vectors appearing in the operations are not of the same length, **R** will automatically recycle/repeated the shorter vector to be of the same length as the longer vector (with a possible warning message)
 ```{r warning = TRUE}
 x <- 1:10; x
-x + 1
 x*2
 x^2
-
+sqrt(x)
 ```
 
 ---
 class: clear
 ```{r}
-sqrt(x)
 x + 1:2
 x + 1:3
 ```
@@ -318,15 +303,7 @@ which(c(TRUE, FALSE, NA, FALSE, TRUE))
 w <- c(x = 1, y = 2, z = 3)
 w[c("x","z","z","x")]
 ```
----
-class: clear
-+ Finally, you can extract all the elements with `[]` or a single element with `[[]]`, e.g.,
-```{r error = TRUE}
-x <- 1:10
-x[]
-x[[1]]
-x[[c(1,2)]]
-```
+
 ---
 #Recursive vectors (lists)
 Lists are non-atomic vectors whose elements are themselves possibly other lists. Thus, the elements of a list could have different type, e.g.,
@@ -381,8 +358,7 @@ hence removes a level of nesting.
 
 ```{r error = TRUE}
 str(a[[4]])
-a[[c(4,1)]]
-a[[4]][[1]] ## Equivalent to the above
+a[[4]][[1]] 
 a[[4]][1] #Not equivalent to the above
 ```
 
@@ -519,16 +495,16 @@ filter(august21_jfk_lga, arr_delay > 10 | dep_delay > 10)
 class: clear
 We can do all of the above filtering using a single chain sequence as follows
 ```{r}
-flights %>% filter(month == 8 & day == 21) %>% 
-            filter(origin %in% c("JFK","LGA")) %>%
+flights |> filter(month == 8 & day == 21) |> 
+            filter(origin %in% c("JFK","LGA")) |>
             filter(arr_delay > 10 | dep_delay > 10)
 ```
 
-+ The previous example introduce the `%>%` pipe operator. 
++ The previous example introduce the `|>` pipe operator. 
 
 + The pipe operator allows us to chain together operations without the need to introduce auxiliary variables.
 
-+ The pipe operator maps `x %>% f(y)` to `f(x,y)`.
++ The pipe operator maps `x |> f(y)` to `f(x,y)`.
 
 ---
 #Missing values
@@ -537,18 +513,9 @@ Missing values are represented in **R** as $\mathrm{NA}$; missing values are "co
 NA > 5
 10 == NA
 NA + 10
-2*NA
-```
----
-class: clear
-Further examples include
-```{r}
 NA == NA
-0*NA
-NA^0
-NA | TRUE
-FALSE & NA
 ```
+
 ---
 class: clear
 **filter** only includes rows where the condition is $\mathrm{TRUE}$, i.e., it excludes rows with both $\mathrm{FALSE}$ and $\mathrm{NA}$ values. To preserve missing values, we have to ask for them explicitly, e.g.,
@@ -613,15 +580,15 @@ flights_sml <- select(flights, year:day,ends_with("delay"),
 mutate(flights_sml, gain = arr_delay - dep_delay,
                     hours = air_time/60,
                     speed = distance/hours,
-                    gain_per_hour = gain/hours) %>% select(-hours)
+                    gain_per_hour = gain/hours) |> select(-hours)
 ```
 ---
 class: clear
-A variant of *mutate* is *transmute*, which drops all variables except the newly created variables, e.g.,
+You can use mutate with the `.keep="none"` option to drops all variables except the newly created variables, e.g.,
 ```{r}
-transmute(flights, gain = arr_delay - dep_delay, 
+mutate(flights, gain = arr_delay - dep_delay, 
                    hours = air_time/60, 
-                   gain_per_hour = gain/hours)
+                   gain_per_hour = gain/hours, .keep="none")
 ```
 ---
 #summarize()
@@ -634,23 +601,23 @@ summarize(flights, delay = mean(dep_delay, na.rm = TRUE))
 class: clear
 This is not terribly exciting. The power of *summarize* comes from its combination with **groub_by()**, allowing us to do *grouped summaries*, i.e., summary statistics on individual groups. For example
 ```{r}
-flights %>% group_by(year, month, day)
+flights |> group_by(year, month, day)
 ```
 ---
 class: clear
 ```{r}
-flights %>% group_by(year, month, day) %>%
+flights |> group_by(year, month, day) |>
 summarize(delay = mean(dep_delay, na.rm = TRUE))
 ```
 ---
 class: clear
 A more involved example is to compute the average distance and delay for flights to all destinations (except Honolulu).
 ```{r}
-delays <- flights %>% group_by(dest) %>% 
+delays <- flights |> group_by(dest) |> 
   summarize(count = n(), 
             dist = mean(distance,na.rm = TRUE),
             avg_delay = mean(arr_delay + dep_delay,na.rm = TRUE)
-            ) %>%
+            ) |>
   filter(count > 20, dest != "HNL")
 delays
 ```
@@ -669,40 +636,40 @@ There are a large number of useful summary functions. See Section 5.6.4 of [R4DS
 ```{r}
 ## average arrival delay
 not_canceled <- filter(flights, !is.na(dep_delay) & !is.na(arr_delay))
-not_canceled %>% group_by(year, month, day) %>% 
+not_canceled |> group_by(year, month, day) |> 
   summarize(avg_delay = mean(arr_delay), 
             avg_positive_delay = mean(arr_delay[arr_delay > 0]))
 ```
 ---
 class: clear
 ```{r}
-not_canceled %>% group_by(dest) %>% 
-  summarize(dist_sd = sd(distance)) %>% arrange(desc(dist_sd))
+not_canceled |> group_by(dest) |> 
+  summarize(dist_sd = sd(distance)) |> arrange(desc(dist_sd))
 ```
 ---
 class: clear
 We note that *summarize* drops all variables except possibly those used to group the data and those variables introduced by the summary statistics. Contrasts the following two approaches
 ```{r}
-not_canceled %>% group_by(year,month,day) %>%
+not_canceled |> group_by(year,month,day) |>
   summarize(first_dep = first(dep_time), last_dep = last(dep_time))
 ```
 ---
 class: clear
 ```{r}
-not_canceled %>% group_by(year, month, day) %>%
-  mutate(r = min_rank(desc(dep_time))) %>% filter(r %in% range(r))
+not_canceled |> group_by(year, month, day) |>
+  mutate(r = min_rank(desc(dep_time))) |> filter(r %in% range(r))
 ```
 ---
 # More examples
 ```{r}
-not_canceled %>% group_by(year, month, day) %>%
+not_canceled |> group_by(year, month, day) |>
   summarize(n_early = sum(dep_time < 500))
 ```
 ---
 class: clear
 ```{r}
-not_canceled %>% group_by(dest) %>%
-  summarize(long_delay_pct = mean(arr_delay > 60)) %>%
+not_canceled |> group_by(dest) |>
+  summarize(long_delay_pct = mean(arr_delay > 60)) |>
   arrange(desc(long_delay_pct))
 ```
 ---
@@ -715,27 +682,9 @@ daily
 ---
 class:clear
 ```{r}
-daily %>% summarize(flights = n()) %>% 
-          summarize(flights = sum(flights)) %>%
+daily |> summarize(flights = n()) |> 
+          summarize(flights = sum(flights)) |>
           summarize(flights = sum(flights)) 
-```
----
-class: clear
-Be careful when peeling off nested groupings using a sequence of $\mathrm{summarize}$. 
-
-Consider the following examples.
-
-```{r echo = -1}
-#options(tibble.print_max = 6, tibble.print_min = 4)
-group_by(not_canceled, dest, month) %>% 
-  summarize(air_time = mean(air_time)) %>% 
-  summarize(air_time = mean(air_time))
-```
----
-class: clear
-```{r}
-group_by(not_canceled, dest) %>% 
-  summarize(air_time = mean(air_time))
 ```
 ---
 #ungroup()
@@ -743,7 +692,7 @@ To remove grouping structure on grouped data, use $\mathrm{ungroup()}$, e.g.,
 ```{r}
 daily <- group_by(flights, year, month, day)
 summarize(daily, flights = n())
-daily %>% ungroup() %>% summarize(flights = n())
+daily |> ungroup() |> summarize(flights = n())
 ```
 ---
 #grouped mutate + filter
@@ -752,16 +701,16 @@ We can also do a number of very useful operations by combining $\mathrm{group\_b
 ## Find the worst flights with longest delay each day
 flights_sml <- select(flights, year:day, ends_with("delay"),
                       distance, air_time)
-flights_sml %>% group_by(year, month, day) %>%
+flights_sml |> group_by(year, month, day) |>
   filter(rank(desc(arr_delay)) <= 10)
 ```
 ---
 ```{r}
 ## Find all popular destinations and compute
 ## proportion of total delay for each flights
-flights %>% group_by(dest) %>%
-  filter(n() > 365, arr_delay > 0) %>%
-  mutate(prop_delay = arr_delay/sum(arr_delay)) %>%
+flights |> group_by(dest) |>
+  filter(n() > 365, arr_delay > 0) |>
+  mutate(prop_delay = arr_delay/sum(arr_delay)) |>
   select(year:day, dest, arr_delay, prop_delay)
 ```
 ---
@@ -770,11 +719,11 @@ Functions that work most naturally in grouped mutates and grouped filters are [w
 The following example is from [window functions](https://rpubs.com/hadley/window). The example uses a dataset from the **Lahman** database that contains pitching, hitting, and fielding statistics for MLB from $1871$ through $2018$. We will consider a sample of batting data for players that have won an award.
 ```{r}
 library(Lahman)
-batting <- Lahman::Batting %>% as_tibble() %>% 
-           select(playerID, yearID, teamID, G, AB, R, H) %>%
-           arrange(playerID, yearID, teamID) %>%
+batting <- Lahman::Batting |> as_tibble() |> 
+           select(playerID, yearID, teamID, G, AB, R, H) |>
+           arrange(playerID, yearID, teamID) |>
            semi_join(Lahman::AwardsPlayers, by = "playerID")
-players <- batting %>% group_by(playerID)
+players <- batting |> group_by(playerID)
 ```
 ---
 Using this dataset, let us try a few $\mathrm{group\_mutate}$ and $\mathrm{group\_filter}$ operations. 
@@ -805,12 +754,12 @@ mutate(players, G_z = (G - mean(G)) / sd(G))
 class: clear
 The $\mathrm{ntile(x,m)}$ function divides the (numeric) vector $x$ into $m$ evenly sized buckets. The next operation divides the team players into $4$ coarse groups and calculate the batting average for each group.
 ```{r}
-batting %>% group_by(teamID,playerID) %>%
+batting |> group_by(teamID,playerID) |>
   summarise(total_hits = sum(H), total_ab = sum(AB), 
-            batting_avg = total_hits/total_ab) %>%
-  filter(!is.na(batting_avg)) %>%
-  mutate(quartile = ntile(batting_avg,4)) %>%
-  group_by(teamID,quartile) %>% 
+            batting_avg = total_hits/total_ab) |>
+  filter(!is.na(batting_avg)) |>
+  mutate(quartile = ntile(batting_avg,4)) |>
+  group_by(teamID,quartile) |> 
   summarise(batting_avg = sum(total_hits)/sum(total_ab))
 ```
 
@@ -827,10 +776,10 @@ df
 ]
 .pull-right[
 ```{r}
-df %>% summarize(
+df |> summarize(
   across(c(x,y,z),mean))
 ## Equivalently
-## df %>% summarize(
+## df |> summarize(
 ##   across(everything(),mean))
 ```
 ]
@@ -844,9 +793,9 @@ With **across **you can also
 + select a subset of columns according to some condition
 
 ```{r}
-df <- df %>% mutate(names = rep(letters,4)[1:100])
+df <- df |> mutate(names = rep(letters,4)[1:100])
 df
-df %>% summarize(across(where(is.numeric),
+df |> summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = ~max(.)/min(.))))
 
 ```
@@ -854,21 +803,23 @@ df %>% summarize(across(where(is.numeric),
 ---
 class: clear
 
-The previous examples uses the $.$ operator, which serves as a placeholder for the variable/data of interest. See also the documentation for the [magrittr library](https://github.com/tidyverse/magrittr). It is, however, generally cleaner (syntax wise), to define and use a named function as opposed to an anonymous function.
+The previous examples uses the $.$ operator, which serves as a placeholder for the variable/data of interest. 
+
+It is, however, generally cleaner (syntax wise), to define and use a named function as opposed to an anonymous function.
 
 ```{r}
 max_min_ratio <- function(x){
   max(x)/min(x)
 }
-df %>% summarize(across(where(is.numeric),
+df |> summarize(across(where(is.numeric),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 
 # You can also combine multiple selection criteria
-df %>% summarize(across(where(is.numeric) & c(-x),
+df |> summarize(across(where(is.numeric) & c(-x),
                         list(mean = mean, sd = sd, ratio = max_min_ratio)))
 
 ## Equivalently
-## df %>% summarize(across(c(y,z), 
+## df |> summarize(across(c(y,z), 
 ##     list(mean = mean, sd = sd, ratio = max_min_ratio)))
 ```
 
@@ -876,20 +827,22 @@ df %>% summarize(across(where(is.numeric) & c(-x),
 #dplyr::pull()
 Finally, we discuss the use of the *pull* function to *extract* or *pull out* a variable/column from a data frame. Consider the following code.
 ```{r error = TRUE}
-flights %>% select(arr_delay)
-class(flights %>% select(arr_delay))
+library(dplyr)
+flights |> select(arr_delay)
+flights |> select(arr_delay) |> class()
 ```
 ---
 class: clear
 ```{r error = TRUE}
-flights %>% pull(arr_delay) %>% head
-class(flights %>% pull(arr_delay))
+library(dplyr)
+flights |> dplyr::pull(arr_delay) |> head()
+flights |> pull(arr_delay) |> class()
 ```
 --
 If we now extract the standard deviation from the above data frame/vector, we get
 ```{r error = TRUE}
-flights %>% select(arr_delay) %>% sd(na.rm = TRUE)
-flights %>% pull(arr_delay) %>% sd(na.rm = TRUE)
+flights |> select(arr_delay) |> sd(na.rm = TRUE)
+flights |> pull(arr_delay) |> sd(na.rm = TRUE)
 ```
 
 The difference in the above output is due to the fact that $\mathrm{sd}$ expects a *numeric* vector. Meanwhile, the *select* verb takes as input a *data frame* and ouputs another *data frame*. Since we want to extract the column $\mathrm{arr\_delay}$ ,we need to use $\mathrm{pull}$. 
