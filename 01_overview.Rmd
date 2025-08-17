@@ -7,7 +7,7 @@ output:
   xaringan::moon_reader:
     lib_dir: libs
     #css: [default, "xaringan-themer.css", metropolis, metropolis-fonts,animate.css]
-    #css: ["xaringan-themer.css","animate.css"]
+    css: ["xaringan-themer.css","animate.css"]
     nature:
       highlightStyle: solarized-light
       highlightLines: true
@@ -21,7 +21,7 @@ options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",t
 ```
 
 ```{r xaringan-themer, include = FALSE}
-#library(xaringanthemer)
+library(xaringanthemer)
 xaringanExtra::use_tile_view()
 xaringanExtra::use_scribble()
 xaringanExtra::use_search(show_icon = TRUE)
@@ -34,17 +34,17 @@ htmltools::tagList(
  ),
  rmarkdown::html_dependency_font_awesome()
 )
-#style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
    #title_slide_background_color = "#FFFFFF",
    #title_slide_text_color = "#006747",
-#   header_font_google = google_font("Josefin Sans"),
-   #title_slide_background_size = "600px",
-   #title_slide_background_position = "bottom",
-#   text_font_google   = google_font("Montserrat", "300", "300i"),
-#   code_font_size = "0.8rem",
-#   code_font_family = "Fira Code",
-#   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
-#)
+   header_font_google = google_font("Josefin Sans"),
+   title_slide_background_size = "600px",
+   title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
 #style_solarized_light()
 #style_duo(primary_color = "#1F4257", secondary_color = "#F97B64",
 #   text_font_google   = google_font("Montserrat", "300", "300i"),
