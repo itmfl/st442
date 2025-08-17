@@ -36,7 +36,7 @@ class: center, middle, inverse, title-slide
 ## R Fundamentals
 ]
 .date[
-### Fall 2023
+### Fall 2025
 ]
 
 ---
@@ -51,7 +51,7 @@ class: center, middle, inverse, title-slide
 
 + Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). 
 
-+ Chapter `\(1\)` through `\(4\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Chapter `\(1\)` through `\(4\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.dfci.harvard.edu/dsbook-part-1/)
 
 + Long and Teetor [R Cookbook](https://rc2e.com/)
 
@@ -60,8 +60,6 @@ class: center, middle, inverse, title-slide
 + `?` in **R**
 
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
-
-+ [Ask Yujing, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/); Office hours: 3:30pm -- 5:30pm on Tuesday.
 
 ---
 class: middle
@@ -83,9 +81,9 @@ a
 + A function in **R** is defined according to the template
 
 ```r
-f &lt;- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
+f &lt;- function(x = 0,y = 1,z = 2*y,...){ ## default values optional
   ## Do something
-  x + 2*y + 3*z ## The output of the last statement is also the return value
+  x + 2*y + 3*z ## output of last statement is also the return value
 }
 f(4)
 ```
@@ -108,10 +106,11 @@ f(1)
 ```
 
 ```
-## function(y){
+## function (y) 
+## {
 ##     x + y
-##   }
-## &lt;environment: 0x561aecc0c160&gt;
+## }
+## &lt;environment: 0x563353d53d20&gt;
 ```
 
 ```r
@@ -122,16 +121,19 @@ f(1)(5)
 ## [1] 6
 ```
 
+---
+
 ```r
 f(2)
 ```
 
 ```
-## function(y){
+## function (y) 
+## {
 ##     x + y
-##   }
-## &lt;bytecode: 0x561ae96f1dd0&gt;
-## &lt;environment: 0x561ae95640c8&gt;
+## }
+## &lt;bytecode: 0x563354cadfa8&gt;
+## &lt;environment: 0x56335145db60&gt;
 ```
 
 ```r
@@ -481,8 +483,8 @@ exp(c(2,3,4))
 ```
 
 ```r
-f &lt;- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
-  x + 2*y + 3*z ## The output of the last statement is also the return value
+f &lt;- function(x = 0,y = 1,z = 2*y,...){ ## default values optional
+  x + 2*y + 3*z ## output of last statement is also the return value
 }
 f(x = 4, y = 1, z = 2)
 ```
@@ -1409,7 +1411,7 @@ sqrt(x)
 ##  [1] 1.00 1.41 1.73 2.00 2.24 2.45 2.65 2.83 3.00 3.16
 ```
 
-In later lectures we will also introduce the family of [apply](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) functions which is generally more elegant than writing for loops. Indeed, consider the following code chunk.
+In later lectures we will introduce the family of [apply](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) functions which is generally more elegant than writing for loops. Consider for example, 
 
 
 ```r
@@ -1426,7 +1428,7 @@ output
 ```
 
 ```
-## [1] -0.0913  0.0220 -0.2027
+## [1]  0.15194  0.03484 -0.00944
 ```
 
 ```r
@@ -1435,17 +1437,17 @@ output
 ```
 
 ```
-##       a       b       c 
-## -0.0913  0.0220 -0.2027
+##        a        b        c 
+##  0.15194  0.03484 -0.00944
 ```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "solarized-light",
-"highlightLines": true,
-"highlightSpans": true,
-"countIncrementalSlides": false
+  "highlightStyle": "solarized-light",
+  "highlightLines": true,
+  "highlightSpans": true,
+  "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

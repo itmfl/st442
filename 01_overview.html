@@ -4,6 +4,8 @@
     <title>Introduction to Data Science</title>
     <meta charset="utf-8" />
     <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
     <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
     <script src="libs/tile-view/tile-view.js"></script>
     <script src="libs/fabric/fabric.min.js"></script>
@@ -22,8 +24,6 @@
     <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
     <link href="libs/font-awesome/css/all.min.css" rel="stylesheet" />
     <link href="libs/font-awesome/css/v4-shims.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
-    <link rel="stylesheet" href="animate.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
@@ -36,7 +36,7 @@ class: center, middle, inverse, title-slide
 ## Course overview
 ]
 .date[
-### Fall 2023
+### Fall 2025
 ]
 
 ---
@@ -46,7 +46,7 @@ class: center, middle, inverse, title-slide
 
 
 #Brief self-introduction
-+ Name: Minh Tang. (Preferred Salutation: **Minh** or Dr. Tang.)
++ Name: Minh Tang. (Preferred Salutation: Dr. Tang.)
 + Birthplace: Vietnam.
 + Degrees: 
     + BS in Computer Science in Thailand. 
@@ -83,7 +83,7 @@ class: clear, middle
 &lt;img src="figures/sexiest.png" width="950%" style="display: block; margin: auto;" /&gt;
 ---
 # The rise of data?
-&lt;img src="figures/data_never_sleeps.jpg" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="figure/data_never_sleeps.jpg" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 # But not all data are useful!
@@ -97,22 +97,23 @@ class: clear, middle
 ---
 # In demand ??
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="figures/linkedin_pulse2023.png" alt="Linkedin economic report" width="70%" /&gt;
+&lt;img src="figure/linkedin_2025.png" alt="Linkedin economic report" width="70%" /&gt;
 &lt;p class="caption"&gt;Linkedin economic report&lt;/p&gt;
 &lt;/div&gt;
 ---
-&lt;img src="figures/bls.png" width="70%" style="display: block; margin: auto;" /&gt;
----
-class: clear, middle
-&lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="https://www.pwc.com/us/en/publications/data-science-and-analytics/253879-2017-dsa-graphic-12-8b-07.png" alt="PWC" width="60%" /&gt;
-&lt;p class="caption"&gt;PWC&lt;/p&gt;
-&lt;/div&gt;
+&lt;img src="figure/bls.png" width="70%" style="display: block; margin: auto;" /&gt;
 
---
 
-Who are these pesky data engineers ?
 ---
+class: middle
+
+# But wait!!!
+&lt;img src="figure/risk_genai.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+Read the [preprint](https://arxiv.org/abs/2507.07935). 
+
+---
+
 class: middle
 # Data Science is right here.
 
@@ -135,8 +136,8 @@ class: middle
 ---
 # A lot of requirements ?
 &lt;div class="figure" style="text-align: center"&gt;
-&lt;img src="https://bit.ly/2Mmu7lW" alt="http://www.kimberlycoffey.com/blog/2016/11/text-analysis" width="60%" /&gt;
-&lt;p class="caption"&gt;http://www.kimberlycoffey.com/blog/2016/11/text-analysis&lt;/p&gt;
+&lt;img src="https://sshaikh.org/wp-content/uploads/2019/06/image-2-1024x1024.png" alt="https://sshaikh.org/2019/06/01/top-skills-for-a-data-scientist-2019/" width="60%" /&gt;
+&lt;p class="caption"&gt;https://sshaikh.org/2019/06/01/top-skills-for-a-data-scientist-2019/&lt;/p&gt;
 &lt;/div&gt;
 ---
 # Many Venns of data science
@@ -151,12 +152,8 @@ class: middle
 ]
 
 .pull-right[
-&lt;img src="https://www.cognilytica.com/wp-content/uploads/2018/06/DATA-SCIENCE-VS-DATA-ENGINEER-CGIG001-v2.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="figures/venn2.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
-
----
-class: clear
-&lt;img src="figures/venn2.png" width="70%" style="display: block; margin: auto;" /&gt;
 
 ---
 # DS = Jack of all trades ?
@@ -227,13 +224,13 @@ are available through the CRAN family of Internet sites.
 ---
 class: middle
 
-Don't panic if you had never use **R**. It is very easy to learn (but quite hard to master).
+Don't panic if you had never use **R**. It is very easy to learn (but hard to master).
 
 First thing first
 
-+ Install base [R](https://cran.r-project.org/mirrors.html) and then install [Rstudio](https://www.rstudio.com/products/rstudio/download/#download). See also the instructions in Chapter 36 of [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Install base [R](https://cran.r-project.org/mirrors.html) and then install [Rstudio](https://www.rstudio.com/products/rstudio/download/#download). 
 
-+ Read chapter 1 and 2 of [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Read chapter 1 through 3 of [Introduction to Data Science](https://rafalab.dfci.harvard.edu/dsbook-part-1/).
 
 + Learn the command [install.packages](https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/install.packages) function.
 
@@ -246,7 +243,7 @@ First thing first
 
 + Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). In particular see chapters 4, 13 and 14.
 
-+ Chapter `\(1\)` through `\(4\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Chapter `\(1\)` through `\(6\)` of Rafael Irizarry's [Introduction to Data Science](https://rafalab.dfci.harvard.edu/dsbook-part-1/).
 
 + [JHU Coursera](https://www.coursera.org/learn/r-programming)
 
@@ -260,7 +257,7 @@ First thing first
 
 --
 &lt;br&gt;&lt;br&gt;
-+ [Ask Yujing Gao, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/). 
++ Ask your TA [Arpan](https://statistics.sciences.ncsu.edu/people/akumar46) and [Elyse](https://statistics.sciences.ncsu.edu/people/emmcfall).
 
 --
 &lt;br&gt;&lt;br&gt;
@@ -288,16 +285,16 @@ We will cover the following tentative topics.
 ---
 class: clear
 ### Suggested Texts
-+ Garrett Grolemund and Hadley Wickham, [R for Data Science](https://r4ds.hadley.nz)
++ Garrett Grolemund and Hadley Wickham, [R for Data Science 2nd edition](https://r4ds.hadley.nz)
 + Gareth James, Daniella Witten, Trevor Hastie, and Rob Tibshirani, [An Introduction to Statistical Learning with R, 2nd edition](http://www.statlearning.com)
 + Benjamin Baumer, Daniel Kaplan, and Nicholas Horton, [Modern Data Science with R, 2nd edition](https://mdsr-book.github.io/mdsr2e/)
-+ Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Rafael Irizarry's Introduction to Data Science [part 1](https://rafalab.dfci.harvard.edu/dsbook-part-2/) and [part 2]( https://rafalab.dfci.harvard.edu/dsbook-part-2)
 
 ### Course Expectations &amp; Grading
 The grading is broken down into three components
-   + Homework assignments (35% of total grade)
+   + Homework assignments (30% of total grade)
    + Two take-home exams (30% of total grade)
-   + Final project (35% of total grade)
+   + Final project (40% of total grade)
    
 The homework assignments, their due dates, and submission formats 
 will be posted on the Moodle page for the course. 
@@ -305,7 +302,7 @@ will be posted on the Moodle page for the course.
 class: clear
 
 ### Homework policy
-The class has, with high probability, 7 -- 8 homework assignments. Every student is allowed a **quota of at most 2 late** homework submissions 
+The class has, with high probability, 7 -- 8 homework assignments. Every student is allowed a **quota of at most 3 late** homework submissions 
 (they will not be penalized but need to be submitted no later than **72** hours after the deadline). Once the quota is exceeded, no further late submissions will be graded. 
 
 
@@ -321,19 +318,19 @@ You are responsible for keeping track of your scores and to notify the course in
 ---
 class: clear
 ### Key Dates
-+ Census day &amp; drop deadline: Friday, September 1, 2023.
-+ Withdrawal deadline: Wednesday, October 19, 2023.
-+ Take home exam 1: Wednesday, September 27, 2023 (tentative)
-+ Take home exam 2: Wednesday, November 8, 2023. (tentative)
-+ Term paper: Due on Tuesday, December 12, 2023 before 11:59pm (tentative)
++ Census day &amp; drop deadline: Friday, August 29, 2025.
++ Withdrawal deadline: Thursday, October 23, 2025.
++ Take home exam 1: Thursday, September 25, 2025 (tentative)
++ Take home exam 2: Thursday, October 31, 2025. (tentative)
++ Term paper: Due on Friday, December 5, 2025 before 11:59pm (tentative)
 
 ### Grading scale
 Grading is rounded to the nearest percentage point. Potential (upward) curving of the grades might also be done at the instructor discretion. Guaranteed letter grades, 
 regardless of curving, are as follows, 
 
 .pull-left[
-+ 95% and above: A+
-+ 90% — 94%: A 
++ 97% and above: A+
++ 90% — 96%: A 
 + 87% — 89%: A-
 + 83% — 86%: B+
 + 80% — 82%: B
@@ -362,10 +359,10 @@ The strength of the university depends on academic and personal integrity. In th
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "solarized-light",
-"highlightLines": true,
-"highlightSpans": true,
-"countIncrementalSlides": false
+  "highlightStyle": "solarized-light",
+  "highlightLines": true,
+  "highlightSpans": true,
+  "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

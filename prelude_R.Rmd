@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "R Fundamentals"
-date: "Fall 2023"
+date: "Fall 2025"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -58,7 +58,7 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 
 + Roger Peng's [R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/). 
 
-+ Chapter $1$ through $4$ of Rafael Irizarry's [Introduction to Data Science](https://rafalab.github.io/dsbook/)
++ Chapter $1$ through $4$ of Rafael Irizarry's [Introduction to Data Science](https://rafalab.dfci.harvard.edu/dsbook-part-1/)
 
 + Long and Teetor [R Cookbook](https://rc2e.com/)
 
@@ -67,8 +67,6 @@ style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
 + `?` in **R**
 
 + [Google it!](https://lmgtfy.com/?q=advanced+google+search+tips)
-
-+ [Ask Yujing, your TA](https://statistics.sciences.ncsu.edu/people/ygao39/); Office hours: 3:30pm -- 5:30pm on Tuesday.
 
 ---
 class: middle
@@ -84,9 +82,9 @@ a
 
 + A function in **R** is defined according to the template
 ```{r}
-f <- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
+f <- function(x = 0,y = 1,z = 2*y,...){ ## default values optional
   ## Do something
-  x + 2*y + 3*z ## The output of the last statement is also the return value
+  x + 2*y + 3*z ## output of last statement is also the return value
 }
 f(4)
 ```
@@ -102,6 +100,10 @@ f <- function(x){
 }
 f(1)
 f(1)(5)
+```
+
+---
+```{r}
 f(2)
 f(2)(10)
 ```
@@ -266,8 +268,8 @@ typeof(c("1",1))
 + Basic mathematical operations are **vectorized** in **R**. 
 ```{r}
 exp(c(2,3,4))
-f <- function(x = 0, y = 1, z = 2*y, ...){ ## default values are optional
-  x + 2*y + 3*z ## The output of the last statement is also the return value
+f <- function(x = 0,y = 1,z = 2*y,...){ ## default values optional
+  x + 2*y + 3*z ## output of last statement is also the return value
 }
 f(x = 4, y = 1, z = 2)
 f(x = c(2,3,4), y = c(4,5,6), z = c(7,8,9))
@@ -624,7 +626,7 @@ x <- 1:10
 sqrt(x)
 ```
 
-In later lectures we will also introduce the family of [apply](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) functions which is generally more elegant than writing for loops. Indeed, consider the following code chunk.
+In later lectures we will introduce the family of [apply](https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html) functions which is generally more elegant than writing for loops. Consider for example, 
 
 ```{r}
 df <- list(
