@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "Data wrangling with dplyr"
-date: "Fall 2023"
+date: "Fall 2025"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -536,11 +536,11 @@ class(flights |> select(arr_delay))
 ---
 class: clear
 ```{r error = TRUE}
-flights |> pull(arr_delay) |> head
+flights |> pull(arr_delay) |> head()
 class(flights |> pull(arr_delay))
 ```
 --
-If we now extract the standard deviation from the above data frame/vector, we get
+If we now extract the standard deviation from the above data, we get
 ```{r error = TRUE}
 flights |> select(arr_delay) |> sd(na.rm = TRUE)
 flights |> pull(arr_delay) |> sd(na.rm = TRUE)
