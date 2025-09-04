@@ -1,7 +1,7 @@
 ---
 title: "Introduction to Data Science"
 subtitle: "ggplot, maps, and other tidbits"
-date: "Fall 2023"
+date: "Fall 2025"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -478,6 +478,9 @@ drawing only a particular region of the world.
 class: clear, middle
 We switch to [Albers projection](https://en.wikipedia.org/wiki/Albers_projection) as used by the US Census Bureau.
 ```{r cache = TRUE, out.width = "70%"}
+library("mapproj")
+library("ggside")
+library("ggstance")
 p <- us_states %>% ggplot(aes(x = long, y = lat, group = group, fill = region))
 p <- p + geom_polygon(color = "gray90", size = 0.1) +
          coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
@@ -498,6 +501,7 @@ class: clear, middle
 We are now ready to plot the election results.
 ```{r us_states_elec_plot, dependson="us_states_elec", cache = TRUE, message = TRUE, out.width="70%"}
 # Hex color codes for Dem Blue and Rep Red
+library("scales")
 party_colors <- c("#2E74C0", "#CB454A") 
 p <- ggplot(us_states_elec, aes(x = long, y = lat, group = group))
 p <- p + geom_polygon(color = "gray90", size = 0.1,aes(fill = party)) +
@@ -640,6 +644,7 @@ class: clear
 Let us create a plot depicting the number of firearm-related suicide rates during $1999$ to $2015$ and compare it against the population map per counties.  
 
 ```{r guns_pop, cache = TRUE}
+library("scales")
 orange_pal <- RColorBrewer::brewer.pal(n = 6, name = "Oranges")
 orange_rev <- rev(orange_pal)
 gun_p <- ggplot(county_full, 

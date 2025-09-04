@@ -32,7 +32,7 @@ class: center, middle, inverse, title-slide
 ## ggplot, maps, and other tidbits
 ]
 .date[
-### Fall 2023
+### Fall 2025
 ]
 
 ---
@@ -45,7 +45,7 @@ class: center, middle, inverse, title-slide
 
 # The importance of grouping
 
-```r
+``` r
 library(dplyr)
 library(gapminder) ## install.packages(gapminder)
 gapminder
@@ -66,7 +66,7 @@ gapminder
 ---
 class: normal
 
-```r
+``` r
 library(ggplot2)
 gapminder_small &lt;- gapminder %&gt;% 
   filter(country %in% c("Japan", "China", "Cuba"))
@@ -78,7 +78,7 @@ p + geom_line(size=2)
 ---
 class: normal
 
-```r
+``` r
 p + geom_path()
 ```
 
@@ -95,7 +95,7 @@ From the help page
 class: clear, middle
 .pull-left[
 
-```r
+``` r
 p + geom_line(aes(group = country))
 ```
 
@@ -103,7 +103,7 @@ p + geom_line(aes(group = country))
 ]
 .pull-right[
 
-```r
+``` r
 p + geom_path(aes(group = country))
 ```
 
@@ -135,7 +135,7 @@ Consider the following examples of `\(x\)` or `\(y\)` aesthetics being mapped to
 
 .pull-left[
 
-```r
+``` r
 df &lt;- dplyr::tibble(
   x = c("a", "a", "a", "a", 
         "b", "b", "b", "b"),
@@ -162,7 +162,7 @@ df
 
 .pull-right[
 
-```r
+``` r
 df %&gt;% ggplot(aes(x = x, y = y)) + 
   geom_line()
 ```
@@ -177,7 +177,7 @@ class: clear
 
 .pull-left[
 
-```r
+``` r
 df
 ```
 
@@ -198,7 +198,7 @@ df
 
 .pull-right[
 
-```r
+``` r
 df %&gt;% ggplot(aes(x = z, y = y)) + 
   geom_line()
 ```
@@ -212,7 +212,7 @@ for the `\(z\)` variable of `\(\mathrm{df}\)`.
 class: clear
 .pull-left[
 
-```r
+``` r
 df
 ```
 
@@ -233,7 +233,7 @@ df
 
 .pull-right[
 
-```r
+``` r
 df %&gt;% ggplot(aes(x = x, y = y, 
                   group = z)) + 
   geom_line()
@@ -248,7 +248,7 @@ for the `\(z\)` variable of `\(\mathrm{df}\)`.
 class: clear
 .pull-left[
 
-```r
+``` r
 df
 ```
 
@@ -269,7 +269,7 @@ df
 
 .pull-right[
 
-```r
+``` r
 df %&gt;% ggplot(aes(x = z, y = y, 
               group = x)) + 
   geom_line()
@@ -284,7 +284,7 @@ for the `\(x\)` variable of `\(\mathrm{df}\)`.
 class: clear
 .pull-left[
 
-```r
+``` r
 df
 ```
 
@@ -305,7 +305,7 @@ df
 
 .pull-right[
 
-```r
+``` r
 df %&gt;% ggplot(aes(x = x, y = y, 
                  group = 1)) + 
   geom_line()
@@ -320,7 +320,7 @@ class: clear
 The implicit grouping due to categorical variables being mapped to `\(x\)` or `\(y\)` can be quite confusing. For example,
 .pull-left[
 
-```r
+``` r
 BOD
 ```
 
@@ -339,7 +339,7 @@ BOD
 
 .pull-right[
 
-```r
+``` r
 BOD %&gt;% ggplot(aes(x = Time, 
                    y = demand)) + 
   geom_line()
@@ -353,7 +353,7 @@ class: clear
 
 .pull-left[
 
-```r
+``` r
 BOD$Time &lt;-  as.factor(BOD$Time)
 BOD
 ```
@@ -372,7 +372,7 @@ BOD
 ]
 .pull-right[
 
-```r
+``` r
 BOD %&gt;% ggplot( aes(x = Time, 
                     y = demand)) + 
   geom_line()
@@ -393,7 +393,7 @@ class: clear
 
 .pull-left[
 
-```r
+``` r
 BOD$Time &lt;-  as.factor(BOD$Time)
 BOD
 ```
@@ -413,7 +413,7 @@ BOD
 
 .pull-right[
 
-```r
+``` r
 BOD %&gt;% ggplot(aes(x = Time, 
                    y = demand,
                    group=1)) + 
@@ -426,7 +426,7 @@ BOD %&gt;% ggplot(aes(x = Time,
 
 # The power of groupings ?
 
-```r
+``` r
 nlme::Oxboys
 ```
 
@@ -450,7 +450,7 @@ class: clear
 
 .pull-left[
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys,
             aes(x = age, y = height))
 h + geom_line()
@@ -460,7 +460,7 @@ h + geom_line()
 ]
 .pull-right[
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys,
             aes(x = age, y = height,
                 group = Subject))
@@ -473,7 +473,7 @@ h + geom_line()
 class: clear
 .pull-left[
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys,
             aes(x = age, y = height,
                 group = Subject))
@@ -486,7 +486,7 @@ h + geom_line() +
 ]
 .pull-right[
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys,
             aes(x = age, y = height,
                 group = Subject))
@@ -502,7 +502,7 @@ h + geom_line() +
 ---
 class: clear, middle
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys, aes(x = Occasion, y = height))
 ## Nine boxplots, one for each Occasion
 h + geom_boxplot()
@@ -512,7 +512,7 @@ h + geom_boxplot()
 ---
 class: clear, middle
 
-```r
+``` r
 h &lt;- ggplot(nlme::Oxboys,aes(x = Occasion, y = height))
 ## 9 boxplots, one for each Occasion
 ## 24 lines, one for each boy
@@ -528,7 +528,7 @@ h + geom_boxplot() + geom_line(aes(group = Subject), color = "blue") +
 # Groupings &amp; interactions
 
 
-```r
+``` r
 mpg
 ```
 
@@ -557,7 +557,7 @@ We recall our previous discussion of grouping
 ---
 class: clear
 
-```r
+``` r
 library(ggplot2)
 library(grid)
 library(gridExtra)
@@ -578,7 +578,7 @@ grid.arrange(g1, g2, nrow = 1)
 class: clear
 To get one box plot for every `\(\mathrm{drv}\)` category, we explicit specify `\(\mathrm{group} = \mathrm{drv}\)`. 
 
-```r
+``` r
 g3 &lt;- ggplot(mpg, aes(drv, hwy, color = factor(year))) + 
   geom_jitter() + stat_boxplot(aes(group = drv)) +
     labs(subtitle = "group explicitly set for boxplot")
@@ -597,7 +597,7 @@ g3
 #Maps data
 See also Chapter 7 of K. Healy's book on [Visualizing data](https://socviz.co/maps.html#map-u.s.-state-level-data)
 
-```r
+``` r
 library(maps) ## install.packages("maps")
 us_states &lt;- map_data("state")
 us_counties &lt;- map_data("county")
@@ -619,7 +619,7 @@ us_states
 ---
 class: clear, middle
 
-```r
+``` r
 us_counties
 ```
 
@@ -665,7 +665,7 @@ ggplot(nc, aes(x = long, y = lat)) + geom_polygon(aes(group = group)) +
 
 # Let us get back to class.
 
-```r
+``` r
 p &lt;- us_states %&gt;% ggplot(aes(x = long, y = lat, group = group))
 p + geom_polygon(fill = "white", color = "black")
 ```
@@ -677,7 +677,10 @@ drawing only a particular region of the world.
 class: clear, middle
 We switch to [Albers projection](https://en.wikipedia.org/wiki/Albers_projection) as used by the US Census Bureau.
 
-```r
+``` r
+library("mapproj")
+library("ggside")
+library("ggstance")
 p &lt;- us_states %&gt;% ggplot(aes(x = long, y = lat, group = group, fill = region))
 p &lt;- p + geom_polygon(color = "gray90", size = 0.1) +
          coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
@@ -721,8 +724,9 @@ us_states_elec &lt;- us_states %&gt;% left_join(election) ## Combine the two tab
 class: clear, middle
 We are now ready to plot the election results.
 
-```r
+``` r
 # Hex color codes for Dem Blue and Rep Red
+library("scales")
 party_colors &lt;- c("#2E74C0", "#CB454A") 
 p &lt;- ggplot(us_states_elec, aes(x = long, y = lat, group = group))
 p &lt;- p + geom_polygon(color = "gray90", size = 0.1,aes(fill = party)) +
@@ -738,7 +742,7 @@ p + theme_map()
 class: clear
 Let us now try some other variants of this plot
 
-```r
+``` r
 p0 &lt;- ggplot(us_states_elec, aes(x = long, y = lat, 
                                  group = group, fill = pct_trump))
 
@@ -748,7 +752,7 @@ p1 &lt;- p0 + geom_polygon(color = "gray90", size = 0.1) +
 ```
 .pull-left[
 
-```r
+``` r
 p1
 ```
 
@@ -756,7 +760,7 @@ p1
 ]
 .pull-right[
 
-```r
+``` r
 p1 + 
   scale_fill_gradient(low = "white", 
                       high = "#CB454A")
@@ -812,7 +816,7 @@ p2 %+% us_counties_elec #&lt;&lt;
 
 #Maps vs faceted dot plots ?
 
-```r
+``` r
 p0 &lt;- ggplot(subset(election, !(state %in% "District of Columbia")),
              aes(x = r_points, y = reorder(state,r_points), color = party))
 p1 &lt;- p0 + geom_vline(xintercept = 0, color = "gray30") + 
@@ -826,7 +830,7 @@ p3 &lt;- p2 + xlab("Point margin") + ylab("") + theme_minimal()
 ---
 class: clear
 
-```r
+``` r
 p3 + facet_wrap(~ census, nrow = 2) + guides(color = FALSE)
 ```
 
@@ -834,7 +838,7 @@ p3 + facet_wrap(~ census, nrow = 2) + guides(color = FALSE)
 ---
 class: clear
 
-```r
+``` r
 ## Free Y!
 p3 + facet_wrap(~ census, nrow = 2, scales = "free_y") + 
   guides(color = FALSE)
@@ -855,7 +859,7 @@ We illustrate this phenomenon with a few visualizations (see Chapter 7 of [K. He
 ---
 class: clear, middle
 
-```r
+``` r
 library(socviz)
 county_map
 ```
@@ -875,7 +879,7 @@ county_map
 ---
 class: clear
 
-```r
+``` r
 county_data ## From the US Census Bureau
 ```
 
@@ -928,7 +932,8 @@ class: clear
 Let us create a plot depicting the number of firearm-related suicide rates during `\(1999\)` to `\(2015\)` and compare it against the population map per counties.  
 
 
-```r
+``` r
+library("scales")
 orange_pal &lt;- RColorBrewer::brewer.pal(n = 6, name = "Oranges")
 orange_rev &lt;- rev(orange_pal)
 gun_p &lt;- ggplot(county_full, 
@@ -1034,10 +1039,10 @@ p2 + labs(x = "", y = "Rate per 100,000",
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "solarized-light",
-"highlightLines": false,
-"highlightSpans": false,
-"countIncrementalSlides": false
+  "highlightStyle": "solarized-light",
+  "highlightLines": false,
+  "highlightSpans": false,
+  "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
