@@ -41,7 +41,7 @@ class: center, middle, inverse, title-slide
 ### 
 ]
 .date[
-### Fall 2023
+### Fall 2025
 ]
 
 ---
@@ -76,7 +76,7 @@ For more on RDBMS, see
 
 + The lecture videos on [Youtube](https://www.youtube.com/watch?v=x8kMELlNaYg&amp;list=PLroEs25KGvwzmvIxYHRhoGTz9w8LeXek0&amp;index=5) from Stanford University.
 
-+ The book [SQL in a nutshell](https://www.oreilly.com/library/view/sql-in-a/9780596155322/)
++ The book [SQL in a nutshell](https://www.oreilly.com/library/view/sql-in-a/9781492088851/)
 
 + Any of the books listed [here](https://catalog.lib.ncsu.edu/catalog?q=relational+database&amp;search_field=all_fields)
 
@@ -358,7 +358,7 @@ class: clear
 
 Let us now query data from this database.
 
-```r
+``` r
 library(DBI)
 library(RSQLite)
 library(dplyr)
@@ -368,8 +368,8 @@ flights
 ```
 
 ```
-## # Source:   table&lt;flights&gt; [?? x 19]
-## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+## # Source:   table&lt;`flights`&gt; [?? x 19]
+## # Database: sqlite 3.50.4 [/home/mtang8/Work/classes/st442/tmp_sqlite]
 ##    year month   day dep_time sched_dep_time dep_delay arr_time
 ##   &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;
 ## 1  2013     1     1      517            515         2      830
@@ -388,15 +388,15 @@ flights
 ---
 class: clear
 
-```r
+``` r
 library(dplyr)
 airports &lt;- con_sqlite |&gt; tbl("airports")
 airports
 ```
 
 ```
-## # Source:   table&lt;airports&gt; [?? x 8]
-## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+## # Source:   table&lt;`airports`&gt; [?? x 8]
+## # Database: sqlite 3.50.4 [/home/mtang8/Work/classes/st442/tmp_sqlite]
 ##   faa   name                         lat   lon   alt    tz dst   tzone
 ##   &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
 ## 1 04G   Lansdowne Airport           41.1 -80.6  1044    -5 A     Amer…
@@ -410,7 +410,7 @@ airports
 ---
 class: clear
 
-```r
+``` r
 query1 &lt;- flights |&gt; group_by(dest) |&gt; summarize(count = n()) |&gt; 
   slice_max(count, n = 20) |&gt;
   left_join(airports, by = c("dest" = "faa"))
@@ -419,23 +419,36 @@ query1
 
 ```
 ## # Source:   SQL [?? x 9]
-## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
-##   dest  count name                  lat    lon   alt    tz dst   tzone
-##   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
-## 1 ORD   17283 Chicago Ohare Intl   42.0  -87.9   668    -6 A     Amer…
-## 2 ATL   17215 Hartsfield Jackson…  33.6  -84.4  1026    -5 A     Amer…
-## 3 LAX   16174 Los Angeles Intl     33.9 -118.    126    -8 A     Amer…
-## 4 BOS   15508 General Edward Law…  42.4  -71.0    19    -5 A     Amer…
-## 5 MCO   14082 Orlando Intl         28.4  -81.3    96    -5 A     Amer…
-## 6 CLT   14064 Charlotte Douglas …  35.2  -80.9   748    -5 A     Amer…
-## # ℹ more rows
+## # Database: sqlite 3.50.4 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+##    dest  count name                 lat    lon   alt    tz dst   tzone
+##    &lt;chr&gt; &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+##  1 ORD   17283 Chicago Ohare Intl  42.0  -87.9   668    -6 A     Amer…
+##  2 ATL   17215 Hartsfield Jackso…  33.6  -84.4  1026    -5 A     Amer…
+##  3 LAX   16174 Los Angeles Intl    33.9 -118.    126    -8 A     Amer…
+##  4 BOS   15508 General Edward La…  42.4  -71.0    19    -5 A     Amer…
+##  5 MCO   14082 Orlando Intl        28.4  -81.3    96    -5 A     Amer…
+##  6 CLT   14064 Charlotte Douglas…  35.2  -80.9   748    -5 A     Amer…
+##  7 SFO   13331 San Francisco Intl  37.6 -122.     13    -8 A     Amer…
+##  8 FLL   12055 Fort Lauderdale H…  26.1  -80.2     9    -5 A     Amer…
+##  9 MIA   11728 Miami Intl          25.8  -80.3     8    -5 A     Amer…
+## 10 DCA    9705 Ronald Reagan Was…  38.9  -77.0    15    -5 A     Amer…
+## 11 DTW    9384 Detroit Metro Way…  42.2  -83.4   645    -5 A     Amer…
+## 12 DFW    8738 Dallas Fort Worth…  32.9  -97.0   607    -6 A     Amer…
+## 13 RDU    8163 Raleigh Durham In…  35.9  -78.8   435    -5 A     Amer…
+## 14 TPA    7466 Tampa Intl          28.0  -82.5    26    -5 A     Amer…
+## 15 DEN    7266 Denver Intl         39.9 -105.   5431    -7 A     Amer…
+## 16 IAH    7198 George Bush Inter…  30.0  -95.3    97    -6 A     Amer…
+## 17 MSP    7185 Minneapolis St Pa…  44.9  -93.2   841    -6 A     Amer…
+## 18 PBI    6554 Palm Beach Intl     26.7  -80.1    19    -5 A     Amer…
+## 19 BNA    6333 Nashville Intl      36.1  -86.7   599    -6 A     Amer…
+## 20 LAS    5997 Mc Carran Intl      36.1 -115.   2141    -8 A     Amer…
 ```
 
 ---
 class: clear
 
 
-```r
+``` r
 query1 |&gt; show_query()
 ```
 
@@ -445,20 +458,20 @@ query1 |&gt; show_query()
 ## FROM (
 ##   SELECT `dest`, `count`
 ##   FROM (
-##     SELECT *, RANK() OVER (ORDER BY `count` DESC) AS `q01`
+##     SELECT `q01`.*, RANK() OVER (ORDER BY `count` DESC) AS `col01`
 ##     FROM (
 ##       SELECT `dest`, COUNT(*) AS `count`
 ##       FROM `flights`
 ##       GROUP BY `dest`
-##     )
-##   )
-##   WHERE (`q01` &lt;= 20)
+##     ) AS `q01`
+##   ) AS `q01`
+##   WHERE (`col01` &lt;= 20)
 ## ) AS `LHS`
 ## LEFT JOIN `airports`
 ##   ON (`LHS`.`dest` = `airports`.`faa`)
 ```
 
-```r
+``` r
 pop_dest &lt;- query1 |&gt; collect()
 glimpse(pop_dest)
 ```
@@ -484,7 +497,7 @@ As we saw, most operations that we can do using **dplyr** on normal data frames,
 Finally, if we want, we can send SQL code directly to the database through [DBI::dbGetQuery](https://dbi.r-dbi.org/reference/dbgetquery).
 
 
-```r
+``` r
 query2a &lt;- con_sqlite |&gt; dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay &lt; 15, 1.0, 0.0))/count(*) as ontimePct,
@@ -510,7 +523,7 @@ class: clear
 The same code, when written using **dplyr** and **dbplyr** is quite similar.
 
 
-```r
+``` r
 query2b &lt;- flights |&gt; summarize(
   numFlights = n(), 
   ontimePct = sum(if_else(arr_delay &lt; 15, 1, 0))/n(),
@@ -523,8 +536,8 @@ query2b
 ```
 
 ```
-## # Source:   SQL [1 x 6]
-## # Database: sqlite 3.41.2 [/home/mtang8/Work/classes/st442/tmp_sqlite]
+## # Source:   SQL [?? x 6]
+## # Database: sqlite 3.50.4 [/home/mtang8/Work/classes/st442/tmp_sqlite]
 ##   numFlights ontimePct earlyPct netMinLate minLate minEarly
 ##        &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
 ## 1     336776     0.734    0.561       2.26    5.37    -3.11
@@ -536,7 +549,7 @@ class: clear
 This code however doesn't seem to work as expected.
 
 
-```r
+``` r
 query2c &lt;- con_sqlite |&gt; dbGetQuery('SELECT
   COUNT(*) as numFlights,
   SUM(IIF(arr_delay &lt; 15, 1, 0))/count(*) as ontimePct,
@@ -559,7 +572,7 @@ query2c
 class: clear
 
 
-```r
+``` r
 sapply(query2c, typeof)
 ```
 
@@ -568,7 +581,7 @@ sapply(query2c, typeof)
 ##  "integer"  "integer"  "integer"   "double"   "double"   "double"
 ```
 
-```r
+``` r
 sapply(query2a, typeof)
 ```
 
@@ -584,8 +597,8 @@ Beware of integers division!
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "solarized-light",
-"countIncrementalSlides": false
+  "highlightStyle": "solarized-light",
+  "countIncrementalSlides": false
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

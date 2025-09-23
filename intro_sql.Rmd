@@ -2,7 +2,7 @@
 title: "Introduction to Data Science"
 subtitle: "Intermezzo: SQL and R through dbplyr"
 author: ""
-date: "Fall 2023"
+date: "Fall 2025"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -82,7 +82,7 @@ For more on RDBMS, see
 
 + The lecture videos on [Youtube](https://www.youtube.com/watch?v=x8kMELlNaYg&list=PLroEs25KGvwzmvIxYHRhoGTz9w8LeXek0&index=5) from Stanford University.
 
-+ The book [SQL in a nutshell](https://www.oreilly.com/library/view/sql-in-a/9780596155322/)
++ The book [SQL in a nutshell](https://www.oreilly.com/library/view/sql-in-a/9781492088851/)
 
 + Any of the books listed [here](https://catalog.lib.ncsu.edu/catalog?q=relational+database&search_field=all_fields)
 
