@@ -1,63 +1,56 @@
 ---
 title: "K-means and hierarchical clustering"
 author: "CSC/ST 442"
-date: "Fall 2019"
+date: "Fall 2025"
+
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts]
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: zenburn
+      highlightStyle: solarized-light
       highlightLines: true
+      highlightSpans: true
       countIncrementalSlides: false
-    df_print: tibble
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", message = FALSE, warning = FALSE)
-options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
-library(knitr)
-hook_output <- knit_hooks$get("output")
-knit_hooks$set(output = function(x, options) {
-  lines <- options$output.lines
-  if (is.null(lines)) {
-    return(hook_output(x, options))  # pass to default hook
-  }
-  x <- unlist(strsplit(x, "\n"))
-  more <- "..."
-  if (length(lines)==1) {        # first n lines
-    if (length(x) > lines) {
-      # truncate the output, but add ....
-      x <- c(head(x, lines), more)
-    }
-  } else {
-    x <- c(more, x[lines], more)
-  }
-  # paste these lines together
-  x <- paste(c(x, ""), collapse = "\n")
-  hook_output(x, options)
-})
-hook_output = knit_hooks$get('message')
-knit_hooks$set(message = function(x, options) {
-  # this hook is used only when the linewidth option is not NULL
-  if (!is.null(n <- options$linewidth)) {
-    x = knitr:::split_lines(x)
-    # any lines wider than n should be wrapped
-    if (any(nchar(x) > n)) x = strwrap(x, width = n)
-    x = paste(x, collapse = '\n')
-  }
-  hook_output(x, options)
-})
-hook_output = knit_hooks$get('error')
-knit_hooks$set(error = function(x, options) {
-  # this hook is used only when the linewidth option is not NULL
-  if (!is.null(n <- options$linewidth)) {
-    x = knitr:::split_lines(x)
-    # any lines wider than n should be wrapped
-    if (any(nchar(x) > n)) x = strwrap(x, width = n)
-    x = paste(x, collapse = '\n')
-  }
-  hook_output(x, options)
-})
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
+```
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
 ```
 
 # Unsupervised learning
@@ -68,7 +61,7 @@ In contrast, in the problem of **unsupervised** learning, we are simply given $n
 
 The two main techniques for unsupervised learning are 
 
-+ dimension reduction: e.g., PCA, low-rank matrix recovery, classical multidimensional scaling as seen in the previous lecture
++ dimension reduction: e.g., PCA, low-rank matrix recovery, classical multidimensional scaling.
 + **clustering**:  topic of this lecture. The typical application of clustering assumes that the $X_i$ are all numeric/real-valued vectors.
 
 ---
@@ -83,22 +76,24 @@ knitr::include_graphics("https://beanumber.github.io/mdsr2e/gfx/evolutionary-tre
 ---
 class: clear
 To illustrate hierarchical clustering in **R**, we will use the following [dataset](https://www.fueleconomy.gov/feg/epadata/16data.zip)
-on the fuel economy rating of cars from the US Department of Energy. We follow the exposition in Chapter 9 of Baumer et al. [Modern Data Science with R](https://beanumber.github.io/mdsr2e/ch-learningII.html#clustering)
+on the fuel economy rating of cars from the US Department of Energy. We follow the exposition in Chapter 12 of Baumer et al. [Modern Data Science with R 2nd edition](https://beanumber.github.io/mdsr2e/ch-learningII.html#clustering)
 
 ```{r fuel, cache = TRUE, message = FALSE}
 library(dplyr)
 library(readxl)
 library(janitor) ## library for simple tools for cleaning data.
 library(tibble)
-filename <- "data/2016_feguide.xlsx"
+library(ggplot2)
+filename <- "data/2026_feguide.xlsx"
 cars <- read_excel(filename) %>% 
   janitor::clean_names() %>%
   rename(make = mfr_name, model = carline, displacement = eng_displ,
     city_mpg = city_fe_guide_conventional_fuel,
-    hwy_mpg = hwy_fe_guide_conventional_fuel) %>%
-  select(make, model, displacement, number_cyl, number_gears, city_mpg, hwy_mpg) %>%
-  distinct(model, .keep_all = TRUE) %>% 
-  filter(make == "Toyota") %>%
+    hwy_mpg = hwy_fe_guide_conventional_fuel) |>
+  select(make, model, displacement, number_cyl, 
+         number_gears, city_mpg, hwy_mpg) |>
+  distinct(model, .keep_all = TRUE) |> 
+  filter(make == "Toyota") |>
   column_to_rownames(var = "model")
 ```
 
@@ -157,16 +152,20 @@ str(cars_hclust)
 ```
 ---
 class: clear
-```{r}
-plot(cars_hclust, cex = 0.6, hang = -1, xlab = "", sub = "", 
+```{r eval = FALSE}
+plot(cex = 0.6, hang = -1, xlab = "", sub = "", 
      main = "Hierarchical clustering of Toyota cars (complete linkage)")
+```
+```{r echo = FALSE, out.height="100%"}
+knitr::include_graphics("figures/toyota_clustering.png")
 ```
 
 --
-Good luck reading these labels.
+
+Good luck reading those labels. 
 
 ---
-# Challenges in hierarchical clustering
+## Challenges in hierarchical clustering
 There are several important issues in using hierarchical clustering. 
 
 + Choice of dissimilarity/distance metrices used in the hierarchical clustering. Even for the normal Euclidean distance, a small but possibly important question is whether or not to scale the variables in the data (to have sample variance 1). For data with discrete/nominal variables, might want to consider the [Gower distance](https://www.jstor.org/stable/2528823); see also the **R** package [cluster](https://www.rdocumentation.org/packages/cluster/versions/2.1.0) and the [daisy function](https://www.rdocumentation.org/packages/cluster/versions/2.1.0/topics/daisy)
@@ -176,7 +175,7 @@ There are several important issues in using hierarchical clustering.
 + Hierarchical clustering do not yield, a priori, a (hard) clustering of the data points into a fixed number of clusters. One heuristics is to truncate the dendogram at a fixed level and then using the clustering at that given level.
 
 ---
-# K-means clustering
+## K-means clustering
 
 Another clustering technique is $K$-means clustering, which assign each data point $X_i$ to one of several distinct clusters, with the aim of minimizing the sum of square distance between each data point and its assigned cluster centroid. More specifically, given a positive integer $K \geq 1$ representing the number of clusters, $K$-means aim to solve the minimization problem
 
@@ -194,6 +193,8 @@ When the data points $X_i \in \mathbb{R}^{d}$ for $d \geq 2$, the **globally** o
 
 See [here](http://tech.nitoyon.com/en/blog/2013/11/07/k-means/) for a visualization of $K$-means.
 
+---
+
 + The main decision in $K$-means is choosing $K$, the number of clusters. Once again, unless there is additional knowledge, there are almost no good way of choosing $K$.
 
 + The $K$-means algorithm in general will only find a local minimum (which depends on the initial random cluster centroids). There are several heuristics, such as random restarts, to remove this limitation
@@ -201,10 +202,10 @@ See [here](http://tech.nitoyon.com/en/blog/2013/11/07/k-means/) for a visualizat
 + Given two values of $K$, say $K_1$ and $K_2$, we can compute a similarity index such as the [adjusted Rand Index](https://en.wikipedia.org/wiki/Rand_index) (from the **clues** or **mclust** package) between the two clusterings.
 
 ---
-# K-means example 
+## K-means example 
 ```{r}
 data(USArrests)
-USArrests
+head(USArrests)
 ```
 
 ---
@@ -228,21 +229,23 @@ adjustedRandIndex(fit$cluster, fit3$cluster)
 ```
 
 ---
-# Example: PCA/SVD and clustering
+## PCA/SVD and clustering
 ```{r}
 ## Voting records from the Scottish Parliement
 ## The data is part of the mdsr package accompanying the book
 ## Modern data science with R.
 library(mdsr)
+library(ggplot2)
+library(dplyr)
 data(Votes) 
-Votes
+head(Votes)
 ```
 ---
 class: clear
 A visualization of this voting records is as follows. We follow the presentation in Chapter 10 of Baumer et al. [Modern Data Science with R](https://beanumber.github.io/mdsr2e/ch-learningII.html#clustering)
 ```{r out.width = "70%", fig.align = 'center'}
-Votes %>% 
-  mutate(Vote = factor(vote, labels = c("Nay","Abstain","Aye"))) %>%
+Votes |>
+  mutate(Vote = factor(vote, labels = c("Nay","Abstain","Aye"))) |>
   ggplot(aes(x = bill, y = name, fill = Vote)) +
     geom_tile() + xlab("Ballot") + ylab("Member of Parliament") +
     scale_fill_manual(values = c("darkgray", "white", "goldenrod")) + 
@@ -255,11 +258,11 @@ class: clear
 Suppose we want to cluster the members of the Scottish parliement based on their voting records. Our approach is to first converting the data to a wide format, then do SVD, and then clustering the data via e.g., $K$-means.
 
 ```{r}
-Votes_wide <- Votes %>%
+Votes_wide <- Votes |>
   tidyr::spread(key = bill, value = vote)
-Votes_wide
-vote_svd <- Votes_wide %>% 
-  select(-name) %>% svd()
+head(Votes_wide)
+vote_svd <- Votes_wide |> 
+  select(-name) |> svd()
 str(vote_svd)
 
 ```
@@ -281,15 +284,15 @@ We now add the clustering information to the voters data along with the parties
 name of each parliement members.
 ```{r}
 data(Parties)
-Parties
-voters <- voters %>% mutate(cluster = as.factor(clusters$cluster)) %>%
-  mutate(name = Votes_wide$name) %>%
+head(Parties)
+voters <- voters %>% mutate(cluster = as.factor(clusters$cluster)) |>
+  mutate(name = Votes_wide$name) |>
   left_join(Parties, by = c("name" = "name"))
 ```
 ---
 class: clear
 ```{r}
-voters
+head(voters)
 ```
 
 ---
@@ -301,7 +304,7 @@ adjustedRandIndex(voters$cluster, voters$party)
 ```
 
 ---
-# Alternatives to $K$-means clustering
+## Alternatives to $K$-means clustering
 
 Three important alternatives to $K$-means clustering are
 
@@ -318,7 +321,7 @@ class: clear
 + Spectral clusering: Combination of (non-linear) PCA and K-means. Given a matrix $\mathbf{X}$ of $n$ data points, compute a $n \times n$ affinity/kernel matrix $\mathbf{K}$. Do truncated PCA/SVD on $\mathbf{K}$ to yield a $n \times d$ matrix $\mathbf{Z}$ representing $n$ points in $\mathbb{R}^{d}$. Then run $K$-means (or some other clustering algorithm) on the rows of $\mathbf{Z}$. Simple enough that it should be implemented by hand, but see [specc](https://www.rdocumentation.org/packages/kernlab/versions/0.9-29/topics/specc) for an implementation.
 
 ---
-#Example: Spectral clustering
+## Spectral clustering
 ```{r fig.asp = 1, fig.retina = 3, out.width = "45%"}
 ## libary for Machine learning benchmark problems
 library(mlbench) 
@@ -338,7 +341,7 @@ plot(df, col = cluster, xlab = "", ylab = "")
 ```
 
 ---
-#Example: Community detection
+## Community detection
 We now discuss how the idea of dimension reduction and clustering can be used to analyze and detect communities in networks. We will use the data from [Adamic \& Glance](https://dl.acm.org/citation.cfm?id=1134277)
 ```{r fig.cap = "Political blogs visualization from Adamic and Glance", out.width="70%", echo = FALSE}
 knitr::include_graphics("figures/adamic_blogs.png")
@@ -365,7 +368,7 @@ plot(blog_graph, main = "Political Blog Network", usearrows = TRUE)
 class: clear
 Well, the above visualization looks **terrible**. Sadly, proper visualization of this graph data is highly non-trivial. Let us try a different approach.
 ```{r cache = FALSE, out.width = "80%"}
-blog_adj <- blog_graph[] ## Get adjacency matrix
+blog_adj <- as_adjacency_matrix(blog_graph, sparse=FALSE) ## Get adjacency matrix
 dim(blog_adj)
 image(blog_adj)
 ```
@@ -379,8 +382,8 @@ library(dplyr)
 library(magrittr)
 largest_strong_component <- function(graph) {
    co <- components(graph, mode = "strong")
-   which.max(co$csize) %>%
-   equals(co$membership) %>%
+   which.max(co$csize) |>
+   equals(co$membership) |>
    induced_subgraph(graph = graph)
 }
 blog_graph <- largest_strong_component(blog_graph)
@@ -414,8 +417,8 @@ clusters <- kmeans(X_sphere, centers = 2, nstart = 50)
 table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 5%
 ```
 
-Note that if we do not transform the embedding prior to $K$-means then we get
+If we do not transform the embedding prior to $K$-means then we get
 ```{r}
 clusters <- kmeans(X, centers = 2, nstart = 50)
-table(clusters$cluster, V(blog_graph)$color) ## clustering error rate of roughly 31%
+table(clusters$cluster, V(blog_graph)$color) ## error rate of roughly 31%
 ```

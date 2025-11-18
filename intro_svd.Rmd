@@ -1,90 +1,85 @@
 ---
-title: "Singular Value Decomposition and Principal Component Analysis"
+title: "SVD and PCA"
 author: "CSC/ST 442"
-date: "Fall 2019"
+date: "Fall 2025"
+
+
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: [default, metropolis, metropolis-fonts]
+    #css: ["default","metropolis","metropolis-fonts","animate.css"]
+    css: ["xaringan-themer.css","metropolis-fonts"]
     nature:
-      highlightStyle: zenburn
+      highlightStyle: solarized-light
       highlightLines: true
+      highlightSpans: true
       countIncrementalSlides: false
-    df_print: tibble
-   
+    # df_print: tibble
+    # css: [default, metropolis, metropolis-fonts]
+    # nature:
+    #   highlightStyle: zenburn
+    #   highlightLines: true
+    #   countIncrementalSlides: false
 --- 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%", message = FALSE, warning = FALSE)
-options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.print_max=6)
-library(knitr)
-hook_output <- knit_hooks$get("output")
-knit_hooks$set(output = function(x, options) {
-  lines <- options$output.lines
-  if (is.null(lines)) {
-    return(hook_output(x, options))  # pass to default hook
-  }
-  x <- unlist(strsplit(x, "\n"))
-  more <- "..."
-  if (length(lines)==1) {        # first n lines
-    if (length(x) > lines) {
-      # truncate the output, but add ....
-      x <- c(head(x, lines), more)
-    }
-  } else {
-    x <- c(more, x[lines], more)
-  }
-  # paste these lines together
-  x <- paste(c(x, ""), collapse = "\n")
-  hook_output(x, options)
-})
-hook_output = knit_hooks$get('message')
-knit_hooks$set(message = function(x, options) {
-  # this hook is used only when the linewidth option is not NULL
-  if (!is.null(n <- options$linewidth)) {
-    x = knitr:::split_lines(x)
-    # any lines wider than n should be wrapped
-    if (any(nchar(x) > n)) x = strwrap(x, width = n)
-    x = paste(x, collapse = '\n')
-  }
-  hook_output(x, options)
-})
-hook_output = knit_hooks$get('error')
-knit_hooks$set(error = function(x, options) {
-  # this hook is used only when the linewidth option is not NULL
-  if (!is.null(n <- options$linewidth)) {
-    x = knitr:::split_lines(x)
-    # any lines wider than n should be wrapped
-    if (any(nchar(x) > n)) x = strwrap(x, width = n)
-    x = paste(x, collapse = '\n')
-  }
-  hook_output(x, options)
-})
+knitr::opts_chunk$set(fig.retina = 3, fig.asp = 0.6, fig.align = 'center', out.width = "120%",message = FALSE)
+options(htmltools.dir.version = FALSE, digits = 3, knitr.table.format = "html",tibble.print_min=6, tibble.width=70)
 ```
 
-# Singular Value Decomposition
-The *singular value decomposition* is the **crown jewel** and single, most important operation in numerical linear algebra and hence data science.
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+xaringanExtra::use_tile_view()
+xaringanExtra::use_scribble()
+xaringanExtra::use_extra_styles(hover_code_line = TRUE)
+xaringanExtra::use_search(show_icon = TRUE)
+xaringanExtra::use_tachyons()
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+style_duo_accent(primary_color = "#035AA6", secondary_color = "#03A696",
+   #title_slide_background_color = "#FFFFFF",
+   #title_slide_text_color = "#006747",
+   link_color = "#03A696",
+   header_font_google = google_font("Josefin Sans"),
+   #title_slide_background_size = "600px",
+   #title_slide_background_position = "bottom",
+   text_font_google   = google_font("Montserrat", "300", "300i"),
+   code_font_size = "0.8rem",
+   code_font_family = "Fira Code",
+   code_font_url = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+```
+
+## Singular Value Decomposition (SVD)
+The *SVD* is the **crown jewel** of numerical linear algebra.
 
 **Theorem** Let $\mathbf{X}$ be a $n \times m$ matrix with $n \geq m$. Then there exists $n \times n$ orthogonal matrix $\mathbf{U}$ and $m \times m$ orthogonal matrix $\mathbf{V}$ such that
 $$\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} \\ \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$$
-where $\boldsymbol{\Sigma}$ is a $m \times m$ diagonal matrix with diagonal elements $\sigma_1 \leq \sigma_2 \leq \dots \leq \sigma_{m}$. Furthermore,
+where $\boldsymbol{\Sigma}$ is a diagonal matrix with diagonal entries $\sigma_1 \leq \sigma_2 \leq \dots \leq \sigma_{m}$. Furthermore,
 $$\mathbf{X} \mathbf{X}^{\top} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma}^2 & \boldsymbol{0} \\ \boldsymbol{0} & \boldsymbol{0} \end{bmatrix} \mathbf{U}^{\top}; \quad \mathbf{X}^{\top} \mathbf{X} = \mathbf{V} \boldsymbol{\Sigma}^2 \mathbf{V}^{\top}$$
-are the eigendecompositions (recall spectral theorem) of $\mathbf{X}\mathbf{X}^{\top}$ and $\mathbf{X}^{\top} \mathbf{X}$. The diagonal elements $\sigma_1, \dots, \sigma_m$ of $\boldsymbol{\Sigma}$ are known as the **singular values**. The columns of $\mathbf{U}$ are known as the **left singular vectors**. The columns of $\mathbf{V}$ are known as the **right singular vectors**. 
+are the eigendecompositions of $\mathbf{X}\mathbf{X}^{\top}$ and $\mathbf{X}^{\top} \mathbf{X}$. 
 
-**Note**: In the case of $n \leq m$, $\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} & \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$ where $\boldsymbol{\Sigma}$ is a $n \times n$ diagonal matrix.
++ Diagonal elements $\sigma_1, \dots, \sigma_m$ of $\boldsymbol{\Sigma}$ are the **singular values**. 
++ Columns of $\mathbf{U}$ and $\mathbf{V}$ are the **left** and **right** **singular vectors**.  
+
+**Note**: If $n \leq m$ then $\mathbf{X} = \mathbf{U} \begin{bmatrix} \boldsymbol{\Sigma} & \boldsymbol{0} \end{bmatrix} \mathbf{V}^{\top}$ where $\boldsymbol{\Sigma}$ is a $n \times n$ diagonal matrix.
 
 ---
-# SVD and low-rank approximation
+## SVD and low-rank approximation
 
-**Theorem** (Eckart-Young-Mirsky (1936)) Let $\mathbf{X}$ be a $n \times m$ matrix with $n \geq m$. Let $k \leq m$. Then the **best** rank $k$ approximation (with respect to sum of square error) to $\mathbf{X}$ is the matrix
-$$\mathbf{X}_{k} = \mathbf{U}_{k} \Sigma_{k} \mathbf{V}_{k}^{\top}$$
-where 
-
+**Theorem** (Eckart-Young-Mirsky (1936)) Let $\mathbf{X}$ be a $n \times m$ matrix with $n \geq m$. Write the SVD of $\mathbf{X}$ as $\mathbf{X} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^{\top}$. 
+Let $k \leq m$. Then the **best** rank $k$ approximation (with respect to sum of square error) to $\mathbf{X}$ is the matrix
+$$\mathbf{X}_{k} = \mathbf{U}_{k} \Sigma_{k} \mathbf{V}_{k}^{\top},$$
 + $\mathbf{U}_{k}$ is the $n \times k$ matrix containing the **first** $k$ **columns** of $\mathbf{U}$
 + $\mathbf{V}_{k}^{\top}$ is the $k \times m$ matrix containing the **first** $k$ **rows** of $\mathbf{V}^{\top}$
-+ $\boldsymbol{\Sigma}_{k}$ is the $k \times k$ diagonal matrix containing the first $k$ diagonal elements of $\boldsymbol{\Sigma}$. 
++ $\boldsymbol{\Sigma}_{k}$ is the diagonal matrix containing the first $k$ diagonal elements of $\boldsymbol{\Sigma}$. 
 
 That is to say, for all $n \times m$ matrix $\mathbf{Z}$ with $\mathrm{rank}(\mathbf{Z}) = k$, we have
-$$\sum_{\ell = k+1}^{m} \sigma_{\ell}^2 = \sum_{i} \sum_{j} (x_{ij} - x_{k,ij})^2 \leq \sum_{i} \sum_{j} (x_{ij} - z_{ij})^2$$
+$$\sum_{i} \sum_{j} (x_{ij} - z_{ij})^2 \geq \sum_{i} \sum_{j} (x_{ij} - x_{k,ij})^2 = \sum_{\ell=k+1}^{m} \sigma_{\ell}^2.$$
 
 ---
 class: clear
@@ -95,7 +90,7 @@ That is to say, the rows of $\mathbf{Z}_k$ is the **best** representation, in $k
 Furthermore, $\mathbf{Z}_k$ is obtained via a linear combination of the columns of $\mathbf{X}$; the coefficients in these linear combinations are given by the entries of the $m \times k$ matrix $\mathbf{V}_k$.
 
 ---
-# SVD computation in R
+## SVD computation in R
 
 ```{r echo = TRUE}
 ## Generate a matrix X of size 500 rows and 200 columns
@@ -131,26 +126,19 @@ sum((X - X_rk10)^2)/sum(X^2) ## Relative error in approximation.
 class: clear
 
 Let us now see how the accuracy of the rank $k$ approximation changes as we increase $k$.
-```{r, size = 'tiny', out.width = "80%"}
+```{r, size = 'tiny', out.width = "60%"}
 head(X_svd$d)
-plot(1:length(X_svd$d), X_svd$d, xlab = "Dimension index", 
-     ylab = "Error reduction when adding that dimension")
-```
----
-class: clear
-```{r, out.width = "80%"}
-t <- cumsum(X_svd$d)
+t <- cumsum(X_svd$d^2)
 head(t)
 plot(1:length(t), t/max(t), 
-     xlab = "Number of dimensions included", 
-     ylab = "Approximation accuracy")
+     xlab = "Number of dimensions included", ylab = "Approximation accuracy")
 ```
 
 ---
-# Fast computation of SVD in R
+## Fast computation of SVD in R
 Suppose we are given a big $n \times m$ matrix and we want to find its rank $k$ approximation for some $k \ll m$, e.g., 
 $m = 4000$ and $k = 5$.
-```{r cache = TRUE}
+```{r svd_fast0, cache = TRUE}
 X <- matrix(rnorm(4000000), nrow = 10000, ncol = 4000)
 r <- 5
 ptm <- proc.time()
@@ -161,27 +149,27 @@ The **irlba** library implements a method for finding a few approximate singular
 It is a fast and memory-efficient way to compute a truncated (partial) SVD.
 ---
 class: clear
-```{r svd_fast0, cache = TRUE}
+```{r svd_fast1, depends_on="svd_fast0", cache = TRUE}
 library(irlba)
 r <- 5
 ptm <- proc.time()
 X_irlba <- irlba(X, nu = r, nv = r)
 proc.time() - ptm
 ```
-The irlba has a speed up of roughly $60$ times. This speed up is even more pronounced for larger matrices. The error between the two methods is minimal.
+**irlba** has a speed up of roughly $30$ times. This speed up is even more pronounced for larger matrices. The error between the two methods is minimal.
 ```{r}
 X_approx1 <- X_svd$u %*% diag(X_svd$d[1:r]) %*% t(X_svd$v)
 X_approx2 <- X_irlba$u %*% diag(X_irlba$d[1:r]) %*% t(X_irlba$v)
-sum((X_approx1 - X_approx2)^2)
+sum((X_approx1 - X_approx2)^2)/sum(X_approx1^2) ## Relative error
 ```
 
 ---
-# Approximating kernel matrices
+## Approximating kernel matrices
 Let $\mathbf{K}$ be a $n \times n$ matrix whose $ij$-th entries are of the form
 $$\exp(-\gamma \|X_i - X_j\|^2)$$
 for some $X_1, X_2, \dots, X_n$. Consider approximating $\mathbf{K}$ by a low rank matrix.
 
-```{r svd_fast1, cache = TRUE}
+```{r svd_fast2, cache = TRUE}
 ## Create 2000 points in R^2
 library(irlba)
 X <- matrix(rnorm(4000), ncol = 2)
@@ -193,7 +181,7 @@ sum((K - K_approx)^2)/sum(K^2) ## Relative error of estimation
 ```
 ---
 class: clear
-```{r svd_fast2, cache = TRUE}
+```{r svd_fast3, cache = TRUE}
 library(irlba)
 K_svd <- irlba(K, nu = 10, nv = 10)
 K_approx <- K_svd$u %*% diag(K_svd$d) %*% t(K_svd$v)
@@ -207,10 +195,11 @@ This indicate that, e.g., support vector machine classification with this Gaussi
 support vector classifiers where the data points are now in $\mathbb{R}^{10}$ dimension (lifted up from the original data in $2$ dimensions).
 
 ---
-# MNIST dataset revisited
+## Revisiting MNIST 
 
 ```{r mnist1, cache = TRUE}
-mnist_train <- read.csv("data/mnist_train.csv", stringsAsFactors = F, header = F)
+mnist_train <- read.csv("data/mnist_train.csv", 
+                        stringsAsFactors = F, header = F)
 names(mnist_train)[1] <- "label"
 mnist_train$label <- factor(mnist_train$label)
 
@@ -249,11 +238,12 @@ tibble::as_tibble(X_lift)
 
 ---
 class: clear
-```{r mnist4, cache = TRUE}
+```{r mnist4, cache = TRUE, warning = FALSE}
 library(kernlab)
 XY_lift <- tibble::as_tibble(cbind(train$label, X_lift))
 names(XY_lift)[1] <- "label"
-ksvm(factor(label) ~ ., data = XY_lift, kernel = "vanilladot", scaled = TRUE, C = 10)
+ksvm(factor(label) ~ ., data = XY_lift, 
+     kernel = "vanilladot", scaled = TRUE, C = 10)
 ```
 We see that the performance of the $20$ dimensional low-rank approximation of the Gaussian kernel is decent
 but somewhat sub-optimal.
@@ -266,26 +256,26 @@ K_irlba <- irlba(K, nu = 40, nv = 40)
 X_lift <- K_irlba$u %*% diag(sqrt(K_irlba$d)) 
 XY_lift <- tibble::as_tibble(cbind(train$label, X_lift))
 names(XY_lift)[1] <- "label"
-ksvm(factor(label) ~ ., data = XY_lift, kernel = "vanilladot", scaled = TRUE, C = 10)
+ksvm(factor(label) ~ ., data = XY_lift, 
+     kernel = "vanilladot", scaled = TRUE, C = 10)
 ```
 The performance of the $40$ dimensional low-rank approximation is almost identical to that of the original Gaussian kernel 
 (which in this case has rank $5000$).
 
 ---
-# PCA: special case of SVD
+## PCA: special case of SVD
 
-Principal component analysis (PCA) is a **special** 
-case of singular value decomposition.
+Principal component analysis (PCA) is a **special** case of SVD. 
 
-Let $\mathbf{X}$ be a $n \times p$ matrix whose rows are observations and columns are variables. Then given an integer $d \leq p$, the **classical** motivation for PCA 
+Let $\mathbf{X}$ be a $n \times p$ matrix whose rows are observations and columns are variables. Given an integer $d \leq p$, the **classical** motivation for PCA 
 is to find a representation of $\mathbf{X}$ as a $n \times d$ matrix $\mathbf{Z}$ ( $n$ points in $\mathbb{R}^{d}$) where each column of $\mathbf{Z}$ is a linear combination of $\mathbf{X}$ that preserves **most** of the **variability** in $\mathbf{X}$. 
 
-However, to make this criterion precise (more specifically, in order to define the notion of variability precisely) requires quite a bit of jumping around through non-intuitive/artificial hoops. We thus do not pursue this motivation of PCA here.
+However, to make this criterion precise (more specifically, in order to define the notion of variability precisely) requires quite a bit more setup. We thus do not pursue this motivation of PCA here.
 
 ---
 class: clear
 
-Our motivation for PCA is simply as follows. We want to find a $n \times d$ matrix $\mathbf{Z}$ such that the **columns** of $\mathbf{X}$ can be reconstructed by taking linear combinations of the columns of $\mathbf{Z}$ with **minimum** error. 
+Our motivation for PCA is simply as follows. We want to find a $n \times d$ matrix $\mathbf{Z}$ such that the **columns** of $\mathbf{X}$ can be reconstructed from linear combinations of the columns of $\mathbf{Z}$ with **minimum** error. 
 
 More specifically, we want to find a $n \times d$ matrix $\mathbf{Z}$, a vector $\boldsymbol{\xi} \in \mathbb{R}^{p}$ and a $p \times d$ matrix $\mathbf{T}$ such that
 
@@ -299,12 +289,12 @@ As $\mathbf{Z}$ is a $n \times d$ matrix, $\mathrm{rank}(\mathbf{Z}) \leq \min(n
 ---
 class: clear
 
-The solution is thus once again given by the singular value decomposition. More specifically
+The solution is thus once again given by SVD. More specifically
 
 + Let $\mathbf{X}$ be a $n \times p$ matrix.
 + Center the columns of $\mathbf{X}$ via $\tilde{\mathbf{X}} = (\mathbf{I} - \tfrac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top}) \mathbf{X}$.
-+ (Optional) Scale the columns of $\tilde{\mathbf{X}}$ so that each columns of $\tilde{\mathbf{X}}$ sums to $1$. 
-+ Perform singular value decomposition on $\tilde{\mathbf{X}} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^{\top}$.
++ (Optional) Scale $\tilde{\mathbf{X}}$ to have (column-wise) sample variance equal to $1$.  
++ Compute SVD of $\tilde{\mathbf{X}}$ as $\tilde{\mathbf{X}} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^{\top}$.
 + The matrix $\mathbf{V}$ (possibly scaled by $\boldsymbol{\Sigma}$) is termed the **loadings** matrix.
 + The matrix $\mathbf{U}$ (possibly scaled by $\boldsymbol{\Sigma}$) 
 is termed the **scores** matrix.
@@ -315,20 +305,21 @@ where $\mathbf{U}_d$ and $\mathbf{V}_d$ are the $n \times d$ and $p \times d$ ma
 ---
 class: clear
 
-+ Recall that $\mathbf{U} \boldsymbol{\Sigma}^2 \mathbf{U}^{\top}$ is the **eigendecomposition** of the $n \times n$ matrix $\tilde{\mathbf{X}} \tilde{\mathbf{X}}^{\top}$; meanwhile $\tilde{\mathbf{V}} \boldsymbol{\Sigma}^2 \tilde{\mathbf{V}}^{\top}$ is the **eigendecomposition** of the $p \times p$ matrix $\tilde{\mathbf{X}}^{\top} \tilde{\mathbf{X}}$.
++ Recall that $\mathbf{U} \boldsymbol{\Sigma}^2 \mathbf{U}^{\top}$ is the **eigendecomposition** of the $n \times n$ matrix $\tilde{\mathbf{X}} \tilde{\mathbf{X}}^{\top}$.
+
++ Similarly, $\tilde{\mathbf{V}} \boldsymbol{\Sigma}^2 \tilde{\mathbf{V}}^{\top}$ is the **eigendecomposition** of the $p \times p$ matrix $\tilde{\mathbf{X}}^{\top} \tilde{\mathbf{X}}$.
 
 + As $\frac{1}{n} \tilde{\mathbf{X}}^{\top} \tilde{\mathbf{X}}$ is the **sample** covariance matrix of $\mathbf{X}$, this relates the columns of $\mathbf{V}$ to the **directions** that most preserve the variability in $\mathbf{X}$. Meanwhile, the columns of $\mathbf{U} \boldsymbol{\Sigma}$ represents the transformation of $\tilde{\mathbf{X}}$ according to these directions (the columns of $\mathbf{V}$).
 
-+ If we scale the columns of $\tilde{\mathbf{X}}$ so that each column sums to $1$, then the matrix $\tfrac{1}{n}\tilde{\mathbf{X}} \tilde{\mathbf{X}}^{\top}$
-corresponds to the sample **correlation** matrices between the columns of $\mathbf{X}$. 
-
-+ Given a new observation $X_*$ in $\mathbb{R}^{p}$, we map $X_*$ into $Z_* \in \mathbb{R}^{d}$ (the PCA space) via
++ Given a new $X_*$ in $\mathbb{R}^{p}$, we map $X_*$ into $Z_* \in \mathbb{R}^{d}$ (the PCA space) via
 $$Z_* = \mathbf{V}_d^{\top} (X_* - \bar{\boldsymbol{x}})$$
 
 ---
-# PCA in R
+## PCA in R
 
-PCA in R is done via either the function **prcomp** or **princomp**. From the help page for **prcomp**
+PCA in R is done via either the function **prcomp** or **princomp**. 
+
+From the help page for **prcomp**
 
 > The calculation is done by a singular value decomposition of the 
 > (centered and  possibly  scaled) data matrix, not by using eigen on the 
@@ -390,10 +381,10 @@ Let us now try to reproduce the iris PCA by hand.
 .pull-left[
 ```{r}
 ## Center the columns of the data
-iris_X_centered <- scale(iris_X, 
-                         center = TRUE, 
-                         scale = FALSE) 
-iris_svd <- svd(iris_X_centered)
+iris_centered <- scale(iris_X, 
+                      center = TRUE, 
+                      scale = FALSE) 
+iris_svd <- svd(iris_centered)
 ## The loading matrix
 iris_svd$v 
 ```
@@ -403,7 +394,7 @@ iris_svd$v
 ```{r size = 'tiny'}
 iris_pca
 sum((iris_pca$x - 
-     iris_svd$u %*% diag(iris_svd$d))^2)
+  iris_svd$u %*% diag(iris_svd$d))^2)
 ```
 ]
 
@@ -421,7 +412,7 @@ z_star
 ```
 
 ---
-# Prcomp is potentially quite slow
+## Prcomp can be quite slow
 As **prcomp** uses the default **svd** in **R**, it is quite slow if we are only interested in say a few principal components directions.
 
 ```{r mnist_pca, cache = TRUE}
@@ -439,10 +430,10 @@ proc.time() - ptm
 ```
 
 ---
-# Classical multidimensional scaling
+## Classical multidimensional scaling
 Consider the following dataset on the airline distances between $11$ cities.
 ```{r}
-library(psych)
+library(psychTools)
 data(cities)
 cities
 ```
@@ -467,7 +458,7 @@ text(-cities_xhat[,1], -cities_xhat[,2], rownames(cities))
 ---
 class: clear
 
-It turns out that this problem is, once again, intrinsically related to singular value decomposition.
+It turns out that this problem is, once again, intrinsically related to SVD
 
 More specifically, let $\Delta$ be a $n \times n$ symmetric matrix whose entries $\delta_{ij}$ encode a notion of "dissimilarities", i.e.,
 
@@ -488,16 +479,20 @@ $$\sum_{i} \sum_{j} (\delta_{ij} - \|X_i - X_j\|)^2$$
 
 It turns out that this problem is quite challenging to solve exactly (due to the constraint on the dimension $p$ of the $X_i$).
 
-A related problem that is easier to solve is the **classical multidimensional scaling** problem.
+A related but easier optimization problem is **classical multidimensional scaling**.
 
 More specifically, suppose that $\delta_{ij}$ is a true Euclidean distance, i.e., there exists $X_1, X_2, \dots, X_n$ such that $\delta_{ij} = \|X_i - X_j\|$ for all $i,j$.
+
+
 
 Then $$\delta_{ij}^2 = \|X_i - X_j\|^2 = X_i^{\top} X_i - 2 X_i^{\top} X_j + X_j^{\top} X_j$$.
 
 ---
 class: clear
 
-Furthermore, $$m_{ij} = \delta_{ij}^2 - \frac{1}{n} \sum_{i} \delta_{ij}^2 - \sum_{j} \delta_{ij}^2 + \frac{1}{n} \sum_{i} \sum_{j} \delta_{ij}^2 = - 2 X_i^{\top} X_j$$
+Now suppose, without loss of generality, that $\sum_{i} X_i = \boldsymbol{0}$.
+
+Then $$m_{ij} := \delta_{ij}^2 - \frac{1}{n} \sum_{i} \delta_{ij}^2 - \sum_{j} \delta_{ij}^2 + \frac{1}{n} \sum_{i} \sum_{j} \delta_{ij}^2 = - 2 X_i^{\top} X_j$$
 
 The matrix with elements $m_{ij}$ is given by
 
@@ -526,14 +521,17 @@ class: clear
 ```{r cmds0, cache = TRUE}
 library(dplyr)
 library(mdsr)
-BigCities <- WorldCities %>% arrange(desc(population)) %>% head(4000) %>% 
+world_cities
+BigCities <- world_cities |> arrange(desc(population)) |> head(4000) |>
   select(longitude, latitude)
 BigCities
-D <- as.matrix(dist(BigCities))
-dim(D)
 ```
 ---
 class: clear
+```{r cmds0a, cache = TRUE}
+D <- as.matrix(dist(BigCities))
+dim(D)
+```
 Given $\mathbf{D}$, let us try to reconstruct the latitude and longitude of these cities.
 ```{r cmds0b, cache = TRUE}
 Z <- cmdscale(D, k = 2)
@@ -541,7 +539,7 @@ plot(Z)
 ```
 
 ---
-# Relationship between PCA and CMDS.
+## PCA vs CMDS.
 
 + When $\Delta$ is a Euclidean distance, then the double centering of $\Delta$ satisfies
 $$ - \frac{1}{2} (\mathbf{I} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top}) \Delta^{(2)} (\mathbf{I} - \frac{1}{n} \boldsymbol{1} \boldsymbol{1}^{\top}) = \mathbf{X} \mathbf{X}$$
@@ -557,7 +555,7 @@ $$\mathrm{pca}(\mathbf{X}) \equiv \mathrm{cmds}(\mathbf{D})$$
 [sensor localization](https://www.sciencedirect.com/science/article/pii/S016516841500287X), psychology [visualization of experiments](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3555222/)], and is the building block behind other dimension reduction techniques such as [Isomap](https://web.mit.edu/cocosci/isomap/isomap.html).
 
 ---
-# Matrices completion with iterative SVD.
+## Matrix completion and iterative SVD.
 
 Suppose that we observe a $n \times m$ matrix $\mathbf{M}$ where a (large) number of entries of $\mathbf{M}$ are missing. How can we **impute** or **complete** the missing entries in $\mathbf{M}$ ?
 
@@ -586,11 +584,11 @@ $$\sum_{(i,j) \in \Omega} (m_{ij} - z^{(k)}_{ij})^2$$
 stabilizes.
 
 ---
-# Example: Distance matrices completion
+## Distance matrix completion
 ```{r cmds1, cache = TRUE}
 library(dplyr)
 library(mdsr)
-BigCities <- WorldCities %>% arrange(desc(population)) %>% head(4000) %>% 
+BigCities <- world_cities |> arrange(desc(population)) |> head(4000) |> 
   select(longitude, latitude)
 D <- as.matrix(dist(BigCities)^2)
 D.occluded <- D
@@ -605,11 +603,11 @@ class: clear
 library(softImpute)
 D.impute <- softImpute(D.occluded, rank.max = 5)
 D.reconstruct <- D.impute$u %*% diag(D.impute$d) %*% t(D.impute$v)
-## Mean square error of estimation
+## Mean square error of recovery
 norm(D - D.reconstruct, type = "F")^2/length(D) 
-## Ratio of estimation error vs norm of quantities to be estimated
+## Mean absolute error of recovery
 mean(abs(D - D.reconstruct)) 
-## Ratio of estimation error vs norm of quantities to be estimated
+## Relative error of recovery
 norm(D - D.reconstruct, type = "F")^2/norm(D, type = "F")^2 
 D.reconstruct[D.reconstruct < 0] <- 0
 ```
